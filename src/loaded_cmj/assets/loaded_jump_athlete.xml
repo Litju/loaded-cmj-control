@@ -1,0 +1,223 @@
+<!--
+  Loaded Jump Control - authoritative MJCF.
+
+  contract: LCMJ-IMPLEMENTATION-CONTRACT-0.1 / LCMJ-IC-0.1.2
+  scenario: loaded_jump_fixed_20kg   (75.0 kg athlete + 20.0 kg rigid load)
+
+  Hand-written, first-party, self-contained: no <include>, no mesh, no texture,
+  no external asset.  Provenance is recorded in README.md.
+
+  Compiled identity (asserted by data/plant.py at construction):
+      nq = 25   nv = 21   nu = 15   nbody = 10   njnt = 10
+      ngeom = 16   neq = 0   na = 0
+
+  Every value here is public and the runtime constants live in
+  loaded_cmj.simulation.constants.
+-->
+<mujoco model="loaded_jump_athlete">
+
+  <compiler angle="radian" coordinate="local" inertiafromgeom="false"
+            eulerseq="xyz" autolimits="true"/>
+
+  <!-- CONTACT_AND_NUMERICAL_CONTRACT.md section 2: the one exact profile. -->
+  <option timestep="0.000125"
+          integrator="implicitfast"
+          solver="Newton"
+          iterations="100"
+          ls_iterations="50"
+          tolerance="1e-10"
+          ls_tolerance="0.01"
+          cone="elliptic"
+          impratio="10.0"
+          jacobian="dense"
+          gravity="0 0 -9.81">
+    <flag warmstart="enable"/>
+  </option>
+
+  <default>
+    <!-- PASSIVE_MECHANICS_CONTRACT.md section 2.3: native joint-limit barrier. -->
+    <joint limited="true" solreflimit="0.010 1.0" solimplimit="0.90 0.98 0.010 0.5 2.0"/>
+    <geom condim="3" margin="0.0" gap="0.0" priority="0"
+          solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"/>
+    <motor ctrllimited="true" forcelimited="true"/>
+
+    <!-- collision_groups_and_exclusions: bodies pair only with the floor. -->
+    <default class="pad">
+      <geom type="sphere" size="0.022" contype="2" conaffinity="1"
+            friction="0.9 0.005 0.0001" rgba="0.15 0.15 0.20 1"/>
+    </default>
+    <default class="shell">
+      <geom contype="2" conaffinity="1"
+            friction="0.5 0.005 0.0001" rgba="0.55 0.60 0.68 1"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <light name="key" pos="1.5 -1.5 3.0" dir="-0.4 0.4 -1" directional="true"/>
+
+    <geom name="floor" type="plane" pos="0 0 0" size="0 0 0.05"
+          contype="1" conaffinity="2"
+          friction="0.9 0.005 0.0001"
+          solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
+          margin="0.0" gap="0.0" condim="3" priority="0"
+          rgba="0.35 0.37 0.40 1"/>
+
+    <!-- ================= pelvis (body 1) : the floating base ================= -->
+    <body name="pelvis" pos="0 0 0.930" quat="1 0 0 0">
+      <joint name="root" type="free" limited="false"
+             stiffness="0" damping="0" armature="0"/>
+      <inertial pos="0 0 0.070" quat="1 0 0 0" mass="10.6500"
+                diaginertia="0.086975 0.040115 0.092300"/>
+      <geom name="pelvis_shell" class="shell" type="capsule"
+            fromto="0 -0.100 0.040 0 0.100 0.040" size="0.090"/>
+
+      <!-- ============ torso_head_arms (body 2) : lumbar ball joint ============ -->
+      <body name="torso_head_arms" pos="0 0 0.100" quat="1 0 0 0">
+        <joint name="lumbar" type="ball" range="0 1.1000" limited="true"
+               stiffness="30.0" damping="6.0" armature="0.050"/>
+        <inertial pos="0 0 0.260" quat="1 0 0 0" mass="40.2000"
+                  diaginertia="1.721900 1.480700 0.627120"/>
+        <geom name="torso_shell" class="shell" type="capsule"
+              fromto="0 0 0.020 0 0 0.500" size="0.130"/>
+
+        <!-- ===== external_load (body 3) : RIGID, jointless, 20.0 kg ===== -->
+        <body name="external_load" pos="0 0 0.420" quat="1 0 0 0">
+          <!-- Selected owner-default surrogate: 1.50 m x 0.05 m transverse
+               homogeneous cylinder, with its principal axis along trunk +y. -->
+          <inertial pos="0 0 0" quat="1 0 0 0" mass="20.0000"
+                    diaginertia="3.753125 0.006250 3.753125"/>
+          <geom name="load_shell" class="shell" type="cylinder"
+                size="0.025 0.750"
+                quat="0.7071067811865476 -0.7071067811865475 0 0"
+                rgba="0.75 0.35 0.15 1"/>
+        </body>
+      </body>
+
+      <!-- ================== left leg : thigh / shank / foot ================== -->
+      <body name="left_thigh" pos="0 0.095 0" quat="1 0 0 0">
+        <joint name="left_hip" type="ball" range="0 2.4000" limited="true"
+               stiffness="20.0" damping="5.0" armature="0.050"/>
+        <inertial pos="0 0 -0.186" quat="1 0 0 0" mass="7.5000"
+                  diaginertia="0.126109 0.126109 0.021094"/>
+        <geom name="left_thigh_shell" class="shell" type="capsule"
+              fromto="0 0 -0.040 0 0 -0.390" size="0.070"/>
+
+        <body name="left_shank" pos="0 0 -0.430" quat="1 0 0 0">
+          <joint name="left_knee_flexion" type="hinge" axis="0 -1 0"
+                 range="-0.0873 2.4435" limited="true"
+                 stiffness="12.0" damping="3.0" armature="0.030"
+                 springref="0.2967"/>
+          <inertial pos="0 0 -0.186" quat="1 0 0 0" mass="3.4875"
+                    diaginertia="0.056374 0.056374 0.005275"/>
+          <geom name="left_shank_shell" class="shell" type="capsule"
+                fromto="0 0 -0.040 0 0 -0.390" size="0.050"/>
+
+          <body name="left_foot" pos="0 0 -0.430" quat="1 0 0 0">
+            <joint name="left_ankle_dorsiflexion" type="hinge" axis="0 1 0"
+                   range="-0.8727 0.5236" limited="true"
+                   stiffness="10.0" damping="2.0" armature="0.012"
+                   springref="0.0873"/>
+            <joint name="left_ankle_eversion" type="hinge" axis="1 0 0"
+                   range="-0.3491 0.2618" limited="true"
+                   stiffness="15.0" damping="1.5" armature="0.008"
+                   springref="0.0"/>
+            <inertial pos="0.060 0 -0.030" quat="1 0 0 0" mass="1.0875"
+                      diaginertia="0.001262 0.006570 0.006944"/>
+            <!-- medial on the LEFT foot (y > 0 side) is -y -->
+            <geom name="left_pad_heel_medial"  class="pad" pos="-0.060 -0.030 -0.048"/>
+            <geom name="left_pad_heel_lateral" class="pad" pos="-0.060  0.030 -0.048"/>
+            <geom name="left_pad_fore_medial"  class="pad" pos=" 0.150 -0.035 -0.048"/>
+            <geom name="left_pad_fore_lateral" class="pad" pos=" 0.150  0.035 -0.048"/>
+          </body>
+        </body>
+      </body>
+
+      <!-- ================= right leg : thigh / shank / foot ================= -->
+      <body name="right_thigh" pos="0 -0.095 0" quat="1 0 0 0">
+        <joint name="right_hip" type="ball" range="0 2.4000" limited="true"
+               stiffness="20.0" damping="5.0" armature="0.050"/>
+        <inertial pos="0 0 -0.186" quat="1 0 0 0" mass="7.5000"
+                  diaginertia="0.126109 0.126109 0.021094"/>
+        <geom name="right_thigh_shell" class="shell" type="capsule"
+              fromto="0 0 -0.040 0 0 -0.390" size="0.070"/>
+
+        <body name="right_shank" pos="0 0 -0.430" quat="1 0 0 0">
+          <joint name="right_knee_flexion" type="hinge" axis="0 -1 0"
+                 range="-0.0873 2.4435" limited="true"
+                 stiffness="12.0" damping="3.0" armature="0.030"
+                 springref="0.2967"/>
+          <inertial pos="0 0 -0.186" quat="1 0 0 0" mass="3.4875"
+                    diaginertia="0.056374 0.056374 0.005275"/>
+          <geom name="right_shank_shell" class="shell" type="capsule"
+                fromto="0 0 -0.040 0 0 -0.390" size="0.050"/>
+
+          <body name="right_foot" pos="0 0 -0.430" quat="1 0 0 0">
+            <joint name="right_ankle_dorsiflexion" type="hinge" axis="0 1 0"
+                   range="-0.8727 0.5236" limited="true"
+                   stiffness="10.0" damping="2.0" armature="0.012"
+                   springref="0.0873"/>
+            <joint name="right_ankle_eversion" type="hinge" axis="1 0 0"
+                   range="-0.3491 0.2618" limited="true"
+                   stiffness="15.0" damping="1.5" armature="0.008"
+                   springref="0.0"/>
+            <inertial pos="0.060 0 -0.030" quat="1 0 0 0" mass="1.0875"
+                      diaginertia="0.001262 0.006570 0.006944"/>
+            <!-- medial on the RIGHT foot (y < 0 side) is +y : y is mirrored -->
+            <geom name="right_pad_heel_medial"  class="pad" pos="-0.060  0.030 -0.048"/>
+            <geom name="right_pad_heel_lateral" class="pad" pos="-0.060 -0.030 -0.048"/>
+            <geom name="right_pad_fore_medial"  class="pad" pos=" 0.150  0.035 -0.048"/>
+            <geom name="right_pad_fore_lateral" class="pad" pos=" 0.150 -0.035 -0.048"/>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <!--
+    Parent-child pairs are already excluded by MuJoCo's default filter and by
+    the contype/conaffinity groups above.  They are declared explicitly so the
+    intent survives any future geometry edit and so TEST-PLANT-017 has a
+    literal target.  <exclude> lives in <contact>, so neq stays 0.
+  -->
+  <contact>
+    <exclude body1="pelvis" body2="torso_head_arms"/>
+    <exclude body1="pelvis" body2="external_load"/>
+    <exclude body1="pelvis" body2="left_thigh"/>
+    <exclude body1="pelvis" body2="right_thigh"/>
+    <exclude body1="torso_head_arms" body2="external_load"/>
+    <exclude body1="left_thigh" body2="left_shank"/>
+    <exclude body1="right_thigh" body2="right_shank"/>
+    <exclude body1="left_shank" body2="left_foot"/>
+    <exclude body1="right_shank" body2="right_foot"/>
+  </contact>
+
+  <!--
+    Fifteen MuJoCo motor actuators, in the frozen declaration order of
+    PLANT_TOPOLOGY_CONTRACT.md section 4.  The nine ball-joint actuators act on
+    the child-frame tangent components; trusted code writes T_j(q)^T tau_eta
+    into them.  The six hinge actuators are the anatomical identity.
+    ctrlrange / forcerange are MuJoCo-side hard safety clamps that trusted code
+    never relies on.
+  -->
+  <actuator>
+    <motor name="mj_lumbar_tx"   joint="lumbar"   gear="1 0 0" ctrlrange="-410 410" forcerange="-410 410"/>
+    <motor name="mj_lumbar_ty"   joint="lumbar"   gear="0 1 0" ctrlrange="-410 410" forcerange="-410 410"/>
+    <motor name="mj_lumbar_tz"   joint="lumbar"   gear="0 0 1" ctrlrange="-410 410" forcerange="-410 410"/>
+
+    <motor name="mj_left_hip_tx"  joint="left_hip"  gear="1 0 0" ctrlrange="-450 450" forcerange="-450 450"/>
+    <motor name="mj_left_hip_ty"  joint="left_hip"  gear="0 1 0" ctrlrange="-450 450" forcerange="-450 450"/>
+    <motor name="mj_left_hip_tz"  joint="left_hip"  gear="0 0 1" ctrlrange="-450 450" forcerange="-450 450"/>
+
+    <motor name="mj_right_hip_tx" joint="right_hip" gear="1 0 0" ctrlrange="-450 450" forcerange="-450 450"/>
+    <motor name="mj_right_hip_ty" joint="right_hip" gear="0 1 0" ctrlrange="-450 450" forcerange="-450 450"/>
+    <motor name="mj_right_hip_tz" joint="right_hip" gear="0 0 1" ctrlrange="-450 450" forcerange="-450 450"/>
+
+    <motor name="mj_left_knee_flexion"        joint="left_knee_flexion"        gear="1" ctrlrange="-300 140" forcerange="-300 140"/>
+    <motor name="mj_right_knee_flexion"       joint="right_knee_flexion"       gear="1" ctrlrange="-300 140" forcerange="-300 140"/>
+    <motor name="mj_left_ankle_dorsiflexion"  joint="left_ankle_dorsiflexion"  gear="1" ctrlrange="-220  50" forcerange="-220  50"/>
+    <motor name="mj_right_ankle_dorsiflexion" joint="right_ankle_dorsiflexion" gear="1" ctrlrange="-220  50" forcerange="-220  50"/>
+    <motor name="mj_left_ankle_eversion"      joint="left_ankle_eversion"      gear="1" ctrlrange="-40   40" forcerange="-40   40"/>
+    <motor name="mj_right_ankle_eversion"     joint="right_ankle_eversion"     gear="1" ctrlrange="-40   40" forcerange="-40   40"/>
+  </actuator>
+
+</mujoco>
