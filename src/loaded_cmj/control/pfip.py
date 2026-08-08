@@ -1,4 +1,4 @@
-"""LCMJ-PFIP-001, architecture generation 1.
+"""LCMJ-PFIP-001, architecture generation 2.
 
 The controller is deliberately a single small hybrid phase machine.  It uses
 only the public observation and commands bilateral anatomical references with
@@ -24,6 +24,7 @@ _COUNTER = (
     0.55, 0.0, 0.0,
     -0.75, -0.75, 0.40, 0.40, 0.0, 0.0,
 )
+_COUNTER_RAMP_S = 0.015
 _PROPULSION = (
     -0.20, 0.0, 0.0,
     -0.75, 0.0, 0.0,
@@ -101,7 +102,11 @@ def _phase_base(time_s):
     if _phase == _SETTLED_SUPPORT or _phase == _RECOVERY:
         return list(_HOLD)
     if _phase == _COUNTERMOVEMENT:
-        return list(_COUNTER)
+        alpha = min(1.0, elapsed / _COUNTER_RAMP_S)
+        return [
+            (1.0 - alpha) * _HOLD[i] + alpha * _COUNTER[i]
+            for i in range(15)
+        ]
     if _phase == _REVERSAL:
         alpha = min(1.0, elapsed / 0.080)
         return [
