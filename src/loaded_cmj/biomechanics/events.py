@@ -1,8 +1,8 @@
 """Hybrid CMJ hybrid events, terminations, and raw physical metrics.
 
 This module is the CMJ evaluation boundary.  It consumes physics-substep
-physical samples and never consumes an action, a controller assertion, or
-``reachable_torque_interval``. The public :class:`BiomechanicalSample`
+physical samples and never consumes an action or a controller assertion. The
+public :class:`BiomechanicalSample`
 is deliberately a measurement record: bilateral six-axis virtual
 force-plate wrenches, complete-system COM state, contact classification, and
 the conformance diagnostics needed by the final authority.
@@ -52,6 +52,7 @@ from loaded_cmj.simulation.constants import (
     TERMINATION_THRESHOLDS,
     TOTAL_MASS_KG,
 )
+from loaded_cmj.biomechanics.metrics import derive_propulsive_metrics
 
 BASELINE_DT_S = float(PHYSICS_TIMESTEP_S)
 MASS_KG = float(TOTAL_MASS_KG)
@@ -180,9 +181,21 @@ class BiomechanicalSample:
     com_position_m: Sequence[float]
     com_velocity_mps: Sequence[float]
     plate_wrench_N_Nm: Sequence[Sequence[float]]
+    # World-frame whole-system mechanical quantities.  These are populated by
+    # ``from_plant`` for every live physics sample; ``None`` remains permitted
+    # for small event fixtures that intentionally exercise only event logic.
+    com_acceleration_world_mps2: Sequence[float] | None = None
+    linear_momentum_world_kg_mps: Sequence[float] | None = None
+    centroidal_h_world_kgm2ps: Sequence[float] | None = None
+    centroidal_hdot_world_kgm2ps2: Sequence[float] | None = None
+    pelvis_position_world_m: Sequence[float] | None = None
+    pelvis_velocity_world_mps: Sequence[float] | None = None
+    qpos: Sequence[float] | None = None
+    qvel: Sequence[float] | None = None
     whole_support_wrench_N_Nm: Sequence[float] | None = None
     cop_world_xy_m: Sequence[Sequence[float]] | None = None
     cop_validity: Sequence[bool] | None = None
+    plate_origin_world_m: Sequence[Sequence[float]] | None = None
     plate_origin_world_xy_m: Sequence[Sequence[float]] = ((0.0, 0.0), (0.0, 0.0))
     permitted_support: Sequence[bool] = (True, True)
     support_polygon_margin_m: Sequence[float] = (0.05, 0.05)
@@ -215,6 +228,17 @@ class BiomechanicalSample:
     interval_start_passive_power_W: float | None = None
     interval_start_damping_power_W: float | None = None
     interval_start_limit_power_W: float | None = None
+    accepted_action: Sequence[float] | None = None
+    realized_anatomical_torque_Nm: Sequence[float] | None = None
+    anatomical_position_rad: Sequence[float] | None = None
+    anatomical_velocity_radps: Sequence[float] | None = None
+    controller_phase: str | None = None
+    controller_reference_rad: Sequence[float] | None = None
+    controller_reference_pelvis_z_m: float | None = None
+    controller_support_force_target_N: float | None = None
+    actuator_override_flags: Mapping[str, Sequence[bool]] | None = None
+    actuator_capacity_lower_Nm: Sequence[float] | None = None
+    actuator_capacity_upper_Nm: Sequence[float] | None = None
     agent_fault_reason: str | None = None
     physics_fault_reason: str | None = None
     attempt_id: str | None = None
@@ -236,7 +260,53 @@ class BiomechanicalSample:
         self.time_s = float(self.time_s)
         self.com_position_m = np.asarray(self.com_position_m, dtype=np.float64).reshape(3).copy()
         self.com_velocity_mps = np.asarray(self.com_velocity_mps, dtype=np.float64).reshape(3).copy()
+        for name, size in (
+            ("com_acceleration_world_mps2", 3),
+            ("linear_momentum_world_kg_mps", 3),
+            ("centroidal_h_world_kgm2ps", 3),
+            ("centroidal_hdot_world_kgm2ps2", 3),
+            ("pelvis_position_world_m", 3),
+            ("pelvis_velocity_world_mps", 3),
+            ("qpos", 25),
+            ("qvel", 21),
+        ):
+            value = getattr(self, name)
+            if value is not None:
+                value = np.asarray(value, dtype=np.float64).reshape(size).copy()
+                if not np.isfinite(value).all():
+                    raise ValueError(f"{name} must be finite")
+                setattr(self, name, value)
         self.plate_wrench_N_Nm = np.asarray(self.plate_wrench_N_Nm, dtype=np.float64).reshape(3, 6).copy()
+        for name in (
+            "accepted_action",
+            "realized_anatomical_torque_Nm",
+            "anatomical_position_rad",
+            "anatomical_velocity_radps",
+            "controller_reference_rad",
+            "actuator_capacity_lower_Nm",
+            "actuator_capacity_upper_Nm",
+        ):
+            value = getattr(self, name)
+            if value is not None:
+                value = np.asarray(value, dtype=np.float64).reshape(15).copy()
+                if not np.isfinite(value).all():
+                    raise ValueError(f"{name} must be finite")
+                setattr(self, name, value)
+        if self.controller_phase is not None:
+            self.controller_phase = str(self.controller_phase)
+        if self.controller_reference_pelvis_z_m is not None:
+            self.controller_reference_pelvis_z_m = float(self.controller_reference_pelvis_z_m)
+            if not np.isfinite(self.controller_reference_pelvis_z_m):
+                raise ValueError("controller_reference_pelvis_z_m must be finite")
+        if self.controller_support_force_target_N is not None:
+            self.controller_support_force_target_N = float(self.controller_support_force_target_N)
+            if not np.isfinite(self.controller_support_force_target_N):
+                raise ValueError("controller_support_force_target_N must be finite")
+        if self.actuator_override_flags is not None:
+            self.actuator_override_flags = {
+                str(key): np.asarray(value, dtype=bool).reshape(15).copy()
+                for key, value in self.actuator_override_flags.items()
+            }
         if self.whole_support_wrench_N_Nm is not None:
             self.whole_support_wrench_N_Nm = np.asarray(
                 self.whole_support_wrench_N_Nm, dtype=np.float64
@@ -247,6 +317,10 @@ class BiomechanicalSample:
             ).reshape(2, 2).copy()
         if self.cop_validity is not None:
             self.cop_validity = np.asarray(self.cop_validity, dtype=bool).reshape(2).copy()
+        if self.plate_origin_world_m is not None:
+            self.plate_origin_world_m = np.asarray(
+                self.plate_origin_world_m, dtype=np.float64
+            ).reshape(2, 3).copy()
         self.plate_origin_world_xy_m = np.asarray(
             self.plate_origin_world_xy_m, dtype=np.float64
         ).reshape(2, 2).copy()
@@ -315,16 +389,35 @@ class BiomechanicalSample:
         for name in (
             "com_position_m",
             "com_velocity_mps",
+            "com_acceleration_world_mps2",
+            "linear_momentum_world_kg_mps",
+            "centroidal_h_world_kgm2ps",
+            "centroidal_hdot_world_kgm2ps2",
+            "pelvis_position_world_m",
+            "pelvis_velocity_world_mps",
+            "qpos",
+            "qvel",
             "plate_wrench_N_Nm",
             "whole_support_wrench_N_Nm",
             "cop_world_xy_m",
             "cop_validity",
+            "plate_origin_world_m",
             "plate_origin_world_xy_m",
             "permitted_support",
             "support_polygon_margin_m",
+            "accepted_action",
+            "realized_anatomical_torque_Nm",
+            "anatomical_position_rad",
+            "anatomical_velocity_radps",
+            "controller_reference_rad",
+            "actuator_capacity_lower_Nm",
+            "actuator_capacity_upper_Nm",
         ):
             value = getattr(self, name)
             if isinstance(value, np.ndarray):
+                value.setflags(write=False)
+        if self.actuator_override_flags is not None:
+            for value in self.actuator_override_flags.values():
                 value.setflags(write=False)
         object.__setattr__(self, "_sealed", True)
         return self
@@ -346,6 +439,11 @@ class BiomechanicalSample:
         damping_power_W: float | None = None,
         limit_power_W: float | None = None,
         interval_start_power_components: Mapping[str, float] | None = None,
+        accepted_action: Sequence[float] | None = None,
+        controller_observability: Mapping[str, Any] | None = None,
+        actuator_override_flags: Mapping[str, Sequence[bool]] | None = None,
+        actuator_capacity_lower_Nm: Sequence[float] | None = None,
+        actuator_capacity_upper_Nm: Sequence[float] | None = None,
         agent_fault_reason: str | None = None,
         physics_fault_reason: str | None = None,
         attempt_id: str | None = None,
@@ -378,23 +476,20 @@ class BiomechanicalSample:
             angular,
             0,
         )
-        h = np.zeros(3, dtype=np.float64)
         com = plant.center_of_mass(data)
-        for body_id in plant.idx.all_bodies:
-            velocity = np.zeros(6, dtype=np.float64)
-            mujoco.mj_objectVelocity(
-                plant.model,
-                data,
-                int(mujoco.mjtObj.mjOBJ_BODY),
-                int(body_id),
-                velocity,
-                0,
-            )
-            mass = float(plant.model.body_mass[body_id])
-            rotation = np.asarray(data.xmat[body_id], dtype=np.float64).reshape(3, 3)
-            inertia = rotation @ np.diag(np.asarray(plant.model.body_inertia[body_id])) @ rotation.T
-            h += np.cross(np.asarray(data.xipos[body_id]) - com, mass * velocity[3:])
-            h += inertia @ velocity[:3]
+        com_velocity = plant.center_of_mass_velocity(data)
+        support_wrench = np.asarray(summary["whole_wrench"], dtype=np.float64)
+        com_acceleration = plant.center_of_mass_acceleration(
+            data,
+            support_wrench=support_wrench,
+        )
+        linear_momentum = plant.linear_momentum(data)
+        h = plant.centroidal_angular_momentum(data, com)
+        hdot = plant.centroidal_hdot_from_external_wrench(
+            data,
+            com,
+            support_wrench=support_wrench,
+        )
         residual = plant.dynamics_residual(data)
         limit_type = int(mujoco.mjtConstraint.mjCNSTR_LIMIT_JOINT)
         native_limit = bool(
@@ -416,14 +511,24 @@ class BiomechanicalSample:
         if limit_power_W is None:
             limit_power_W = powers.get("limit_power_W", 0.0)
         start = dict(interval_start_power_components or {})
+        controller = dict(controller_observability or {})
         return cls(
             time_s=time_s,
-            com_position_m=plant.center_of_mass(data),
-            com_velocity_mps=plant.center_of_mass_velocity(data),
+            com_position_m=com,
+            com_velocity_mps=com_velocity,
+            com_acceleration_world_mps2=com_acceleration,
+            linear_momentum_world_kg_mps=linear_momentum,
+            centroidal_h_world_kgm2ps=h,
+            centroidal_hdot_world_kgm2ps2=hdot,
+            pelvis_position_world_m=np.asarray(data.qpos[:3], dtype=np.float64),
+            pelvis_velocity_world_mps=np.asarray(data.qvel[:3], dtype=np.float64),
+            qpos=np.asarray(data.qpos, dtype=np.float64),
+            qvel=np.asarray(data.qvel, dtype=np.float64),
             plate_wrench_N_Nm=plate,
-            whole_support_wrench_N_Nm=np.asarray(summary["whole_wrench"], dtype=np.float64),
+            whole_support_wrench_N_Nm=support_wrench,
             cop_world_xy_m=np.asarray(summary["cop_world_xy"], dtype=np.float64),
             cop_validity=np.asarray(summary["cop_valid"], dtype=bool),
+            plate_origin_world_m=np.asarray(summary["plate_origin_world_m"], dtype=np.float64),
             plate_origin_world_xy_m=np.asarray(summary["cop_origin_world_xy"], dtype=np.float64),
             permitted_support=permitted_support,
             support_polygon_margin_m=support_polygon_margin_m,
@@ -449,6 +554,17 @@ class BiomechanicalSample:
             interval_start_passive_power_W=start.get("passive_power_W"),
             interval_start_damping_power_W=start.get("damping_power_W"),
             interval_start_limit_power_W=start.get("limit_power_W"),
+            accepted_action=accepted_action,
+            realized_anatomical_torque_Nm=realized_anatomical_torque,
+            anatomical_position_rad=anatomical,
+            anatomical_velocity_radps=plant.anatomical_rates(data),
+            controller_phase=controller.get("phase"),
+            controller_reference_rad=controller.get("reference_joint_position_rad"),
+            controller_reference_pelvis_z_m=controller.get("reference_pelvis_z_m"),
+            controller_support_force_target_N=controller.get("support_force_target_N"),
+            actuator_override_flags=actuator_override_flags,
+            actuator_capacity_lower_Nm=actuator_capacity_lower_Nm,
+            actuator_capacity_upper_Nm=actuator_capacity_upper_Nm,
             agent_fault_reason=agent_fault_reason,
             physics_fault_reason=physics_fault_reason,
             attempt_id=attempt_id,
@@ -760,6 +876,30 @@ def sample_at(samples: Sequence[BiomechanicalSample], time_s: float) -> Biomecha
         time_s=float(time_s),
         com_position_m=lerp(before.com_position_m, after.com_position_m),
         com_velocity_mps=lerp(before.com_velocity_mps, after.com_velocity_mps),
+        com_acceleration_world_mps2=(
+            lerp(before.com_acceleration_world_mps2, after.com_acceleration_world_mps2)
+            if before.com_acceleration_world_mps2 is not None
+            and after.com_acceleration_world_mps2 is not None
+            else None
+        ),
+        linear_momentum_world_kg_mps=(
+            lerp(before.linear_momentum_world_kg_mps, after.linear_momentum_world_kg_mps)
+            if before.linear_momentum_world_kg_mps is not None
+            and after.linear_momentum_world_kg_mps is not None
+            else None
+        ),
+        centroidal_h_world_kgm2ps=(
+            lerp(before.centroidal_h_world_kgm2ps, after.centroidal_h_world_kgm2ps)
+            if before.centroidal_h_world_kgm2ps is not None
+            and after.centroidal_h_world_kgm2ps is not None
+            else None
+        ),
+        centroidal_hdot_world_kgm2ps2=(
+            lerp(before.centroidal_hdot_world_kgm2ps2, after.centroidal_hdot_world_kgm2ps2)
+            if before.centroidal_hdot_world_kgm2ps2 is not None
+            and after.centroidal_hdot_world_kgm2ps2 is not None
+            else None
+        ),
         plate_wrench_N_Nm=lerp(before.plate_wrench_N_Nm, after.plate_wrench_N_Nm),
         whole_support_wrench_N_Nm=(
             lerp(before.whole_support_wrench_N_Nm, after.whole_support_wrench_N_Nm)
@@ -773,6 +913,12 @@ def sample_at(samples: Sequence[BiomechanicalSample], time_s: float) -> Biomecha
             else None
         ),
         cop_validity=before.cop_valid if fraction < 0.5 else after.cop_valid,
+        plate_origin_world_m=(
+            lerp(before.plate_origin_world_m, after.plate_origin_world_m)
+            if before.plate_origin_world_m is not None
+            and after.plate_origin_world_m is not None
+            else None
+        ),
         plate_origin_world_xy_m=before.plate_origin_world_xy_m if fraction < 0.5 else after.plate_origin_world_xy_m,
         permitted_support=before.permitted_support if fraction < 0.5 else after.permitted_support,
         support_polygon_margin_m=lerp(before.support_polygon_margin_m, after.support_polygon_margin_m),
@@ -1839,6 +1985,16 @@ class CMJEventDetector:
         ):
             if not np.isfinite(value).all():
                 raise InternalEvaluationError(f"{name} contains non-finite values")
+        for name in (
+            "com_acceleration_world_mps2",
+            "linear_momentum_world_kg_mps",
+            "centroidal_h_world_kgm2ps",
+            "centroidal_hdot_world_kgm2ps2",
+            "plate_origin_world_m",
+        ):
+            value = getattr(sample, name)
+            if value is not None and not np.isfinite(value).all():
+                raise InternalEvaluationError(f"{name} contains non-finite values")
         if sample.whole_support_wrench_N_Nm is not None and not np.isfinite(
             sample.whole_support_wrench_N_Nm
         ).all():
@@ -2055,87 +2211,48 @@ class CMJEventDetector:
         supported_index: int | None,
         result: CMJEventResult,
     ) -> bool:
+        """Apply event validity to the canonical force-time metric owner."""
         if takeoff_time_s <= reversal_time_s + _EPS_TIME:
             result.flags["nonpositive_propulsion_interval"] = True
             return False
-        interval = _valid_interval(samples, reversal_time_s, takeoff_time_s)
-        start = sample_at(samples, reversal_time_s)
-        takeoff = sample_at(samples, takeoff_time_s)
-        net_force = lambda sample: np.asarray(
-            [
-                sample.support_wrench_N_Nm[0],
-                sample.support_wrench_N_Nm[1],
-                sample.support_wrench_N_Nm[2] - MASS_WEIGHT_N,
-            ],
-            dtype=np.float64,
-        )
-        propulsion_impulse = _integrate(samples, reversal_time_s, takeoff_time_s, net_force)
-        actual_delta_p = MASS_KG * (takeoff.com_velocity_mps - start.com_velocity_mps)
-        residual = float(np.linalg.norm(propulsion_impulse - actual_delta_p))
-        vertical_impulse = float(propulsion_impulse[2])
-        horizontal_ratio = float(
-            np.linalg.norm(propulsion_impulse[:2]) / max(_EPS_IMPULSE, vertical_impulse)
-        )
 
-        beta = np.asarray([0.5, 0.5], dtype=np.float64)
-        if supported_index is not None:
-            quiet_force = samples[supported_index].foot_normal_force_N
-            if float(np.sum(quiet_force)) > _EPS_IMPULSE:
-                beta = quiet_force / float(np.sum(quiet_force))
-        bilateral_impulse = np.asarray(
-            [
-                _integrate(
-                    samples,
-                    reversal_time_s,
-                    takeoff_time_s,
-                    lambda sample, foot=foot: np.asarray(
-                        sample.foot_normal_force_N[foot] - beta[foot] * MASS_WEIGHT_N / 1.0,
-                        dtype=np.float64,
-                    ),
-                )
-                for foot in (0, 1)
-            ],
-            dtype=np.float64,
-        ).reshape(2)
-        asymmetry = float(
-            abs(bilateral_impulse[0] - bilateral_impulse[1])
-            / max(_EPS_IMPULSE, abs(bilateral_impulse[0]) + abs(bilateral_impulse[1]))
+        propulsion = derive_propulsive_metrics(
+            samples,
+            reversal_time_s=reversal_time_s,
+            takeoff_time_s=takeoff_time_s,
+            supported_index=supported_index,
+            mass_kg=MASS_KG,
+            gravity_mps2=GRAVITY_MPS2,
         )
-        v_takeoff_impulse = float(start.com_velocity_mps[2] + vertical_impulse / MASS_KG)
-        propulsion = {
-            "interval_start_time_s": float(reversal_time_s),
-            "interval_end_time_s": float(takeoff_time_s),
-            "interval_duration_s": float(takeoff_time_s - reversal_time_s),
-            "start_velocity_mps": start.com_velocity_mps.copy(),
-            "takeoff_velocity_mps": takeoff.com_velocity_mps.copy(),
-            "linear_momentum_start_kgmps": (MASS_KG * start.com_velocity_mps).copy(),
-            "linear_momentum_takeoff_kgmps": (MASS_KG * takeoff.com_velocity_mps).copy(),
-            "net_impulse_Ns": propulsion_impulse.copy(),
-            "vertical_impulse_Ns": vertical_impulse,
-            "takeoff_vertical_velocity_impulse_mps": v_takeoff_impulse,
-            "horizontal_impulse_ratio": horizontal_ratio,
-            "bilateral_vertical_impulse_Ns": bilateral_impulse.copy(),
-            "bilateral_asymmetry": asymmetry,
-            "impulse_momentum_residual_Ns": residual,
-            "impulse_momentum_residual_relative": residual
-            / max(_EPS_IMPULSE, float(np.linalg.norm(propulsion_impulse))),
-            "ballistic_height_diagnostic_m": max(0.0, v_takeoff_impulse) ** 2
-            / (2.0 * GRAVITY_MPS2),
-            "force_plate_interval_sample_count": len(interval),
-            "integration_method": "trapezoidal_endpoint_interpolation",
-            "mass_kg": MASS_KG,
-            "support_wrench_includes_off_plate": True,
-        }
+        phase_force = propulsion.pop("phase_force")
+        interval = _valid_interval(samples, reversal_time_s, takeoff_time_s)
+        impulse = np.asarray(propulsion["net_impulse_Ns"], dtype=np.float64)
+        actual_delta_p = (
+            np.asarray(propulsion["linear_momentum_takeoff_kgmps"], dtype=np.float64)
+            - np.asarray(propulsion["linear_momentum_start_kgmps"], dtype=np.float64)
+        )
+        residual = float(propulsion["impulse_momentum_residual_Ns"])
+        vertical_impulse = float(propulsion["vertical_impulse_Ns"])
+        horizontal_ratio = float(propulsion["horizontal_impulse_ratio"])
+        asymmetry = float(propulsion["bilateral_asymmetry"])
+        v_takeoff_impulse = float(propulsion["takeoff_vertical_velocity_impulse_mps"])
+        propulsion["J_prop_Ns"] = vertical_impulse
+        propulsion["phase_peak_force_N"] = float(phase_force["total_force_peak_N"])
+        propulsion["phase_mean_force_N"] = float(phase_force["total_force_mean_N"])
         result.raw_metrics["propulsion"] = propulsion
         result.raw_metrics["impulses"] = {
-            "propulsion_net_impulse_Ns": propulsion_impulse.copy(),
+            "propulsion_net_impulse_Ns": impulse.copy(),
             "propulsion_momentum_change_kgmps": actual_delta_p.copy(),
         }
-        result.raw_metrics.setdefault("force_plate", {})["propulsion_start_support_wrench_N_Nm"] = start.support_wrench_N_Nm.copy()
-        result.raw_metrics["force_plate"]["propulsion_end_support_wrench_N_Nm"] = takeoff.support_wrench_N_Nm.copy()
+        result.raw_metrics.setdefault("force_plate", {})["propulsion_start_support_wrench_N_Nm"] = (
+            sample_at(samples, reversal_time_s).support_wrench_N_Nm.copy()
+        )
+        result.raw_metrics["force_plate"]["propulsion_end_support_wrench_N_Nm"] = (
+            sample_at(samples, takeoff_time_s).support_wrench_N_Nm.copy()
+        )
 
         residual_bound = self.thresholds.impulse_residual_relative_max * max(
-            1.0, float(np.linalg.norm(propulsion_impulse))
+            1.0, float(np.linalg.norm(impulse))
         )
         force_floor_duration, _, _ = _max_continuous_duration(
             [sample.time_s for sample in interval],
@@ -2157,8 +2274,16 @@ class CMJEventDetector:
             and all(not sample.active_off_plate for sample in interval)
             and all(sample.phi < 1.0 for sample in interval)
             and all(not sample.native_limit_active for sample in interval)
-            and all(sample.mechanics_residual_trans_N <= self.thresholds.mechanics_residual_trans_max_N for sample in interval)
-            and all(sample.mechanics_residual_rot_Nm <= self.thresholds.mechanics_residual_rot_max_Nm for sample in interval)
+            and all(
+                sample.mechanics_residual_trans_N
+                <= self.thresholds.mechanics_residual_trans_max_N
+                for sample in interval
+            )
+            and all(
+                sample.mechanics_residual_rot_Nm
+                <= self.thresholds.mechanics_residual_rot_max_Nm
+                for sample in interval
+            )
         )
         if not valid:
             result.flags["propulsion_rejection"] = {

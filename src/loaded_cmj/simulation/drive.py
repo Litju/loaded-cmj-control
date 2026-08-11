@@ -401,24 +401,6 @@ def activation_update(
     return ap_next, am_next
 
 
-def drive_step(u: np.ndarray, z: np.ndarray, h: float = PHYSICS_TIMESTEP_S) -> np.ndarray:
-    """Legacy aggregate-drive adapter using the exact split-state update."""
-    zz = np.asarray(z, dtype=np.float64).reshape(_N)
-    ap, am = activation_update(u, np.maximum(zz, 0.0), np.maximum(-zz, 0.0), h)
-    return np.asarray([_snap_zero(float(x)) for x in ap - am], dtype=np.float64)
-
-
-def drive_forward(
-    u: np.ndarray, z: np.ndarray, substeps: int = SUBSTEPS_PER_CONTROL,
-    h: float = PHYSICS_TIMESTEP_S,
-) -> np.ndarray:
-    """Hold ``u`` constant for ``substeps`` physics substeps."""
-    zz = np.asarray(z, dtype=np.float64).reshape(_N).copy()
-    for _ in range(int(substeps)):
-        zz = drive_step(u, zz, h)
-    return zz
-
-
 # ==========================================================================
 # Section 4 -- torque-angle envelope
 # ==========================================================================
@@ -658,161 +640,6 @@ def drive_state_step(
     }
 
 
-def anatomical_torque(
-    z: np.ndarray,
-    s: np.ndarray,
-    s_dot: np.ndarray,
-    tau_prev: np.ndarray,
-    h: float = PHYSICS_TIMESTEP_S,
-) -> np.ndarray:
-    """Compatibility adapter for the legacy aggregate-drive call path."""
-    zz = np.asarray(z, dtype=np.float64).reshape(_N)
-    sd = np.asarray(s_dot, dtype=np.float64).reshape(_N)
-    tp = np.asarray(tau_prev, dtype=np.float64).reshape(_N)
-    if not np.isfinite(zz).all() or not np.isfinite(sd).all() or not np.isfinite(tp).all():
-        raise DriveModelError("anatomical_torque received a non-finite input")
-
-    ap = np.maximum(zz, 0.0)
-    am = np.maximum(-zz, 0.0)
-    tau, _, _, _ = _ordered_torque_projection(ap, am, s, sd, tp, h)
-    return tau
-
-
-# ==========================================================================
-# Section 10 -- reachable one-step torque set
-# ==========================================================================
-def reachable_torque_interval(
-    z: DriveState | np.ndarray,
-    s: np.ndarray,
-    s_dot: np.ndarray,
-    tau_prev: np.ndarray | None = None,
-    substeps: int = SUBSTEPS_PER_CONTROL,
-    h: float = PHYSICS_TIMESTEP_S,
-    *,
-    previous_command: np.ndarray | None = None,
-    override_flags: dict[str, np.ndarray] | None = None,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Return the qualified one-step reachable torque interval.
-
-    A ``DriveState`` is the qualified entry point: both directional activation
-    channels, override history, previous command, previous realized torque,
-    and reversal state are copied before every candidate propagation.  The
-    actuator projection is monotone in each held command coordinate, so the
-    endpoints ``-1`` and ``+1`` give the interval for each independent torque
-    channel.  The G4 qualification densely samples the same map, including
-    co-activation and reversal fixtures.
-
-    The array form is retained as a compatibility adapter for older
-    validation callers.  It necessarily represents only a split state derived
-    from the signed aggregate and must not be used for production dynamics.
-    """
-    if isinstance(z, DriveState):
-        if tau_prev is not None or previous_command is not None or override_flags is not None:
-            raise DriveModelError(
-                "reachable_torque_interval receives hidden state only through DriveState"
-            )
-        base = z.copy()
-    else:
-        if tau_prev is None:
-            raise DriveModelError("tau_prev is required for the aggregate compatibility adapter")
-        # Preserve the historical aggregate validation contract for callers
-        # that provide only ``z`` and ``tau_prev``.  This branch is retained
-        # solely for predecessor qualification: it applies one scalar command
-        # to every channel and therefore is not a safe production reachable-set
-        # representation.  Production code must pass DriveState above.
-        if previous_command is None and override_flags is None:
-            legacy = np.stack([
-                _forward_torque(
-                    float(command_value),
-                    np.asarray(z, dtype=np.float64),
-                    s,
-                    s_dot,
-                    np.asarray(tau_prev, dtype=np.float64),
-                    int(substeps),
-                    float(h),
-                )
-                for command_value in np.linspace(-1.0, 1.0, 201)
-            ])
-            return legacy.min(axis=0), legacy.max(axis=0)
-        base = DriveState(
-            z=np.asarray(z, dtype=np.float64),
-            tau_prev=np.asarray(tau_prev, dtype=np.float64),
-            previous_command=previous_command,
-            override_flags=override_flags,
-        )
-    if int(substeps) < 1 or not np.isfinite(float(h)) or float(h) <= 0.0:
-        raise DriveModelError("reachable interval requires positive finite integration settings")
-
-    lower = np.empty(_N, dtype=np.float64)
-    upper = np.empty(_N, dtype=np.float64)
-    for channel in range(_N):
-        values = []
-        for command_value in (-1.0, 1.0):
-            command = base.previous_command.copy()
-            command[channel] = command_value
-            values.append(_forward_torque_state(command, base, s, s_dot, substeps, h)[0])
-        pair = np.stack(values)
-        lower[channel] = float(np.min(pair[:, channel]))
-        upper[channel] = float(np.max(pair[:, channel]))
-    if not np.isfinite(lower).all() or not np.isfinite(upper).all() or np.any(lower > upper + 1e-12):
-        raise DriveModelError("reachable torque interval is non-finite or inverted")
-    return lower, upper
-
-
-def _forward_torque_state(
-    command: np.ndarray,
-    state: DriveState,
-    s: np.ndarray,
-    s_dot: np.ndarray,
-    substeps: int,
-    h: float,
-) -> tuple[np.ndarray, DriveState]:
-    """Propagate one copied qualified state through a held command period."""
-    working = state.copy()
-    tau = working.tau_prev.copy()
-    for _ in range(int(substeps)):
-        result = drive_state_step(command, working, s, s_dot, h)
-        tau = np.asarray(result["tau"], dtype=np.float64).copy()
-    return tau, working
-
-
-def _forward_torque(
-    u_scalar: float,
-    z: np.ndarray,
-    s: np.ndarray,
-    s_dot: np.ndarray,
-    tau_prev: np.ndarray,
-    substeps: int,
-    h: float,
-) -> np.ndarray:
-    u = np.full(_N, float(u_scalar), dtype=np.float64)
-    zz = np.asarray(z, dtype=np.float64).reshape(_N).copy()
-    tp = np.asarray(tau_prev, dtype=np.float64).reshape(_N).copy()
-    tau = tp
-    for _ in range(int(substeps)):
-        zz = drive_step(u, zz, h)
-        tau = anatomical_torque(zz, s, s_dot, tau, h)
-    return tau
-
-
-def forward_torque_for_command(
-    u: np.ndarray,
-    z: np.ndarray,
-    s: np.ndarray,
-    s_dot: np.ndarray,
-    tau_prev: np.ndarray,
-    substeps: int = SUBSTEPS_PER_CONTROL,
-    h: float = PHYSICS_TIMESTEP_S,
-) -> np.ndarray:
-    """Per-channel torque after holding a full command vector for one period."""
-    uu = np.asarray(u, dtype=np.float64).reshape(_N)
-    zz = np.asarray(z, dtype=np.float64).reshape(_N).copy()
-    tau = np.asarray(tau_prev, dtype=np.float64).reshape(_N).copy()
-    for _ in range(int(substeps)):
-        zz = drive_step(uu, zz, h)
-        tau = anatomical_torque(zz, s, s_dot, tau, h)
-    return tau
-
 
 __all__ = [
     "DRIVE_PARAMS",
@@ -837,14 +664,9 @@ __all__ = [
     "DriveModelError",
     "DriveState",
     "activation_update",
-    "anatomical_torque",
     "capacity_envelope",
-    "drive_forward",
     "drive_state_step",
-    "drive_step",
-    "forward_torque_for_command",
     "project_signed_power",
-    "reachable_torque_interval",
     "torque_angle",
     "torque_velocity",
 ]

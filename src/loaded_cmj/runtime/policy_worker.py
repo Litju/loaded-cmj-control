@@ -698,6 +698,9 @@ for raw in sys.stdin:
                 raise ValueError("init_model_xml requires one XML string")
             OUTPUT_MODEL_XML = args[0]
             result = True
+        elif method == "__policy_worker_debug_state__":
+            fn = getattr(policy, "debug_state", None)
+            result = fn() if callable(fn) else None
         else:
             fn = getattr(policy, method)
             with _REDIRECT_STDOUT(sys.stderr):
@@ -960,10 +963,17 @@ class PolicyWorker:
     def init_model_xml(self, xml_text: str) -> None:
         self.call("__policy_worker_init_model_xml__", xml_text)
 
+    def debug_state(self) -> Any:
+        """Read optional controller telemetry without changing observations."""
+        return self.call("__policy_worker_debug_state__")
+
     def call(self, method: str, *args: Any, **kwargs: Any) -> Any:
         if not isinstance(method, str) or not method:
             raise ValueError("method must be a non-empty string")
-        internal_method = method == "__policy_worker_init_model_xml__"
+        internal_method = method in {
+            "__policy_worker_init_model_xml__",
+            "__policy_worker_debug_state__",
+        }
         if (
             not internal_method
             and self.permitted_methods is not None

@@ -645,7 +645,10 @@ class Plant:
         damping_mid = self.passive_damping_torque(rate_mid)
         damping_work = float(damping_mid @ rate_mid * float(dt))
         return {
-            "elastic_work": float(-(q1 - q0)),
+            # The retained plant has no separate anatomical tendon/spring
+            # potential.  Its conservative anatomical potential is the
+            # explicit limit potential below; do not count it twice.
+            "elastic_work": 0.0,
             "damping_work": damping_work,
             "active_work": 0.0,
             "limit_work": float(-(q1 - q0)),
@@ -1107,6 +1110,112 @@ class Plant:
             total += m
         return acc / total
 
+    def center_of_mass_acceleration(
+        self,
+        data: mujoco.MjData,
+        *,
+        support_wrench: np.ndarray | None = None,
+    ) -> np.ndarray:
+        """Return whole-system COM acceleration in world SI coordinates.
+
+        The production measurement uses the complete environment-on-system
+        contact force reconstructed by :meth:`contact_wrench_summary`.  The
+        only other external force in the frozen V1 Plant is uniform gravity,
+        which is added explicitly here.  ``support_wrench`` is expressed at
+        world origin as ``[Fx,Fy,Fz,Mx,My,Mz]`` and includes the off-plate
+        diagnostic partition; it is never replaced by the two plate rows.
+        """
+        if support_wrench is None:
+            support_wrench = self.contact_wrench_summary(data)["whole_wrench"]
+        wrench = np.asarray(support_wrench, dtype=np.float64).reshape(6)
+        if not np.isfinite(wrench).all():
+            raise PlantIntegrityError("support wrench is non-finite")
+        total_mass = float(np.sum(self.model.body_mass[list(self.idx.all_bodies)]))
+        acceleration = wrench[:3] / total_mass
+        acceleration = acceleration + np.asarray(
+            (0.0, 0.0, -GRAVITY_MAGNITUDE), dtype=np.float64
+        )
+        if not np.isfinite(acceleration).all():
+            raise PlantIntegrityError("COM acceleration is non-finite")
+        return acceleration
+
+    def linear_momentum(self, data: mujoco.MjData) -> np.ndarray:
+        """Return ``p = M * v_COM`` in world kg m s⁻¹ coordinates."""
+        total_mass = float(np.sum(self.model.body_mass[list(self.idx.all_bodies)]))
+        momentum = total_mass * self.center_of_mass_velocity(data)
+        if not np.isfinite(momentum).all():
+            raise PlantIntegrityError("linear momentum is non-finite")
+        return np.asarray(momentum, dtype=np.float64)
+
+    def centroidal_angular_momentum(
+        self,
+        data: mujoco.MjData,
+        com: np.ndarray | None = None,
+    ) -> np.ndarray:
+        """Return the full world-frame centroidal angular momentum vector.
+
+        MuJoCo's body velocity query with ``flg_local=0`` returns angular and
+        linear velocity in world coordinates.  ``model.body_inertia`` is
+        diagonal in the body inertial frame; ``data.ximat`` rotates that
+        tensor into world coordinates before it is applied to world angular
+        velocity.  The sum includes every non-world body, including the
+        jointless 20 kg external load and the floating-base pelvis.
+        """
+        if com is None:
+            com = self.center_of_mass(data)
+        center = np.asarray(com, dtype=np.float64).reshape(3)
+        if not np.isfinite(center).all():
+            raise PlantIntegrityError("COM reference is non-finite")
+        h = np.zeros(3, dtype=np.float64)
+        velocity = np.zeros(6, dtype=np.float64)
+        for body_id in self.idx.all_bodies:
+            mujoco.mj_objectVelocity(
+                self.model,
+                data,
+                int(mujoco.mjtObj.mjOBJ_BODY),
+                int(body_id),
+                velocity,
+                0,
+            )
+            rotation = np.asarray(data.ximat[body_id], dtype=np.float64).reshape(3, 3)
+            inertia_body = np.diag(np.asarray(self.model.body_inertia[body_id], dtype=np.float64))
+            inertia_world = rotation @ inertia_body @ rotation.T
+            mass = float(self.model.body_mass[body_id])
+            h += inertia_world @ velocity[:3]
+            h += np.cross(np.asarray(data.xipos[body_id], dtype=np.float64) - center, mass * velocity[3:6])
+        if not np.isfinite(h).all():
+            raise PlantIntegrityError("centroidal angular momentum is non-finite")
+        return h
+
+    def centroidal_hdot_from_external_wrench(
+        self,
+        data: mujoco.MjData,
+        com: np.ndarray | None = None,
+        *,
+        support_wrench: np.ndarray | None = None,
+    ) -> np.ndarray:
+        """Return ``Hdot`` from the complete external wrench about the COM.
+
+        The trusted wrench is reconstructed at world origin.  Its moment is
+        shifted to the instantaneous COM by ``M_COM = M_origin - c x F``.
+        Uniform gravity acts through the complete-system COM, so its moment
+        about that reference is zero; its force is already handled by the
+        linear COM acceleration path.  No contact filtering or event state is
+        used here.
+        """
+        if com is None:
+            com = self.center_of_mass(data)
+        center = np.asarray(com, dtype=np.float64).reshape(3)
+        if support_wrench is None:
+            support_wrench = self.contact_wrench_summary(data)["whole_wrench"]
+        wrench = np.asarray(support_wrench, dtype=np.float64).reshape(6)
+        if not np.isfinite(center).all() or not np.isfinite(wrench).all():
+            raise PlantIntegrityError("centroidal external wrench is non-finite")
+        hdot = wrench[3:] - np.cross(center, wrench[:3])
+        if not np.isfinite(hdot).all():
+            raise PlantIntegrityError("centroidal angular momentum rate is non-finite")
+        return np.asarray(hdot, dtype=np.float64)
+
     def trunk_tilt_rad(self, data: mujoco.MjData) -> float:
         """Angle between the torso body ``+z`` axis and world ``+z``."""
         rot = np.asarray(data.xmat[self.idx.torso_body], dtype=np.float64).reshape(3, 3)
@@ -1286,6 +1395,7 @@ class Plant:
             "cop_xy": cop.reshape(4),
             "cop_world_xy": cop.copy(),
             "cop_frame": "world",
+            "plate_origin_world_m": origins.copy(),
             "cop_origin_world_xy": origins[:, :2].copy(),
             "cop_valid": cop_valid,
             "contact_active": bool(np.any(active)),

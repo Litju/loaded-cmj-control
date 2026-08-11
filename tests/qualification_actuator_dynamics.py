@@ -218,13 +218,25 @@ def _reachable_proof() -> tuple[bool, Any]:
     s = rng.normal(0.0, 0.15, ACTION_DIM)
     sd = rng.normal(0.0, 1.0, ACTION_DIM)
     previous = rng.normal(0.0, 10.0, ACTION_DIM)
-    lo, hi = drive.reachable_torque_interval(z, s, sd, previous, substeps=40, h=PHYSICS_TIMESTEP_S)
+
+    def held_torque(command_value: float) -> np.ndarray:
+        state = drive.DriveState(
+            z=z,
+            tau_prev=previous,
+            previous_command=np.zeros(ACTION_DIM, dtype=np.float64),
+        )
+        command = np.full(ACTION_DIM, command_value, dtype=np.float64)
+        result = None
+        for _ in range(40):
+            result = drive.drive_state_step(command, state, s, sd, PHYSICS_TIMESTEP_S)
+        assert result is not None
+        return np.asarray(result["tau"], dtype=np.float64)
+
+    endpoints = np.stack([held_torque(-1.0), held_torque(1.0)])
+    lo = endpoints.min(axis=0)
+    hi = endpoints.max(axis=0)
     samples = np.linspace(-1.0, 1.0, 201)
-    dense = np.stack([
-        drive.forward_torque_for_command(
-            np.full(ACTION_DIM, u), z, s, sd, previous, substeps=40, h=PHYSICS_TIMESTEP_S
-        ) for u in samples
-    ])
+    dense = np.stack([held_torque(float(u)) for u in samples])
     return bool(
         np.isfinite(lo).all()
         and np.isfinite(hi).all()

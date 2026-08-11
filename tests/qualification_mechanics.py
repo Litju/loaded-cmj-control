@@ -662,9 +662,15 @@ def main() -> int:
     # unchanged production actuator pipeline.
     from loaded_cmj.simulation import drive as drive
     plant.reset_supported(data)
-    z = np.asarray(HOLD_ACTION, dtype=float).copy()
-    tau_prev = plant.tau_eq
     hold_action = np.asarray(HOLD_ACTION, dtype=float).copy()
+    drive_state = drive.DriveState(
+        a_plus=np.maximum(hold_action, 0.0),
+        a_minus=np.maximum(-hold_action, 0.0),
+        tau_prev=plant.tau_eq,
+        previous_command=hold_action,
+    )
+    z = (drive_state.a_plus - drive_state.a_minus).copy()
+    tau_prev = drive_state.tau_prev.copy()
     com0 = plant.center_of_mass(data).copy()
     qvel_hist: list[float] = []
     qacc_hist: list[float] = []
@@ -683,8 +689,11 @@ def main() -> int:
     for step in range(FIXED_HOLD_SUBSTEPS):
         s_now = plant.anatomical_coordinates(data)
         sd_now = plant.anatomical_rates(data)
-        z = drive.drive_step(hold_action, z, PHYSICS_TIMESTEP_S)
-        tau_prev = drive.anatomical_torque(z, s_now, sd_now, tau_prev, PHYSICS_TIMESTEP_S)
+        result = drive.drive_state_step(
+            hold_action, drive_state, s_now, sd_now, PHYSICS_TIMESTEP_S
+        )
+        z = np.asarray(result["drive"], dtype=np.float64)
+        tau_prev = np.asarray(result["tau"], dtype=np.float64)
         plant.apply_anatomical_torque(data, tau_prev)
         mujoco.mj_step(model, data)
         qvel_hist.append(float(np.abs(data.qvel).max()))

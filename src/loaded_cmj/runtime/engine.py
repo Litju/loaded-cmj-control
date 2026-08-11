@@ -22,6 +22,7 @@ from loaded_cmj.biomechanics.events import (  # noqa: E402
     TerminationClass,
 )
 from loaded_cmj.simulation.plant import Plant, PlantIntegrityError, ResetAdmissibilityError, build_model  # noqa: E402
+from loaded_cmj.simulation.transition import step_5ms  # noqa: E402
 from loaded_cmj.simulation.constants import (  # noqa: E402
     ACTION_DIM,
     MODEL_REVISION,
@@ -62,6 +63,7 @@ from loaded_cmj.runtime.results import (  # noqa: E402
     EvaluationOutcome,
     RolloutResult,
     TerminationReason,
+    canonical_trace_digest,
 )
 from loaded_cmj.runtime.policy_spec import PolicySpec  # noqa: E402
 
@@ -95,57 +97,7 @@ def _trace_digest(
     attempt_id: str,
     samples: tuple[BiomechanicalSample, ...],
 ) -> str:
-    digest = hashlib.sha256()
-    digest.update(b"lcmj_causal_trace_v1")
-    digest.update(attempt_id.encode("utf-8"))
-    for sample in samples:
-        fields = (
-            str(sample.time_s),
-            str(sample.control_index),
-            str(sample.physics_index),
-            str(sample.accepted_action_digest),
-            str(sample.post_step_state_digest),
-            str(sample.model_revision),
-            str(sample.runtime_revision),
-            sample.extraction_status,
-        )
-        for field in fields:
-            encoded = field.encode("utf-8")
-            digest.update(len(encoded).to_bytes(8, "little"))
-            digest.update(encoded)
-        for name in (
-            "com_position_m",
-            "com_velocity_mps",
-            "plate_wrench_N_Nm",
-            "whole_support_wrench_N_Nm",
-            "cop_world_xy_m",
-            "cop_validity",
-            "support_polygon_margin_m",
-        ):
-            value = getattr(sample, name)
-            if value is None:
-                digest.update(b"none")
-            else:
-                array = np.asarray(value)
-                digest.update(str(array.dtype).encode("ascii"))
-                digest.update(np.ascontiguousarray(array).tobytes(order="C"))
-        for name in (
-            "active_power_signed_W",
-            "active_power_positive_W",
-            "active_power_negative_W",
-            "passive_power_W",
-            "damping_power_W",
-            "limit_power_W",
-            "interval_start_active_power_signed_W",
-            "interval_start_active_power_positive_W",
-            "interval_start_active_power_negative_W",
-            "interval_start_passive_power_W",
-            "interval_start_damping_power_W",
-            "interval_start_limit_power_W",
-        ):
-            value = getattr(sample, name)
-            digest.update(np.asarray([0.0 if value is None else value], dtype="<f8").tobytes())
-    return digest.hexdigest()
+    return canonical_trace_digest(attempt_id, samples)
 
 
 def _json_digest(value: Any) -> str:
@@ -304,7 +256,7 @@ class RolloutEngine:
             for control_index in range(EPISODE_CONTROL_STEPS):
                 try:
                     candidate = worker.act(observation)
-                    accepted = np.asarray(
+                    raw_action = np.asarray(
                         validate_action(candidate, spec.action), dtype=np.float64
                     ).reshape(ACTION_DIM).copy()
                 except (PolicyTimeoutError, PolicyWorkerError, PolicyProtocolError, InvalidActionError, InvalidPolicyError) as exc:
@@ -314,26 +266,26 @@ class RolloutEngine:
                         physics_index=physics_index,
                     )
                     break
-                action_digest = _action_digest(accepted)
-                # The action becomes the held command only after the worker
-                # response has passed all validation.  No Plant mutation has
-                # occurred on any rejected response.
-                previous_action = accepted.copy()
+                try:
+                    controller_observability = worker.debug_state()
+                except (PolicyTimeoutError, PolicyWorkerError, PolicyProtocolError) as exc:
+                    fault = self._policy_fault(
+                        exc,
+                        control_index=control_index,
+                        physics_index=physics_index,
+                    )
+                    break
 
-                for substep in range(SUBSTEPS_PER_CONTROL):
-                    assert plant is not None and data is not None and drive_state is not None
+                def on_substep(
+                    substep: int,
+                    accepted_action: np.ndarray,
+                    drive_result: dict[str, Any],
+                    realized_tau: np.ndarray,
+                    interval_start_power: dict[str, float],
+                ) -> bool:
+                    nonlocal event_result, fault, physics_index
+                    assert model is not None and plant is not None and data is not None
                     try:
-                        drive_result = drive_model.drive_state_step(
-                            accepted,
-                            drive_state,
-                            plant.anatomical_coordinates(data),
-                            plant.anatomical_rates(data),
-                            PHYSICS_TIMESTEP_S,
-                        )
-                        realized_tau = np.asarray(drive_result["tau"], dtype=np.float64).copy()
-                        interval_start_power = plant.realized_power_components(data, realized_tau)
-                        plant.apply_anatomical_torque(data, realized_tau)
-                        mujoco.mj_step(model, data)
                         physics_index += 1
                         self._assert_finite_post_step(
                             model,
@@ -350,10 +302,15 @@ class RolloutEngine:
                             support_polygon_margin_m=(support_margin, support_margin),
                             realized_anatomical_torque=realized_tau,
                             interval_start_power_components=interval_start_power,
+                            accepted_action=accepted_action,
+                            controller_observability=controller_observability,
+                            actuator_override_flags=drive_result["override_flags"],
+                            actuator_capacity_lower_Nm=drive_result["capacity_lower"],
+                            actuator_capacity_upper_Nm=drive_result["capacity_upper"],
                             attempt_id=self.attempt_id,
                             control_index=control_index,
                             physics_index=physics_index,
-                            accepted_action_digest=action_digest,
+                            accepted_action_digest=_action_digest(accepted_action),
                             post_step_state_digest=state_digest,
                             model_revision=MODEL_REVISION,
                             runtime_revision=RUNTIME_REVISION,
@@ -366,7 +323,7 @@ class RolloutEngine:
                             substep=substep,
                             physics_index=physics_index,
                         )
-                        break
+                        return False
 
                     self.completed_physics_steps = physics_index
                     try:
@@ -378,12 +335,44 @@ class RolloutEngine:
                             substep=substep,
                             physics_index=physics_index,
                         )
-                        break
+                        return False
                     if candidate_event is not None:
                         event_result = evaluator.finalize(horizon_s=sample.time_s)
-                        break
+                        return False
+                    return True
+
+                assert plant is not None and data is not None and drive_state is not None
+                try:
+                    transition = step_5ms(
+                        plant=plant,
+                        data=data,
+                        drive_state=drive_state,
+                        previous_accepted_action=previous_action,
+                        raw_action=raw_action,
+                        on_substep=on_substep,
+                    )
+                except Exception as exc:  # noqa: BLE001 - physical boundary fails closed
+                    fault = self._physics_fault(
+                        exc,
+                        control_index=control_index,
+                        substep=None,
+                        physics_index=physics_index,
+                    )
+                    break
                 if fault is not None or event_result is not None:
                     break
+                if transition.substeps_executed != SUBSTEPS_PER_CONTROL:
+                    fault = self._internal_fault(
+                        RuntimeEvaluationError("shared transition did not complete 40 substeps"),
+                        control_index=control_index,
+                        substep=None,
+                        physics_index=physics_index,
+                    )
+                    break
+                # The action becomes the held command only after the worker
+                # response has passed validation and the shared transition has
+                # produced its single accepted-action projection.
+                previous_action = transition.accepted_action.copy()
                 self.completed_control_steps = control_index + 1
                 if control_index + 1 < EPISODE_CONTROL_STEPS:
                     assert plant is not None and data is not None
