@@ -296,12 +296,19 @@ def test_witness_derivative_request_excludes_fixed_channels(qualified_fixtures):
     requested = []
 
     def provider(**kwargs):
-        requested.append(tuple(kwargs["action_columns"]))
-        active = set(WITNESS_FREE_ACTION_INDICES)
+        requested.append(
+            (
+                None if kwargs["state_columns"] is None else tuple(kwargs["state_columns"]),
+                tuple(kwargs["action_columns"]),
+            )
+        )
+        active = set(kwargs["action_columns"])
         branches = tuple("INTERIOR" if index in active else "NEAR_KINK" for index in range(ACTION_DIMENSION))
         validity = np.array([index in active for index in range(ACTION_DIMENSION)], dtype=bool)
         B = np.zeros((STATE_DIMENSION, ACTION_DIMENSION))
-        B[:, np.asarray(WITNESS_FIXED_ACTION_INDICES)] = np.nan
+        omitted = tuple(index for index in range(ACTION_DIMENSION) if index not in active)
+        if omitted:
+            B[:, np.asarray(omitted)] = np.nan
         A = np.eye(STATE_DIMENSION)
         A[:, 111:132] = 0.0
         return SimpleNamespace(
@@ -335,10 +342,28 @@ def test_witness_derivative_request_excludes_fixed_channels(qualified_fixtures):
         derivative_provider=provider,
     )
     evaluation = problem.interval_evaluation(_zero_decision(problem, actions), 0)
-    result = problem._derivatives(evaluation.state, evaluation.raw_action)
-    assert requested == [WITNESS_FREE_ACTION_INDICES]
+    result = problem._derivatives(evaluation.state, evaluation.raw_action, state_columns=())
+    assert requested == [((), WITNESS_FREE_ACTION_INDICES)]
     assert np.isfinite(result.B[:, np.asarray(WITNESS_FREE_ACTION_INDICES)]).all()
     assert np.isnan(result.B[:, np.asarray(WITNESS_FIXED_ACTION_INDICES)]).all()
+
+    problem_two, actions_two = _problem(
+        qualified_fixtures,
+        2,
+        action_layout=WITNESS_LAYOUT,
+        derivative_provider=provider,
+    )
+    problem_two.jacobian_values(_zero_decision(problem_two, actions_two))
+    assert requested[-2:] == [((), WITNESS_FREE_ACTION_INDICES), (tuple(range(STATE_DIMENSION)), WITNESS_FREE_ACTION_INDICES)]
+
+    full_problem, full_actions = _problem(
+        qualified_fixtures,
+        2,
+        action_layout=FULL_LAYOUT,
+        derivative_provider=provider,
+    )
+    full_problem.jacobian_values(_zero_decision(full_problem, full_actions))
+    assert requested[-2:] == [((), FULL_ACTIVE_ACTION_INDICES), (tuple(range(STATE_DIMENSION)), FULL_ACTIVE_ACTION_INDICES)]
 
 
 @pytest.mark.parametrize("action_layout", (FULL_LAYOUT, WITNESS_LAYOUT))

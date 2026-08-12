@@ -981,7 +981,13 @@ class DirectMultipleShootingProblem:
                 residuals[row.row_index] += value[row.slack_decision_index]
         return residuals
 
-    def _derivatives(self, state: MacroSnapshot, action: np.ndarray) -> WrappedLinearization:
+    def _derivatives(
+        self,
+        state: MacroSnapshot,
+        action: np.ndarray,
+        *,
+        state_columns: Sequence[int] | None = None,
+    ) -> WrappedLinearization:
         provider = linearize_step_5ms if self.derivative_provider is None else self.derivative_provider
         try:
             result = provider(
@@ -990,14 +996,22 @@ class DirectMultipleShootingProblem:
                 raw_action=action,
                 state_steps=ML241_STATE_STEPS,
                 action_steps=ML241_ACTION_STEP,
+                state_columns=state_columns,
                 action_columns=self.layout.active_action_indices,
             )
         except Exception as exc:
             if isinstance(exc, DerivativeContractError):
                 raise
             raise DerivativeContractError("ML-241 ordinary local derivative assembly was rejected") from exc
+        requested_state = (
+            tuple(range(STATE_DIMENSION)) if state_columns is None else tuple(int(index) for index in state_columns)
+        )
         self._validate_derivative_metadata(
-            result, state, action, self.layout.active_action_indices
+            result,
+            state,
+            action,
+            requested_state,
+            self.layout.active_action_indices,
         )
         return result
 
@@ -1006,6 +1020,7 @@ class DirectMultipleShootingProblem:
         result: WrappedLinearization,
         state: MacroSnapshot,
         action: np.ndarray,
+        requested_state_columns: Sequence[int],
         active_action_indices: Sequence[int],
     ) -> None:
         if result.A.shape != (STATE_DIMENSION, STATE_DIMENSION) or result.B.shape != (STATE_DIMENSION, ACTION_DIMENSION):
@@ -1024,27 +1039,29 @@ class DirectMultipleShootingProblem:
             raise DerivativeContractError("ML-241 action derivative steps changed")
         if dict(result.state_step_metadata) != dict(ML241_STATE_STEPS):
             raise DerivativeContractError("ML-241 state derivative steps changed")
-        if result.qacc_derivative_disposition != QACC_DERIVATIVE_DISPOSITION:
-            raise DerivativeContractError("ML-241 qacc qualified-zero metadata is missing")
-        if tuple(result.qacc_zero_columns) != QACC_ZERO_COLUMNS:
-            raise DerivativeContractError("ML-241 qacc zero-column metadata is not 111:131")
-        bounds = dict(result.qacc_absolute_error_bound)
-        if bounds != dict(QACC_ERROR_BOUNDS):
-            raise DerivativeContractError("ML-241 qacc error bounds changed")
-        if not result.qacc_certificate_evidence_id:
-            raise DerivativeContractError("ML-241 qacc certificate evidence identity is missing")
+        requested_state = tuple(int(index) for index in requested_state_columns)
+        qacc_requested = bool(set(requested_state).intersection(QACC_ZERO_COLUMNS))
+        if qacc_requested:
+            if result.qacc_derivative_disposition != QACC_DERIVATIVE_DISPOSITION:
+                raise DerivativeContractError("ML-241 qacc qualified-zero metadata is missing")
+            if tuple(result.qacc_zero_columns) != QACC_ZERO_COLUMNS:
+                raise DerivativeContractError("ML-241 qacc zero-column metadata is not 111:131")
+            bounds = dict(result.qacc_absolute_error_bound)
+            if bounds != dict(QACC_ERROR_BOUNDS):
+                raise DerivativeContractError("ML-241 qacc error bounds changed")
+            if not result.qacc_certificate_evidence_id:
+                raise DerivativeContractError("ML-241 qacc certificate evidence identity is missing")
         branches = tuple(result.base_active_set.action_branches)
         active = tuple(int(index) for index in active_action_indices)
-        if len(branches) != ACTION_DIMENSION or any(
-            branches[index] in {"NEAR_KINK", "ACTION_BOUND_ACTIVE"} for index in active
-        ):
+        if len(branches) != ACTION_DIMENSION or any(branches[index] == "NEAR_KINK" for index in active):
             raise DerivativeContractError("ML-241 action branch is not an ordinary smooth local branch")
         if result.base_snapshot_digest != snapshot_digest(state) or result.base_raw_action.shape != (ACTION_DIMENSION,):
             raise DerivativeContractError("ML-241 base-point metadata is incomplete")
         if not np.array_equal(np.asarray(result.base_raw_action), action):
             raise DerivativeContractError("ML-241 derivative base action does not match the decision")
-        if not np.asarray(result.state_validity, dtype=bool).all():
-            invalid = np.flatnonzero(~np.asarray(result.state_validity, dtype=bool)).tolist()
+        state_validity = np.asarray(result.state_validity, dtype=bool)
+        if requested_state and not state_validity[np.asarray(requested_state, dtype=np.int64)].all():
+            invalid = [index for index in requested_state if not bool(state_validity[index])]
             raise DerivativeContractError(f"ordinary local A columns are nonsmooth/invalid: {invalid}")
         action_validity = np.asarray(result.action_validity, dtype=bool)
         if not action_validity[np.asarray(active, dtype=np.int64)].all():
@@ -1052,11 +1069,18 @@ class DirectMultipleShootingProblem:
                 index for index in active if not bool(action_validity[index])
             ]
             raise DerivativeContractError(f"ordinary local B columns are nonsmooth/invalid: {invalid}")
-        if not np.isfinite(result.A).all() or not np.isfinite(
+        state_finite = (
+            np.isfinite(result.A[:, np.asarray(requested_state, dtype=np.int64)]).all()
+            if requested_state
+            else True
+        )
+        if not state_finite or not np.isfinite(
             np.asarray(result.B)[:, np.asarray(active, dtype=np.int64)]
         ).all():
             raise DerivativeContractError("ordinary local derivative contains invalid active columns")
-        if not np.array_equal(result.A[:, QACC_ZERO_COLUMNS], np.zeros((STATE_DIMENSION, len(QACC_ZERO_COLUMNS)))):
+        if qacc_requested and not np.array_equal(
+            result.A[:, QACC_ZERO_COLUMNS], np.zeros((STATE_DIMENSION, len(QACC_ZERO_COLUMNS)))
+        ):
             raise DerivativeContractError("qualified-zero qacc columns were altered")
 
     def jacobian_values(self, z: Sequence[float] | np.ndarray) -> np.ndarray:
@@ -1065,13 +1089,18 @@ class DirectMultipleShootingProblem:
         active = np.asarray(self.layout.active_action_indices, dtype=np.int64)
         for interval in range(self.horizon):
             evaluation = self.interval_evaluation(value, interval)
-            linearization = self._derivatives(evaluation.state, evaluation.raw_action)
+            requested_state = () if interval == 0 else tuple(range(STATE_DIMENSION))
+            linearization = self._derivatives(
+                evaluation.state,
+                evaluation.raw_action,
+                state_columns=requested_state,
+            )
             endpoint = boxminus_endpoint_jacobians(
                 next_snapshot=evaluation.next_state,
                 predicted_snapshot=evaluation.predicted_state,
                 model=self.plant.model,
             )
-            J_state = endpoint.G_pred @ linearization.A
+            J_state = endpoint.G_pred @ linearization.A if interval > 0 else None
             J_action = endpoint.G_pred @ linearization.B[:, active]
             J_next = endpoint.G_next
             for component in range(STATE_DIMENSION):

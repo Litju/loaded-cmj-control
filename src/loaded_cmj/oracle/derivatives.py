@@ -50,6 +50,22 @@ CONSTRAINT_CATALOG_ID = "LCMJ-V1-ORACLE-CONSTRAINT-CATALOG-1.0.0"
 CENTRAL_DIFFERENCE_SCHEME = "central_boxminus_at_common_y0"
 _ACTION_BOUND = 1.0
 _KINK_TOLERANCE = 1.0e-10
+_NATIVE_DOMAIN_TOLERANCE = 1.0e-12
+_TORQUE_VELOCITY_NORMALIZED_NEAR_ZERO = 1.0e-6
+
+# The first seven values are the primary stencil/qualification classes.  The
+# remaining values are deliberately more specific rejection diagnostics.
+CENTRAL_INTERIOR = "CENTRAL_INTERIOR"
+FORWARD_FEASIBLE_SIDE = "FORWARD_FEASIBLE_SIDE"
+BACKWARD_FEASIBLE_SIDE = "BACKWARD_FEASIBLE_SIDE"
+FIXED_ELIMINATED = "FIXED_ELIMINATED"
+TRUE_KINK_INVALID = "TRUE_KINK_INVALID"
+PHYSICAL_CONTACT_SWITCH_INVALID = "PHYSICAL_CONTACT_SWITCH_INVALID"
+MANIFOLD_INVALID = "MANIFOLD_INVALID"
+NUMERICAL_CERTIFICATE_ONLY = "NUMERICAL_CERTIFICATE_ONLY"
+PIECEWISE_BRANCH_SWITCH_INVALID = "PIECEWISE_BRANCH_SWITCH_INVALID"
+NATIVE_DOMAIN_INVALID = "NATIVE_DOMAIN_INVALID"
+NONFINITE_EVALUATION = "NONFINITE_EVALUATION"
 
 ACTION_BRANCH_INTERIOR = "INTERIOR"
 ACTION_BRANCH_SLEW_ACTIVE = "SLEW_ACTIVE"
@@ -126,9 +142,11 @@ class ActiveSetFingerprint:
     cop_valid_steps: tuple[tuple[bool, bool], ...]
     support_active_steps: tuple[tuple[bool, bool], ...]
     friction_steps: tuple[bool, ...]
-    native_joint_limit_steps: tuple[tuple[int, ...], ...]
+    native_joint_limit_steps: tuple[bool, ...]
     drive_flag_steps: tuple[tuple[tuple[str, tuple[bool, ...]], ...], ...]
     action_branches: tuple[str, ...]
+    drive_branch_steps: tuple[tuple[tuple[str, tuple[str, ...]], ...], ...] = ()
+    transition_branch_steps: tuple[tuple[tuple[str, tuple[str, ...]], ...], ...] = ()
 
     @property
     def digest(self) -> str:
@@ -141,6 +159,8 @@ class ActiveSetFingerprint:
             "native_joint_limit_steps": self.native_joint_limit_steps,
             "drive_flag_steps": self.drive_flag_steps,
             "action_branches": self.action_branches,
+            "drive_branch_steps": self.drive_branch_steps,
+            "transition_branch_steps": self.transition_branch_steps,
         }
         encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
         return hashlib.sha256(encoded).hexdigest()
@@ -161,7 +181,7 @@ class TransitionEvaluation:
 
 @dataclass(frozen=True)
 class ColumnQualification:
-    """Validity and provenance for one central finite-difference column."""
+    """Validity and provenance for one requested derivative column."""
 
     axis: str
     index: int
@@ -172,6 +192,16 @@ class ColumnQualification:
     active_set_preserved: bool
     plus_fingerprint_digest: str | None
     minus_fingerprint_digest: str | None
+    stencil: str = CENTRAL_INTERIOR
+    native_domain_legal: bool = True
+    base_fingerprint_digest: str | None = None
+    sample_fingerprint_digests: tuple[str, ...] = ()
+
+    @property
+    def classification(self) -> str:
+        """Compatibility/readability alias for the primary stencil class."""
+
+        return self.stencil
 
 
 @dataclass(frozen=True)
@@ -269,9 +299,21 @@ class WrappedLinearization:
         certified = np.asarray(self.A, dtype=np.float64).copy()
         certified[:, WARMSTART_SLICE] = 0.0
         certified = _readonly_array(certified)
+        qualified_reports = tuple(
+            replace(
+                report,
+                stencil=(
+                    NUMERICAL_CERTIFICATE_ONLY
+                    if WARMSTART_SLICE.start <= int(report.index) < WARMSTART_SLICE.stop
+                    else report.stencil
+                ),
+            )
+            for report in self.state_columns
+        )
         return replace(
             self,
             A=certified,
+            state_columns=qualified_reports,
             qacc_derivative_disposition=QACC_DERIVATIVE_NUMERICALLY_NULL,
             qacc_zero_columns=qacc_indexes,
             qacc_absolute_error_bound=bounds,
@@ -405,6 +447,34 @@ def classify_action_projection(
     return tuple(result)
 
 
+def _classify_slew_projection(
+    previous_accepted_action: Sequence[float] | np.ndarray,
+    raw_action: Sequence[float] | np.ndarray,
+    *,
+    tolerance: float = _KINK_TOLERANCE,
+) -> tuple[str, ...]:
+    """Classify only the accepted-action slew branch.
+
+    Raw-box endpoint labels belong to ``classify_action_projection``.  They
+    are deliberately kept separate here so a feasible-side raw-box stencil
+    cannot be mistaken for a slew-branch crossing.
+    """
+
+    previous = _finite_vector(previous_accepted_action, ACTION_DIM, "previous accepted action")
+    raw = _finite_vector(raw_action, ACTION_DIM, "raw action")
+    delta = raw - previous
+    result: list[str] = []
+    for delta_value in delta:
+        absolute = abs(float(delta_value))
+        if abs(absolute - ACCEPTED_ACTION_MAX_STEP) <= tolerance:
+            result.append(ACTION_BRANCH_NEAR_KINK)
+        elif absolute > ACCEPTED_ACTION_MAX_STEP + tolerance:
+            result.append(ACTION_BRANCH_SLEW_ACTIVE)
+        else:
+            result.append(ACTION_BRANCH_INTERIOR)
+    return tuple(result)
+
+
 def _state_step_vector(state_steps: Mapping[str, float]) -> np.ndarray:
     missing = [key for key in STATE_STEP_BLOCKS if key not in state_steps]
     extra = [key for key in state_steps if key not in STATE_STEP_BLOCKS]
@@ -432,28 +502,80 @@ def _action_step_vector(action_steps: float | Sequence[float] | np.ndarray) -> n
     return result
 
 
-def _native_joint_limits(data: mujoco.MjData) -> tuple[int, ...]:
+@dataclass(frozen=True)
+class _StencilPlan:
+    """A fixed, pre-evaluation finite-difference stencil decision."""
+
+    classification: str
+    offsets: tuple[int, ...]
+    native_domain_legal: bool = True
+    reason: str = ""
+
+    @property
+    def valid(self) -> bool:
+        return not self.reason
+
+
+@dataclass(frozen=True)
+class _StepFingerprint:
+    """Discrete branch state observed at one physics substep.
+
+    This intentionally excludes all continuous margins, forces, penetrations,
+    COP coordinates, velocities, and torque magnitudes.  ``native_joint_limit``
+    is an owner predicate only; no ``efc`` row/address is retained.
+    """
+
+    contacts: tuple[tuple[int, int, str, int | None, int, bool], ...]
+    prohibited_contact: bool
+    cop_valid: tuple[bool, bool]
+    support_active: tuple[bool, bool]
+    friction_feasible: bool
+    native_joint_limit: bool
+    drive_flags: tuple[tuple[str, tuple[bool, ...]], ...]
+    drive_branches: tuple[tuple[str, tuple[str, ...]], ...]
+    transition_branches: tuple[tuple[str, tuple[str, ...]], ...]
+
+
+def _native_joint_limits(data: mujoco.MjData) -> bool:
+    """Return the physical native-limit predicate without solver row identity.
+
+    MuJoCo's ``efc_type`` is consulted only as the Plant's existing native
+    limit-status observable.  The internal constraint row number is not part
+    of the certificate, digest, or equality relation.
+    """
+
     limit_type = int(mujoco.mjtConstraint.mjCNSTR_LIMIT_JOINT)
-    return tuple(
-        int(index)
-        for index in range(int(data.nefc))
-        if int(data.efc_type[index]) == limit_type
+    return bool(
+        int(data.nefc) > 0
+        and np.any(np.asarray(data.efc_type[: data.nefc], dtype=np.int32) == limit_type)
     )
+
+
+def _discrete_sign(values: Sequence[float] | np.ndarray, *, tolerance: float) -> tuple[str, ...]:
+    array = np.asarray(values, dtype=np.float64).reshape(-1)
+    if not np.isfinite(array).all():
+        raise DerivativeDomainError("branch certificate received a non-finite value")
+    return tuple(
+        "POSITIVE" if value > tolerance else "NEGATIVE" if value < -tolerance else "NEAR_ZERO"
+        for value in array
+    )
+
+
+def _flag_labels(values: Sequence[bool] | np.ndarray) -> tuple[str, ...]:
+    return tuple("ACTIVE" if bool(value) else "INACTIVE" for value in np.asarray(values, dtype=bool).reshape(-1))
 
 
 def _step_fingerprint(
     plant: Plant,
     data: mujoco.MjData,
     drive_result: Mapping[str, Any],
-) -> tuple[
-    tuple[tuple[int, int, str, int | None, int, bool], ...],
-    bool,
-    tuple[bool, bool],
-    tuple[bool, bool],
-    bool,
-    tuple[int, ...],
-    tuple[tuple[str, tuple[bool, ...]], ...],
-]:
+    *,
+    raw_action: np.ndarray,
+    accepted_action: np.ndarray,
+    slew_branches: tuple[str, ...],
+    old_a_plus: np.ndarray,
+    old_a_minus: np.ndarray,
+) -> _StepFingerprint:
     summary = plant.contact_wrench_summary(data)
     contacts = tuple(
         (
@@ -474,41 +596,94 @@ def _step_fingerprint(
         (str(key), tuple(bool(value) for value in np.asarray(values, dtype=bool).reshape(ACTION_DIM)))
         for key, values in sorted(dict(drive_result["override_flags"]).items())
     )
-    return (
-        contacts,
-        bool(summary["prohibited_contact"]),
-        cop_valid,
-        support_active,
-        bool(summary["friction_feasible"]),
-        _native_joint_limits(data),
-        flags,
+    new_a_plus = _finite_vector(drive_result["a_plus"], ACTION_DIM, "drive a_plus")
+    new_a_minus = _finite_vector(drive_result["a_minus"], ACTION_DIM, "drive a_minus")
+    old_drive = old_a_plus - old_a_minus
+    new_drive = new_a_plus - new_a_minus
+    raw = _finite_vector(raw_action, ACTION_DIM, "raw action")
+    accepted = _finite_vector(accepted_action, ACTION_DIM, "accepted action")
+    rates = _finite_vector(plant.anatomical_rates(data), ACTION_DIM, "anatomical rates")
+    drive_branches = (
+        ("raw_action_sign", _discrete_sign(raw, tolerance=_KINK_TOLERANCE)),
+        ("accepted_action_sign", _discrete_sign(accepted, tolerance=_KINK_TOLERANCE)),
+        (
+            "activation_plus",
+            tuple("RISING" if max(float(u), 0.0) > float(old) else "DECAYING" for u, old in zip(accepted, old_a_plus, strict=True)),
+        ),
+        (
+            "activation_minus",
+            tuple("RISING" if max(float(-u), 0.0) > float(old) else "DECAYING" for u, old in zip(accepted, old_a_minus, strict=True)),
+        ),
+        ("old_drive_sign", _discrete_sign(old_drive, tolerance=_KINK_TOLERANCE)),
+        ("new_drive_sign", _discrete_sign(new_drive, tolerance=_KINK_TOLERANCE)),
+        (
+            "drive_zero_crossing",
+            _flag_labels(dict(drive_result["override_flags"]).get("zero_crossing", np.zeros(ACTION_DIM, dtype=bool))),
+        ),
+        (
+            "torque_velocity_positive",
+            _discrete_sign(
+                rates / drive.OMEGA_MAX_POS,
+                tolerance=_TORQUE_VELOCITY_NORMALIZED_NEAR_ZERO,
+            ),
+        ),
+        (
+            "torque_velocity_negative",
+            _discrete_sign(
+                -rates / drive.OMEGA_MAX_NEG,
+                tolerance=_TORQUE_VELOCITY_NORMALIZED_NEAR_ZERO,
+            ),
+        ),
+        (
+            "power_projection",
+            _flag_labels(dict(drive_result["override_flags"]).get("power_override", np.zeros(ACTION_DIM, dtype=bool))),
+        ),
+        (
+            "capacity_clipping",
+            _flag_labels(dict(drive_result["override_flags"]).get("hard_capacity", np.zeros(ACTION_DIM, dtype=bool))),
+        ),
+        (
+            "torque_rate_clipping",
+            _flag_labels(dict(drive_result["override_flags"]).get("rate_override", np.zeros(ACTION_DIM, dtype=bool))),
+        ),
+        (
+            "hard_power_clipping",
+            _flag_labels(dict(drive_result["override_flags"]).get("hard_power", np.zeros(ACTION_DIM, dtype=bool))),
+        ),
+    )
+    transition_branches = (
+        ("raw_action_box", tuple("IN_DOMAIN" for _ in range(ACTION_DIM))),
+        ("accepted_action_slew", slew_branches),
+    )
+    return _StepFingerprint(
+        contacts=contacts,
+        prohibited_contact=bool(summary["prohibited_contact"]),
+        cop_valid=cop_valid,
+        support_active=support_active,
+        friction_feasible=bool(summary["friction_feasible"]),
+        native_joint_limit=_native_joint_limits(data),
+        drive_flags=flags,
+        drive_branches=drive_branches,
+        transition_branches=transition_branches,
     )
 
 
 def _make_active_set(
     *,
-    steps: Sequence[
-        tuple[
-            tuple[tuple[int, int, str, int | None, int, bool], ...],
-            bool,
-            tuple[bool, bool],
-            tuple[bool, bool],
-            bool,
-            tuple[int, ...],
-            tuple[tuple[str, tuple[bool, ...]], ...],
-        ]
-    ],
+    steps: Sequence[_StepFingerprint],
     action_branches: tuple[str, ...],
 ) -> ActiveSetFingerprint:
     return ActiveSetFingerprint(
-        contact_steps=tuple(step[0] for step in steps),
-        prohibited_contact_steps=tuple(step[1] for step in steps),
-        cop_valid_steps=tuple(step[2] for step in steps),
-        support_active_steps=tuple(step[3] for step in steps),
-        friction_steps=tuple(step[4] for step in steps),
-        native_joint_limit_steps=tuple(step[5] for step in steps),
-        drive_flag_steps=tuple(step[6] for step in steps),
+        contact_steps=tuple(step.contacts for step in steps),
+        prohibited_contact_steps=tuple(step.prohibited_contact for step in steps),
+        cop_valid_steps=tuple(step.cop_valid for step in steps),
+        support_active_steps=tuple(step.support_active for step in steps),
+        friction_steps=tuple(step.friction_feasible for step in steps),
+        native_joint_limit_steps=tuple(step.native_joint_limit for step in steps),
+        drive_flag_steps=tuple(step.drive_flags for step in steps),
         action_branches=action_branches,
+        drive_branch_steps=tuple(step.drive_branches for step in steps),
+        transition_branch_steps=tuple(step.transition_branches for step in steps),
     )
 
 
@@ -611,7 +786,8 @@ def evaluate_wrapped_step_5ms(
     raw = _finite_vector(raw_action, ACTION_DIM, "raw action")
     owner_ids = tuple(str(owner_id) for owner_id in owner_ids)
     branches = classify_action_projection(snapshot.previous_accepted_action, raw)
-    active_steps: list[Any] = []
+    slew_branches = _classify_slew_projection(snapshot.previous_accepted_action, raw)
+    active_steps: list[_StepFingerprint] = []
     final_owner_outputs: dict[str, np.ndarray] = {}
     work = _workspace(plant) if workspace is None else workspace
     restored_previous = snapshot.restore(
@@ -619,6 +795,8 @@ def evaluate_wrapped_step_5ms(
         data=work.data,
         drive_state=work.drive_state,
     )
+    previous_a_plus = np.asarray(snapshot.a_plus, dtype=np.float64).copy()
+    previous_a_minus = np.asarray(snapshot.a_minus, dtype=np.float64).copy()
 
     def record_substep(
         _substep: int,
@@ -627,7 +805,21 @@ def evaluate_wrapped_step_5ms(
         _realized: np.ndarray,
         power: Mapping[str, float],
     ) -> bool:
-        active_steps.append(_step_fingerprint(plant, work.data, drive_result))
+        nonlocal previous_a_plus, previous_a_minus
+        active_steps.append(
+            _step_fingerprint(
+                plant,
+                work.data,
+                drive_result,
+                raw_action=raw,
+                accepted_action=_accepted,
+                slew_branches=slew_branches,
+                old_a_plus=previous_a_plus,
+                old_a_minus=previous_a_minus,
+            )
+        )
+        previous_a_plus = _finite_vector(drive_result["a_plus"], ACTION_DIM, "drive a_plus")
+        previous_a_minus = _finite_vector(drive_result["a_minus"], ACTION_DIM, "drive a_minus")
         if _substep == 39 and owner_ids:
             final_owner_outputs.update(
                 _owner_output_values(
@@ -669,6 +861,165 @@ def evaluate_wrapped_step_5ms(
     )
 
 
+def _native_state_coordinate(snapshot: MacroSnapshot, index: int) -> tuple[float, float, float] | None:
+    """Return ``(value, lower, upper)`` only for native Euclidean owners."""
+
+    if 51 <= index < 66:
+        return float(snapshot.a_plus[index - 51]), 0.0, 1.0
+    if 66 <= index < 81:
+        return float(snapshot.a_minus[index - 66]), 0.0, 1.0
+    if 96 <= index < 111:
+        return float(snapshot.previous_accepted_action[index - 96]), -1.0, 1.0
+    return None
+
+
+def _is_native_legal(value: float, lower: float, upper: float) -> bool:
+    return bool(
+        value >= lower - _NATIVE_DOMAIN_TOLERANCE
+        and value <= upper + _NATIVE_DOMAIN_TOLERANCE
+    )
+
+
+def _state_stencil_plan(snapshot: MacroSnapshot, index: int, h: float) -> _StencilPlan:
+    domain = _native_state_coordinate(snapshot, index)
+    if domain is None:
+        return _StencilPlan(CENTRAL_INTERIOR, (-1, 1))
+    value, lower, upper = domain
+    plus_1 = value + h
+    minus_1 = value - h
+    if _is_native_legal(plus_1, lower, upper) and _is_native_legal(minus_1, lower, upper):
+        return _StencilPlan(CENTRAL_INTERIOR, (-1, 1))
+    at_lower = value <= lower + _NATIVE_DOMAIN_TOLERANCE
+    at_upper = value >= upper - _NATIVE_DOMAIN_TOLERANCE
+    if at_lower and not _is_native_legal(minus_1, lower, upper):
+        if _is_native_legal(value + 2.0 * h, lower, upper):
+            return _StencilPlan(FORWARD_FEASIBLE_SIDE, (1, 2))
+        return _StencilPlan(
+            NATIVE_DOMAIN_INVALID,
+            (),
+            native_domain_legal=False,
+            reason=NATIVE_DOMAIN_INVALID,
+        )
+    if at_upper and not _is_native_legal(plus_1, lower, upper):
+        if _is_native_legal(value - 2.0 * h, lower, upper):
+            return _StencilPlan(BACKWARD_FEASIBLE_SIDE, (-1, -2))
+        return _StencilPlan(
+            NATIVE_DOMAIN_INVALID,
+            (),
+            native_domain_legal=False,
+            reason=NATIVE_DOMAIN_INVALID,
+        )
+    return _StencilPlan(
+        NATIVE_DOMAIN_INVALID,
+        (),
+        native_domain_legal=False,
+        reason=NATIVE_DOMAIN_INVALID,
+    )
+
+
+def _action_stencil_plan(
+    raw_value: float,
+    h: float,
+    *,
+    previous_value: float,
+) -> _StencilPlan:
+    del previous_value  # projection branch is certified by sampled evaluations
+    # The retained Drive state has distinct directional channels at raw u=0.
+    # A declared stencil spanning that surface is invalid before either side is
+    # averaged.  This is intentionally conservative at the exact zero kink.
+    if raw_value - h < -_KINK_TOLERANCE and raw_value + h > _KINK_TOLERANCE:
+        return _StencilPlan(TRUE_KINK_INVALID, (), reason=TRUE_KINK_INVALID)
+    plus_1 = raw_value + h
+    minus_1 = raw_value - h
+    plus_legal = _is_native_legal(plus_1, -_ACTION_BOUND, _ACTION_BOUND)
+    minus_legal = _is_native_legal(minus_1, -_ACTION_BOUND, _ACTION_BOUND)
+    if plus_legal and minus_legal:
+        return _StencilPlan(CENTRAL_INTERIOR, (-1, 1))
+    at_lower = raw_value <= -_ACTION_BOUND + _NATIVE_DOMAIN_TOLERANCE
+    at_upper = raw_value >= _ACTION_BOUND - _NATIVE_DOMAIN_TOLERANCE
+    if at_lower and not minus_legal:
+        if _is_native_legal(raw_value + 2.0 * h, -_ACTION_BOUND, _ACTION_BOUND):
+            return _StencilPlan(FORWARD_FEASIBLE_SIDE, (1, 2))
+        return _StencilPlan(NATIVE_DOMAIN_INVALID, (), native_domain_legal=False, reason=NATIVE_DOMAIN_INVALID)
+    if at_upper and not plus_legal:
+        if _is_native_legal(raw_value - 2.0 * h, -_ACTION_BOUND, _ACTION_BOUND):
+            return _StencilPlan(BACKWARD_FEASIBLE_SIDE, (-1, -2))
+        return _StencilPlan(NATIVE_DOMAIN_INVALID, (), native_domain_legal=False, reason=NATIVE_DOMAIN_INVALID)
+    return _StencilPlan(NATIVE_DOMAIN_INVALID, (), native_domain_legal=False, reason=NATIVE_DOMAIN_INVALID)
+
+
+def _sample_values(plan: _StencilPlan, h: float) -> tuple[float, ...]:
+    return tuple(float(offset) * h for offset in plan.offsets)
+
+
+def _difference_from_samples(
+    values: Sequence[np.ndarray],
+    plan: _StencilPlan,
+    h: float,
+) -> np.ndarray:
+    if plan.classification == CENTRAL_INTERIOR:
+        return (np.asarray(values[1]) - np.asarray(values[0])) / (2.0 * h)
+    if plan.classification == FORWARD_FEASIBLE_SIDE:
+        return (4.0 * np.asarray(values[0]) - np.asarray(values[1])) / (2.0 * h)
+    if plan.classification == BACKWARD_FEASIBLE_SIDE:
+        return (-4.0 * np.asarray(values[0]) + np.asarray(values[1])) / (2.0 * h)
+    raise DerivativeDomainError(f"cannot evaluate invalid stencil {plan.classification}")
+
+
+def _physical_branch_changed(base: ActiveSetFingerprint, sample: ActiveSetFingerprint) -> bool:
+    return any(
+        left != right
+        for left, right in (
+            (base.contact_steps, sample.contact_steps),
+            (base.prohibited_contact_steps, sample.prohibited_contact_steps),
+            (base.cop_valid_steps, sample.cop_valid_steps),
+            (base.support_active_steps, sample.support_active_steps),
+            (base.friction_steps, sample.friction_steps),
+        )
+    )
+
+
+def _branch_rejection_reason(
+    base: TransitionEvaluation,
+    samples: Sequence[TransitionEvaluation],
+) -> str:
+    for sample in samples:
+        if _physical_branch_changed(base.active_set, sample.active_set):
+            return PHYSICAL_CONTACT_SWITCH_INVALID
+    return PIECEWISE_BRANCH_SWITCH_INVALID
+
+
+def _same_certificate_for_column(
+    base: TransitionEvaluation,
+    sample: TransitionEvaluation,
+    *,
+    axis: str,
+    index: int,
+    plan: _StencilPlan,
+) -> bool:
+    if sample.active_set == base.active_set:
+        return True
+    # An action-box/previous-action endpoint is a native domain boundary, not
+    # a physical projection kink.  The feasible-side sample necessarily has a
+    # different endpoint label (BOUND_ACTIVE -> INTERIOR), which is allowed as
+    # long as it does not enter the exact slew kink.
+    boundary_coordinate = axis in {"B", "OWNER_ACTION"} or 96 <= index < 111
+    if not boundary_coordinate or plan.classification not in {
+        FORWARD_FEASIBLE_SIDE,
+        BACKWARD_FEASIBLE_SIDE,
+    }:
+        return False
+    if base.active_set.action_branches[index] != ACTION_BRANCH_BOUND_ACTIVE:
+        return False
+    if sample.active_set.action_branches[index] == ACTION_BRANCH_NEAR_KINK:
+        return False
+    base_without_endpoint = replace(
+        base.active_set,
+        action_branches=sample.active_set.action_branches,
+    )
+    return base_without_endpoint == sample.active_set
+
+
 def _column_result(
     *,
     axis: str,
@@ -677,22 +1028,32 @@ def _column_result(
     base: TransitionEvaluation,
     plus: TransitionEvaluation | None,
     minus: TransitionEvaluation | None,
+    samples: Sequence[TransitionEvaluation],
     block: str,
+    plan: _StencilPlan,
     reason: str = "",
 ) -> ColumnQualification:
     plus_digest = None if plus is None else plus.active_set.digest
     minus_digest = None if minus is None else minus.active_set.digest
-    preserved = (
-        plus is not None
-        and minus is not None
-        and plus.active_set == base.active_set
-        and minus.active_set == base.active_set
+    sample_digests = tuple(sample.active_set.digest for sample in samples)
+    preserved = bool(samples) and all(
+        _same_certificate_for_column(
+            base,
+            sample,
+            axis=axis,
+            index=index,
+            plan=plan,
+        )
+        for sample in samples
     )
     if reason:
         valid = False
+    elif not samples:
+        valid = False
+        reason = plan.reason or NATIVE_DOMAIN_INVALID
     elif not preserved:
         valid = False
-        reason = "NONSMOOTH_ACTIVE_SET_CROSSING"
+        reason = _branch_rejection_reason(base, samples)
     else:
         valid = True
         reason = "SMOOTH_FIXED_ACTIVE_SET"
@@ -706,6 +1067,10 @@ def _column_result(
         active_set_preserved=preserved,
         plus_fingerprint_digest=plus_digest,
         minus_fingerprint_digest=minus_digest,
+        stencil=plan.classification,
+        native_domain_legal=plan.native_domain_legal,
+        base_fingerprint_digest=base.active_set.digest,
+        sample_fingerprint_digests=sample_digests,
     )
 
 
@@ -731,11 +1096,11 @@ def linearize_step_5ms(
     action_columns: Sequence[int] | None = None,
     allow_nonsmooth: bool = False,
 ) -> WrappedLinearization:
-    """Finite-difference the exact wrapped transition in the frozen tangent frame.
+    """Finite-difference the exact wrapped transition in a qualified domain.
 
-    Every plus/minus evaluation restores its own snapshot into the same fresh
-    workspace.  Both output perturbations are computed with ``boxminus`` at the
-    single base next-state frame before their centered difference is formed.
+    Only requested columns are sampled.  Every valid sample is expressed in
+    the base next-state tangent frame with canonical ``boxminus``; no raw
+    quaternion subtraction or illegal-domain clipping is permitted.
     """
 
     raw = _finite_vector(raw_action, ACTION_DIM, "raw action")
@@ -751,12 +1116,7 @@ def linearize_step_5ms(
         raise DerivativeDomainError("duplicate derivative column index")
 
     work = _workspace(plant)
-    base = evaluate_wrapped_step_5ms(
-        plant=plant,
-        snapshot=base_snapshot,
-        raw_action=raw,
-        workspace=work,
-    )
+    base = evaluate_wrapped_step_5ms(plant=plant, snapshot=base_snapshot, raw_action=raw, workspace=work)
     base_next = base.next_snapshot
     A = np.full((TANGENT_DIMENSION, TANGENT_DIMENSION), np.nan, dtype=np.float64)
     B = np.full((TANGENT_DIMENSION, ACTION_DIM), np.nan, dtype=np.float64)
@@ -765,100 +1125,125 @@ def linearize_step_5ms(
     action_reports: list[ColumnQualification] = []
     evaluations = 1
 
+    def exception_reason(exc: Exception) -> str:
+        message = str(exc).lower()
+        if "nan" in message or "inf" in message or "finite" in message:
+            return NONFINITE_EVALUATION
+        if isinstance(exc, (ValueError, RuntimeError)):
+            return MANIFOLD_INVALID
+        return f"PERTURBATION_REJECTED:{type(exc).__name__}"
+
     for index in state_indexes:
         h = float(step_vector[index])
-        block = _STATE_BLOCK_FOR_INDEX[index]
-        delta = np.zeros(TANGENT_DIMENSION, dtype=np.float64)
-        delta[index] = h
-        plus_eval: TransitionEvaluation | None = None
-        minus_eval: TransitionEvaluation | None = None
-        reason = ""
-        try:
-            plus_snapshot = boxplus(base_snapshot, delta, model=plant.model)
-            minus_snapshot = boxplus(base_snapshot, -delta, model=plant.model)
-            plus_eval = evaluate_wrapped_step_5ms(
-                plant=plant, snapshot=plus_snapshot, raw_action=raw, workspace=work
-            )
-            minus_eval = evaluate_wrapped_step_5ms(
-                plant=plant, snapshot=minus_snapshot, raw_action=raw, workspace=work
-            )
-            evaluations += 2
-        except (DerivativeDomainError, ValueError, drive.DriveModelError) as exc:
-            reason = f"PERTURBATION_REJECTED:{type(exc).__name__}"
+        plan = _state_stencil_plan(base_snapshot, index, h)
+        samples: list[TransitionEvaluation] = []
+        reason = plan.reason
+        offset_to_sample: dict[int, TransitionEvaluation] = {}
+        if plan.valid:
+            for offset in plan.offsets:
+                delta = np.zeros(TANGENT_DIMENSION, dtype=np.float64)
+                delta[index] = float(offset) * h
+                try:
+                    candidate = boxplus(base_snapshot, delta, model=plant.model)
+                    evaluation = evaluate_wrapped_step_5ms(
+                        plant=plant, snapshot=candidate, raw_action=raw, workspace=work
+                    )
+                    samples.append(evaluation)
+                    offset_to_sample[offset] = evaluation
+                    evaluations += 1
+                except (DerivativeDomainError, ValueError, RuntimeError, drive.DriveModelError) as exc:
+                    reason = exception_reason(exc)
+                    break
         report = _column_result(
             axis="A",
             index=index,
             step=h,
             base=base,
-            plus=plus_eval,
-            minus=minus_eval,
-            block=block,
+            plus=offset_to_sample.get(1),
+            minus=offset_to_sample.get(-1),
+            samples=samples,
+            block=_STATE_BLOCK_FOR_INDEX[index],
+            plan=plan,
             reason=reason,
         )
-        state_reports.append(report)
         if report.valid:
-            d_plus = boxminus(plus_eval.next_snapshot, base_next, model=plant.model)
-            d_minus = boxminus(minus_eval.next_snapshot, base_next, model=plant.model)
-            A[:, index] = (d_plus - d_minus) / (2.0 * h)
+            try:
+                deltas = [boxminus(sample.next_snapshot, base_next, model=plant.model) for sample in samples]
+                value = _difference_from_samples(deltas, plan, h)
+                if not np.isfinite(value).all():
+                    raise FloatingPointError("state derivative is non-finite")
+                A[:, index] = value
+            except (DerivativeDomainError, ValueError, RuntimeError, FloatingPointError) as exc:
+                report = replace(report, valid=False, reason=NONFINITE_EVALUATION if isinstance(exc, FloatingPointError) else MANIFOLD_INVALID)
+        state_reports.append(report)
 
     for index in action_indexes:
         h = float(action_step_vector[index])
-        branches = base.active_set.action_branches
-        reason = ""
-        plus_eval = None
-        minus_eval = None
-        if branches[index] in (ACTION_BRANCH_NEAR_KINK, ACTION_BRANCH_BOUND_ACTIVE):
-            reason = f"ACTION_PROJECTION_{branches[index]}"
-        else:
-            plus_action = raw.copy()
-            minus_action = raw.copy()
-            plus_action[index] += h
-            minus_action[index] -= h
-            if np.any(np.abs(plus_action) > _ACTION_BOUND) or np.any(np.abs(minus_action) > _ACTION_BOUND):
-                reason = "ACTION_BOX_BOUND_CROSSED"
-            else:
+        plan = _action_stencil_plan(
+            float(raw[index]),
+            h,
+            previous_value=float(base_snapshot.previous_accepted_action[index]),
+        )
+        samples = []
+        reason = plan.reason
+        offset_to_sample = {}
+        if not reason and base.active_set.action_branches[index] == ACTION_BRANCH_NEAR_KINK:
+            reason = PIECEWISE_BRANCH_SWITCH_INVALID
+        if plan.valid and not reason:
+            for offset in plan.offsets:
+                candidate_action = raw.copy()
+                candidate_action[index] += float(offset) * h
                 try:
-                    plus_eval = evaluate_wrapped_step_5ms(
-                        plant=plant, snapshot=base_snapshot, raw_action=plus_action, workspace=work
+                    evaluation = evaluate_wrapped_step_5ms(
+                        plant=plant,
+                        snapshot=base_snapshot,
+                        raw_action=candidate_action,
+                        workspace=work,
                     )
-                    minus_eval = evaluate_wrapped_step_5ms(
-                        plant=plant, snapshot=base_snapshot, raw_action=minus_action, workspace=work
-                    )
-                    evaluations += 2
-                except (DerivativeDomainError, ValueError, drive.DriveModelError) as exc:
-                    reason = f"PERTURBATION_REJECTED:{type(exc).__name__}"
+                    samples.append(evaluation)
+                    offset_to_sample[offset] = evaluation
+                    evaluations += 1
+                except (DerivativeDomainError, ValueError, RuntimeError, drive.DriveModelError) as exc:
+                    reason = exception_reason(exc)
+                    break
         report = _column_result(
             axis="B",
             index=index,
             step=h,
             base=base,
-            plus=plus_eval,
-            minus=minus_eval,
+            plus=offset_to_sample.get(1),
+            minus=offset_to_sample.get(-1),
+            samples=samples,
             block="raw_action",
+            plan=plan,
             reason=reason,
         )
-        action_reports.append(report)
         if report.valid:
-            d_plus = boxminus(plus_eval.next_snapshot, base_next, model=plant.model)
-            d_minus = boxminus(minus_eval.next_snapshot, base_next, model=plant.model)
-            B[:, index] = (d_plus - d_minus) / (2.0 * h)
-
-    for index in action_indexes:
-        h = float(action_step_vector[index])
-        if base.active_set.action_branches[index] in (
-            ACTION_BRANCH_NEAR_KINK,
-            ACTION_BRANCH_BOUND_ACTIVE,
-        ):
-            continue
-        plus_action = raw.copy()
-        minus_action = raw.copy()
-        plus_action[index] += h
-        minus_action[index] -= h
-        if np.any(np.abs(plus_action) > _ACTION_BOUND) or np.any(np.abs(minus_action) > _ACTION_BOUND):
-            continue
-        plus_accepted = project_accepted_action(base_snapshot.previous_accepted_action, plus_action)
-        minus_accepted = project_accepted_action(base_snapshot.previous_accepted_action, minus_action)
-        P[:, index] = (plus_accepted - minus_accepted) / (2.0 * h)
+            try:
+                deltas = [boxminus(sample.next_snapshot, base_next, model=plant.model) for sample in samples]
+                value = _difference_from_samples(deltas, plan, h)
+                if not np.isfinite(value).all():
+                    raise FloatingPointError("action derivative is non-finite")
+                B[:, index] = value
+                accepted_values = [
+                    project_accepted_action(
+                        base_snapshot.previous_accepted_action,
+                        np.asarray(raw + np.eye(ACTION_DIM, dtype=np.float64)[index] * (float(offset) * h)),
+                    )
+                    for offset in plan.offsets
+                ]
+                accepted_base = project_accepted_action(
+                    base_snapshot.previous_accepted_action,
+                    raw,
+                )
+                P[:, index] = _difference_from_samples(
+                    [value - accepted_base for value in accepted_values],
+                    plan,
+                    h,
+                )
+            except (DerivativeDomainError, ValueError, RuntimeError, FloatingPointError) as exc:
+                report = replace(report, valid=False, reason=NONFINITE_EVALUATION if isinstance(exc, FloatingPointError) else MANIFOLD_INVALID)
+        action_reports.append(report)
 
     _raise_invalid_columns((*state_reports, *action_reports), allow_nonsmooth=allow_nonsmooth)
     selected_state_finite = all(np.isfinite(A[:, index]).all() for index in state_indexes)
@@ -866,23 +1251,18 @@ def linearize_step_5ms(
     if not allow_nonsmooth and not (selected_state_finite and selected_action_finite):
         raise DerivativeDomainError("qualified wrapped derivative contains NaN or Inf")
 
-    A = _readonly_array(A)
-    B = _readonly_array(B)
-    P = _readonly_array(P)
     state_validity_values = np.zeros(TANGENT_DIMENSION, dtype=bool)
     for report in state_reports:
         state_validity_values[report.index] = report.valid
     action_validity_values = np.zeros(ACTION_DIM, dtype=bool)
     for report in action_reports:
         action_validity_values[report.index] = report.valid
-    state_validity = _readonly_array(state_validity_values, dtype=bool)
-    action_validity = _readonly_array(action_validity_values, dtype=bool)
     return WrappedLinearization(
-        A=A,
-        B=B,
-        accepted_action_jacobian=P,
-        state_validity=state_validity,
-        action_validity=action_validity,
+        A=_readonly_array(A),
+        B=_readonly_array(B),
+        accepted_action_jacobian=_readonly_array(P),
+        state_validity=_readonly_array(state_validity_values, dtype=bool),
+        action_validity=_readonly_array(action_validity_values, dtype=bool),
         state_columns=tuple(state_reports),
         action_columns=tuple(action_reports),
         base_snapshot_digest=base.snapshot_digest,
@@ -957,102 +1337,114 @@ def differentiate_owner_output(
     action_reports: list[ColumnQualification] = []
     evaluations = 1
 
+    def exception_reason(exc: Exception) -> str:
+        message = str(exc).lower()
+        if "nan" in message or "inf" in message or "finite" in message:
+            return NONFINITE_EVALUATION
+        if isinstance(exc, (ValueError, RuntimeError)):
+            return MANIFOLD_INVALID
+        return f"PERTURBATION_REJECTED:{type(exc).__name__}"
+
     for index in state_indexes:
         h = float(step_vector[index])
-        delta = np.zeros(TANGENT_DIMENSION, dtype=np.float64)
-        delta[index] = h
-        plus_eval: TransitionEvaluation | None = None
-        minus_eval: TransitionEvaluation | None = None
-        reason = ""
-        try:
-            plus_snapshot = boxplus(base_snapshot, delta, model=plant.model)
-            minus_snapshot = boxplus(base_snapshot, -delta, model=plant.model)
-            plus_eval = evaluate_wrapped_step_5ms(
-                plant=plant,
-                snapshot=plus_snapshot,
-                raw_action=raw,
-                workspace=work,
-                owner_ids=(owner_id,),
-            )
-            minus_eval = evaluate_wrapped_step_5ms(
-                plant=plant,
-                snapshot=minus_snapshot,
-                raw_action=raw,
-                workspace=work,
-                owner_ids=(owner_id,),
-            )
-            evaluations += 2
-        except (DerivativeDomainError, ValueError, drive.DriveModelError) as exc:
-            reason = f"PERTURBATION_REJECTED:{type(exc).__name__}"
+        plan = _state_stencil_plan(base_snapshot, index, h)
+        samples: list[TransitionEvaluation] = []
+        offset_to_sample: dict[int, TransitionEvaluation] = {}
+        reason = plan.reason
+        if plan.valid:
+            for offset in plan.offsets:
+                delta = np.zeros(TANGENT_DIMENSION, dtype=np.float64)
+                delta[index] = float(offset) * h
+                try:
+                    candidate = boxplus(base_snapshot, delta, model=plant.model)
+                    evaluation = evaluate_wrapped_step_5ms(
+                        plant=plant,
+                        snapshot=candidate,
+                        raw_action=raw,
+                        workspace=work,
+                        owner_ids=(owner_id,),
+                    )
+                    samples.append(evaluation)
+                    offset_to_sample[offset] = evaluation
+                    evaluations += 1
+                except (DerivativeDomainError, ValueError, RuntimeError, drive.DriveModelError) as exc:
+                    reason = exception_reason(exc)
+                    break
         report = _column_result(
             axis="OWNER_STATE",
             index=index,
             step=h,
             base=base,
-            plus=plus_eval,
-            minus=minus_eval,
+            plus=offset_to_sample.get(1),
+            minus=offset_to_sample.get(-1),
+            samples=samples,
             block=_STATE_BLOCK_FOR_INDEX[index],
+            plan=plan,
             reason=reason,
         )
-        state_reports.append(report)
         if report.valid:
-            state_jacobian[:, index] = (
-                np.asarray(plus_eval.owner_outputs[owner_id])
-                - np.asarray(minus_eval.owner_outputs[owner_id])
-            ) / (2.0 * h)
+            try:
+                values = [np.asarray(sample.owner_outputs[owner_id]) - base_value for sample in samples]
+                value = _difference_from_samples(values, plan, h)
+                if not np.isfinite(value).all():
+                    raise FloatingPointError("owner state derivative is non-finite")
+                state_jacobian[:, index] = value
+            except (DerivativeDomainError, ValueError, RuntimeError, FloatingPointError) as exc:
+                report = replace(report, valid=False, reason=NONFINITE_EVALUATION if isinstance(exc, FloatingPointError) else MANIFOLD_INVALID)
+        state_reports.append(report)
 
     for index in action_indexes:
         h = float(action_step_vector[index])
-        reason = ""
-        plus_eval = None
-        minus_eval = None
-        if base.active_set.action_branches[index] in (
-            ACTION_BRANCH_NEAR_KINK,
-            ACTION_BRANCH_BOUND_ACTIVE,
-        ):
-            reason = f"ACTION_PROJECTION_{base.active_set.action_branches[index]}"
-        else:
-            plus_action = raw.copy()
-            minus_action = raw.copy()
-            plus_action[index] += h
-            minus_action[index] -= h
-            if np.any(np.abs(plus_action) > _ACTION_BOUND) or np.any(np.abs(minus_action) > _ACTION_BOUND):
-                reason = "ACTION_BOX_BOUND_CROSSED"
-            else:
+        plan = _action_stencil_plan(
+            float(raw[index]),
+            h,
+            previous_value=float(base_snapshot.previous_accepted_action[index]),
+        )
+        samples = []
+        offset_to_sample = {}
+        reason = plan.reason
+        if not reason and base.active_set.action_branches[index] == ACTION_BRANCH_NEAR_KINK:
+            reason = PIECEWISE_BRANCH_SWITCH_INVALID
+        if plan.valid and not reason:
+            for offset in plan.offsets:
+                candidate_action = raw.copy()
+                candidate_action[index] += float(offset) * h
                 try:
-                    plus_eval = evaluate_wrapped_step_5ms(
+                    evaluation = evaluate_wrapped_step_5ms(
                         plant=plant,
                         snapshot=base_snapshot,
-                        raw_action=plus_action,
+                        raw_action=candidate_action,
                         workspace=work,
                         owner_ids=(owner_id,),
                     )
-                    minus_eval = evaluate_wrapped_step_5ms(
-                        plant=plant,
-                        snapshot=base_snapshot,
-                        raw_action=minus_action,
-                        workspace=work,
-                        owner_ids=(owner_id,),
-                    )
-                    evaluations += 2
-                except (DerivativeDomainError, ValueError, drive.DriveModelError) as exc:
-                    reason = f"PERTURBATION_REJECTED:{type(exc).__name__}"
+                    samples.append(evaluation)
+                    offset_to_sample[offset] = evaluation
+                    evaluations += 1
+                except (DerivativeDomainError, ValueError, RuntimeError, drive.DriveModelError) as exc:
+                    reason = exception_reason(exc)
+                    break
         report = _column_result(
             axis="OWNER_ACTION",
             index=index,
             step=h,
             base=base,
-            plus=plus_eval,
-            minus=minus_eval,
+            plus=offset_to_sample.get(1),
+            minus=offset_to_sample.get(-1),
+            samples=samples,
             block="raw_action",
+            plan=plan,
             reason=reason,
         )
-        action_reports.append(report)
         if report.valid:
-            action_jacobian[:, index] = (
-                np.asarray(plus_eval.owner_outputs[owner_id])
-                - np.asarray(minus_eval.owner_outputs[owner_id])
-            ) / (2.0 * h)
+            try:
+                values = [np.asarray(sample.owner_outputs[owner_id]) - base_value for sample in samples]
+                value = _difference_from_samples(values, plan, h)
+                if not np.isfinite(value).all():
+                    raise FloatingPointError("owner action derivative is non-finite")
+                action_jacobian[:, index] = value
+            except (DerivativeDomainError, ValueError, RuntimeError, FloatingPointError) as exc:
+                report = replace(report, valid=False, reason=NONFINITE_EVALUATION if isinstance(exc, FloatingPointError) else MANIFOLD_INVALID)
+        action_reports.append(report)
 
     _raise_invalid_columns((*state_reports, *action_reports), allow_nonsmooth=allow_nonsmooth)
     selected_state_finite = all(
@@ -1092,10 +1484,20 @@ __all__ = [
     "ACTION_BRANCH_INTERIOR",
     "ACTION_BRANCH_NEAR_KINK",
     "ACTION_BRANCH_SLEW_ACTIVE",
+    "BACKWARD_FEASIBLE_SIDE",
+    "CENTRAL_INTERIOR",
     "ActiveSetFingerprint",
     "CENTRAL_DIFFERENCE_SCHEME",
     "CONSTRAINT_CATALOG_ID",
     "DERIVATIVE_API_VERSION",
+    "FIXED_ELIMINATED",
+    "FORWARD_FEASIBLE_SIDE",
+    "MANIFOLD_INVALID",
+    "NATIVE_DOMAIN_INVALID",
+    "NONFINITE_EVALUATION",
+    "NUMERICAL_CERTIFICATE_ONLY",
+    "PHYSICAL_CONTACT_SWITCH_INVALID",
+    "PIECEWISE_BRANCH_SWITCH_INVALID",
     "QACC_DERIVATIVE_MATERIAL_BUT_UNIDENTIFIABLE",
     "QACC_DERIVATIVE_NUMERICALLY_NULL",
     "QACC_DERIVATIVE_PRIOR_GATE_DEFECT",
@@ -1108,6 +1510,7 @@ __all__ = [
     "SNAPSHOT_SCHEMA_ID",
     "STATE_STEP_BLOCKS",
     "TANGENT_LAYOUT_ID",
+    "TRUE_KINK_INVALID",
     "TransitionEvaluation",
     "WrappedLinearization",
     "classify_action_projection",

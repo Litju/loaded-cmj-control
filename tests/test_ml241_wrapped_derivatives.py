@@ -140,7 +140,7 @@ def test_kink_is_rejected_instead_of_averaged():
             state_columns=[],
             action_columns=[0],
         )
-    assert error.value.reports[0].reason == "ACTION_PROJECTION_NEAR_KINK"
+    assert error.value.reports[0].reason == "PIECEWISE_BRANCH_SWITCH_INVALID"
 
 
 def test_contact_changing_state_column_is_rejected():
@@ -155,7 +155,7 @@ def test_contact_changing_state_column_is_rejected():
             state_columns=[3],
             action_columns=[],
         )
-    assert error.value.reports[0].reason == "NONSMOOTH_ACTIVE_SET_CROSSING"
+    assert error.value.reports[0].reason == "PHYSICAL_CONTACT_SWITCH_INVALID"
 
 
 def test_previous_action_tangent_column_is_checked_against_slew_active_set():
