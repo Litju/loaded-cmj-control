@@ -128,7 +128,7 @@ def _reference_problem(fixture: Any, horizon: int, **kwargs: Any) -> tuple[Direc
 
 def _zero(problem: DirectMultipleShootingProblem, actions: tuple[np.ndarray, ...]) -> np.ndarray:
     return problem.pack_decision(
-        [np.zeros(STATE_DIMENSION, dtype=np.float64) for _ in range(problem.horizon + 1)],
+        [np.zeros(STATE_DIMENSION, dtype=np.float64) for _ in range(problem.horizon)],
         actions,
     )
 
@@ -330,7 +330,7 @@ def _assembled_jacobian_checks(fixture: Any) -> dict[str, Any]:
     cases: dict[str, dict[str, Any]] = {}
 
     direction = np.zeros(problem.variable_count, dtype=np.float64)
-    direction[problem.state_slice(0).start + 30] = 1.0
+    direction[problem.state_slice(1).start + 30] = 1.0
     cases["CASE_A_zero_defect_supported"] = _directional_case(problem, actions, direction)
 
     shift = np.zeros(problem.variable_count, dtype=np.float64)
@@ -342,7 +342,7 @@ def _assembled_jacobian_checks(fixture: Any) -> dict[str, Any]:
     )
 
     direction = np.zeros(problem.variable_count, dtype=np.float64)
-    direction[problem.state_slice(0).start + 33] = 1.0
+    direction[problem.state_slice(1).start + 33] = 1.0
     direction[problem.action_slice(0).start + 2] = 0.25
     cases["CASE_C_state_action_composite"] = _directional_case(problem, actions, direction)
 
@@ -493,7 +493,7 @@ def _structure_records(problem: DirectMultipleShootingProblem) -> tuple[dict[str
         "dynamics_rows": problem.dynamics_row_count,
         "rows": rows,
         "cols": cols,
-        "ordering": "interval, component, dense current-state/action/next-state blocks",
+        "ordering": "interval, component, interval-zero action/next-state then current-state/action/next-state blocks",
         "hash": problem.jacobian_structure_hash(),
     }
     diagnostics = {
@@ -639,8 +639,8 @@ def _main() -> Path:
     _write_json(evidence / "20_DECISION_LAYOUT.json", {
         "schema_id": TRANSCRIPTION_SCHEMA_ID,
         "layouts": [problems[h][0].decision_layout_record() for h in (1, 5, 10, 40)],
-        "N1_base_decision_variables": 279,
-        "N40_base_decision_variables": 6012,
+        "N1_base_decision_variables": 147,
+        "N40_base_decision_variables": 5880,
     })
     _write_json(evidence / "21_DEFECT_ROW_LAYOUT.json", {
         "schema_id": TRANSCRIPTION_SCHEMA_ID,
@@ -667,10 +667,10 @@ def _main() -> Path:
 
     _write(evidence / "40_HORIZON_SCALING_REPORT.md", "\n".join([
         "HORIZONS=1,5,10,40",
-        "N=1 BASE_VARIABLES=279 DYNAMICS_ROWS=132",
-        "N=5 BASE_VARIABLES=1539 DYNAMICS_ROWS=660",
-        "N=10 BASE_VARIABLES=2859 DYNAMICS_ROWS=1320",
-        "N=40 BASE_VARIABLES=6012 DYNAMICS_ROWS=5280",
+        "N=1 BASE_VARIABLES=147 DYNAMICS_ROWS=132",
+        "N=5 BASE_VARIABLES=735 DYNAMICS_ROWS=660",
+        "N=10 BASE_VARIABLES=1470 DYNAMICS_ROWS=1320",
+        "N=40 BASE_VARIABLES=5880 DYNAMICS_ROWS=5280",
         "No solver, GPU, SciPy, cyipopt, or Ipopt was used.",
     ]))
     _write(evidence / "41_NUMERICAL_STATE_PROPAGATION.md", "PASS\nCache SO3 state (tangent 21:30) and qacc warmstart (111:132) are reconstructed in MacroSnapshot and advanced only by step_5ms. Their next-knot rows/columns remain in the defect structure.")
@@ -703,8 +703,8 @@ def _main() -> Path:
             item["sha256"] for item in _substrate_hash_records() if item["path"].endswith("oracle/derivatives.py")
         ),
         "ml241_noise_contract_id": ML241_NOISE_ID,
-        "decision_ordering": "delta_x[0],u[0],...,delta_x[N-1],u[N-1],delta_x[N],slack_suffix",
-        "N40_base_decision_variables": 6012,
+        "decision_ordering": "u_active[0],delta_x[1],...,u_active[N-1],delta_x[N],slack_suffix",
+        "N40_base_decision_variables": 5880,
         "N40_dynamics_rows": 5280,
         "N40_jacobian_nnz": int(structure["cols"].__len__()),
         "sparsity_pattern_sha256": structure["hash"],
@@ -758,13 +758,13 @@ def _main() -> Path:
         f"ML242_FREEZE_ID={freeze_id}",
         "STATE_DIMENSION=132",
         "ACTION_DIMENSION=15",
-        "DECISION_ORDERING=delta_x[0],u[0],...,delta_x[N-1],u[N-1],delta_x[N],slack_suffix",
-        "N1_BASE_DECISION_VARIABLES=279",
+        "DECISION_ORDERING=u_active[0],delta_x[1],...,u_active[N-1],delta_x[N],slack_suffix",
+        "N1_BASE_DECISION_VARIABLES=147",
         "N1_DYNAMICS_ROWS=132",
-        "N40_BASE_DECISION_VARIABLES=6012",
+        "N40_BASE_DECISION_VARIABLES=5880",
         "N40_DYNAMICS_ROWS=5280",
         f"ELASTIC_SLACK_COUNT_N40=0 (schema-dependent; active N1 fixture bindings={len(schema['active_elastic_bindings'])})",
-        "TOTAL_VARIABLES_N40=6012",
+        "TOTAL_VARIABLES_N40=5880",
         "TOTAL_CONSTRAINT_ROWS_N40=5280",
         "PACK_UNPACK=PASS",
         "REFERENCE_TIME_SCHEDULE=PASS",

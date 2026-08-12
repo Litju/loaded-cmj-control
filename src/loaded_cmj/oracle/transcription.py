@@ -32,6 +32,7 @@ from loaded_cmj.simulation.constants import ACTION_DIM, CONTROL_PERIOD_S
 from loaded_cmj.simulation.plant import Plant
 from loaded_cmj.simulation.snapshot import MacroSnapshot, SNAPSHOT_SCHEMA_VERSION
 from loaded_cmj.simulation.tangent import (
+    PREVIOUS_ACTION_SLICE,
     TANGENT_DIMENSION,
     boxminus,
     boxplus,
@@ -43,6 +44,26 @@ TRANSCRIPTION_SCHEMA_ID = "LCMJ-V1-SP-SDDT-TRANSCRIPTION-1.0.0"
 STATE_DIMENSION = TANGENT_DIMENSION
 CONTROL_DT_S = CONTROL_PERIOD_S
 ACTION_DIMENSION = ACTION_DIM
+FULL_LAYOUT = "FULL_LAYOUT"
+WITNESS_LAYOUT = "WITNESS_LAYOUT"
+FULL_ACTIVE_ACTION_INDICES = tuple(range(ACTION_DIMENSION))
+WITNESS_FREE_ACTION_INDICES = (0, 3, 6, 9, 10, 11, 12)
+WITNESS_FIXED_ACTION_INDICES = tuple(
+    index for index in FULL_ACTIVE_ACTION_INDICES if index not in WITNESS_FREE_ACTION_INDICES
+)
+WITNESS_FIXED_ACTION_VALUES = tuple((index, 0.0) for index in WITNESS_FIXED_ACTION_INDICES)
+
+# These are the native Euclidean coordinates owned by the DriveState/snapshot
+# contract.  Configuration, cached SO(3), velocities, and qacc remain
+# manifold-, cache-, or owner-defined and therefore receive no invented box.
+A_PLUS_TANGENT_SLICE = slice(51, 66)
+A_MINUS_TANGENT_SLICE = slice(66, 81)
+PREVIOUS_ACCEPTED_ACTION_TANGENT_SLICE = PREVIOUS_ACTION_SLICE
+_NATIVE_EUCLIDEAN_STATE_DOMAINS = (
+    ("a_plus", A_PLUS_TANGENT_SLICE, 0.0, 1.0),
+    ("a_minus", A_MINUS_TANGENT_SLICE, 0.0, 1.0),
+    ("previous_accepted_action", PREVIOUS_ACCEPTED_ACTION_TANGENT_SLICE, -1.0, 1.0),
+)
 QACC_ZERO_COLUMNS = tuple(range(111, 132))
 QACC_DERIVATIVE_DISPOSITION = QACC_DERIVATIVE_NUMERICALLY_NULL
 QACC_ERROR_BOUNDS = MappingProxyType(
@@ -166,18 +187,54 @@ class ConstraintRow:
 
 @dataclass(frozen=True, slots=True)
 class DecisionLayout:
-    """Frozen state/action/slack decision-vector slices."""
+    """Frozen state/action/slack decision-vector slices.
+
+    Knot zero is an exact fixed parameter supplied by the problem owner.  The
+    first decision block is therefore the active raw action for interval zero,
+    followed by the decision state at knot one.  ``active_action_indices`` and
+    ``fixed_action_values`` are the sole owner of full-versus-witness action
+    reconstruction.
+    """
 
     horizon: int
     state_dimension: int = STATE_DIMENSION
     action_dimension: int = ACTION_DIMENSION
     slack_specs: tuple[SlackSpec, ...] = ()
+    active_action_indices: tuple[int, ...] = FULL_ACTIVE_ACTION_INDICES
+    fixed_action_values: tuple[tuple[int, float], ...] = ()
+    layout_id: str = FULL_LAYOUT
 
     def __post_init__(self) -> None:
         if int(self.horizon) < 1:
             raise TranscriptionError("horizon must be a positive interval count")
         if (self.state_dimension, self.action_dimension) != (132, 15):
             raise TranscriptionError("state/action dimensions are not the frozen V1 dimensions")
+        active = tuple(int(index) for index in self.active_action_indices)
+        if not active or len(set(active)) != len(active) or tuple(sorted(active)) != active:
+            raise TranscriptionError("active action indices must be a nonempty sorted tuple")
+        if any(index < 0 or index >= self.action_dimension for index in active):
+            raise TranscriptionError("active action index is outside the raw action domain")
+        if self.layout_id not in {FULL_LAYOUT, WITNESS_LAYOUT}:
+            raise TranscriptionError(f"unknown decision layout {self.layout_id!r}")
+        expected_fixed = tuple(
+            index for index in range(self.action_dimension) if index not in active
+        )
+        fixed = tuple((int(index), float(value)) for index, value in self.fixed_action_values)
+        if not fixed and expected_fixed:
+            fixed = tuple((index, 0.0) for index in expected_fixed)
+        if tuple(index for index, _ in fixed) != expected_fixed:
+            raise TranscriptionError("fixed action values do not cover the eliminated channels")
+        if any(
+            not np.isfinite(value) or abs(value) > 1.0
+            for _, value in fixed
+        ):
+            raise TranscriptionError("fixed raw action values must be finite and lie in [-1, 1]")
+        if self.layout_id == FULL_LAYOUT and active != FULL_ACTIVE_ACTION_INDICES:
+            raise TranscriptionError("FULL_LAYOUT must expose all raw action channels")
+        if self.layout_id == WITNESS_LAYOUT and active != WITNESS_FREE_ACTION_INDICES:
+            raise TranscriptionError("WITNESS_LAYOUT must expose the authorized seven channels")
+        object.__setattr__(self, "active_action_indices", active)
+        object.__setattr__(self, "fixed_action_values", fixed)
         if any(not slack.nonnegative for slack in self.slack_specs):
             raise TranscriptionError("all approved elastic slacks must be nonnegative")
         expected = self.base_dimension
@@ -188,7 +245,15 @@ class DecisionLayout:
 
     @property
     def base_dimension(self) -> int:
-        return (self.horizon + 1) * self.state_dimension + self.horizon * self.action_dimension
+        return self.horizon * (self.state_dimension + self.active_action_dimension)
+
+    @property
+    def active_action_dimension(self) -> int:
+        return len(self.active_action_indices)
+
+    @property
+    def state_knot_indices(self) -> tuple[int, ...]:
+        return tuple(range(1, self.horizon + 1))
 
     @property
     def total_dimension(self) -> int:
@@ -196,13 +261,34 @@ class DecisionLayout:
 
     def state_slice(self, knot_index: int) -> slice:
         k = _index(knot_index, self.horizon + 1, "state knot")
-        start = k * (self.state_dimension + self.action_dimension)
+        if k == 0:
+            raise TranscriptionError("knot zero is the fixed initial-state parameter, not a decision")
+        start = (k - 1) * (self.state_dimension + self.active_action_dimension)
+        start += self.active_action_dimension
         return slice(start, start + self.state_dimension)
 
     def action_slice(self, interval_index: int) -> slice:
         k = _index(interval_index, self.horizon, "action interval")
-        start = k * (self.state_dimension + self.action_dimension) + self.state_dimension
-        return slice(start, start + self.action_dimension)
+        start = k * (self.state_dimension + self.active_action_dimension)
+        return slice(start, start + self.active_action_dimension)
+
+    def reconstruct_action(
+        self, active_action: Sequence[float] | np.ndarray
+    ) -> np.ndarray:
+        """Insert active controls into one exact 15-D raw Plant action."""
+
+        active = _validate_vector(
+            active_action, self.active_action_dimension, "active raw action"
+        )
+        result = np.empty(self.action_dimension, dtype=np.float64)
+        result[:] = np.nan
+        for position, index in enumerate(self.active_action_indices):
+            result[index] = active[position]
+        for index, value in self.fixed_action_values:
+            result[index] = value
+        if not np.isfinite(result).all():
+            raise TranscriptionError("action reconstruction left an unassigned channel")
+        return result
 
     def slack_slice(self, slack_index: int | SlackSpec) -> slice:
         if isinstance(slack_index, SlackSpec):
@@ -219,21 +305,22 @@ class DecisionLayout:
         actions: Sequence[np.ndarray],
         slacks: Sequence[float] = (),
     ) -> np.ndarray:
-        states = _validate_matrix_sequence(state_deltas, self.horizon + 1, STATE_DIMENSION, "state deltas")
-        commands = _validate_matrix_sequence(actions, self.horizon, ACTION_DIMENSION, "raw actions")
+        states = _validate_matrix_sequence(state_deltas, self.horizon, STATE_DIMENSION, "state deltas x[1:N]")
+        commands = _validate_matrix_sequence(
+            actions, self.horizon, self.active_action_dimension, "active raw actions"
+        )
         slack_values = _validate_slacks(slacks, len(self.slack_specs))
         result = np.empty(self.total_dimension, dtype=np.float64)
         for k in range(self.horizon):
-            result[self.state_slice(k)] = states[k]
             result[self.action_slice(k)] = commands[k]
-        result[self.state_slice(self.horizon)] = states[-1]
+            result[self.state_slice(k + 1)] = states[k]
         if slack_values.size:
             result[self.base_dimension:] = slack_values
         return result
 
     def unpack_decision(self, z: Sequence[float] | np.ndarray) -> "UnpackedDecision":
         value = _validate_vector(z, self.total_dimension, "decision vector")
-        states = tuple(value[self.state_slice(k)].copy() for k in range(self.horizon + 1))
+        states = tuple(value[self.state_slice(k)].copy() for k in self.state_knot_indices)
         actions = tuple(value[self.action_slice(k)].copy() for k in range(self.horizon))
         slacks = value[self.base_dimension:].copy()
         return UnpackedDecision(states=states, actions=actions, slacks=slacks)
@@ -503,13 +590,19 @@ class DirectMultipleShootingProblem:
         fixed_initial_state: bool = True,
         include_elastic_slacks: bool = False,
         derivative_provider: DerivativeProvider | None = None,
+        action_layout: str = FULL_LAYOUT,
     ) -> None:
+        if not fixed_initial_state:
+            raise TranscriptionError("ML242 requires the authoritative initial state as a fixed parameter")
+        if action_layout not in {FULL_LAYOUT, WITNESS_LAYOUT}:
+            raise TranscriptionError(f"unknown action layout {action_layout!r}")
         self.plant = plant
         self.control_dt = float(control_dt)
         self.catalog = catalog
-        self.fixed_initial_state = bool(fixed_initial_state)
+        self.fixed_initial_state = True
         self.include_elastic_slacks = bool(include_elastic_slacks)
         self.derivative_provider = derivative_provider
+        self.action_layout = action_layout
         self.reference_snapshots = tuple(reference_snapshots)
         self.horizon = len(self.reference_snapshots) - 1
         self.segments = tuple(segments)
@@ -521,8 +614,29 @@ class DirectMultipleShootingProblem:
         )
         self._validate_schedule()
         self._validate_metadata()
+        active_action_indices = (
+            FULL_ACTIVE_ACTION_INDICES
+            if action_layout == FULL_LAYOUT
+            else WITNESS_FREE_ACTION_INDICES
+        )
+        fixed_action_values = (
+            () if action_layout == FULL_LAYOUT else WITNESS_FIXED_ACTION_VALUES
+        )
+        self.layout = DecisionLayout(
+            self.horizon,
+            slack_specs=(),
+            active_action_indices=active_action_indices,
+            fixed_action_values=fixed_action_values,
+            layout_id=action_layout,
+        )
         self._elastic_bindings = self._build_elastic_bindings()
-        self.layout = DecisionLayout(self.horizon, slack_specs=self._elastic_bindings)
+        self.layout = DecisionLayout(
+            self.horizon,
+            slack_specs=self._elastic_bindings,
+            active_action_indices=active_action_indices,
+            fixed_action_values=fixed_action_values,
+            layout_id=action_layout,
+        )
         self.constraint_rows = self._build_constraint_rows()
         self._sealed = True
 
@@ -541,6 +655,25 @@ class DirectMultipleShootingProblem:
     @property
     def reference_time_schedule(self) -> tuple[float, ...]:
         return self.time_schedule
+
+    @property
+    def initial_state(self) -> MacroSnapshot:
+        """Return the exact authoritative E3 snapshot parameter."""
+
+        return self.reference_snapshots[0]
+
+    @property
+    def active_action_indices(self) -> tuple[int, ...]:
+        return self.layout.active_action_indices
+
+    @property
+    def fixed_action_indices(self) -> tuple[int, ...]:
+        return tuple(index for index, _ in self.layout.fixed_action_values)
+
+    def reconstruct_action(
+        self, active_action: Sequence[float] | np.ndarray
+    ) -> np.ndarray:
+        return self.layout.reconstruct_action(active_action)
 
     @property
     def smooth_nlp_constraint_count(self) -> int:
@@ -589,6 +722,14 @@ class DirectMultipleShootingProblem:
                 raise TranscriptionError(f"reference snapshot {index} has incompatible dimensions")
             if not np.isfinite(snapshot.time):
                 raise TranscriptionError(f"reference snapshot {index} has non-finite time")
+            if np.any(snapshot.a_plus < 0.0) or np.any(snapshot.a_plus > 1.0):
+                raise TranscriptionError(f"reference snapshot {index} has a_plus outside [0, 1]")
+            if np.any(snapshot.a_minus < 0.0) or np.any(snapshot.a_minus > 1.0):
+                raise TranscriptionError(f"reference snapshot {index} has a_minus outside [0, 1]")
+            if np.any(np.abs(snapshot.previous_accepted_action) > 1.0):
+                raise TranscriptionError(
+                    f"reference snapshot {index} has previous_accepted_action outside [-1, 1]"
+                )
 
     def _validate_schedule(self) -> None:
         for index, (snapshot, expected) in enumerate(zip(self.reference_snapshots, self.time_schedule, strict=True)):
@@ -632,7 +773,7 @@ class DirectMultipleShootingProblem:
         # slacks.  The complete ML-240 allowlist remains available as schema
         # metadata, including deferred owner-derived scales.
         bindings: list[SlackSpec] = []
-        next_index = self.horizon * (STATE_DIMENSION + ACTION_DIMENSION) + STATE_DIMENSION
+        next_index = self.layout.base_dimension
         for spec in self.catalog.specs:
             if spec.constraint_id not in APPROVED_ELASTIC_CONSTRAINT_IDS:
                 continue
@@ -673,6 +814,8 @@ class DirectMultipleShootingProblem:
         return ()
 
     def _support_for_spec(self, spec: ConstraintSpec, index: int) -> tuple[tuple[str, int], ...]:
+        if spec.classification == "HARD_TERMINAL":
+            return (("state", index),)
         if spec.evaluation_domain == "state":
             return (("state", index),)
         if spec.evaluation_domain == "transition":
@@ -774,6 +917,8 @@ class DirectMultipleShootingProblem:
         return self.layout.unpack_decision(z)
 
     def _reconstruct_state(self, knot: int, delta: np.ndarray) -> MacroSnapshot:
+        if knot == 0:
+            raise TranscriptionError("knot zero is supplied as the exact initial-state parameter")
         try:
             return boxplus(self.reference_snapshots[knot], delta, model=self.plant.model)
         except (ValueError, RuntimeError) as exc:
@@ -790,15 +935,20 @@ class DirectMultipleShootingProblem:
     def interval_evaluation(self, z: Sequence[float] | np.ndarray, interval: int) -> IntervalEvaluation:
         k = _index(interval, self.horizon, "dynamics interval")
         decision = self.unpack_decision(z)
-        state = self._reconstruct_state(k, decision.states[k])
-        next_state = self._reconstruct_state(k + 1, decision.states[k + 1])
-        predicted = self._propagate(state, decision.actions[k])
+        state = (
+            self.initial_state
+            if k == 0
+            else self._reconstruct_state(k, decision.states[k - 1])
+        )
+        next_state = self._reconstruct_state(k + 1, decision.states[k])
+        raw_action = self.layout.reconstruct_action(decision.actions[k])
+        predicted = self._propagate(state, raw_action)
         defect = boxminus(next_state, predicted, model=self.plant.model)
         return IntervalEvaluation(
             state=state,
             next_state=next_state,
             predicted_state=predicted,
-            raw_action=decision.actions[k].copy(),
+            raw_action=raw_action,
             predicted_time_advance_s=float(predicted.time - state.time),
             defect=defect,
         )
@@ -840,17 +990,23 @@ class DirectMultipleShootingProblem:
                 raw_action=action,
                 state_steps=ML241_STATE_STEPS,
                 action_steps=ML241_ACTION_STEP,
+                action_columns=self.layout.active_action_indices,
             )
         except Exception as exc:
             if isinstance(exc, DerivativeContractError):
                 raise
             raise DerivativeContractError("ML-241 ordinary local derivative assembly was rejected") from exc
-        self._validate_derivative_metadata(result, state, action)
+        self._validate_derivative_metadata(
+            result, state, action, self.layout.active_action_indices
+        )
         return result
 
     @staticmethod
     def _validate_derivative_metadata(
-        result: WrappedLinearization, state: MacroSnapshot, action: np.ndarray
+        result: WrappedLinearization,
+        state: MacroSnapshot,
+        action: np.ndarray,
+        active_action_indices: Sequence[int],
     ) -> None:
         if result.A.shape != (STATE_DIMENSION, STATE_DIMENSION) or result.B.shape != (STATE_DIMENSION, ACTION_DIMENSION):
             raise DerivativeContractError("ML-241 A/B shapes are not 132x132 and 132x15")
@@ -878,29 +1034,35 @@ class DirectMultipleShootingProblem:
         if not result.qacc_certificate_evidence_id:
             raise DerivativeContractError("ML-241 qacc certificate evidence identity is missing")
         branches = tuple(result.base_active_set.action_branches)
+        active = tuple(int(index) for index in active_action_indices)
         if len(branches) != ACTION_DIMENSION or any(
-            branch in {"NEAR_KINK", "ACTION_BOUND_ACTIVE"} for branch in branches
+            branches[index] in {"NEAR_KINK", "ACTION_BOUND_ACTIVE"} for index in active
         ):
             raise DerivativeContractError("ML-241 action branch is not an ordinary smooth local branch")
         if result.base_snapshot_digest != snapshot_digest(state) or result.base_raw_action.shape != (ACTION_DIMENSION,):
             raise DerivativeContractError("ML-241 base-point metadata is incomplete")
         if not np.array_equal(np.asarray(result.base_raw_action), action):
             raise DerivativeContractError("ML-241 derivative base action does not match the decision")
-        if not np.isfinite(result.A).all() or not np.isfinite(result.B).all():
-            raise DerivativeContractError("ordinary local derivative contains invalid columns")
         if not np.asarray(result.state_validity, dtype=bool).all():
             invalid = np.flatnonzero(~np.asarray(result.state_validity, dtype=bool)).tolist()
             raise DerivativeContractError(f"ordinary local A columns are nonsmooth/invalid: {invalid}")
-        if not np.asarray(result.action_validity, dtype=bool).all():
-            invalid = np.flatnonzero(~np.asarray(result.action_validity, dtype=bool)).tolist()
+        action_validity = np.asarray(result.action_validity, dtype=bool)
+        if not action_validity[np.asarray(active, dtype=np.int64)].all():
+            invalid = [
+                index for index in active if not bool(action_validity[index])
+            ]
             raise DerivativeContractError(f"ordinary local B columns are nonsmooth/invalid: {invalid}")
+        if not np.isfinite(result.A).all() or not np.isfinite(
+            np.asarray(result.B)[:, np.asarray(active, dtype=np.int64)]
+        ).all():
+            raise DerivativeContractError("ordinary local derivative contains invalid active columns")
         if not np.array_equal(result.A[:, QACC_ZERO_COLUMNS], np.zeros((STATE_DIMENSION, len(QACC_ZERO_COLUMNS)))):
             raise DerivativeContractError("qualified-zero qacc columns were altered")
 
     def jacobian_values(self, z: Sequence[float] | np.ndarray) -> np.ndarray:
         value = _validate_vector(z, self.variable_count, "decision vector")
         entries: list[float] = []
-        decision = self.unpack_decision(value)
+        active = np.asarray(self.layout.active_action_indices, dtype=np.int64)
         for interval in range(self.horizon):
             evaluation = self.interval_evaluation(value, interval)
             linearization = self._derivatives(evaluation.state, evaluation.raw_action)
@@ -910,10 +1072,11 @@ class DirectMultipleShootingProblem:
                 model=self.plant.model,
             )
             J_state = endpoint.G_pred @ linearization.A
-            J_action = endpoint.G_pred @ linearization.B
+            J_action = endpoint.G_pred @ linearization.B[:, active]
             J_next = endpoint.G_next
             for component in range(STATE_DIMENSION):
-                entries.extend(J_state[component].tolist())
+                if interval > 0:
+                    entries.extend(J_state[component].tolist())
                 entries.extend(J_action[component].tolist())
                 entries.extend(J_next[component].tolist())
         for row in self.constraint_rows[self.dynamics_row_count :]:
@@ -945,19 +1108,29 @@ class DirectMultipleShootingProblem:
     def jacobian_structure(self) -> tuple[np.ndarray, np.ndarray]:
         rows: list[int] = []
         cols: list[int] = []
+        active_width = self.layout.active_action_dimension
         for interval in range(self.horizon):
-            state_start = self.layout.state_slice(interval).start
             action_start = self.layout.action_slice(interval).start
             next_start = self.layout.state_slice(interval + 1).start
             for component in range(STATE_DIMENSION):
                 row = interval * STATE_DIMENSION + component
-                rows.extend([row] * (STATE_DIMENSION + ACTION_DIMENSION + STATE_DIMENSION))
-                cols.extend(range(state_start, state_start + STATE_DIMENSION))
-                cols.extend(range(action_start, action_start + ACTION_DIMENSION))
+                if interval > 0:
+                    rows.extend([row] * STATE_DIMENSION)
+                    state_start = self.layout.state_slice(interval).start
+                    cols.extend(range(state_start, state_start + STATE_DIMENSION))
+                rows.extend([row] * (active_width + STATE_DIMENSION))
+                cols.extend(range(action_start, action_start + active_width))
                 cols.extend(range(next_start, next_start + STATE_DIMENSION))
         for row in self.constraint_rows[self.dynamics_row_count :]:
             for kind, index in row.support:
-                slc = self.layout.state_slice(index) if kind == "state" else self.layout.action_slice(index)
+                if kind == "state":
+                    if index == 0:
+                        continue
+                    slc = self.layout.state_slice(index)
+                elif kind == "action":
+                    slc = self.layout.action_slice(index)
+                else:
+                    raise TranscriptionError(f"unknown Jacobian support kind {kind!r}")
                 rows.extend([row.row_index] * (slc.stop - slc.start))
                 cols.extend(range(slc.start, slc.stop))
             if row.slack_decision_index is not None:
@@ -982,8 +1155,14 @@ class DirectMultipleShootingProblem:
         lower = np.full(self.variable_count, -np.inf, dtype=np.float64)
         for interval in range(self.horizon):
             lower[self.layout.action_slice(interval)] = -1.0
-        if self.fixed_initial_state:
-            lower[self.layout.state_slice(0)] = 0.0
+        for knot in self.layout.state_knot_indices:
+            state_slice = self.layout.state_slice(knot)
+            reference = self.reference_snapshots[knot]
+            for attribute, tangent_slice, physical_lower, _ in _NATIVE_EUCLIDEAN_STATE_DOMAINS:
+                values = np.asarray(getattr(reference, attribute), dtype=np.float64)
+                start = state_slice.start + tangent_slice.start
+                stop = state_slice.start + tangent_slice.stop
+                lower[start:stop] = physical_lower - values
         for slack in self.layout.slack_specs:
             lower[slack.decision_index] = 0.0
         return lower
@@ -992,8 +1171,14 @@ class DirectMultipleShootingProblem:
         upper = np.full(self.variable_count, np.inf, dtype=np.float64)
         for interval in range(self.horizon):
             upper[self.layout.action_slice(interval)] = 1.0
-        if self.fixed_initial_state:
-            upper[self.layout.state_slice(0)] = 0.0
+        for knot in self.layout.state_knot_indices:
+            state_slice = self.layout.state_slice(knot)
+            reference = self.reference_snapshots[knot]
+            for attribute, tangent_slice, _, physical_upper in _NATIVE_EUCLIDEAN_STATE_DOMAINS:
+                values = np.asarray(getattr(reference, attribute), dtype=np.float64)
+                start = state_slice.start + tangent_slice.start
+                stop = state_slice.start + tangent_slice.stop
+                upper[start:stop] = physical_upper - values
         return upper
 
     def constraint_lower_bounds(self) -> np.ndarray:
@@ -1019,13 +1204,25 @@ class DirectMultipleShootingProblem:
             "schema_id": TRANSCRIPTION_SCHEMA_ID,
             "state_dimension": STATE_DIMENSION,
             "action_dimension": ACTION_DIMENSION,
+            "active_action_dimension": self.layout.active_action_dimension,
+            "active_action_indices": list(self.layout.active_action_indices),
+            "fixed_action_values": [
+                [index, value] for index, value in self.layout.fixed_action_values
+            ],
+            "layout_id": self.layout.layout_id,
             "horizon": self.horizon,
             "control_dt_s": self.control_dt,
-            "ordering": "delta_x[0], u[0], ..., delta_x[N-1], u[N-1], delta_x[N], slack_suffix",
+            "ordering": "u_active[0], delta_x[1], ..., u_active[N-1], delta_x[N], slack_suffix",
             "base_dimension": self.layout.base_dimension,
             "total_dimension": self.layout.total_dimension,
-            "fixed_initial_state": self.fixed_initial_state,
-            "state_slices": [self.layout.state_slice(k).indices(self.layout.total_dimension) for k in range(self.horizon + 1)],
+            "initial_state_parameter": {
+                "knot_index": 0,
+                "role": "FIXED_PARAMETER",
+                "is_nlp_decision": False,
+            },
+            "fixed_initial_state": True,
+            "state_knot_indices": list(self.layout.state_knot_indices),
+            "state_slices": [self.layout.state_slice(k).indices(self.layout.total_dimension) for k in self.layout.state_knot_indices],
             "action_slices": [self.layout.action_slice(k).indices(self.layout.total_dimension) for k in range(self.horizon)],
             "slack_slices": [self.layout.slack_slice(slack).indices(self.layout.total_dimension) for slack in self.layout.slack_specs],
         }
@@ -1139,6 +1336,8 @@ def unpack_decision(layout: DecisionLayout, z: Sequence[float] | np.ndarray) -> 
 
 __all__ = [
     "ACTION_DIMENSION",
+    "A_PLUS_TANGENT_SLICE",
+    "A_MINUS_TANGENT_SLICE",
     "advance_snapshot_exact",
     "APPROVED_ELASTIC_CONSTRAINT_IDS",
     "CONTROL_DT_S",
@@ -1149,6 +1348,8 @@ __all__ = [
     "DirectMultipleShootingProblem",
     "DirectionalCheck",
     "EndpointJacobianResult",
+    "FULL_ACTIVE_ACTION_INDICES",
+    "FULL_LAYOUT",
     "GuardSpec",
     "IntervalEvaluation",
     "ML241_ACTION_STEP",
@@ -1162,6 +1363,11 @@ __all__ = [
     "TRANSCRIPTION_SCHEMA_ID",
     "TranscriptionError",
     "UnpackedDecision",
+    "PREVIOUS_ACCEPTED_ACTION_TANGENT_SLICE",
+    "WITNESS_FIXED_ACTION_INDICES",
+    "WITNESS_FIXED_ACTION_VALUES",
+    "WITNESS_FREE_ACTION_INDICES",
+    "WITNESS_LAYOUT",
     "boxminus_endpoint_jacobians",
     "pack_decision",
     "qualify_endpoint_directional_maps",
