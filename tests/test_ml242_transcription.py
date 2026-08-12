@@ -27,6 +27,9 @@ from loaded_cmj.oracle.transcription import (
     TranscriptionError,
     WITNESS_FIXED_ACTION_INDICES,
     WITNESS_FREE_ACTION_INDICES,
+    WITNESS_NEGATIVE_SECTOR_ACTION_INDICES,
+    WITNESS_POSITIVE_SECTOR_ACTION_INDICES,
+    WITNESS_SIGN_SECTOR_BOUNDS,
     WITNESS_LAYOUT,
     advance_snapshot_exact,
     boxminus_endpoint_jacobians,
@@ -42,6 +45,24 @@ from loaded_cmj.simulation.snapshot import SNAPSHOT_SCHEMA_VERSION
 
 sys.path.insert(0, str(Path(__file__).parent))
 from test_ml238_macro_state import fixtures as ml238_fixtures
+
+
+# Recomputed from the unmodified ML212C entry tree before this gate's edit.
+PRE_G35_FULL_STRUCTURE_HASH = "3d8ba72e23559d5c236c4be0734704f20efbfd0cbc181536b4b82f838d32a3de"
+PRE_G35_WITNESS_STRUCTURE_HASH = "95881e8313b5ffbb10aa86e5e287607fc9de781f0f5afab452de853b6325c156"
+AUTHORITATIVE_E3_WITNESS_SEED = (
+    (0, 0.90000000000000002),
+    (3, 0.16806307252533137),
+    (6, 0.16806307252528851),
+    (9, 0.11091999487016607),
+    (10, 0.11091999487016607),
+    (11, -0.016134519367529535),
+    (12, -0.01613451936758624),
+)
+
+
+def _bound_accepts(value: float, lower: float, upper: float) -> bool:
+    return lower <= value <= upper
 
 
 @pytest.fixture(scope="module")
@@ -139,6 +160,9 @@ def test_decision_layout_scales_and_slices():
     assert witness.action_slice(0) == slice(0, 7)
     assert witness.state_slice(1) == slice(7, 139)
     assert witness.fixed_action_values == tuple((index, 0.0) for index in WITNESS_FIXED_ACTION_INDICES)
+    assert witness.active_action_bounds == tuple(
+        WITNESS_SIGN_SECTOR_BOUNDS[index] for index in WITNESS_FREE_ACTION_INDICES
+    )
 
 
 def test_pack_unpack_and_invalid_inputs(qualified_fixtures):
@@ -192,6 +216,71 @@ def test_fixed_initial_bounds_and_raw_action_bounds(qualified_fixtures):
         problem.state_slice(0)
     assert problem.initial_state is problem.reference_snapshots[0]
     assert problem.decision_layout_record()["initial_state_parameter"]["is_nlp_decision"] is False
+
+
+def test_full_action_bounds_remain_native_for_every_interval(qualified_fixtures):
+    problem, _ = _r2_problem(qualified_fixtures, action_layout=FULL_LAYOUT)
+    lower = problem.variable_lower_bounds()
+    upper = problem.variable_upper_bounds()
+    for interval in range(problem.horizon):
+        action_slice = problem.layout.action_slice(interval)
+        np.testing.assert_array_equal(lower[action_slice], -np.ones(ACTION_DIMENSION))
+        np.testing.assert_array_equal(upper[action_slice], np.ones(ACTION_DIMENSION))
+
+
+def test_witness_sign_sector_bounds_are_exact_for_every_interval(qualified_fixtures):
+    problem, _ = _r2_problem(qualified_fixtures, action_layout=WITNESS_LAYOUT)
+    lower = problem.variable_lower_bounds()
+    upper = problem.variable_upper_bounds()
+    positive_positions = tuple(
+        problem.active_action_indices.index(index)
+        for index in WITNESS_POSITIVE_SECTOR_ACTION_INDICES
+    )
+    negative_positions = tuple(
+        problem.active_action_indices.index(index)
+        for index in WITNESS_NEGATIVE_SECTOR_ACTION_INDICES
+    )
+    for interval in range(problem.horizon):
+        action_slice = problem.layout.action_slice(interval)
+        interval_lower = lower[action_slice]
+        interval_upper = upper[action_slice]
+        np.testing.assert_array_equal(interval_lower[list(positive_positions)], 0.0)
+        np.testing.assert_array_equal(interval_upper[list(positive_positions)], 1.0)
+        np.testing.assert_array_equal(interval_lower[list(negative_positions)], -1.0)
+        np.testing.assert_array_equal(interval_upper[list(negative_positions)], 0.0)
+
+
+def test_witness_sign_sector_exact_endpoints_and_opposite_sign_rejection(qualified_fixtures):
+    problem, _ = _r2_problem(qualified_fixtures, action_layout=WITNESS_LAYOUT)
+    lower = problem.variable_lower_bounds()[problem.layout.action_slice(0)]
+    upper = problem.variable_upper_bounds()[problem.layout.action_slice(0)]
+    positions = {
+        index: problem.active_action_indices.index(index)
+        for index in WITNESS_FREE_ACTION_INDICES
+    }
+
+    for index in WITNESS_POSITIVE_SECTOR_ACTION_INDICES:
+        position = positions[index]
+        assert _bound_accepts(0.0, lower[position], upper[position])
+        assert _bound_accepts(1.0, lower[position], upper[position])
+        assert not _bound_accepts(-1.0, lower[position], upper[position])
+
+    for index in WITNESS_NEGATIVE_SECTOR_ACTION_INDICES:
+        position = positions[index]
+        assert _bound_accepts(-1.0, lower[position], upper[position])
+        assert _bound_accepts(0.0, lower[position], upper[position])
+        assert not _bound_accepts(1.0, lower[position], upper[position])
+
+    assert WITNESS_SIGN_SECTOR_BOUNDS == {
+        **{index: (0.0, 1.0) for index in WITNESS_POSITIVE_SECTOR_ACTION_INDICES},
+        **{index: (-1.0, 0.0) for index in WITNESS_NEGATIVE_SECTOR_ACTION_INDICES},
+    }
+
+
+def test_authoritative_e3_witness_seed_is_strictly_inside_sign_sectors():
+    for index, value in AUTHORITATIVE_E3_WITNESS_SEED:
+        lower, upper = WITNESS_SIGN_SECTOR_BOUNDS[index]
+        assert lower < value < upper
 
 
 def test_x0_is_an_exact_parameter_and_not_a_fixed_decision(qualified_fixtures):
@@ -406,7 +495,14 @@ def test_r2_full_and_witness_sparse_receipts_are_derived_from_ownership(qualifie
         assert rows.size == expected_dynamic_nnz(problem) + expected_extra_nnz(problem)
         assert problem.constraint_count == problem.dynamics_row_count + 43
         assert problem.variable_count == problem.layout.base_dimension + problem.elastic_slack_count
-        assert problem.jacobian_structure_hash() == problem.jacobian_structure_hash()
+        expected_hash = (
+            PRE_G35_FULL_STRUCTURE_HASH
+            if problem.action_layout == FULL_LAYOUT
+            else PRE_G35_WITNESS_STRUCTURE_HASH
+        )
+        assert problem.jacobian_structure_hash() == expected_hash
+        assert rows.dtype == np.int64
+        assert cols.dtype == np.int64
 
     assert full.variable_count == 5922
     assert full.constraint_count == 5323

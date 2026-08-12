@@ -48,6 +48,14 @@ FULL_LAYOUT = "FULL_LAYOUT"
 WITNESS_LAYOUT = "WITNESS_LAYOUT"
 FULL_ACTIVE_ACTION_INDICES = tuple(range(ACTION_DIMENSION))
 WITNESS_FREE_ACTION_INDICES = (0, 3, 6, 9, 10, 11, 12)
+WITNESS_POSITIVE_SECTOR_ACTION_INDICES = (0, 3, 6, 9, 10)
+WITNESS_NEGATIVE_SECTOR_ACTION_INDICES = (11, 12)
+WITNESS_SIGN_SECTOR_BOUNDS = MappingProxyType(
+    {
+        **{index: (0.0, 1.0) for index in WITNESS_POSITIVE_SECTOR_ACTION_INDICES},
+        **{index: (-1.0, 0.0) for index in WITNESS_NEGATIVE_SECTOR_ACTION_INDICES},
+    }
+)
 WITNESS_FIXED_ACTION_INDICES = tuple(
     index for index in FULL_ACTIVE_ACTION_INDICES if index not in WITNESS_FREE_ACTION_INDICES
 )
@@ -233,6 +241,8 @@ class DecisionLayout:
             raise TranscriptionError("FULL_LAYOUT must expose all raw action channels")
         if self.layout_id == WITNESS_LAYOUT and active != WITNESS_FREE_ACTION_INDICES:
             raise TranscriptionError("WITNESS_LAYOUT must expose the authorized seven channels")
+        if self.layout_id == WITNESS_LAYOUT and set(WITNESS_SIGN_SECTOR_BOUNDS) != set(active):
+            raise TranscriptionError("WITNESS_LAYOUT sign-sector bounds do not cover the active channels")
         object.__setattr__(self, "active_action_indices", active)
         object.__setattr__(self, "fixed_action_values", fixed)
         if any(not slack.nonnegative for slack in self.slack_specs):
@@ -250,6 +260,16 @@ class DecisionLayout:
     @property
     def active_action_dimension(self) -> int:
         return len(self.active_action_indices)
+
+    @property
+    def active_action_bounds(self) -> tuple[tuple[float, float], ...]:
+        """Return native bounds for the active raw actions in layout order."""
+
+        if self.layout_id == FULL_LAYOUT:
+            return tuple((-1.0, 1.0) for _ in self.active_action_indices)
+        if self.layout_id == WITNESS_LAYOUT:
+            return tuple(WITNESS_SIGN_SECTOR_BOUNDS[index] for index in self.active_action_indices)
+        raise TranscriptionError(f"unknown action layout {self.layout_id!r}")
 
     @property
     def state_knot_indices(self) -> tuple[int, ...]:
@@ -1182,8 +1202,12 @@ class DirectMultipleShootingProblem:
 
     def variable_lower_bounds(self) -> np.ndarray:
         lower = np.full(self.variable_count, -np.inf, dtype=np.float64)
+        action_lower = np.asarray(
+            [bounds[0] for bounds in self.layout.active_action_bounds],
+            dtype=np.float64,
+        )
         for interval in range(self.horizon):
-            lower[self.layout.action_slice(interval)] = -1.0
+            lower[self.layout.action_slice(interval)] = action_lower
         for knot in self.layout.state_knot_indices:
             state_slice = self.layout.state_slice(knot)
             reference = self.reference_snapshots[knot]
@@ -1198,8 +1222,12 @@ class DirectMultipleShootingProblem:
 
     def variable_upper_bounds(self) -> np.ndarray:
         upper = np.full(self.variable_count, np.inf, dtype=np.float64)
+        action_upper = np.asarray(
+            [bounds[1] for bounds in self.layout.active_action_bounds],
+            dtype=np.float64,
+        )
         for interval in range(self.horizon):
-            upper[self.layout.action_slice(interval)] = 1.0
+            upper[self.layout.action_slice(interval)] = action_upper
         for knot in self.layout.state_knot_indices:
             state_slice = self.layout.state_slice(knot)
             reference = self.reference_snapshots[knot]
@@ -1396,6 +1424,9 @@ __all__ = [
     "WITNESS_FIXED_ACTION_INDICES",
     "WITNESS_FIXED_ACTION_VALUES",
     "WITNESS_FREE_ACTION_INDICES",
+    "WITNESS_NEGATIVE_SECTOR_ACTION_INDICES",
+    "WITNESS_POSITIVE_SECTOR_ACTION_INDICES",
+    "WITNESS_SIGN_SECTOR_BOUNDS",
     "WITNESS_LAYOUT",
     "boxminus_endpoint_jacobians",
     "pack_decision",
