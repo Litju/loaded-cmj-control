@@ -17,7 +17,7 @@ import numpy as np
 
 from loaded_cmj.simulation import drive
 from loaded_cmj.simulation.constants import ACTION_DIM
-from loaded_cmj.simulation.plant import Plant
+from loaded_cmj.simulation.plant import Plant, SupportMarginBranchCertificate
 from loaded_cmj.simulation.snapshot import MacroSnapshot
 from loaded_cmj.simulation.tangent import (
     CACHE_SO3_SLICE,
@@ -66,6 +66,10 @@ NUMERICAL_CERTIFICATE_ONLY = "NUMERICAL_CERTIFICATE_ONLY"
 PIECEWISE_BRANCH_SWITCH_INVALID = "PIECEWISE_BRANCH_SWITCH_INVALID"
 NATIVE_DOMAIN_INVALID = "NATIVE_DOMAIN_INVALID"
 NONFINITE_EVALUATION = "NONFINITE_EVALUATION"
+SUPPORT_HULL_KINK_INVALID = "SUPPORT_HULL_KINK_INVALID"
+SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID = "SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID"
+SUPPORT_HULL_PROJECTION_BRANCH_SWITCH_INVALID = "SUPPORT_HULL_PROJECTION_BRANCH_SWITCH_INVALID"
+SUPPORT_ACTIVE_SET_SWITCH_INVALID = "SUPPORT_ACTIVE_SET_SWITCH_INVALID"
 
 ACTION_BRANCH_INTERIOR = "INTERIOR"
 ACTION_BRANCH_SLEW_ACTIVE = "SLEW_ACTIVE"
@@ -92,6 +96,7 @@ OWNER_OUTPUT_IDS = (
     "E3_E4_REVERSAL",
     "E3_E4_HORIZONTAL",
 )
+_SUPPORT_GEOMETRY_OWNER_IDS = frozenset({"SUPPORT_MARGIN", "E3_E4_HORIZONTAL"})
 
 # The tangent metadata mixes physical units.  These keys intentionally keep
 # translations, rotations, activations, torques, and warm-start accelerations
@@ -177,6 +182,7 @@ class TransitionEvaluation:
     snapshot_digest: str
     next_snapshot_digest: str
     owner_outputs: Mapping[str, np.ndarray]
+    support_margin_branch_steps: tuple[SupportMarginBranchCertificate, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -534,6 +540,7 @@ class _StepFingerprint:
     drive_flags: tuple[tuple[str, tuple[bool, ...]], ...]
     drive_branches: tuple[tuple[str, tuple[str, ...]], ...]
     transition_branches: tuple[tuple[str, tuple[str, ...]], ...]
+    support_margin_branch: SupportMarginBranchCertificate | None = None
 
 
 def _native_joint_limits(data: mujoco.MjData) -> bool:
@@ -591,6 +598,11 @@ def _step_fingerprint(
     cop_valid = tuple(bool(value) for value in np.asarray(summary["cop_valid"], dtype=bool).reshape(2))
     support_active = tuple(
         bool(value) for value in np.asarray(summary["active_by_foot"], dtype=bool).reshape(2)
+    )
+    support_margin_diagnostic = plant.support_margin_diagnostics(
+        data,
+        plant.center_of_mass(data),
+        support_active,
     )
     flags = tuple(
         (str(key), tuple(bool(value) for value in np.asarray(values, dtype=bool).reshape(ACTION_DIM)))
@@ -665,6 +677,7 @@ def _step_fingerprint(
         drive_flags=flags,
         drive_branches=drive_branches,
         transition_branches=transition_branches,
+        support_margin_branch=support_margin_diagnostic.derivative_branch_certificate,
     )
 
 
@@ -858,6 +871,10 @@ def evaluate_wrapped_step_5ms(
         snapshot_digest=snapshot_digest(snapshot),
         next_snapshot_digest=snapshot_digest(next_snapshot),
         owner_outputs=final_owner_outputs,
+        support_margin_branch_steps=tuple(
+            step.support_margin_branch for step in active_steps
+            if step.support_margin_branch is not None
+        ),
     )
 
 
@@ -979,11 +996,57 @@ def _physical_branch_changed(base: ActiveSetFingerprint, sample: ActiveSetFinger
     )
 
 
+def _support_margin_branch_rejection_reason(
+    base: TransitionEvaluation,
+    sample: TransitionEvaluation,
+) -> str:
+    """Compare only Plant-provided support provenance, never geometry math."""
+    base_steps = base.support_margin_branch_steps
+    sample_steps = sample.support_margin_branch_steps
+    if not base_steps and not sample_steps:
+        return ""
+    if len(base_steps) != len(sample_steps):
+        return SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID
+    for base_branch, sample_branch in zip(base_steps, sample_steps, strict=True):
+        if base_branch is None or sample_branch is None:
+            return NONFINITE_EVALUATION
+        if not base_branch.finite or not sample_branch.finite:
+            return NONFINITE_EVALUATION
+        if base_branch.support_active_set != sample_branch.support_active_set:
+            return SUPPORT_ACTIVE_SET_SWITCH_INVALID
+        if (
+            base_branch.support_point_count != sample_branch.support_point_count
+            or base_branch.canonical_hull_vertex_order
+            != sample_branch.canonical_hull_vertex_order
+        ):
+            return SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID
+        if base_branch.branch_family != sample_branch.branch_family:
+            return SUPPORT_HULL_KINK_INVALID
+        if (
+            base_branch.exact_tie
+            or sample_branch.exact_tie
+            or base_branch.norm_zero_kink
+            or sample_branch.norm_zero_kink
+        ):
+            return SUPPORT_HULL_KINK_INVALID
+        if base_branch.projection_regimes != sample_branch.projection_regimes:
+            return SUPPORT_HULL_PROJECTION_BRANCH_SWITCH_INVALID
+        if base_branch.active_minimizer_set != sample_branch.active_minimizer_set:
+            return SUPPORT_HULL_KINK_INVALID
+    return ""
+
+
 def _branch_rejection_reason(
     base: TransitionEvaluation,
     samples: Sequence[TransitionEvaluation],
+    *,
+    support_geometry: bool = False,
 ) -> str:
     for sample in samples:
+        if support_geometry:
+            support_reason = _support_margin_branch_rejection_reason(base, sample)
+            if support_reason:
+                return support_reason
         if _physical_branch_changed(base.active_set, sample.active_set):
             return PHYSICAL_CONTACT_SWITCH_INVALID
     return PIECEWISE_BRANCH_SWITCH_INVALID
@@ -996,7 +1059,10 @@ def _same_certificate_for_column(
     axis: str,
     index: int,
     plan: _StencilPlan,
+    support_geometry: bool = False,
 ) -> bool:
+    if support_geometry and _support_margin_branch_rejection_reason(base, sample):
+        return False
     if sample.active_set == base.active_set:
         return True
     # An action-box/previous-action endpoint is a native domain boundary, not
@@ -1032,6 +1098,7 @@ def _column_result(
     block: str,
     plan: _StencilPlan,
     reason: str = "",
+    support_geometry: bool = False,
 ) -> ColumnQualification:
     plus_digest = None if plus is None else plus.active_set.digest
     minus_digest = None if minus is None else minus.active_set.digest
@@ -1043,6 +1110,7 @@ def _column_result(
             axis=axis,
             index=index,
             plan=plan,
+            support_geometry=support_geometry,
         )
         for sample in samples
     )
@@ -1053,7 +1121,11 @@ def _column_result(
         reason = plan.reason or NATIVE_DOMAIN_INVALID
     elif not preserved:
         valid = False
-        reason = _branch_rejection_reason(base, samples)
+        reason = _branch_rejection_reason(
+            base,
+            samples,
+            support_geometry=support_geometry,
+        )
     else:
         valid = True
         reason = "SMOOTH_FIXED_ACTIVE_SET"
@@ -1381,6 +1453,7 @@ def differentiate_owner_output(
             block=_STATE_BLOCK_FOR_INDEX[index],
             plan=plan,
             reason=reason,
+            support_geometry=owner_id in _SUPPORT_GEOMETRY_OWNER_IDS,
         )
         if report.valid:
             try:
@@ -1434,6 +1507,7 @@ def differentiate_owner_output(
             block="raw_action",
             plan=plan,
             reason=reason,
+            support_geometry=owner_id in _SUPPORT_GEOMETRY_OWNER_IDS,
         )
         if report.valid:
             try:
@@ -1498,6 +1572,10 @@ __all__ = [
     "NUMERICAL_CERTIFICATE_ONLY",
     "PHYSICAL_CONTACT_SWITCH_INVALID",
     "PIECEWISE_BRANCH_SWITCH_INVALID",
+    "SUPPORT_ACTIVE_SET_SWITCH_INVALID",
+    "SUPPORT_HULL_KINK_INVALID",
+    "SUPPORT_HULL_PROJECTION_BRANCH_SWITCH_INVALID",
+    "SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID",
     "QACC_DERIVATIVE_MATERIAL_BUT_UNIDENTIFIABLE",
     "QACC_DERIVATIVE_NUMERICALLY_NULL",
     "QACC_DERIVATIVE_PRIOR_GATE_DEFECT",

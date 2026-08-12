@@ -215,6 +215,57 @@ class FixedHoldResetState:
     reversal_phase: np.ndarray | None = None
 
 
+@dataclass(frozen=True)
+class SupportMarginBranchCertificate:
+    """Discrete Plant provenance required for a classical support derivative."""
+
+    support_active_set: tuple[bool, bool]
+    branch_family: str
+    support_point_count: int
+    canonical_hull_vertex_order: tuple[int, ...]
+    active_minimizer_set: tuple[tuple[int, int], ...]
+    unique_active_minimizer: tuple[int, int] | None
+    projection_regimes: tuple[tuple[tuple[int, int], str], ...]
+    exact_tie: bool
+    norm_zero_kink: bool
+    finite: bool
+
+
+@dataclass(frozen=True)
+class SupportMarginDiagnostics:
+    """Canonical support margin plus derivative-relevant Plant provenance."""
+
+    margin: float
+    support_active_set: tuple[bool, bool]
+    branch_family: str
+    support_point_count: int
+    canonical_hull_vertex_order: tuple[int, ...]
+    active_minimizer_set: tuple[tuple[int, int], ...]
+    unique_active_minimizer: tuple[int, int] | None
+    projection_regimes: tuple[tuple[tuple[int, int], str], ...]
+    exact_tie: bool
+    norm_zero_kink: bool
+    branch_conditioning_gap: float | None
+    finite: bool
+
+    @property
+    def derivative_branch_certificate(self) -> SupportMarginBranchCertificate:
+        """Return only discrete facts; continuous values are not fingerprinted."""
+
+        return SupportMarginBranchCertificate(
+            support_active_set=self.support_active_set,
+            branch_family=self.branch_family,
+            support_point_count=self.support_point_count,
+            canonical_hull_vertex_order=self.canonical_hull_vertex_order,
+            active_minimizer_set=self.active_minimizer_set,
+            unique_active_minimizer=self.unique_active_minimizer,
+            projection_regimes=self.projection_regimes,
+            exact_tie=self.exact_tie,
+            norm_zero_kink=self.norm_zero_kink,
+            finite=self.finite,
+        )
+
+
 # --------------------------------------------------------------------------
 # Model construction
 # --------------------------------------------------------------------------
@@ -1473,10 +1524,21 @@ class Plant:
         self, data: mujoco.MjData, com: np.ndarray, latched: tuple[bool, bool]
     ) -> float:
         """Signed distance from the COM ground projection to the support edge."""
+        return self.support_margin_diagnostics(data, com, latched).margin
+
+    def support_margin_diagnostics(
+        self, data: mujoco.MjData, com: np.ndarray, latched: tuple[bool, bool]
+    ) -> SupportMarginDiagnostics:
+        """Return the canonical support margin and its discrete branch receipt."""
+
         pts = self.support_polygon(data, latched)
-        if pts.shape[0] == 0:
-            return -float("inf")
-        return _point_in_hull_margin(np.asarray(com[0:2], dtype=np.float64), pts)
+        return _support_margin_diagnostics(
+            np.zeros(2, dtype=np.float64)
+            if pts.shape[0] == 0
+            else np.asarray(com[0:2], dtype=np.float64),
+            pts,
+            tuple(bool(value) for value in latched),
+        )
 
     # ---------------------------------------------------------- observation
     def public_observation(
@@ -1567,15 +1629,100 @@ def _convex_hull(points: np.ndarray) -> np.ndarray:
     return np.asarray(lower[:-1] + upper[:-1], dtype=np.float64)
 
 
-def _point_in_hull_margin(point: np.ndarray, points: np.ndarray) -> float:
-    """Signed distance to the hull boundary: positive inside, negative outside."""
+def _canonical_cycle(values: tuple[int, ...]) -> tuple[int, ...]:
+    """Normalize only the starting point of an oriented cyclic identity."""
+    if not values:
+        return ()
+    rotations = tuple(values[index:] + values[:index] for index in range(len(values)))
+    return min(rotations)
+
+
+def _edge_identity(first: int, second: int) -> tuple[int, int]:
+    """Return an orientation-independent identity for one hull edge."""
+    return (first, second) if first <= second else (second, first)
+
+
+def _hull_source_ids(points: np.ndarray, hull: np.ndarray) -> tuple[int, ...]:
+    """Map hull coordinates to stable source-row identities without tolerance."""
+    if not np.isfinite(points).all() or not np.isfinite(hull).all():
+        return ()
+    source_ids: list[int] = []
+    for vertex in hull:
+        matches = np.flatnonzero(np.all(points == vertex, axis=1))
+        if matches.size == 0:
+            return ()
+        source_ids.append(int(matches[0]))
+    return tuple(source_ids)
+
+
+def _conditioning_gap(values: list[float]) -> float | None:
+    """Return the first/second minimum gap as diagnosis-only evidence."""
+    if len(values) < 2 or not all(np.isfinite(value) for value in values):
+        return None
+    ordered = sorted(float(value) for value in values)
+    return float(ordered[1] - ordered[0])
+
+
+def _support_margin_diagnostics(
+    point: np.ndarray,
+    points: np.ndarray,
+    support_active_set: tuple[bool, bool],
+) -> SupportMarginDiagnostics:
+    """Compute the current scalar once and collect only canonical provenance."""
+    point = np.asarray(point, dtype=np.float64)
+    points = np.asarray(points, dtype=np.float64).reshape(-1, 2)
+    support_point_count = int(points.shape[0])
+    if support_point_count == 0:
+        return SupportMarginDiagnostics(
+            margin=-float("inf"),
+            support_active_set=support_active_set,
+            branch_family="EMPTY",
+            support_point_count=0,
+            canonical_hull_vertex_order=(),
+            active_minimizer_set=(),
+            unique_active_minimizer=None,
+            projection_regimes=(),
+            exact_tie=False,
+            norm_zero_kink=False,
+            branch_conditioning_gap=None,
+            finite=False,
+        )
+
     hull = _convex_hull(points)
+    hull_source_ids = _hull_source_ids(points, hull)
+    canonical_hull_vertex_order = _canonical_cycle(hull_source_ids)
+    finite_inputs = bool(
+        np.isfinite(point).all()
+        and np.isfinite(points).all()
+        and np.isfinite(hull).all()
+    )
     n = hull.shape[0]
     if n < 3:
-        return -float(np.linalg.norm(point - np.asarray(points).mean(axis=0)))
+        norm_value = float(np.linalg.norm(point - np.asarray(points).mean(axis=0)))
+        margin = -norm_value
+        finite = bool(finite_inputs and np.isfinite(margin))
+        return SupportMarginDiagnostics(
+            margin=margin,
+            support_active_set=support_active_set,
+            branch_family="DEGENERATE" if finite else "NONFINITE",
+            support_point_count=support_point_count,
+            canonical_hull_vertex_order=canonical_hull_vertex_order,
+            active_minimizer_set=(),
+            unique_active_minimizer=None,
+            projection_regimes=(),
+            exact_tie=False,
+            norm_zero_kink=bool(norm_value == 0.0),
+            branch_conditioning_gap=None,
+            finite=finite,
+        )
+
     inside = True
     best_inside = float("inf")
     dist_outside = float("inf")
+    signed_values: list[float] = []
+    distances: list[float] = []
+    edge_ids: list[tuple[int, int]] = []
+    projection_labels: list[str] = []
     for k in range(n):
         a = hull[k]
         b = hull[(k + 1) % n]
@@ -1589,12 +1736,74 @@ def _point_in_hull_margin(point: np.ndarray, points: np.ndarray) -> float:
             inside = False
         best_inside = min(best_inside, signed)
         t = float(np.clip(float(edge @ (point - a)) / (length * length), 0.0, 1.0))
-        dist_outside = min(dist_outside, float(np.linalg.norm(point - (a + t * edge))))
-    return best_inside if inside else -dist_outside
+        distance = float(np.linalg.norm(point - (a + t * edge)))
+        dist_outside = min(dist_outside, distance)
+        signed_values.append(signed)
+        distances.append(distance)
+        if len(hull_source_ids) == n:
+            edge_ids.append(_edge_identity(hull_source_ids[k], hull_source_ids[(k + 1) % n]))
+        else:
+            edge_ids.append(_edge_identity(k, (k + 1) % n))
+        if t == 0.0:
+            projection_labels.append("ENDPOINT_A")
+        elif t == 1.0:
+            projection_labels.append("ENDPOINT_B")
+        else:
+            projection_labels.append("INTERIOR")
+
+    values = signed_values if inside else distances
+    selected_minimum = best_inside if inside else dist_outside
+    active_indexes = tuple(
+        index for index, value in enumerate(values) if value == selected_minimum
+    )
+    active_minimizer_set = tuple(sorted(edge_ids[index] for index in active_indexes))
+    unique_active_minimizer = (
+        active_minimizer_set[0] if len(active_minimizer_set) == 1 else None
+    )
+    projection_regimes = (
+        tuple(
+            sorted(
+                (edge_ids[index], projection_labels[index])
+                for index in active_indexes
+            )
+        )
+        if not inside
+        else ()
+    )
+    margin = best_inside if inside else -dist_outside
+    finite = bool(finite_inputs and np.isfinite(margin))
+    branch_family = (
+        "POLYGON_INSIDE" if inside else "POLYGON_OUTSIDE"
+    ) if finite else "NONFINITE"
+    return SupportMarginDiagnostics(
+        margin=margin,
+        support_active_set=support_active_set,
+        branch_family=branch_family,
+        support_point_count=support_point_count,
+        canonical_hull_vertex_order=canonical_hull_vertex_order,
+        active_minimizer_set=active_minimizer_set,
+        unique_active_minimizer=unique_active_minimizer,
+        projection_regimes=projection_regimes,
+        exact_tie=len(active_minimizer_set) > 1,
+        norm_zero_kink=bool((not inside) and any(value == 0.0 for value in distances)),
+        branch_conditioning_gap=_conditioning_gap(values),
+        finite=finite,
+    )
+
+
+def _point_in_hull_margin(point: np.ndarray, points: np.ndarray) -> float:
+    """Signed distance to the hull boundary: positive inside, negative outside."""
+    return _support_margin_diagnostics(
+        np.asarray(point, dtype=np.float64),
+        np.asarray(points, dtype=np.float64).reshape(-1, 2),
+        (False, False),
+    ).margin
 
 
 __all__ = [
     "Plant",
+    "SupportMarginBranchCertificate",
+    "SupportMarginDiagnostics",
     "PlantIndices",
     "PlantIntegrityError",
     "ResetAdmissibilityError",
