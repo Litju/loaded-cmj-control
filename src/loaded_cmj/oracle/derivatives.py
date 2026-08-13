@@ -1,8 +1,9 @@
-"""Privileged local derivatives of the frozen wrapped 5 ms transition.
+"""Privileged local derivatives of frozen transition and state-owner maps.
 
-This module owns only the finite-difference wrapper.  It deliberately delegates
-state geometry, restart, action projection, actuator dynamics, torque mapping,
-and physics stepping to their frozen owners.
+Transition-wrapped derivatives retain the exact 5 ms wrapper.  Direct
+state-owner derivatives restore a MacroSnapshot and use only ``mj_forward``
+before reading the canonical current-state owner.  Both modes delegate state
+geometry and restart semantics to their frozen owners.
 """
 
 from __future__ import annotations
@@ -10,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 import hashlib
 import json
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 import mujoco
 import numpy as np
@@ -39,6 +40,8 @@ from loaded_cmj.simulation.transition import (
 
 
 DERIVATIVE_API_VERSION = "LCMJ-V1-WRAPPED-DERIVATIVE-1.0.0"
+DIRECT_STATE_OWNER = "DIRECT_STATE_OWNER"
+TRANSITION_WRAPPED_OWNER = "TRANSITION_WRAPPED_OWNER"
 QACC_DERIVATIVE_UNADJUDICATED = "UNADJUDICATED"
 QACC_DERIVATIVE_QUALIFIED_NONZERO = "QUALIFIED_NONZERO"
 QACC_DERIVATIVE_NUMERICALLY_NULL = "NUMERICALLY_NULL_WITH_BOUNDED_ERROR"
@@ -97,6 +100,9 @@ OWNER_OUTPUT_IDS = (
     "E3_E4_HORIZONTAL",
 )
 _SUPPORT_GEOMETRY_OWNER_IDS = frozenset({"SUPPORT_MARGIN", "E3_E4_HORIZONTAL"})
+_DIRECT_STATE_OWNER_IDS = frozenset(
+    {"SUPPORT_MARGIN", "E3_E4_HORIZONTAL", "E3_E4_REVERSAL"}
+)
 
 # The tangent metadata mixes physical units.  These keys intentionally keep
 # translations, rotations, activations, torques, and warm-start accelerations
@@ -183,6 +189,22 @@ class TransitionEvaluation:
     next_snapshot_digest: str
     owner_outputs: Mapping[str, np.ndarray]
     support_margin_branch_steps: tuple[SupportMarginBranchCertificate, ...] = ()
+
+
+@dataclass(frozen=True)
+class StateOwnerEvaluation:
+    """One direct current-state owner evaluation and its branch receipt."""
+
+    owner_id: str
+    value: np.ndarray
+    owner_outputs: Mapping[str, np.ndarray]
+    active_set: ActiveSetFingerprint
+    support_margin_branch_steps: tuple[SupportMarginBranchCertificate, ...]
+    snapshot_digest: str
+    owner_output_digest: str
+    time: float
+    qacc_warmstart_digest: str
+    evaluation_mode: str = DIRECT_STATE_OWNER
 
 
 @dataclass(frozen=True)
@@ -329,7 +351,7 @@ class WrappedLinearization:
 
 @dataclass(frozen=True)
 class OwnerOutputSensitivity:
-    """Fixed-mode source-owner sensitivity in the same wrapped domain."""
+    """Fixed-mode source-owner sensitivity with explicit evaluation mode."""
 
     owner_id: str
     base_value: np.ndarray
@@ -345,10 +367,24 @@ class OwnerOutputSensitivity:
     action_step_metadata: tuple[float, ...]
     scheme: str
     transition_evaluation_count: int
+    evaluation_mode: str = TRANSITION_WRAPPED_OWNER
+    owner_output_digest: str = ""
+    base_branch_certificate: SupportMarginBranchCertificate | None = None
+    qacc_derivative_disposition: str = QACC_DERIVATIVE_UNADJUDICATED
+    qacc_zero_columns: tuple[int, ...] = ()
+    qacc_absolute_error_bound: tuple[tuple[str, float], ...] = ()
 
     @property
     def output_shape(self) -> tuple[int, ...]:
         return tuple(int(x) for x in self.base_value.shape)
+
+    @property
+    def requested_state_columns(self) -> tuple[int, ...]:
+        return tuple(int(report.index) for report in self.state_columns)
+
+    @property
+    def requested_action_columns(self) -> tuple[int, ...]:
+        return tuple(int(report.index) for report in self.action_columns)
 
 
 @dataclass
@@ -782,6 +818,102 @@ def _owner_output_values(
     return result
 
 
+def _direct_active_set(
+    data: mujoco.MjData,
+    summary: Mapping[str, Any],
+) -> ActiveSetFingerprint:
+    """Build the one-sample physical branch receipt for a direct owner."""
+
+    contacts = tuple(
+        (
+            int(entry["geom1"]),
+            int(entry["geom2"]),
+            str(entry["region"]),
+            None if entry["designated_foot"] is None else int(entry["designated_foot"]),
+            int(entry["row"]),
+            bool(entry["prohibited_contact"]),
+        )
+        for entry in summary["contacts"]
+    )
+    cop_valid = tuple(
+        bool(value)
+        for value in np.asarray(summary["cop_valid"], dtype=bool).reshape(2)
+    )
+    support_active = tuple(
+        bool(value)
+        for value in np.asarray(summary["active_by_foot"], dtype=bool).reshape(2)
+    )
+    return ActiveSetFingerprint(
+        contact_steps=(contacts,),
+        prohibited_contact_steps=(bool(summary["prohibited_contact"]),),
+        cop_valid_steps=(cop_valid,),
+        support_active_steps=(support_active,),
+        friction_steps=(bool(summary["friction_feasible"]),),
+        native_joint_limit_steps=(_native_joint_limits(data),),
+        drive_flag_steps=(),
+        action_branches=(),
+        drive_branch_steps=(),
+        transition_branch_steps=(),
+    )
+
+
+def evaluate_state_owner(
+    *,
+    plant: Plant,
+    snapshot: MacroSnapshot,
+    owner_id: str,
+) -> StateOwnerEvaluation:
+    """Evaluate one approved physical owner at the exact current state.
+
+    The snapshot is restored into fresh mutable MuJoCo/DriveState storage and
+    ``mj_forward`` realizes derived state.  There is intentionally no action,
+    accepted-action projection, drive update, or physical time advance in this
+    evaluator.
+    """
+
+    owner_id = str(owner_id)
+    if owner_id not in _DIRECT_STATE_OWNER_IDS:
+        raise DerivativeDomainError(
+            f"direct state owner is not approved: {owner_id}"
+        )
+    data = plant.make_data()
+    drive_state = drive.DriveState()
+    snapshot.restore(plant=plant, data=data, drive_state=drive_state)
+    mujoco.mj_forward(plant.model, data)
+
+    summary = plant.contact_wrench_summary(data)
+    active = tuple(bool(value) for value in summary["active_by_foot"])
+    support_branch: tuple[SupportMarginBranchCertificate, ...] = ()
+    if owner_id in _SUPPORT_GEOMETRY_OWNER_IDS:
+        com = np.asarray(plant.center_of_mass(data), dtype=np.float64)
+        diagnostic = plant.support_margin_diagnostics(data, com, active)
+        value = np.asarray(
+            [plant.support_margin(data, com, active)],
+            dtype=np.float64,
+        )
+        support_branch = (diagnostic.derivative_branch_certificate,)
+    else:
+        value = np.asarray(
+            [plant.center_of_mass_velocity(data)[2]],
+            dtype=np.float64,
+        )
+    if not np.isfinite(value).all():
+        raise DerivativeDomainError("direct owner evaluation is nonfinite")
+    value = _readonly_array(value)
+    owner_outputs = {owner_id: value}
+    return StateOwnerEvaluation(
+        owner_id=owner_id,
+        value=value,
+        owner_outputs=owner_outputs,
+        active_set=_direct_active_set(data, summary),
+        support_margin_branch_steps=support_branch,
+        snapshot_digest=snapshot_digest(snapshot),
+        owner_output_digest=_array_digest(value),
+        time=float(data.time),
+        qacc_warmstart_digest=_array_digest(data.qacc_warmstart),
+    )
+
+
 def _workspace(plant: Plant) -> _EvaluationWorkspace:
     return _EvaluationWorkspace(mujoco.MjData(plant.model), drive.DriveState())
 
@@ -997,8 +1129,8 @@ def _physical_branch_changed(base: ActiveSetFingerprint, sample: ActiveSetFinger
 
 
 def _support_margin_branch_rejection_reason(
-    base: TransitionEvaluation,
-    sample: TransitionEvaluation,
+    base: TransitionEvaluation | StateOwnerEvaluation,
+    sample: TransitionEvaluation | StateOwnerEvaluation,
 ) -> str:
     """Compare only Plant-provided support provenance, never geometry math."""
     base_steps = base.support_margin_branch_steps
@@ -1037,8 +1169,8 @@ def _support_margin_branch_rejection_reason(
 
 
 def _branch_rejection_reason(
-    base: TransitionEvaluation,
-    samples: Sequence[TransitionEvaluation],
+    base: TransitionEvaluation | StateOwnerEvaluation,
+    samples: Sequence[TransitionEvaluation | StateOwnerEvaluation],
     *,
     support_geometry: bool = False,
 ) -> str:
@@ -1053,8 +1185,8 @@ def _branch_rejection_reason(
 
 
 def _same_certificate_for_column(
-    base: TransitionEvaluation,
-    sample: TransitionEvaluation,
+    base: TransitionEvaluation | StateOwnerEvaluation,
+    sample: TransitionEvaluation | StateOwnerEvaluation,
     *,
     axis: str,
     index: int,
@@ -1075,6 +1207,11 @@ def _same_certificate_for_column(
         BACKWARD_FEASIBLE_SIDE,
     }:
         return False
+    if (
+        index >= len(base.active_set.action_branches)
+        or index >= len(sample.active_set.action_branches)
+    ):
+        return False
     if base.active_set.action_branches[index] != ACTION_BRANCH_BOUND_ACTIVE:
         return False
     if sample.active_set.action_branches[index] == ACTION_BRANCH_NEAR_KINK:
@@ -1091,10 +1228,10 @@ def _column_result(
     axis: str,
     index: int,
     step: float,
-    base: TransitionEvaluation,
-    plus: TransitionEvaluation | None,
-    minus: TransitionEvaluation | None,
-    samples: Sequence[TransitionEvaluation],
+    base: TransitionEvaluation | StateOwnerEvaluation,
+    plus: TransitionEvaluation | StateOwnerEvaluation | None,
+    minus: TransitionEvaluation | StateOwnerEvaluation | None,
+    samples: Sequence[TransitionEvaluation | StateOwnerEvaluation],
     block: str,
     plan: _StencilPlan,
     reason: str = "",
@@ -1155,6 +1292,169 @@ def _raise_invalid_columns(
     if invalid and not allow_nonsmooth:
         summary = ", ".join(f"{r.axis}[{r.index}]={r.reason}" for r in invalid)
         raise DerivativeDomainError(f"ordinary central derivative rejected: {summary}", reports=invalid)
+
+
+@dataclass(frozen=True)
+class _StateOwnerDerivativeCore:
+    """Common ML-241 state-column difference result for both owner modes."""
+
+    base: TransitionEvaluation | StateOwnerEvaluation
+    base_value: np.ndarray
+    jacobian: np.ndarray
+    reports: tuple[ColumnQualification, ...]
+    evaluations: int
+
+
+def _differentiate_owner_state_columns(
+    *,
+    plant: Plant,
+    base_snapshot: MacroSnapshot,
+    owner_id: str,
+    state_steps: Mapping[str, float],
+    state_indexes: Sequence[int],
+    evaluator: Callable[[MacroSnapshot], TransitionEvaluation | StateOwnerEvaluation],
+    support_geometry: bool,
+    base_evaluation: TransitionEvaluation | StateOwnerEvaluation | None = None,
+    allow_nonsmooth: bool = False,
+) -> _StateOwnerDerivativeCore:
+    """Run the certified state FD policy against an owner evaluator strategy."""
+
+    step_vector = _state_step_vector(state_steps)
+    indexes = tuple(int(index) for index in state_indexes)
+    base = evaluator(base_snapshot) if base_evaluation is None else base_evaluation
+    base_value = np.asarray(base.owner_outputs[owner_id], dtype=np.float64).reshape(-1)
+    jacobian = np.full(
+        (base_value.size, TANGENT_DIMENSION),
+        np.nan,
+        dtype=np.float64,
+    )
+    reports: list[ColumnQualification] = []
+    evaluations = 1
+
+    def exception_reason(exc: Exception) -> str:
+        message = str(exc).lower()
+        if "nan" in message or "inf" in message or "finite" in message:
+            return NONFINITE_EVALUATION
+        if isinstance(exc, (ValueError, RuntimeError)):
+            return MANIFOLD_INVALID
+        return f"PERTURBATION_REJECTED:{type(exc).__name__}"
+
+    for index in indexes:
+        h = float(step_vector[index])
+        plan = _state_stencil_plan(base_snapshot, index, h)
+        samples: list[TransitionEvaluation | StateOwnerEvaluation] = []
+        offset_to_sample: dict[
+            int, TransitionEvaluation | StateOwnerEvaluation
+        ] = {}
+        reason = plan.reason
+        if plan.valid:
+            for offset in plan.offsets:
+                delta = np.zeros(TANGENT_DIMENSION, dtype=np.float64)
+                delta[index] = float(offset) * h
+                try:
+                    candidate = boxplus(base_snapshot, delta, model=plant.model)
+                    evaluation = evaluator(candidate)
+                    samples.append(evaluation)
+                    offset_to_sample[offset] = evaluation
+                    evaluations += 1
+                except (
+                    DerivativeDomainError,
+                    ValueError,
+                    RuntimeError,
+                    drive.DriveModelError,
+                ) as exc:
+                    reason = exception_reason(exc)
+                    break
+        report = _column_result(
+            axis="OWNER_STATE",
+            index=index,
+            step=h,
+            base=base,
+            plus=offset_to_sample.get(1),
+            minus=offset_to_sample.get(-1),
+            samples=samples,
+            block=_STATE_BLOCK_FOR_INDEX[index],
+            plan=plan,
+            reason=reason,
+            support_geometry=support_geometry,
+        )
+        if report.valid:
+            try:
+                values = [
+                    np.asarray(sample.owner_outputs[owner_id]) - base_value
+                    for sample in samples
+                ]
+                value = _difference_from_samples(values, plan, h)
+                if not np.isfinite(value).all():
+                    raise FloatingPointError("owner state derivative is non-finite")
+                jacobian[:, index] = value
+            except (
+                DerivativeDomainError,
+                ValueError,
+                RuntimeError,
+                FloatingPointError,
+            ) as exc:
+                report = replace(
+                    report,
+                    valid=False,
+                    reason=(
+                        NONFINITE_EVALUATION
+                        if isinstance(exc, FloatingPointError)
+                        else MANIFOLD_INVALID
+                    ),
+                )
+        reports.append(report)
+
+    _raise_invalid_columns(reports, allow_nonsmooth=allow_nonsmooth)
+    selected_finite = all(
+        np.isfinite(jacobian[:, index]).all() for index in indexes
+    )
+    if not allow_nonsmooth and not selected_finite:
+        raise DerivativeDomainError(
+            "qualified owner-output state sensitivity contains NaN or Inf"
+        )
+    return _StateOwnerDerivativeCore(
+        base=base,
+        base_value=base_value,
+        jacobian=jacobian,
+        reports=tuple(reports),
+        evaluations=evaluations,
+    )
+
+
+def _direct_qacc_receipt(
+    *,
+    reports: Sequence[ColumnQualification],
+    jacobian: np.ndarray,
+) -> tuple[str, tuple[int, ...], tuple[tuple[str, float], ...]]:
+    """Seal only a completed direct 21-column numerical null qualification."""
+
+    qacc_columns = tuple(range(WARMSTART_SLICE.start, WARMSTART_SLICE.stop))
+    by_index = {int(report.index): report for report in reports}
+    if any(index not in by_index for index in qacc_columns):
+        return QACC_DERIVATIVE_UNADJUDICATED, (), ()
+    if any(not by_index[index].valid for index in qacc_columns):
+        return QACC_DERIVATIVE_UNADJUDICATED, (), ()
+    translation_bound = float(
+        np.max(np.abs(jacobian[:, 111:114]))
+    )
+    rotation_joint_bound = float(
+        np.max(np.abs(jacobian[:, 114:132]))
+    )
+    if any(
+        not np.isfinite(jacobian[:, index]).all()
+        or np.any(np.abs(jacobian[:, index]) > 1.0e-12)
+        for index in qacc_columns
+    ):
+        return QACC_DERIVATIVE_UNADJUDICATED, (), ()
+    return (
+        QACC_DERIVATIVE_NUMERICALLY_NULL,
+        qacc_columns,
+        (
+            ("qacc_translation", translation_bound),
+            ("qacc_rotation_joint", rotation_joint_bound),
+        ),
+    )
 
 
 def linearize_step_5ms(
@@ -1353,6 +1653,96 @@ def linearize_step_5ms(
     )
 
 
+def differentiate_state_owner_output(
+    *,
+    plant: Plant,
+    base_snapshot: MacroSnapshot,
+    owner_id: str,
+    state_steps: Mapping[str, float],
+    state_columns: Sequence[int] | None = None,
+    allow_nonsmooth: bool = False,
+) -> OwnerOutputSensitivity:
+    """Differentiate an approved owner as a function of the current state.
+
+    This is the state-only sibling of :func:`differentiate_owner_output`.
+    Both entry points use the same ML-241 stencil, manifold perturbation,
+    branch-certificate, and finite-difference core; only their evaluator
+    strategy differs.
+    """
+
+    owner_id = str(owner_id)
+    if owner_id not in _DIRECT_STATE_OWNER_IDS:
+        raise DerivativeDomainError(
+            f"direct state owner is not approved: {owner_id}"
+        )
+    state_indexes = (
+        tuple(range(TANGENT_DIMENSION))
+        if state_columns is None
+        else tuple(int(index) for index in state_columns)
+    )
+    if any(index < 0 or index >= TANGENT_DIMENSION for index in state_indexes):
+        raise DerivativeDomainError(
+            "direct state owner column index outside [0, 132)"
+        )
+    if len(set(state_indexes)) != len(state_indexes):
+        raise DerivativeDomainError(
+            "duplicate direct state owner derivative column index"
+        )
+
+    core = _differentiate_owner_state_columns(
+        plant=plant,
+        base_snapshot=base_snapshot,
+        owner_id=owner_id,
+        state_steps=state_steps,
+        state_indexes=state_indexes,
+        evaluator=lambda snapshot: evaluate_state_owner(
+            plant=plant,
+            snapshot=snapshot,
+            owner_id=owner_id,
+        ),
+        support_geometry=owner_id in _SUPPORT_GEOMETRY_OWNER_IDS,
+        allow_nonsmooth=allow_nonsmooth,
+    )
+    base = core.base
+    if not isinstance(base, StateOwnerEvaluation):  # pragma: no cover
+        raise DerivativeDomainError("direct owner evaluator returned a transition result")
+    state_validity_values = np.zeros(TANGENT_DIMENSION, dtype=bool)
+    for report in core.reports:
+        state_validity_values[report.index] = report.valid
+    action_jacobian = np.full((core.base_value.size, ACTION_DIM), np.nan, dtype=np.float64)
+    qacc_disposition, qacc_zero_columns, qacc_bounds = _direct_qacc_receipt(
+        reports=core.reports,
+        jacobian=core.jacobian,
+    )
+    base_branch_certificate = (
+        base.support_margin_branch_steps[0]
+        if len(base.support_margin_branch_steps) == 1
+        else None
+    )
+    return OwnerOutputSensitivity(
+        owner_id=owner_id,
+        base_value=_readonly_array(core.base_value),
+        state_jacobian=_readonly_array(core.jacobian),
+        action_jacobian=_readonly_array(action_jacobian),
+        state_validity=_readonly_array(state_validity_values, dtype=bool),
+        action_validity=_readonly_array(np.zeros(ACTION_DIM, dtype=bool), dtype=bool),
+        state_columns=core.reports,
+        action_columns=(),
+        base_snapshot_digest=base.snapshot_digest,
+        base_next_snapshot_digest="",
+        state_step_metadata={key: float(state_steps[key]) for key in STATE_STEP_BLOCKS},
+        action_step_metadata=(),
+        scheme=CENTRAL_DIFFERENCE_SCHEME,
+        transition_evaluation_count=core.evaluations,
+        evaluation_mode=DIRECT_STATE_OWNER,
+        owner_output_digest=base.owner_output_digest,
+        base_branch_certificate=base_branch_certificate,
+        qacc_derivative_disposition=qacc_disposition,
+        qacc_zero_columns=qacc_zero_columns,
+        qacc_absolute_error_bound=qacc_bounds,
+    )
+
+
 def differentiate_owner_output(
     *,
     plant: Plant,
@@ -1376,7 +1766,6 @@ def differentiate_owner_output(
     if owner_id not in OWNER_OUTPUT_IDS:
         raise DerivativeDomainError(f"owner output is not approved: {owner_id}")
     raw = _finite_vector(raw_action, ACTION_DIM, "raw action")
-    step_vector = _state_step_vector(state_steps)
     action_step_vector = _action_step_vector(action_steps)
     state_indexes = tuple(range(TANGENT_DIMENSION)) if state_columns is None else tuple(int(i) for i in state_columns)
     action_indexes = tuple(range(ACTION_DIM)) if action_columns is None else tuple(int(i) for i in action_columns)
@@ -1401,9 +1790,7 @@ def differentiate_owner_output(
     ):
         raise DerivativeDomainError("COP owner output is not differentiable while COP validity is false")
 
-    state_shape = (base_value.size, TANGENT_DIMENSION)
     action_shape = (base_value.size, ACTION_DIM)
-    state_jacobian = np.full(state_shape, np.nan, dtype=np.float64)
     action_jacobian = np.full(action_shape, np.nan, dtype=np.float64)
     state_reports: list[ColumnQualification] = []
     action_reports: list[ColumnQualification] = []
@@ -1417,54 +1804,28 @@ def differentiate_owner_output(
             return MANIFOLD_INVALID
         return f"PERTURBATION_REJECTED:{type(exc).__name__}"
 
-    for index in state_indexes:
-        h = float(step_vector[index])
-        plan = _state_stencil_plan(base_snapshot, index, h)
-        samples: list[TransitionEvaluation] = []
-        offset_to_sample: dict[int, TransitionEvaluation] = {}
-        reason = plan.reason
-        if plan.valid:
-            for offset in plan.offsets:
-                delta = np.zeros(TANGENT_DIMENSION, dtype=np.float64)
-                delta[index] = float(offset) * h
-                try:
-                    candidate = boxplus(base_snapshot, delta, model=plant.model)
-                    evaluation = evaluate_wrapped_step_5ms(
-                        plant=plant,
-                        snapshot=candidate,
-                        raw_action=raw,
-                        workspace=work,
-                        owner_ids=(owner_id,),
-                    )
-                    samples.append(evaluation)
-                    offset_to_sample[offset] = evaluation
-                    evaluations += 1
-                except (DerivativeDomainError, ValueError, RuntimeError, drive.DriveModelError) as exc:
-                    reason = exception_reason(exc)
-                    break
-        report = _column_result(
-            axis="OWNER_STATE",
-            index=index,
-            step=h,
-            base=base,
-            plus=offset_to_sample.get(1),
-            minus=offset_to_sample.get(-1),
-            samples=samples,
-            block=_STATE_BLOCK_FOR_INDEX[index],
-            plan=plan,
-            reason=reason,
-            support_geometry=owner_id in _SUPPORT_GEOMETRY_OWNER_IDS,
-        )
-        if report.valid:
-            try:
-                values = [np.asarray(sample.owner_outputs[owner_id]) - base_value for sample in samples]
-                value = _difference_from_samples(values, plan, h)
-                if not np.isfinite(value).all():
-                    raise FloatingPointError("owner state derivative is non-finite")
-                state_jacobian[:, index] = value
-            except (DerivativeDomainError, ValueError, RuntimeError, FloatingPointError) as exc:
-                report = replace(report, valid=False, reason=NONFINITE_EVALUATION if isinstance(exc, FloatingPointError) else MANIFOLD_INVALID)
-        state_reports.append(report)
+    state_core = _differentiate_owner_state_columns(
+        plant=plant,
+        base_snapshot=base_snapshot,
+        owner_id=owner_id,
+        state_steps=state_steps,
+        state_indexes=state_indexes,
+        evaluator=lambda snapshot: evaluate_wrapped_step_5ms(
+            plant=plant,
+            snapshot=snapshot,
+            raw_action=raw,
+            workspace=work,
+            owner_ids=(owner_id,),
+        ),
+        support_geometry=owner_id in _SUPPORT_GEOMETRY_OWNER_IDS,
+        base_evaluation=base,
+        allow_nonsmooth=allow_nonsmooth,
+    )
+    base = state_core.base
+    base_value = state_core.base_value
+    state_jacobian = state_core.jacobian
+    state_reports = list(state_core.reports)
+    evaluations = state_core.evaluations
 
     for index in action_indexes:
         h = float(action_step_vector[index])
@@ -1550,6 +1911,8 @@ def differentiate_owner_output(
         action_step_metadata=tuple(float(value) for value in action_step_vector),
         scheme=CENTRAL_DIFFERENCE_SCHEME,
         transition_evaluation_count=evaluations,
+        evaluation_mode=TRANSITION_WRAPPED_OWNER,
+        owner_output_digest=_array_digest(base_value),
     )
 
 
@@ -1564,6 +1927,7 @@ __all__ = [
     "CENTRAL_DIFFERENCE_SCHEME",
     "CONSTRAINT_CATALOG_ID",
     "DERIVATIVE_API_VERSION",
+    "DIRECT_STATE_OWNER",
     "FIXED_ELIMINATED",
     "FORWARD_FEASIBLE_SIDE",
     "MANIFOLD_INVALID",
@@ -1585,14 +1949,18 @@ __all__ = [
     "ColumnQualification",
     "OWNER_OUTPUT_IDS",
     "OwnerOutputSensitivity",
+    "StateOwnerEvaluation",
     "SNAPSHOT_SCHEMA_ID",
     "STATE_STEP_BLOCKS",
     "TANGENT_LAYOUT_ID",
+    "TRANSITION_WRAPPED_OWNER",
     "TRUE_KINK_INVALID",
     "TransitionEvaluation",
     "WrappedLinearization",
     "classify_action_projection",
+    "differentiate_state_owner_output",
     "differentiate_owner_output",
+    "evaluate_state_owner",
     "evaluate_wrapped_step_5ms",
     "linearize_step_5ms",
     "snapshot_digest",

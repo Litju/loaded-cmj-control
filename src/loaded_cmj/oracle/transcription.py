@@ -944,6 +944,20 @@ class DirectMultipleShootingProblem:
         except (ValueError, RuntimeError) as exc:
             raise TranscriptionError(f"knot {knot} leaves the frozen tangent chart") from exc
 
+    def reconstruct_knot_state(
+        self,
+        knot: int,
+        delta: Sequence[float] | np.ndarray,
+    ) -> MacroSnapshot:
+        """Return a read-only reconstructed noninitial knot state.
+
+        This is the public composition seam for the already-authoritative
+        tangent reconstruction.  It adds no decision, constraint, bound, or
+        sparse-structure semantics.
+        """
+
+        return self._reconstruct_state(knot, np.asarray(delta, dtype=np.float64))
+
     def _propagate(self, state: MacroSnapshot, raw_action: np.ndarray) -> MacroSnapshot:
         return advance_snapshot_exact(
             plant=self.plant,
