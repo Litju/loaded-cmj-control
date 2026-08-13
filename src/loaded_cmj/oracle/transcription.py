@@ -3,7 +3,8 @@
 The module stores local tangent offsets around immutable :class:`MacroSnapshot`
 references.  It evaluates defects by restoring a reconstructed snapshot and
 calling the shared five-millisecond transition.  It contains no solver,
-objective, physical equation, or alternate state representation.
+physical equation, or alternate state representation.  Its optional Phase-I
+objective is the scalar rho epigraph variable and does not add physical cost.
 """
 
 from __future__ import annotations
@@ -60,6 +61,9 @@ WITNESS_FIXED_ACTION_INDICES = tuple(
     index for index in FULL_ACTIVE_ACTION_INDICES if index not in WITNESS_FREE_ACTION_INDICES
 )
 WITNESS_FIXED_ACTION_VALUES = tuple((index, 0.0) for index in WITNESS_FIXED_ACTION_INDICES)
+PHASE_I_LENGTH_SCALE_M = 1.0
+PHASE_I_LENGTH_UNITS = "m"
+PHASE_I_EPIGRAPH_GROUP = "phase_i_epigraph"
 
 # These are the native Euclidean coordinates owned by the DriveState/snapshot
 # contract.  Configuration, cached SO(3), velocities, and qacc remain
@@ -191,11 +195,14 @@ class ConstraintRow:
     sense: str
     differentiability: str
     slack_decision_index: int | None = None
+    phase_i_scale: float | None = None
+    phase_i_units: str | None = None
+    rho_decision_index: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class DecisionLayout:
-    """Frozen state/action/slack decision-vector slices.
+    """Frozen state/action/slack/rho decision-vector slices.
 
     Knot zero is an exact fixed parameter supplied by the problem owner.  The
     first decision block is therefore the active raw action for interval zero,
@@ -211,6 +218,7 @@ class DecisionLayout:
     active_action_indices: tuple[int, ...] = FULL_ACTIVE_ACTION_INDICES
     fixed_action_values: tuple[tuple[int, float], ...] = ()
     layout_id: str = FULL_LAYOUT
+    include_phase_i_rho: bool = False
 
     def __post_init__(self) -> None:
         if int(self.horizon) < 1:
@@ -277,6 +285,12 @@ class DecisionLayout:
 
     @property
     def total_dimension(self) -> int:
+        return self.base_dimension + len(self.slack_specs) + int(self.include_phase_i_rho)
+
+    @property
+    def rho_decision_index(self) -> int | None:
+        if not self.include_phase_i_rho:
+            return None
         return self.base_dimension + len(self.slack_specs)
 
     def state_slice(self, knot_index: int) -> slice:
@@ -315,44 +329,59 @@ class DecisionLayout:
             index = slack_index.decision_index
         else:
             index = int(slack_index)
-        if index < self.base_dimension or index >= self.total_dimension:
+        slack_end = self.base_dimension + len(self.slack_specs)
+        if index < self.base_dimension or index >= slack_end:
             raise TranscriptionError("slack index is outside the frozen slack suffix")
         return slice(index, index + 1)
+
+    def rho_slice(self) -> slice:
+        if self.rho_decision_index is None:
+            raise TranscriptionError("Phase-I rho is not present in this decision layout")
+        return slice(self.rho_decision_index, self.rho_decision_index + 1)
 
     def pack_decision(
         self,
         state_deltas: Sequence[np.ndarray],
         actions: Sequence[np.ndarray],
         slacks: Sequence[float] = (),
+        *,
+        rho: float = 0.0,
     ) -> np.ndarray:
         states = _validate_matrix_sequence(state_deltas, self.horizon, STATE_DIMENSION, "state deltas x[1:N]")
         commands = _validate_matrix_sequence(
             actions, self.horizon, self.active_action_dimension, "active raw actions"
         )
         slack_values = _validate_slacks(slacks, len(self.slack_specs))
+        rho_value = _validate_rho(rho)
         result = np.empty(self.total_dimension, dtype=np.float64)
         for k in range(self.horizon):
             result[self.action_slice(k)] = commands[k]
             result[self.state_slice(k + 1)] = states[k]
+        slack_end = self.base_dimension + len(self.slack_specs)
         if slack_values.size:
-            result[self.base_dimension:] = slack_values
+            result[self.base_dimension:slack_end] = slack_values
+        if self.rho_decision_index is not None:
+            result[self.rho_decision_index] = rho_value
         return result
 
     def unpack_decision(self, z: Sequence[float] | np.ndarray) -> "UnpackedDecision":
         value = _validate_vector(z, self.total_dimension, "decision vector")
         states = tuple(value[self.state_slice(k)].copy() for k in self.state_knot_indices)
         actions = tuple(value[self.action_slice(k)].copy() for k in range(self.horizon))
-        slacks = value[self.base_dimension:].copy()
-        return UnpackedDecision(states=states, actions=actions, slacks=slacks)
+        slack_end = self.base_dimension + len(self.slack_specs)
+        slacks = value[self.base_dimension:slack_end].copy()
+        rho = None if self.rho_decision_index is None else float(value[self.rho_decision_index])
+        return UnpackedDecision(states=states, actions=actions, slacks=slacks, rho=rho)
 
 
 @dataclass(frozen=True, slots=True)
 class UnpackedDecision:
-    """Structured tangent/action/slack view of one solver vector."""
+    """Structured tangent/action/slack/rho view of one decision vector."""
 
     states: tuple[np.ndarray, ...]
     actions: tuple[np.ndarray, ...]
     slacks: np.ndarray
+    rho: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -391,6 +420,9 @@ class DirectionalCheck:
 
 DerivativeProvider = Callable[..., WrappedLinearization]
 ConstraintEvaluator = Callable[[ConstraintRow, np.ndarray, "DirectMultipleShootingProblem"], float | np.ndarray]
+ConstraintJacobianEvaluator = Callable[
+    [ConstraintRow, np.ndarray, "DirectMultipleShootingProblem"], Sequence[float] | np.ndarray
+]
 
 
 def _index(value: int, upper: int, label: str) -> int:
@@ -436,6 +468,22 @@ def _validate_slacks(values: Sequence[float], count: int) -> np.ndarray:
     if np.any(result < 0.0):
         raise TranscriptionError("elastic slacks must be nonnegative")
     return result.copy()
+
+
+def _validate_rho(value: float) -> float:
+    try:
+        result = float(value)
+    except (TypeError, ValueError) as exc:
+        raise TranscriptionError("Phase-I rho must be a scalar") from exc
+    if not np.isfinite(result) or result < 0.0:
+        raise TranscriptionError("Phase-I rho must be finite and nonnegative")
+    return result
+
+
+def _phase_i_epigraph_jacobian_pair(row: ConstraintRow) -> tuple[float, float]:
+    if row.slack_decision_index is None or row.rho_decision_index is None or row.phase_i_scale is None:
+        raise TranscriptionError("Phase-I epigraph row is missing its slack, rho, or scale metadata")
+    return -1.0, float(row.phase_i_scale)
 
 
 def _drive_from_snapshot(snapshot: MacroSnapshot) -> drive.DriveState:
@@ -656,8 +704,11 @@ class DirectMultipleShootingProblem:
             active_action_indices=active_action_indices,
             fixed_action_values=fixed_action_values,
             layout_id=action_layout,
+            include_phase_i_rho=bool(self._elastic_bindings),
         )
-        self.constraint_rows = self._build_constraint_rows()
+        physical_rows = self._build_constraint_rows()
+        self.constraint_rows = physical_rows
+        self._phase_i_epigraph_rows = self._build_phase_i_epigraph_rows(physical_rows)
         self._sealed = True
 
     @property
@@ -666,7 +717,7 @@ class DirectMultipleShootingProblem:
 
     @property
     def constraint_count(self) -> int:
-        return len(self.constraint_rows)
+        return len(self.constraint_rows) + len(self._phase_i_epigraph_rows)
 
     @property
     def dynamics_row_count(self) -> int:
@@ -690,6 +741,14 @@ class DirectMultipleShootingProblem:
     def fixed_action_indices(self) -> tuple[int, ...]:
         return tuple(index for index, _ in self.layout.fixed_action_values)
 
+    @property
+    def rho_variable_count(self) -> int:
+        return int(self.layout.rho_decision_index is not None)
+
+    @property
+    def rho_decision_index(self) -> int | None:
+        return self.layout.rho_decision_index
+
     def reconstruct_action(
         self, active_action: Sequence[float] | np.ndarray
     ) -> np.ndarray:
@@ -697,7 +756,10 @@ class DirectMultipleShootingProblem:
 
     @property
     def smooth_nlp_constraint_count(self) -> int:
-        return sum(row.group in {"smooth_path", "smooth_guard", "smooth_terminal"} for row in self.constraint_rows)
+        return sum(
+            row.group in {"smooth_path", "smooth_guard", "smooth_terminal"}
+            for row in self.constraint_rows
+        ) + len(self._phase_i_epigraph_rows)
 
     @property
     def postcheck_discrete_count(self) -> int:
@@ -710,6 +772,35 @@ class DirectMultipleShootingProblem:
     @property
     def elastic_slack_count(self) -> int:
         return len(self.layout.slack_specs)
+
+    @property
+    def phase_i_scale_m(self) -> float:
+        return PHASE_I_LENGTH_SCALE_M
+
+    @property
+    def phase_i_epigraph_rows(self) -> tuple[ConstraintRow, ...]:
+        return self._phase_i_epigraph_rows
+
+    @property
+    def phase_i_epigraph_row_count(self) -> int:
+        return len(self.phase_i_epigraph_rows)
+
+    def objective(self, z: Sequence[float] | np.ndarray) -> float:
+        """Return the pure Phase-I feasibility objective ``rho``."""
+
+        value = _validate_vector(z, self.variable_count, "decision vector")
+        if self.rho_decision_index is None:
+            return 0.0
+        return float(value[self.rho_decision_index])
+
+    def objective_gradient(self, z: Sequence[float] | np.ndarray) -> np.ndarray:
+        """Return the exact gradient of the pure Phase-I objective."""
+
+        _validate_vector(z, self.variable_count, "decision vector")
+        gradient = np.zeros(self.variable_count, dtype=np.float64)
+        if self.rho_decision_index is not None:
+            gradient[self.rho_decision_index] = 1.0
+        return gradient
 
     @property
     def elastic_slack_schema(self) -> tuple[dict[str, Any], ...]:
@@ -905,6 +996,34 @@ class DirectMultipleShootingProblem:
                     )
         return tuple(rows)
 
+    def _build_phase_i_epigraph_rows(
+        self, physical_rows: tuple[ConstraintRow, ...]
+    ) -> tuple[ConstraintRow, ...]:
+        if self.rho_decision_index is None:
+            return ()
+        rows: list[ConstraintRow] = []
+        for slack in self.layout.slack_specs:
+            kind, raw_index = slack.row_instance.split(":", 1)
+            index = int(raw_index)
+            rows.append(
+                ConstraintRow(
+                    row_index=len(physical_rows) + len(rows),
+                    group=PHASE_I_EPIGRAPH_GROUP,
+                    constraint_id=slack.constraint_id,
+                    component_index=0,
+                    interval_index=index if kind == "interval" else None,
+                    knot_index=index if kind == "knot" else None,
+                    support=(),
+                    sense="MARGIN_G_GE_0",
+                    differentiability="SMOOTH_MODE_LOCAL",
+                    slack_decision_index=slack.decision_index,
+                    phase_i_scale=PHASE_I_LENGTH_SCALE_M,
+                    phase_i_units=PHASE_I_LENGTH_UNITS,
+                    rho_decision_index=self.rho_decision_index,
+                )
+            )
+        return tuple(rows)
+
     def _slack_index(self, constraint_id: str, interval: int | None, knot: int | None) -> int | None:
         wanted = f"knot:{knot}" if knot is not None else f"interval:{interval}"
         for slack in self.layout.slack_specs if hasattr(self, "layout") else self._elastic_bindings:
@@ -930,8 +1049,10 @@ class DirectMultipleShootingProblem:
         state_deltas: Sequence[np.ndarray],
         actions: Sequence[np.ndarray],
         slacks: Sequence[float] = (),
+        *,
+        rho: float = 0.0,
     ) -> np.ndarray:
-        return self.layout.pack_decision(state_deltas, actions, slacks)
+        return self.layout.pack_decision(state_deltas, actions, slacks, rho=rho)
 
     def unpack_decision(self, z: Sequence[float] | np.ndarray) -> UnpackedDecision:
         return self.layout.unpack_decision(z)
@@ -1013,6 +1134,11 @@ class DirectMultipleShootingProblem:
             residuals[row.row_index] = float(row_value[0])
             if row.slack_decision_index is not None:
                 residuals[row.row_index] += value[row.slack_decision_index]
+        for row in self._phase_i_epigraph_rows:
+            residuals[row.row_index] = (
+                value[row.rho_decision_index] * row.phase_i_scale
+                - value[row.slack_decision_index]
+            )
         return residuals
 
     def _derivatives(
@@ -1117,7 +1243,23 @@ class DirectMultipleShootingProblem:
         ):
             raise DerivativeContractError("qualified-zero qacc columns were altered")
 
-    def jacobian_values(self, z: Sequence[float] | np.ndarray) -> np.ndarray:
+    def _catalog_row_jacobian_width(self, row: ConstraintRow) -> int:
+        width = 0
+        for kind, index in row.support:
+            if kind == "state":
+                width += 0 if index == 0 else STATE_DIMENSION
+            elif kind == "action":
+                width += self.layout.active_action_dimension
+            else:
+                raise TranscriptionError(f"unknown Jacobian support kind {kind!r}")
+        return width + int(row.slack_decision_index is not None)
+
+    def jacobian_values(
+        self,
+        z: Sequence[float] | np.ndarray,
+        *,
+        catalog_jacobian_evaluator: ConstraintJacobianEvaluator | None = None,
+    ) -> np.ndarray:
         value = _validate_vector(z, self.variable_count, "decision vector")
         entries: list[float] = []
         active = np.asarray(self.layout.active_action_indices, dtype=np.int64)
@@ -1143,9 +1285,21 @@ class DirectMultipleShootingProblem:
                 entries.extend(J_action[component].tolist())
                 entries.extend(J_next[component].tolist())
         for row in self.constraint_rows[self.dynamics_row_count :]:
-            raise ConstraintEvaluationRequired(
-                f"no source-owner Jacobian adapter supplied for catalog row {row.constraint_id}"
-            )
+            if catalog_jacobian_evaluator is None:
+                raise ConstraintEvaluationRequired(
+                    f"no source-owner Jacobian adapter supplied for catalog row {row.constraint_id}"
+                )
+            row_values = np.asarray(
+                catalog_jacobian_evaluator(row, value, self), dtype=np.float64
+            ).reshape(-1)
+            expected_width = self._catalog_row_jacobian_width(row)
+            if row_values.shape != (expected_width,) or not np.isfinite(row_values).all():
+                raise ConstraintEvaluationRequired(
+                    f"Jacobian evaluator returned invalid values for {row.constraint_id}"
+                )
+            entries.extend(row_values.tolist())
+        for row in self._phase_i_epigraph_rows:
+            entries.extend(_phase_i_epigraph_jacobian_pair(row))
         expected = len(self.jacobian_structure()[0])
         if len(entries) != expected:
             raise TranscriptionError(f"Jacobian value count {len(entries)} != structure count {expected}")
@@ -1199,7 +1353,20 @@ class DirectMultipleShootingProblem:
             if row.slack_decision_index is not None:
                 rows.append(row.row_index)
                 cols.append(row.slack_decision_index)
+        for row in self._phase_i_epigraph_rows:
+            rows.extend([row.row_index, row.row_index])
+            cols.extend([row.slack_decision_index, row.rho_decision_index])
         return np.asarray(rows, dtype=np.int64), np.asarray(cols, dtype=np.int64)
+
+    def phase_i_epigraph_jacobian_values(self) -> np.ndarray:
+        """Return the exact sparse values for the rho epigraph rows."""
+
+        entries = [
+            value
+            for row in self.phase_i_epigraph_rows
+            for value in _phase_i_epigraph_jacobian_pair(row)
+        ]
+        return np.asarray(entries, dtype=np.float64)
 
     def jacobian_structure_hash(self) -> str:
         rows, cols = self.jacobian_structure()
@@ -1232,6 +1399,8 @@ class DirectMultipleShootingProblem:
                 lower[start:stop] = physical_lower - values
         for slack in self.layout.slack_specs:
             lower[slack.decision_index] = 0.0
+        if self.rho_decision_index is not None:
+            lower[self.rho_decision_index] = 0.0
         return lower
 
     def variable_upper_bounds(self) -> np.ndarray:
@@ -1260,6 +1429,8 @@ class DirectMultipleShootingProblem:
                 lower[row.row_index] = 0.0
             elif row.sense == "EQUALITY_H_EQ_0":
                 lower[row.row_index] = 0.0
+        for row in self._phase_i_epigraph_rows:
+            lower[row.row_index] = 0.0
         return lower
 
     def constraint_upper_bounds(self) -> np.ndarray:
@@ -1283,9 +1454,20 @@ class DirectMultipleShootingProblem:
             "layout_id": self.layout.layout_id,
             "horizon": self.horizon,
             "control_dt_s": self.control_dt,
-            "ordering": "u_active[0], delta_x[1], ..., u_active[N-1], delta_x[N], slack_suffix",
+            "ordering": (
+                "u_active[0], delta_x[1], ..., u_active[N-1], delta_x[N], slack_suffix, rho"
+                if self.rho_decision_index is not None
+                else "u_active[0], delta_x[1], ..., u_active[N-1], delta_x[N], slack_suffix"
+            ),
             "base_dimension": self.layout.base_dimension,
             "total_dimension": self.layout.total_dimension,
+            "rho_variable_count": self.rho_variable_count,
+            "rho_decision_index": self.rho_decision_index,
+            "rho_slice": (
+                None
+                if self.rho_decision_index is None
+                else self.layout.rho_slice().indices(self.layout.total_dimension)
+            ),
             "initial_state_parameter": {
                 "knot_index": 0,
                 "role": "FIXED_PARAMETER",
@@ -1299,8 +1481,11 @@ class DirectMultipleShootingProblem:
         }
 
     def row_layout_record(self) -> dict[str, Any]:
+        rows = self.constraint_rows + self._phase_i_epigraph_rows
         return {
             "dynamics_row_count": self.dynamics_row_count,
+            "physical_constraint_row_count": len(self.constraint_rows),
+            "phase_i_epigraph_row_count": len(self._phase_i_epigraph_rows),
             "constraint_count": self.constraint_count,
             "rows": [
                 {
@@ -1314,8 +1499,11 @@ class DirectMultipleShootingProblem:
                     "sense": row.sense,
                     "differentiability": row.differentiability,
                     "slack_decision_index": row.slack_decision_index,
+                    "phase_i_scale": row.phase_i_scale,
+                    "phase_i_units": row.phase_i_units,
+                    "rho_decision_index": row.rho_decision_index,
                 }
-                for row in self.constraint_rows
+                for row in rows
             ],
         }
 
@@ -1393,10 +1581,12 @@ def pack_decision(
     state_deltas: Sequence[np.ndarray],
     actions: Sequence[np.ndarray],
     slacks: Sequence[float] = (),
+    *,
+    rho: float = 0.0,
 ) -> np.ndarray:
     """Pack through the one frozen layout owner."""
 
-    return layout.pack_decision(state_deltas, actions, slacks)
+    return layout.pack_decision(state_deltas, actions, slacks, rho=rho)
 
 
 def unpack_decision(layout: DecisionLayout, z: Sequence[float] | np.ndarray) -> UnpackedDecision:
@@ -1413,6 +1603,7 @@ __all__ = [
     "APPROVED_ELASTIC_CONSTRAINT_IDS",
     "CONTROL_DT_S",
     "ConstraintEvaluationRequired",
+    "ConstraintJacobianEvaluator",
     "ConstraintRow",
     "DecisionLayout",
     "DerivativeContractError",
@@ -1425,6 +1616,9 @@ __all__ = [
     "IntervalEvaluation",
     "ML241_ACTION_STEP",
     "ML241_STATE_STEPS",
+    "PHASE_I_EPIGRAPH_GROUP",
+    "PHASE_I_LENGTH_SCALE_M",
+    "PHASE_I_LENGTH_UNITS",
     "QACC_DERIVATIVE_DISPOSITION",
     "QACC_ERROR_BOUNDS",
     "QACC_ZERO_COLUMNS",

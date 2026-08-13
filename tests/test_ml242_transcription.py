@@ -50,6 +50,8 @@ from test_ml238_macro_state import fixtures as ml238_fixtures
 # Recomputed from the unmodified ML212C entry tree before this gate's edit.
 PRE_G35_FULL_STRUCTURE_HASH = "3d8ba72e23559d5c236c4be0734704f20efbfd0cbc181536b4b82f838d32a3de"
 PRE_G35_WITNESS_STRUCTURE_HASH = "95881e8313b5ffbb10aa86e5e287607fc9de781f0f5afab452de853b6325c156"
+POST_G5_FULL_STRUCTURE_HASH = "a444afff25037147acd39a1c1d12130a129971aade518921cdcb8d34f87e2f63"
+POST_G5_WITNESS_STRUCTURE_HASH = "d196ea16e9c531751c939adca1415623dd54ac0204cec82e32b621df24b0022d"
 AUTHORITATIVE_E3_WITNESS_SEED = (
     (0, 0.90000000000000002),
     (3, 0.16806307252533137),
@@ -487,29 +489,40 @@ def test_r2_full_and_witness_sparse_receipts_are_derived_from_ownership(qualifie
                 else:
                     raise AssertionError(f"unexpected support kind: {kind}")
             total += row.slack_decision_index is not None
+            total += row.rho_decision_index is not None
         return total
 
     for problem in (full, witness):
         rows, cols = problem.jacobian_structure()
         assert rows.size == cols.size
-        assert rows.size == expected_dynamic_nnz(problem) + expected_extra_nnz(problem)
-        assert problem.constraint_count == problem.dynamics_row_count + 43
-        assert problem.variable_count == problem.layout.base_dimension + problem.elastic_slack_count
+        assert rows.size == (
+            expected_dynamic_nnz(problem)
+            + expected_extra_nnz(problem)
+            + 2 * problem.phase_i_epigraph_row_count
+        )
+        assert problem.constraint_count == (
+            problem.dynamics_row_count + 43 + problem.phase_i_epigraph_row_count
+        )
+        assert problem.variable_count == (
+            problem.layout.base_dimension
+            + problem.elastic_slack_count
+            + problem.rho_variable_count
+        )
         expected_hash = (
-            PRE_G35_FULL_STRUCTURE_HASH
+            POST_G5_FULL_STRUCTURE_HASH
             if problem.action_layout == FULL_LAYOUT
-            else PRE_G35_WITNESS_STRUCTURE_HASH
+            else POST_G5_WITNESS_STRUCTURE_HASH
         )
         assert problem.jacobian_structure_hash() == expected_hash
         assert rows.dtype == np.int64
         assert cols.dtype == np.int64
 
-    assert full.variable_count == 5922
-    assert full.constraint_count == 5323
-    assert full.jacobian_structure()[0].size == 1461282
-    assert witness.variable_count == 5602
-    assert witness.constraint_count == 5323
-    assert witness.jacobian_structure()[0].size == 1419042
+    assert full.variable_count == 5923
+    assert full.constraint_count == 5365
+    assert full.jacobian_structure()[0].size == 1461366
+    assert witness.variable_count == 5603
+    assert witness.constraint_count == 5365
+    assert witness.jacobian_structure()[0].size == 1419126
 
     full_rows, full_cols = full.jacobian_structure()
     witness_rows, witness_cols = witness.jacobian_structure()
