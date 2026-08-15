@@ -326,6 +326,15 @@ def test_frozen_hessian_scaling_and_exact_jacobian_contract() -> None:
     assert adapter.options["jacobian_approximation"] == "exact"
     assert adapter.options["nlp_scaling_method"] == "gradient-based"
     assert adapter.options["obj_scaling_factor"] == 1.0
+    assert adapter.options["bound_relax_factor"] == 0.0
+    assert adapter.options["bound_push"] == 0.01
+    assert adapter.options["bound_frac"] == 0.01
+    assert adapter.options["slack_bound_push"] == 0.01
+    assert adapter.options["slack_bound_frac"] == 0.01
+    assert adapter.options["least_square_init_primal"] == "no"
+    assert adapter.options["warm_start_init_point"] == "no"
+    assert adapter.options["derivative_test"] == "none"
+    assert adapter.options["option_file_name"] == ""
 
     with pytest.raises(SolverContractError):
         _ = IpoptAdapter(
@@ -335,6 +344,71 @@ def test_frozen_hessian_scaling_and_exact_jacobian_contract() -> None:
             verify_frozen_ml242=False,
             options={"hessian_approximation": "exact"},
         )
+
+
+def test_ipopt_domain_options_cannot_be_overridden() -> None:
+    for name, value in (
+        ("bound_relax_factor", 1.0e-8),
+        ("bound_push", 0.02),
+        ("bound_frac", 0.02),
+        ("slack_bound_push", 0.02),
+        ("slack_bound_frac", 0.02),
+        ("least_square_init_primal", "yes"),
+        ("warm_start_init_point", "yes"),
+        ("option_file_name", "ipopt.opt"),
+    ):
+        with pytest.raises(SolverContractError):
+            _ = IpoptAdapter(
+                _linear_problem(),
+                objective=lambda _: 0.0,
+                gradient=lambda x: np.zeros_like(x),
+                verify_frozen_ml242=False,
+                options={name: value},
+            )
+
+    with pytest.raises(SolverContractError):
+        _ = IpoptAdapter(
+            _linear_problem(),
+            objective=lambda _: 0.0,
+            gradient=lambda x: np.zeros_like(x),
+            options={"derivative_test": "first-order"},
+        )
+
+
+def test_callback_inputs_are_strictly_finite_one_dimensional_and_bounded() -> None:
+    problem = ProblemStub(
+        n=2,
+        m=1,
+        rows=np.array([0, 0]),
+        cols=np.array([0, 1]),
+        constraint_fn=lambda x: np.array([x[0] - x[1]]),
+        jacobian_fn=lambda _: np.array([1.0, -1.0]),
+        variable_lower=np.array([0.0, -1.0]),
+        variable_upper=np.array([1.0, 0.0]),
+    )
+    adapter = IpoptAdapter(
+        problem,
+        objective=lambda x: float(np.sum(x * x)),
+        gradient=lambda x: 2.0 * x,
+        verify_frozen_ml242=False,
+    )
+
+    assert adapter.objective(np.array([0.0, -1.0])) == 1.0
+    assert np.array_equal(adapter.jacobian(np.array([1.0, 0.0])), np.array([1.0, -1.0]))
+    for bad in (
+        np.array([[0.0, -1.0]]),
+        np.array([np.nan, -1.0]),
+        np.array([-1.0, -1.0]),
+        np.array([0.0, 1.0]),
+    ):
+        with pytest.raises(SolverContractError):
+            adapter.objective(bad)
+        with pytest.raises(SolverContractError):
+            adapter.gradient(bad)
+        with pytest.raises(SolverContractError):
+            adapter.constraints(bad)
+        with pytest.raises(SolverContractError):
+            adapter.jacobian(bad)
 
 
 def test_callback_evaluation_budget_is_frozen_and_enforced() -> None:

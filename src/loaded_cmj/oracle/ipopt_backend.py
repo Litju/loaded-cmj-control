@@ -59,6 +59,15 @@ DEFAULT_SOLVER_OPTIONS: Mapping[str, int | float | str] = MappingProxyType(
         "check_derivatives_for_naninf": "yes",
         "jacobian_approximation": "exact",
         "mu_strategy": "adaptive",
+        "bound_relax_factor": 0.0,
+        "bound_push": 0.01,
+        "bound_frac": 0.01,
+        "slack_bound_push": 0.01,
+        "slack_bound_frac": 0.01,
+        "least_square_init_primal": "no",
+        "warm_start_init_point": "no",
+        "derivative_test": "none",
+        "option_file_name": "",
     }
 )
 
@@ -182,6 +191,7 @@ class IpoptAdapter:
             raise SolverContractError("evaluation budget must define positive limits for every callback")
         self.counters = CallbackCounters()
         self._last_iteration: int | None = None
+        self._verify_frozen_ml242 = bool(verify_frozen_ml242)
         self._validate_options()
 
         self.n = int(problem.variable_count)
@@ -217,6 +227,27 @@ class IpoptAdapter:
             raise SolverContractError("ML-243 freezes the MUMPS linear solver")
         if self.options.get("jacobian_approximation") != "exact":
             raise SolverContractError("ML-243 requires exact sparse Jacobian callbacks")
+        frozen = {
+            "bound_relax_factor": 0.0,
+            "bound_push": 0.01,
+            "bound_frac": 0.01,
+            "slack_bound_push": 0.01,
+        }
+        for name, expected in frozen.items():
+            if self.options.get(name) != expected:
+                raise SolverContractError(
+                    f"ML-243 freezes {name}={expected!r} for native-domain initialization"
+                )
+        for name, expected in (
+            ("slack_bound_frac", 0.01),
+            ("least_square_init_primal", "no"),
+            ("warm_start_init_point", "no"),
+            ("option_file_name", ""),
+        ):
+            if self.options.get(name) != expected:
+                raise SolverContractError(f"ML-243 freezes {name}={expected!r}")
+        if self._verify_frozen_ml242 and self.options.get("derivative_test") != "none":
+            raise SolverContractError("ML-243 target callbacks require derivative_test=none")
 
     @staticmethod
     def _integer_vector(value: object, label: str) -> np.ndarray:
@@ -264,9 +295,17 @@ class IpoptAdapter:
                 require_resolved_phase_i_scale(record["constraint_id"], record.get("phase_i_scale"))
 
     def _vector(self, value: object, length: int, label: str) -> np.ndarray:
-        vector = np.asarray(value, dtype=np.float64).reshape(-1)
+        vector = np.asarray(value, dtype=np.float64)
         if vector.shape != (length,) or not np.isfinite(vector).all():
             raise SolverContractError(f"{label} must be a finite vector of length {length}")
+        return vector.copy()
+
+    def _decision_vector(self, value: object, label: str) -> np.ndarray:
+        vector = self._vector(value, self.n, label)
+        if np.any(vector < self.variable_lower_bounds) or np.any(
+            vector > self.variable_upper_bounds
+        ):
+            raise SolverContractError(f"{label} is outside the declared variable bounds")
         return vector
 
     def _count(self, name: str) -> None:
@@ -277,26 +316,49 @@ class IpoptAdapter:
 
     def objective(self, x: object) -> float:
         self._count("objective")
-        value = self._vector(x, self.n, "objective input")
-        result = float(self._objective(value))
+        value = self._decision_vector(x, "objective input")
+        try:
+            result = float(self._objective(value))
+        except SolverContractError:
+            raise
+        except Exception as exc:
+            raise SolverContractError("objective callback rejected the decision point") from exc
         if not isfinite(result):
             raise SolverContractError("objective returned NaN or Inf")
         return result
 
     def gradient(self, x: object) -> np.ndarray:
         self._count("gradient")
-        value = self._vector(x, self.n, "gradient input")
-        return self._vector(self._gradient(value), self.n, "gradient result")
+        value = self._decision_vector(x, "gradient input")
+        try:
+            result = self._gradient(value)
+        except SolverContractError:
+            raise
+        except Exception as exc:
+            raise SolverContractError("gradient callback rejected the decision point") from exc
+        return self._vector(result, self.n, "gradient result")
 
     def constraints(self, x: object) -> np.ndarray:
         self._count("constraints")
-        value = self._vector(x, self.n, "constraint input")
-        return self._vector(self.problem.constraint_values(value), self.m, "constraint result")
+        value = self._decision_vector(x, "constraint input")
+        try:
+            result = self.problem.constraint_values(value)
+        except SolverContractError:
+            raise
+        except Exception as exc:
+            raise SolverContractError("constraints callback rejected the decision point") from exc
+        return self._vector(result, self.m, "constraint result")
 
     def jacobian(self, x: object) -> np.ndarray:
         self._count("jacobian")
-        value = self._vector(x, self.n, "Jacobian input")
-        values = self._vector(self.problem.jacobian_values(value), self._rows.size, "Jacobian values")
+        value = self._decision_vector(x, "Jacobian input")
+        try:
+            result = self.problem.jacobian_values(value)
+        except SolverContractError:
+            raise
+        except Exception as exc:
+            raise SolverContractError("Jacobian callback rejected the decision point") from exc
+        values = self._vector(result, self._rows.size, "Jacobian values")
         assert len(values) == len(self._rows) == len(self._cols)
         if len(values) != len(self._rows) or len(values) != len(self._cols):
             raise SparseCallbackError(
@@ -321,7 +383,7 @@ class IpoptAdapter:
         except ImportError as exc:  # pragma: no cover - exercised by environment gate
             raise SolverContractError("cyipopt is unavailable at the offline solver boundary") from exc
 
-        x0 = self._vector(initial_x, self.n, "initial vector")
+        x0 = self._decision_vector(initial_x, "initial vector")
         self.counters = CallbackCounters()
         self._last_iteration = None
         backend = cyipopt.Problem(

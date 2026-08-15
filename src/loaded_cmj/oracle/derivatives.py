@@ -17,7 +17,7 @@ import mujoco
 import numpy as np
 
 from loaded_cmj.simulation import drive
-from loaded_cmj.simulation.constants import ACTION_DIM
+from loaded_cmj.simulation.constants import ACTION_DIM, SUBSTEPS_PER_CONTROL
 from loaded_cmj.simulation.plant import Plant, SupportMarginBranchCertificate
 from loaded_cmj.simulation.snapshot import MacroSnapshot
 from loaded_cmj.simulation.tangent import (
@@ -36,6 +36,7 @@ from loaded_cmj.simulation.transition import (
     TransitionResult,
     project_accepted_action,
     step_5ms,
+    TorqueVelocitySchedule,
 )
 
 
@@ -69,6 +70,7 @@ NUMERICAL_CERTIFICATE_ONLY = "NUMERICAL_CERTIFICATE_ONLY"
 PIECEWISE_BRANCH_SWITCH_INVALID = "PIECEWISE_BRANCH_SWITCH_INVALID"
 NATIVE_DOMAIN_INVALID = "NATIVE_DOMAIN_INVALID"
 NONFINITE_EVALUATION = "NONFINITE_EVALUATION"
+SCHEDULED_MODE_SMOOTH = "SMOOTH_FIXED_MODE_SCHEDULE"
 SUPPORT_HULL_KINK_INVALID = "SUPPORT_HULL_KINK_INVALID"
 SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID = "SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID"
 SUPPORT_HULL_PROJECTION_BRANCH_SWITCH_INVALID = "SUPPORT_HULL_PROJECTION_BRANCH_SWITCH_INVALID"
@@ -189,6 +191,7 @@ class TransitionEvaluation:
     next_snapshot_digest: str
     owner_outputs: Mapping[str, np.ndarray]
     support_margin_branch_steps: tuple[SupportMarginBranchCertificate, ...] = ()
+    drive_guard_steps: tuple[tuple[tuple[float, ...], tuple[float, ...]], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -577,6 +580,7 @@ class _StepFingerprint:
     drive_branches: tuple[tuple[str, tuple[str, ...]], ...]
     transition_branches: tuple[tuple[str, tuple[str, ...]], ...]
     support_margin_branch: SupportMarginBranchCertificate | None = None
+    drive_guard_values: tuple[tuple[float, ...], tuple[float, ...]] = ((), ())
 
 
 def _native_joint_limits(data: mujoco.MjData) -> bool:
@@ -650,7 +654,12 @@ def _step_fingerprint(
     new_drive = new_a_plus - new_a_minus
     raw = _finite_vector(raw_action, ACTION_DIM, "raw action")
     accepted = _finite_vector(accepted_action, ACTION_DIM, "accepted action")
-    rates = _finite_vector(plant.anatomical_rates(data), ACTION_DIM, "anatomical rates")
+    reported_modes = drive_result.get("torque_velocity_modes")
+    reported_normalized = drive_result.get("torque_velocity_normalized")
+    if reported_modes is None or reported_normalized is None:
+        raise DerivativeDomainError(
+            "Drive branch receipt lacks pre-step torque-velocity metadata"
+        )
     drive_branches = (
         ("raw_action_sign", _discrete_sign(raw, tolerance=_KINK_TOLERANCE)),
         ("accepted_action_sign", _discrete_sign(accepted, tolerance=_KINK_TOLERANCE)),
@@ -670,17 +679,11 @@ def _step_fingerprint(
         ),
         (
             "torque_velocity_positive",
-            _discrete_sign(
-                rates / drive.OMEGA_MAX_POS,
-                tolerance=_TORQUE_VELOCITY_NORMALIZED_NEAR_ZERO,
-            ),
+            tuple(reported_modes[0]),
         ),
         (
             "torque_velocity_negative",
-            _discrete_sign(
-                -rates / drive.OMEGA_MAX_NEG,
-                tolerance=_TORQUE_VELOCITY_NORMALIZED_NEAR_ZERO,
-            ),
+            tuple(reported_modes[1]),
         ),
         (
             "power_projection",
@@ -714,6 +717,10 @@ def _step_fingerprint(
         drive_branches=drive_branches,
         transition_branches=transition_branches,
         support_margin_branch=support_margin_diagnostic.derivative_branch_certificate,
+        drive_guard_values=(
+            tuple(float(value) for value in reported_normalized[0]),
+            tuple(float(value) for value in reported_normalized[1]),
+        ),
     )
 
 
@@ -925,6 +932,7 @@ def evaluate_wrapped_step_5ms(
     raw_action: Sequence[float] | np.ndarray,
     workspace: _EvaluationWorkspace | None = None,
     owner_ids: Sequence[str] = (),
+    torque_velocity_schedule: TorqueVelocitySchedule | None = None,
 ) -> TransitionEvaluation:
     """Restore one snapshot and run the authoritative exact transition once."""
 
@@ -986,6 +994,7 @@ def evaluate_wrapped_step_5ms(
         previous_accepted_action=restored_previous,
         raw_action=raw,
         on_substep=record_substep,
+        torque_velocity_schedule=torque_velocity_schedule,
     )
     if transition.substeps_executed != 40 or len(active_steps) != 40:
         raise DerivativeDomainError("wrapped transition did not execute exactly 40 substeps")
@@ -1007,6 +1016,7 @@ def evaluate_wrapped_step_5ms(
             step.support_margin_branch for step in active_steps
             if step.support_margin_branch is not None
         ),
+        drive_guard_steps=tuple(step.drive_guard_values for step in active_steps),
     )
 
 
@@ -1182,6 +1192,109 @@ def _branch_rejection_reason(
         if _physical_branch_changed(base.active_set, sample.active_set):
             return PHYSICAL_CONTACT_SWITCH_INVALID
     return PIECEWISE_BRANCH_SWITCH_INVALID
+
+
+def transition_mode_schedule(
+    active_set: ActiveSetFingerprint,
+) -> TorqueVelocitySchedule:
+    """Return the immutable exact Drive mode schedule for one transition."""
+    if not active_set.drive_branch_steps:
+        raise DerivativeDomainError("transition has no Drive mode schedule")
+    schedule = []
+    for substep, branches in enumerate(active_set.drive_branch_steps):
+        values = dict(branches)
+        try:
+            positive = tuple(values["torque_velocity_positive"])
+            negative = tuple(values["torque_velocity_negative"])
+        except KeyError as exc:
+            raise DerivativeDomainError(
+                f"substep {substep} lacks torque-velocity mode ownership"
+            ) from exc
+        if len(positive) != ACTION_DIM or len(negative) != ACTION_DIM:
+            raise DerivativeDomainError(
+                f"substep {substep} torque-velocity schedule has wrong dimension"
+            )
+        schedule.append((positive, negative))
+    if len(schedule) != SUBSTEPS_PER_CONTROL:
+        raise DerivativeDomainError(
+            f"transition mode schedule has {len(schedule)} substeps; expected {SUBSTEPS_PER_CONTROL}"
+        )
+    return tuple(schedule)
+
+
+def _base_drive_mode_guard_is_clear(
+    evaluation: TransitionEvaluation,
+) -> bool:
+    """Reject a scheduled derivative at the exact Drive branch boundary."""
+    if len(evaluation.drive_guard_steps) != SUBSTEPS_PER_CONTROL:
+        return False
+    for positive, negative in evaluation.drive_guard_steps:
+        for value in (*positive, *negative):
+            if abs(abs(float(value)) - _TORQUE_VELOCITY_NORMALIZED_NEAR_ZERO) <= _KINK_TOLERANCE:
+                return False
+    return True
+
+
+def _scheduled_drive_mode_only(
+    base: TransitionEvaluation,
+    samples: Sequence[TransitionEvaluation],
+) -> bool:
+    """Return whether samples differ only in the schedulable Drive mode."""
+    if not _base_drive_mode_guard_is_clear(base):
+        return False
+    allowed = {"torque_velocity_positive", "torque_velocity_negative"}
+    for sample in samples:
+        if _physical_branch_changed(base.active_set, sample.active_set):
+            return False
+        if base.active_set.native_joint_limit_steps != sample.active_set.native_joint_limit_steps:
+            return False
+        if base.active_set.drive_flag_steps != sample.active_set.drive_flag_steps:
+            return False
+        if base.active_set.action_branches != sample.active_set.action_branches:
+            return False
+        if base.active_set.transition_branch_steps != sample.active_set.transition_branch_steps:
+            return False
+        if _support_margin_branch_rejection_reason(base, sample):
+            return False
+        for base_step, sample_step in zip(
+            base.active_set.drive_branch_steps,
+            sample.active_set.drive_branch_steps,
+            strict=True,
+        ):
+            base_values = dict(base_step)
+            sample_values = dict(sample_step)
+            if base_values.keys() != sample_values.keys():
+                return False
+            for key in base_values:
+                if key not in allowed and base_values[key] != sample_values[key]:
+                    return False
+    return True
+
+
+def _scheduled_column_samples(
+    *,
+    plant: Plant,
+    base_snapshot: MacroSnapshot,
+    raw_action: np.ndarray,
+    index: int,
+    step: float,
+    plan: _StencilPlan,
+    schedule: TorqueVelocitySchedule,
+) -> tuple[TransitionEvaluation, ...]:
+    result = []
+    for offset in plan.offsets:
+        delta = np.zeros(TANGENT_DIMENSION, dtype=np.float64)
+        delta[index] = float(offset) * step
+        candidate = boxplus(base_snapshot, delta, model=plant.model)
+        result.append(
+            evaluate_wrapped_step_5ms(
+                plant=plant,
+                snapshot=candidate,
+                raw_action=raw_action,
+                torque_velocity_schedule=schedule,
+            )
+        )
+    return tuple(result)
 
 
 def _same_certificate_for_column(
@@ -1538,9 +1651,41 @@ def linearize_step_5ms(
             plan=plan,
             reason=reason,
         )
+        derivative_samples = samples
+        if (
+            not allow_nonsmooth
+            and not report.valid
+            and report.reason == PIECEWISE_BRANCH_SWITCH_INVALID
+            and _scheduled_drive_mode_only(base, samples)
+        ):
+            try:
+                schedule = transition_mode_schedule(base.active_set)
+                scheduled_samples = list(
+                    _scheduled_column_samples(
+                        plant=plant,
+                        base_snapshot=base_snapshot,
+                        raw_action=raw,
+                        index=index,
+                        step=h,
+                        plan=plan,
+                        schedule=schedule,
+                    )
+                )
+                if not _scheduled_drive_mode_only(base, scheduled_samples):
+                    raise DerivativeDomainError(
+                        "scheduled transition changed a non-Drive active-set branch"
+                    )
+                derivative_samples = scheduled_samples
+                evaluations += len(derivative_samples)
+                report = replace(report, valid=True, reason=SCHEDULED_MODE_SMOOTH)
+            except (DerivativeDomainError, ValueError, RuntimeError, drive.DriveModelError):
+                derivative_samples = samples
         if report.valid:
             try:
-                deltas = [boxminus(sample.next_snapshot, base_next, model=plant.model) for sample in samples]
+                deltas = [
+                    boxminus(sample.next_snapshot, base_next, model=plant.model)
+                    for sample in derivative_samples
+                ]
                 value = _difference_from_samples(deltas, plan, h)
                 if not np.isfinite(value).all():
                     raise FloatingPointError("state derivative is non-finite")
@@ -1590,9 +1735,13 @@ def linearize_step_5ms(
             plan=plan,
             reason=reason,
         )
+        derivative_samples = samples
         if report.valid:
             try:
-                deltas = [boxminus(sample.next_snapshot, base_next, model=plant.model) for sample in samples]
+                deltas = [
+                    boxminus(sample.next_snapshot, base_next, model=plant.model)
+                    for sample in derivative_samples
+                ]
                 value = _difference_from_samples(deltas, plan, h)
                 if not np.isfinite(value).all():
                     raise FloatingPointError("action derivative is non-finite")
@@ -1935,6 +2084,7 @@ __all__ = [
     "NONFINITE_EVALUATION",
     "NUMERICAL_CERTIFICATE_ONLY",
     "PHYSICAL_CONTACT_SWITCH_INVALID",
+    "SCHEDULED_MODE_SMOOTH",
     "PIECEWISE_BRANCH_SWITCH_INVALID",
     "SUPPORT_ACTIVE_SET_SWITCH_INVALID",
     "SUPPORT_HULL_KINK_INVALID",
@@ -1964,4 +2114,5 @@ __all__ = [
     "evaluate_wrapped_step_5ms",
     "linearize_step_5ms",
     "snapshot_digest",
+    "transition_mode_schedule",
 ]

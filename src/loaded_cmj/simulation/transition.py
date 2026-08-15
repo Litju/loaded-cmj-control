@@ -8,7 +8,7 @@ boundary, so those concerns do not become part of the physical owner.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -48,6 +48,37 @@ SubstepCallback = Callable[
 ]
 
 
+TorqueVelocitySchedule = Sequence[tuple[tuple[str, ...], tuple[str, ...]]]
+
+
+def _validate_torque_velocity_schedule(
+    schedule: TorqueVelocitySchedule | None,
+) -> tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] | None:
+    if schedule is None:
+        return None
+    if len(schedule) != SUBSTEPS_PER_CONTROL:
+        raise ValueError(
+            f"torque-velocity schedule must contain {SUBSTEPS_PER_CONTROL} substeps"
+        )
+    allowed = {"POSITIVE", "NEGATIVE", "NEAR_ZERO"}
+    result = []
+    for substep, entry in enumerate(schedule):
+        if len(entry) != 2:
+            raise ValueError(
+                f"torque-velocity schedule entry {substep} must have two directions"
+            )
+        directions = []
+        for direction, modes in enumerate(entry):
+            values = tuple(str(mode) for mode in modes)
+            if len(values) != ACTION_DIM or any(mode not in allowed for mode in values):
+                raise ValueError(
+                    f"torque-velocity schedule entry {substep} direction {direction} is invalid"
+                )
+            directions.append(values)
+        result.append((directions[0], directions[1]))
+    return tuple(result)
+
+
 def _action_precondition(value: np.ndarray, name: str) -> np.ndarray:
     result = np.asarray(value, dtype=np.float64)
     if result.shape != (ACTION_DIM,):
@@ -82,6 +113,7 @@ def step_5ms(
     previous_accepted_action: np.ndarray,
     raw_action: np.ndarray,
     on_substep: SubstepCallback | None = None,
+    torque_velocity_schedule: TorqueVelocitySchedule | None = None,
 ) -> TransitionResult:
     """Advance the existing plant through exactly one 5 ms control interval.
 
@@ -93,6 +125,7 @@ def step_5ms(
     this function always executes all 40 physics steps.
     """
 
+    schedule = _validate_torque_velocity_schedule(torque_velocity_schedule)
     accepted = project_accepted_action(previous_accepted_action, raw_action)
     realized = np.zeros(ACTION_DIM, dtype=np.float64)
     capacity_lower = np.zeros(ACTION_DIM, dtype=np.float64)
@@ -106,6 +139,7 @@ def step_5ms(
             plant.anatomical_coordinates(data),
             plant.anatomical_rates(data),
             PHYSICS_TIMESTEP_S,
+            torque_velocity_modes=None if schedule is None else schedule[substep],
         )
         realized = np.asarray(drive_result["tau"], dtype=np.float64).copy()
         capacity_lower = np.asarray(drive_result["capacity_lower"], dtype=np.float64).copy()
@@ -135,6 +169,7 @@ def step_5ms(
 __all__ = [
     "ACCEPTED_ACTION_MAX_STEP",
     "SubstepCallback",
+    "TorqueVelocitySchedule",
     "TransitionResult",
     "project_accepted_action",
     "step_5ms",

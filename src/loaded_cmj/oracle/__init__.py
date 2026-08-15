@@ -15,6 +15,10 @@ from loaded_cmj.oracle.constraints import (
     ConstraintSpec,
     ConstraintValue,
 )
+from loaded_cmj.oracle.nlp_binding import (
+    E3E4NLPBinding,
+    NLPBindingError,
+)
 from loaded_cmj.oracle.transcription import (
     TRANSCRIPTION_SCHEMA_ID,
     DirectMultipleShootingProblem,
@@ -29,9 +33,11 @@ __all__ = [
     "DirectMultipleShootingProblem",
     "E3E4CompositionError",
     "E3E4PhysicalConstraintComposer",
+    "E3E4NLPBinding",
     "E3E4_OWNER_IDS",
     "E3E4_PHYSICAL_ROW_COUNT",
     "PhysicalConstraintDerivative",
     "PhysicalConstraintOwnerReceipt",
+    "NLPBindingError",
     "TRANSCRIPTION_SCHEMA_ID",
 ]

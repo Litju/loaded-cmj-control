@@ -449,16 +449,79 @@ def torque_velocity(nu: np.ndarray) -> np.ndarray:
     return out
 
 
+def _scheduled_torque_velocity(
+    normalized_rate: np.ndarray,
+    modes: tuple[str, ...],
+) -> np.ndarray:
+    """Evaluate the exact torque-velocity branch selected by a mode schedule.
+
+    This is a derivative/transcription seam only.  The default physical path
+    still calls :func:`torque_velocity` and remains unchanged.  A scheduled
+    continuation deliberately evaluates one of the existing exact branch
+    equations even when an external finite-difference sample has crossed its
+    guard; the caller is responsible for rejecting an unscheduled physical
+    sample.
+    """
+    arr = np.asarray(normalized_rate, dtype=np.float64).reshape(_N)
+    if len(modes) != _N:
+        raise DriveModelError("torque-velocity mode schedule must have 15 channels")
+    positive = FV_MIN + (1.0 - FV_MIN) * np.exp(-arr / S_C)
+    negative = F_ECC - (F_ECC - 1.0) * np.exp(arr / S_E)
+    out = np.empty(_N, dtype=np.float64)
+    for index, mode in enumerate(modes):
+        if mode == "NEAR_ZERO":
+            out[index] = 1.0
+        elif mode == "POSITIVE":
+            out[index] = positive[index]
+        elif mode == "NEGATIVE":
+            out[index] = negative[index]
+        else:
+            raise DriveModelError(f"unknown torque-velocity mode {mode!r}")
+    if not np.isfinite(out).all() or np.any(out <= 0.0):
+        raise DriveModelError("scheduled torque-velocity envelope evaluated invalid")
+    return out
+
+
 def capacity_envelope(
-    s: np.ndarray, s_dot: np.ndarray
+    s: np.ndarray,
+    s_dot: np.ndarray,
+    *,
+    torque_velocity_modes: tuple[tuple[str, ...], tuple[str, ...]] | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Section 8 envelope ``(tau_min, tau_max)`` at the current ``(s, s_dot)``."""
+    """Section 8 envelope ``(tau_min, tau_max)`` at the current ``(s, s_dot)``.
+
+    ``torque_velocity_modes`` is optional and is used only by the explicit
+    mode-scheduled derivative seam.  Omitting it is the frozen physical path.
+    """
     sd = np.asarray(s_dot, dtype=np.float64).reshape(_N)
     if not np.isfinite(sd).all():
         raise DriveModelError("anatomical rate s_dot is not finite")
     fq_pos, fq_neg = torque_angle(s)
-    fv_pos = torque_velocity(sd / OMEGA_MAX_POS)
-    fv_neg = torque_velocity(-sd / OMEGA_MAX_NEG)
+    if torque_velocity_modes is None:
+        fv_pos = torque_velocity(sd / OMEGA_MAX_POS)
+        fv_neg = torque_velocity(-sd / OMEGA_MAX_NEG)
+    else:
+        if len(torque_velocity_modes) != 2:
+            raise DriveModelError("torque-velocity schedule must contain positive and negative modes")
+        positive_rate = sd / OMEGA_MAX_POS
+        negative_rate = -sd / OMEGA_MAX_NEG
+
+        def mode_for(value: float) -> str:
+            if abs(value) <= 1.0e-6:
+                return "NEAR_ZERO"
+            return "POSITIVE" if value > 0.0 else "NEGATIVE"
+
+        positive_modes = tuple(mode_for(value) for value in positive_rate)
+        negative_modes = tuple(mode_for(value) for value in negative_rate)
+        if (
+            tuple(torque_velocity_modes[0]) == positive_modes
+            and tuple(torque_velocity_modes[1]) == negative_modes
+        ):
+            fv_pos = torque_velocity(positive_rate)
+            fv_neg = torque_velocity(negative_rate)
+        else:
+            fv_pos = _scheduled_torque_velocity(positive_rate, torque_velocity_modes[0])
+            fv_neg = _scheduled_torque_velocity(negative_rate, torque_velocity_modes[1])
     tau_max = TAU_BAR_POS * fq_pos * fv_pos
     tau_min = -(TAU_BAR_NEG * fq_neg * fv_neg)
     return tau_min, tau_max
@@ -505,11 +568,16 @@ def _ordered_torque_projection(
     s_dot: np.ndarray,
     tau_previous: np.ndarray,
     h: float,
+    torque_velocity_modes: tuple[tuple[str, ...], tuple[str, ...]] | None = None,
 ) -> tuple[np.ndarray, dict[str, np.ndarray], np.ndarray, np.ndarray]:
     """Run authority stages 2--8 and return torque plus auditable flags."""
     sd = np.asarray(s_dot, dtype=np.float64).reshape(_N)
     previous = np.asarray(tau_previous, dtype=np.float64).reshape(_N)
-    tau_min, tau_max = capacity_envelope(s, sd)
+    tau_min, tau_max = capacity_envelope(
+        s,
+        sd,
+        torque_velocity_modes=torque_velocity_modes,
+    )
 
     # Stage 4: directional desired anatomical torque.
     desired = np.asarray(a_plus) * tau_max + np.asarray(a_minus) * tau_min
@@ -590,6 +658,7 @@ def drive_state_step(
     s: np.ndarray,
     s_dot: np.ndarray,
     h: float = PHYSICS_TIMESTEP_S,
+    torque_velocity_modes: tuple[tuple[str, ...], tuple[str, ...]] | None = None,
 ) -> dict[str, Any]:
     """Advance hidden drive state and realize one authority-ordered torque."""
     u = np.asarray(command, dtype=np.float64).reshape(_N)
@@ -614,7 +683,15 @@ def drive_state_step(
     state.reversal_phase[:] = 0
     state.reversal_phase[old_drive > 0.0] = 1
     state.reversal_phase[old_drive < 0.0] = -1
-    tau, flags, tau_min, tau_max = _ordered_torque_projection(ap, am, s, s_dot, tau_previous, h)
+    tau, flags, tau_min, tau_max = _ordered_torque_projection(
+        ap,
+        am,
+        s,
+        s_dot,
+        tau_previous,
+        h,
+        torque_velocity_modes=torque_velocity_modes,
+    )
     flags["zero_crossing"] = crossing_channels
     reported_drive = new_drive.copy()
     # A crossing is an explicit sampled event.  The continuous activation
@@ -626,6 +703,14 @@ def drive_state_step(
     state.previous_command[:] = u
     state.override_flags = _copy_override_flags(flags)
     state._validate()
+    normalized_positive = np.asarray(s_dot, dtype=np.float64).reshape(_N) / OMEGA_MAX_POS
+    normalized_negative = -np.asarray(s_dot, dtype=np.float64).reshape(_N) / OMEGA_MAX_NEG
+
+    def mode_for(value: float) -> str:
+        if abs(value) <= 1.0e-6:
+            return "NEAR_ZERO"
+        return "POSITIVE" if value > 0.0 else "NEGATIVE"
+
     return {
         "drive": reported_drive,
         "a_plus": ap.copy(),
@@ -637,6 +722,16 @@ def drive_state_step(
         "capacity_lower": tau_min.copy(),
         "capacity_upper": tau_max.copy(),
         "zero_crossing_time_s": crossing,
+        "torque_velocity_modes": (
+            tuple(mode_for(value) for value in normalized_positive),
+            tuple(mode_for(value) for value in normalized_negative),
+        ),
+        "torque_velocity_normalized": (
+            tuple(float(value) for value in normalized_positive),
+            tuple(float(value) for value in normalized_negative),
+        ),
+        "coordinates": np.asarray(s, dtype=np.float64).reshape(_N).copy(),
+        "rates": np.asarray(s_dot, dtype=np.float64).reshape(_N).copy(),
     }
 
 
