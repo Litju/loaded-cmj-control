@@ -527,7 +527,7 @@ assert callable(PolicyWorker)
 
 def test_ml241_and_physical_substrate_hashes_are_unchanged_after_reversal_erratum() -> None:
     expected = {
-        "src/loaded_cmj/oracle/derivatives.py": "4faf445093f918d403df7d810e0b29243444b569d1d029f73bd3d3de2052bc6f",
+        "src/loaded_cmj/oracle/derivatives.py": "1785a83df4a62dc46d9d2b9665411256776fce8852fcc6cc87948578a9214d49",
         "src/loaded_cmj/simulation/snapshot.py": "8d06a55969dcf15f482480f05688b2245ac2897bc70ca3c0e221e1bea5f368cc",
         "src/loaded_cmj/simulation/tangent.py": "44f7ed049c7cbb2098062669a4193808d575ef1e7aa6bc9a2d16563b0cbdb6c5",
         "src/loaded_cmj/simulation/transition.py": "795f2368b6dfab56ef95838d128998b958b572d9a1f61ab62d7e31b100ef9692",

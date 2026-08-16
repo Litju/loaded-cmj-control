@@ -189,9 +189,13 @@ def _certificate(**overrides) -> SupportMarginBranchCertificate:
     return SupportMarginBranchCertificate(**values)
 
 
-def _evaluation(certificate: SupportMarginBranchCertificate):
+def _evaluation(
+    certificate: SupportMarginBranchCertificate,
+    *,
+    contact_steps: tuple = (),
+):
     active_set = ActiveSetFingerprint(
-        contact_steps=(),
+        contact_steps=contact_steps,
         prohibited_contact_steps=(),
         cop_valid_steps=(),
         support_active_steps=(),
@@ -257,6 +261,40 @@ def test_unique_same_branch_is_accepted_by_support_certificate():
     )
 
 
+def test_redundant_canonical_hull_change_is_accepted_by_support_certificate():
+    base = _evaluation(_certificate())
+    sample = _evaluation(
+        _certificate(canonical_hull_vertex_order=(0, 1, 3, 2))
+    )
+    assert derivatives._same_certificate_for_column(
+        base,
+        sample,
+        axis="OWNER_STATE",
+        index=0,
+        plan=_plan(),
+        support_geometry=True,
+    )
+    assert derivatives._support_margin_branch_rejection_reason(base, sample) == ""
+
+
+def test_contact_active_set_switch_rejects_invariant_support_certificate():
+    base = _evaluation(_certificate())
+    sample = _evaluation(_certificate(), contact_steps=((0, 1),))
+    assert not derivatives._same_certificate_for_column(
+        base,
+        sample,
+        axis="OWNER_STATE",
+        index=0,
+        plan=_plan(),
+        support_geometry=True,
+    )
+    assert derivatives._branch_rejection_reason(
+        base,
+        [sample],
+        support_geometry=True,
+    ) == derivatives.PHYSICAL_CONTACT_SWITCH_INVALID
+
+
 @pytest.mark.parametrize(
     ("changed", "expected_reason"),
     [
@@ -277,12 +315,20 @@ def test_unique_same_branch_is_accepted_by_support_certificate():
             derivatives.SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID,
         ),
         (
+            dict(support_point_count=5),
+            derivatives.SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID,
+        ),
+        (
             dict(support_active_set=(False, True)),
             derivatives.SUPPORT_ACTIVE_SET_SWITCH_INVALID,
         ),
         (
             dict(finite=False, branch_family="NONFINITE"),
             derivatives.NONFINITE_EVALUATION,
+        ),
+        (
+            dict(norm_zero_kink=True),
+            derivatives.SUPPORT_HULL_KINK_INVALID,
         ),
     ],
 )

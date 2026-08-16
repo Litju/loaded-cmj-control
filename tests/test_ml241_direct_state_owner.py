@@ -302,7 +302,7 @@ def test_direct_support_owner_uses_real_branch_certificate():
 
 def test_direct_real_plant_branch_switches_are_rejected():
     fixture = _fixtures()["S3"]
-    with pytest.raises(DerivativeDomainError, match="SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID"):
+    with pytest.raises(DerivativeDomainError, match="SUPPORT_HULL_KINK_INVALID"):
         differentiate_state_owner_output(
             plant=fixture.plant,
             base_snapshot=fixture.snapshot,

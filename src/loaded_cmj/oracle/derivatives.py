@@ -1142,7 +1142,13 @@ def _support_margin_branch_rejection_reason(
     base: TransitionEvaluation | StateOwnerEvaluation,
     sample: TransitionEvaluation | StateOwnerEvaluation,
 ) -> str:
-    """Compare only Plant-provided support provenance, never geometry math."""
+    """Compare Plant provenance of the mathematical support-margin branch.
+
+    The canonical hull cycle is retained for diagnostics, but its vertex
+    representation is not itself a scalar branch.  Redundant collinear
+    source points can therefore enter or leave that cycle without changing
+    the active physical support primitive.
+    """
     base_steps = base.support_margin_branch_steps
     sample_steps = sample.support_margin_branch_steps
     if not base_steps and not sample_steps:
@@ -1156,11 +1162,7 @@ def _support_margin_branch_rejection_reason(
             return NONFINITE_EVALUATION
         if base_branch.support_active_set != sample_branch.support_active_set:
             return SUPPORT_ACTIVE_SET_SWITCH_INVALID
-        if (
-            base_branch.support_point_count != sample_branch.support_point_count
-            or base_branch.canonical_hull_vertex_order
-            != sample_branch.canonical_hull_vertex_order
-        ):
+        if base_branch.support_point_count != sample_branch.support_point_count:
             return SUPPORT_HULL_TOPOLOGY_SWITCH_INVALID
         if base_branch.branch_family != sample_branch.branch_family:
             return SUPPORT_HULL_KINK_INVALID
@@ -1173,7 +1175,11 @@ def _support_margin_branch_rejection_reason(
             return SUPPORT_HULL_KINK_INVALID
         if base_branch.projection_regimes != sample_branch.projection_regimes:
             return SUPPORT_HULL_PROJECTION_BRANCH_SWITCH_INVALID
-        if base_branch.active_minimizer_set != sample_branch.active_minimizer_set:
+        if (
+            base_branch.active_minimizer_set != sample_branch.active_minimizer_set
+            or base_branch.unique_active_minimizer
+            != sample_branch.unique_active_minimizer
+        ):
             return SUPPORT_HULL_KINK_INVALID
     return ""
 
