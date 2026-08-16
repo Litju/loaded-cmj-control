@@ -193,12 +193,13 @@ def _evaluation(
     certificate: SupportMarginBranchCertificate,
     *,
     contact_steps: tuple = (),
+    support_active_steps: tuple = (),
 ):
     active_set = ActiveSetFingerprint(
         contact_steps=contact_steps,
         prohibited_contact_steps=(),
         cop_valid_steps=(),
-        support_active_steps=(),
+        support_active_steps=support_active_steps,
         friction_steps=(),
         native_joint_limit_steps=(),
         drive_flag_steps=(),
@@ -243,6 +244,7 @@ def test_support_owner_certificate_checks_every_declared_stencil_sample(classifi
         block="test",
         plan=_plan(classification),
         support_geometry=True,
+        support_margin_owner=True,
     )
     assert not report.valid
     assert report.reason == derivatives.SUPPORT_HULL_KINK_INVALID
@@ -258,6 +260,7 @@ def test_unique_same_branch_is_accepted_by_support_certificate():
         index=0,
         plan=_plan(),
         support_geometry=True,
+        support_margin_owner=True,
     )
 
 
@@ -273,11 +276,41 @@ def test_redundant_canonical_hull_change_is_accepted_by_support_certificate():
         index=0,
         plan=_plan(),
         support_geometry=True,
+        support_margin_owner=True,
     )
     assert derivatives._support_margin_branch_rejection_reason(base, sample) == ""
 
 
-def test_contact_active_set_switch_rejects_invariant_support_certificate():
+def test_support_margin_owner_accepts_raw_contact_switch_with_invariant_support():
+    base = _evaluation(_certificate())
+    sample = _evaluation(_certificate(), contact_steps=((0, 1),))
+    report = derivatives._column_result(
+        axis="OWNER_STATE",
+        index=0,
+        step=1.0,
+        base=base,
+        plus=sample,
+        minus=sample,
+        samples=(sample, sample),
+        block="test",
+        plan=_plan(),
+        support_geometry=True,
+        support_margin_owner=True,
+    )
+    assert report.valid
+    assert report.reason == "SMOOTH_FIXED_ACTIVE_SET"
+    assert derivatives._same_certificate_for_column(
+        base,
+        sample,
+        axis="OWNER_STATE",
+        index=0,
+        plan=_plan(),
+        support_geometry=True,
+        support_margin_owner=True,
+    )
+
+
+def test_raw_contact_switch_remains_rejected_without_support_margin_opt_in():
     base = _evaluation(_certificate())
     sample = _evaluation(_certificate(), contact_steps=((0, 1),))
     assert not derivatives._same_certificate_for_column(
@@ -287,11 +320,37 @@ def test_contact_active_set_switch_rejects_invariant_support_certificate():
         index=0,
         plan=_plan(),
         support_geometry=True,
+        support_margin_owner=False,
     )
     assert derivatives._branch_rejection_reason(
         base,
         [sample],
         support_geometry=True,
+        support_margin_owner=False,
+    ) == derivatives.PHYSICAL_CONTACT_SWITCH_INVALID
+
+
+def test_support_margin_owner_rejects_active_foot_switch_even_when_contact_changes_are_opted_in():
+    base = _evaluation(_certificate(), support_active_steps=((True, True),))
+    sample = _evaluation(
+        _certificate(),
+        contact_steps=((0, 1),),
+        support_active_steps=((True, False),),
+    )
+    assert not derivatives._same_certificate_for_column(
+        base,
+        sample,
+        axis="OWNER_STATE",
+        index=0,
+        plan=_plan(),
+        support_geometry=True,
+        support_margin_owner=True,
+    )
+    assert derivatives._branch_rejection_reason(
+        base,
+        [sample],
+        support_geometry=True,
+        support_margin_owner=True,
     ) == derivatives.PHYSICAL_CONTACT_SWITCH_INVALID
 
 
@@ -342,11 +401,13 @@ def test_support_certificate_negative_controls_reject(changed, expected_reason):
         index=0,
         plan=_plan(),
         support_geometry=True,
+        support_margin_owner=True,
     )
     assert derivatives._branch_rejection_reason(
         base,
         [sample],
         support_geometry=True,
+        support_margin_owner=True,
     ) == expected_reason
 
 

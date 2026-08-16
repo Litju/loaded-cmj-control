@@ -1138,6 +1138,24 @@ def _physical_branch_changed(base: ActiveSetFingerprint, sample: ActiveSetFinger
     )
 
 
+def _same_support_margin_active_set(
+    base: TransitionEvaluation | StateOwnerEvaluation,
+    sample: TransitionEvaluation | StateOwnerEvaluation,
+) -> bool:
+    """Compare the owner regime while treating raw contacts as provenance.
+
+    The support-margin owner is defined by the latched physical support
+    geometry and its scalar branch certificate. Every other active-set field
+    remains part of the certificate; only raw MuJoCo contact rows are omitted
+    from this owner-specific comparison.
+    """
+
+    return replace(
+        base.active_set,
+        contact_steps=sample.active_set.contact_steps,
+    ) == sample.active_set
+
+
 def _support_margin_branch_rejection_reason(
     base: TransitionEvaluation | StateOwnerEvaluation,
     sample: TransitionEvaluation | StateOwnerEvaluation,
@@ -1189,13 +1207,18 @@ def _branch_rejection_reason(
     samples: Sequence[TransitionEvaluation | StateOwnerEvaluation],
     *,
     support_geometry: bool = False,
+    support_margin_owner: bool = False,
 ) -> str:
     for sample in samples:
         if support_geometry:
             support_reason = _support_margin_branch_rejection_reason(base, sample)
             if support_reason:
                 return support_reason
-        if _physical_branch_changed(base.active_set, sample.active_set):
+        if _physical_branch_changed(base.active_set, sample.active_set) and not (
+            support_geometry
+            and support_margin_owner
+            and _same_support_margin_active_set(base, sample)
+        ):
             return PHYSICAL_CONTACT_SWITCH_INVALID
     return PIECEWISE_BRANCH_SWITCH_INVALID
 
@@ -1311,10 +1334,17 @@ def _same_certificate_for_column(
     index: int,
     plan: _StencilPlan,
     support_geometry: bool = False,
+    support_margin_owner: bool = False,
 ) -> bool:
     if support_geometry and _support_margin_branch_rejection_reason(base, sample):
         return False
     if sample.active_set == base.active_set:
+        return True
+    if (
+        support_geometry
+        and support_margin_owner
+        and _same_support_margin_active_set(base, sample)
+    ):
         return True
     # An action-box/previous-action endpoint is a native domain boundary, not
     # a physical projection kink.  The feasible-side sample necessarily has a
@@ -1355,6 +1385,7 @@ def _column_result(
     plan: _StencilPlan,
     reason: str = "",
     support_geometry: bool = False,
+    support_margin_owner: bool = False,
 ) -> ColumnQualification:
     plus_digest = None if plus is None else plus.active_set.digest
     minus_digest = None if minus is None else minus.active_set.digest
@@ -1367,6 +1398,7 @@ def _column_result(
             index=index,
             plan=plan,
             support_geometry=support_geometry,
+            support_margin_owner=support_margin_owner,
         )
         for sample in samples
     )
@@ -1381,6 +1413,7 @@ def _column_result(
             base,
             samples,
             support_geometry=support_geometry,
+            support_margin_owner=support_margin_owner,
         )
     else:
         valid = True
@@ -1433,6 +1466,7 @@ def _differentiate_owner_state_columns(
     state_indexes: Sequence[int],
     evaluator: Callable[[MacroSnapshot], TransitionEvaluation | StateOwnerEvaluation],
     support_geometry: bool,
+    support_margin_owner: bool = False,
     base_evaluation: TransitionEvaluation | StateOwnerEvaluation | None = None,
     allow_nonsmooth: bool = False,
 ) -> _StateOwnerDerivativeCore:
@@ -1496,6 +1530,7 @@ def _differentiate_owner_state_columns(
             plan=plan,
             reason=reason,
             support_geometry=support_geometry,
+            support_margin_owner=support_margin_owner,
         )
         if report.valid:
             try:
@@ -1856,6 +1891,7 @@ def differentiate_state_owner_output(
             owner_id=owner_id,
         ),
         support_geometry=owner_id in _SUPPORT_GEOMETRY_OWNER_IDS,
+        support_margin_owner=owner_id == "SUPPORT_MARGIN",
         allow_nonsmooth=allow_nonsmooth,
     )
     base = core.base
