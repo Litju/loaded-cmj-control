@@ -15,11 +15,21 @@ from loaded_cmj.oracle.derivatives import (
     ACTION_BRANCH_NEAR_KINK,
     ACTION_BRANCH_SLEW_ACTIVE,
     DerivativeDomainError,
+    QACC_CERTIFICATE_EVIDENCE_ID,
+    QACC_DERIVATIVE_NUMERICALLY_NULL,
+    QACC_DERIVATIVE_UNADJUDICATED,
+    WARMSTART_SLICE,
     differentiate_owner_output,
     evaluate_wrapped_step_5ms,
     classify_action_projection,
     linearize_step_5ms,
     snapshot_digest,
+)
+from loaded_cmj.oracle.transcription import (
+    ML241_ACTION_STEP,
+    ML241_STATE_STEPS,
+    QACC_ERROR_BOUNDS,
+    QACC_ZERO_COLUMNS,
 )
 from loaded_cmj.oracle import derivatives
 
@@ -62,6 +72,52 @@ def test_wrapped_shapes_and_common_output_frame():
     assert result.state_validity[0]
     assert result.action_validity[0]
     assert result.scheme == "central_boxminus_at_common_y0"
+
+
+def test_full_wrapped_linearization_consumes_existing_qacc_certificate():
+    fixture = _fixtures()["S3"]
+    result = linearize_step_5ms(
+        plant=fixture.plant,
+        base_snapshot=fixture.snapshot,
+        raw_action=fixture.snapshot.previous_accepted_action,
+        state_steps=ML241_STATE_STEPS,
+        action_steps=ML241_ACTION_STEP,
+        state_columns=tuple(range(132)),
+        action_columns=(),
+        allow_nonsmooth=True,
+    )
+    qacc = tuple(range(WARMSTART_SLICE.start, WARMSTART_SLICE.stop))
+    assert qacc == QACC_ZERO_COLUMNS
+    assert all(
+        report.valid and report.active_set_preserved
+        for report in result.state_columns
+        if report.index in qacc
+    )
+    assert result.qacc_derivative_disposition == QACC_DERIVATIVE_NUMERICALLY_NULL
+    assert result.qacc_zero_columns == qacc
+    assert dict(result.qacc_absolute_error_bound) == dict(QACC_ERROR_BOUNDS)
+    assert result.qacc_certificate_evidence_id == QACC_CERTIFICATE_EVIDENCE_ID
+    assert np.array_equal(
+        result.A[:, qacc],
+        np.zeros((132, len(qacc))),
+    )
+
+
+def test_partial_qacc_request_does_not_fabricate_certificate_metadata():
+    fixture = _fixtures()["S3"]
+    result = linearize_step_5ms(
+        plant=fixture.plant,
+        base_snapshot=fixture.snapshot,
+        raw_action=fixture.snapshot.previous_accepted_action,
+        state_steps=ML241_STATE_STEPS,
+        action_steps=ML241_ACTION_STEP,
+        state_columns=(WARMSTART_SLICE.start,),
+        action_columns=(),
+    )
+    assert result.qacc_derivative_disposition == QACC_DERIVATIVE_UNADJUDICATED
+    assert result.qacc_zero_columns == ()
+    assert result.qacc_absolute_error_bound == ()
+    assert result.qacc_certificate_evidence_id is None
 
 
 def test_each_evaluation_restores_identical_base_snapshot():

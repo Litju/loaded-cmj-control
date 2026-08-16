@@ -26,6 +26,48 @@ def _json(name: str):
     return json.loads((EVIDENCE / name).read_text())
 
 
+def _synthetic_linearization(*, qacc_value: float = 0.0, valid_index: int | None = None):
+    reports = tuple(
+        ColumnQualification(
+            axis="state",
+            index=index,
+            step=0.1,
+            block="qacc_warmstart" if index >= 111 else "other",
+            valid=index != valid_index,
+            reason="synthetic invalid qacc direction" if index == valid_index else "ok",
+            active_set_preserved=True,
+            plus_fingerprint_digest="base",
+            minus_fingerprint_digest="base",
+        )
+        for index in range(132)
+    )
+    matrix = np.zeros((132, 132), dtype=np.float64)
+    matrix[:, 111:132] = qacc_value
+    synthetic = object.__new__(WrappedLinearization)
+    object.__setattr__(synthetic, "A", matrix)
+    object.__setattr__(synthetic, "B", np.zeros((132, 15), dtype=np.float64))
+    object.__setattr__(synthetic, "accepted_action_jacobian", np.zeros((15, 15), dtype=np.float64))
+    object.__setattr__(synthetic, "state_validity", np.ones(132, dtype=bool))
+    object.__setattr__(synthetic, "action_validity", np.ones(15, dtype=bool))
+    object.__setattr__(synthetic, "state_columns", reports)
+    object.__setattr__(synthetic, "action_columns", ())
+    object.__setattr__(synthetic, "base_snapshot_digest", "base")
+    object.__setattr__(synthetic, "base_next_snapshot_digest", "next")
+    object.__setattr__(synthetic, "base_raw_action", np.zeros(15, dtype=np.float64))
+    object.__setattr__(synthetic, "base_accepted_action", np.zeros(15, dtype=np.float64))
+    object.__setattr__(synthetic, "base_active_set", None)
+    object.__setattr__(synthetic, "state_step_metadata", {})
+    object.__setattr__(synthetic, "action_step_metadata", ())
+    object.__setattr__(synthetic, "scheme", "synthetic")
+    object.__setattr__(synthetic, "tangent_layout_id", "synthetic")
+    object.__setattr__(synthetic, "snapshot_schema_id", "synthetic")
+    object.__setattr__(synthetic, "transition_owner", "synthetic")
+    object.__setattr__(synthetic, "constraint_catalog_id", "synthetic")
+    object.__setattr__(synthetic, "transition_evaluation_count", 0)
+    object.__setattr__(synthetic, "qacc_derivative_disposition", QACC_DERIVATIVE_UNADJUDICATED)
+    return synthetic
+
+
 def test_01_original_qacc_no_plateau_reproduced():
     assert SUMMARY["original_blocker_reproduced"]
     assert "no stable plateau" in (EVIDENCE / "10_BLOCKER_REPRODUCTION.md").read_text()
@@ -139,6 +181,71 @@ def test_15_certificate_rejects_nonpositive_synthetic_bound():
             absolute_error_bound={"qacc_translation": 1e-7, "qacc_rotation_joint": 1e-7},
         )
     assert QACC_DERIVATIVE_NUMERICALLY_NULL != QACC_DERIVATIVE_UNADJUDICATED
+
+
+def test_certificate_rejects_missing_qacc_report():
+    result = _synthetic_linearization()
+    object.__setattr__(result, "state_columns", tuple(result.state_columns[:-1]))
+    with pytest.raises(DerivativeDomainError, match="all 21 qacc reports"):
+        result.certify_qacc_numerical_null(
+            evidence_id="ML241-test-certificate",
+            absolute_error_bound={
+                "qacc_translation": 1.0e-7,
+                "qacc_rotation_joint": 1.0e-7,
+            },
+        )
+
+
+def test_certificate_rejects_invalid_qacc_branch_report():
+    result = _synthetic_linearization(valid_index=111)
+    with pytest.raises(DerivativeDomainError, match="fixed-mode finite qacc reports"):
+        result.certify_qacc_numerical_null(
+            evidence_id="ML241-test-certificate",
+            absolute_error_bound={
+                "qacc_translation": 1.0e-7,
+                "qacc_rotation_joint": 1.0e-7,
+            },
+        )
+
+
+def test_certificate_rejects_current_qacc_response_outside_authorized_bound():
+    result = _synthetic_linearization(qacc_value=1.0e-7 + 1.0e-12)
+    with pytest.raises(DerivativeDomainError, match="error bound"):
+        result.certify_qacc_numerical_null(
+            evidence_id="ML241-test-certificate",
+            absolute_error_bound={
+                "qacc_translation": 1.0e-7,
+                "qacc_rotation_joint": 1.0e-7,
+            },
+        )
+
+
+def test_certificate_rejects_missing_evidence_identity():
+    result = _synthetic_linearization()
+    with pytest.raises(DerivativeDomainError, match="evidence id"):
+        result.certify_qacc_numerical_null(
+            evidence_id="",
+            absolute_error_bound={
+                "qacc_translation": 1.0e-7,
+                "qacc_rotation_joint": 1.0e-7,
+            },
+        )
+
+
+def test_certificate_sets_exact_zero_columns_only_after_qualification():
+    result = _synthetic_linearization(qacc_value=1.0e-12)
+    qualified = result.certify_qacc_numerical_null(
+        evidence_id="ML241-test-certificate",
+        absolute_error_bound={
+            "qacc_translation": 1.0e-7,
+            "qacc_rotation_joint": 1.0e-7,
+        },
+    )
+    assert qualified.qacc_derivative_disposition == QACC_DERIVATIVE_NUMERICALLY_NULL
+    assert np.array_equal(
+        qualified.A[:, WARMSTART_SLICE],
+        np.zeros((132, 21)),
+    )
 
 
 def test_16_failed_relative_plateau_alone_is_insufficient():

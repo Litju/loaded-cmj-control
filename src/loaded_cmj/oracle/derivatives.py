@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 import hashlib
 import json
+from types import MappingProxyType
 from typing import Any, Callable, Mapping, Sequence
 
 import mujoco
@@ -52,6 +53,14 @@ TANGENT_LAYOUT_ID = "LCMJ-V1-TANGENT-STATE-132-1.0.0"
 SNAPSHOT_SCHEMA_ID = "LCMJ-V1-MACRO-SNAPSHOT-1.0.0"
 CONSTRAINT_CATALOG_ID = "LCMJ-V1-ORACLE-CONSTRAINT-CATALOG-1.0.0"
 CENTRAL_DIFFERENCE_SCHEME = "central_boxminus_at_common_y0"
+QACC_ZERO_COLUMNS = tuple(range(WARMSTART_SLICE.start, WARMSTART_SLICE.stop))
+QACC_ERROR_BOUNDS = MappingProxyType(
+    {
+        "qacc_translation": 1.0e-7,
+        "qacc_rotation_joint": 1.0e-7,
+    }
+)
+QACC_CERTIFICATE_EVIDENCE_ID = "ML241-20260810T222908Z-qacc-null-certificate"
 _ACTION_BOUND = 1.0
 _KINK_TOLERANCE = 1.0e-10
 _NATIVE_DOMAIN_TOLERANCE = 1.0e-12
@@ -310,7 +319,7 @@ class WrappedLinearization:
             raise DerivativeDomainError("qacc derivative disposition is already sealed")
         if not str(evidence_id).strip():
             raise DerivativeDomainError("qacc null certificate requires an evidence id")
-        qacc_indexes = tuple(range(WARMSTART_SLICE.start, WARMSTART_SLICE.stop))
+        qacc_indexes = QACC_ZERO_COLUMNS
         reports = {int(report.index): report for report in self.state_columns}
         if any(index not in reports for index in qacc_indexes):
             raise DerivativeDomainError("qacc null certificate requires all 21 qacc reports")
@@ -327,6 +336,27 @@ class WrappedLinearization:
             raise DerivativeDomainError("qacc null certificate requires translation and rotation/joint bounds")
         if any(not np.isfinite(value) or value <= 0.0 for _, value in bounds):
             raise DerivativeDomainError("qacc null certificate bounds must be finite and positive")
+        bound_by_name = dict(bounds)
+        qacc_values = np.asarray(self.A, dtype=np.float64)[:, WARMSTART_SLICE]
+        if not np.isfinite(qacc_values).all():
+            raise DerivativeDomainError("qacc null certificate requires finite current qacc derivatives")
+        observed_bounds = {
+            "qacc_translation": float(np.max(np.abs(qacc_values[:, :3]))),
+            "qacc_rotation_joint": float(np.max(np.abs(qacc_values[:, 3:]))),
+        }
+        exceeded = tuple(
+            key
+            for key, observed in observed_bounds.items()
+            if observed > bound_by_name[key]
+        )
+        if exceeded:
+            details = ", ".join(
+                f"{key}={observed_bounds[key]:.17g}>{bound_by_name[key]:.17g}"
+                for key in exceeded
+            )
+            raise DerivativeDomainError(
+                f"qacc current derivative exceeds authorized error bound: {details}"
+            )
         certified = np.asarray(self.A, dtype=np.float64).copy()
         certified[:, WARMSTART_SLICE] = 0.0
         certified = _readonly_array(certified)
@@ -1583,7 +1613,7 @@ def _direct_qacc_receipt(
 ) -> tuple[str, tuple[int, ...], tuple[tuple[str, float], ...]]:
     """Seal only a completed direct 21-column numerical null qualification."""
 
-    qacc_columns = tuple(range(WARMSTART_SLICE.start, WARMSTART_SLICE.stop))
+    qacc_columns = QACC_ZERO_COLUMNS
     by_index = {int(report.index): report for report in reports}
     if any(index not in by_index for index in qacc_columns):
         return QACC_DERIVATIVE_UNADJUDICATED, (), ()
@@ -1819,7 +1849,7 @@ def linearize_step_5ms(
     action_validity_values = np.zeros(ACTION_DIM, dtype=bool)
     for report in action_reports:
         action_validity_values[report.index] = report.valid
-    return WrappedLinearization(
+    linearization = WrappedLinearization(
         A=_readonly_array(A),
         B=_readonly_array(B),
         accepted_action_jacobian=_readonly_array(P),
@@ -1841,6 +1871,12 @@ def linearize_step_5ms(
         constraint_catalog_id=CONSTRAINT_CATALOG_ID,
         transition_evaluation_count=evaluations,
     )
+    if set(QACC_ZERO_COLUMNS).issubset(state_indexes):
+        return linearization.certify_qacc_numerical_null(
+            evidence_id=QACC_CERTIFICATE_EVIDENCE_ID,
+            absolute_error_bound=QACC_ERROR_BOUNDS,
+        )
+    return linearization
 
 
 def differentiate_state_owner_output(
@@ -2137,6 +2173,9 @@ __all__ = [
     "QACC_DERIVATIVE_PRIOR_GATE_DEFECT",
     "QACC_DERIVATIVE_QUALIFIED_NONZERO",
     "QACC_DERIVATIVE_UNADJUDICATED",
+    "QACC_CERTIFICATE_EVIDENCE_ID",
+    "QACC_ERROR_BOUNDS",
+    "QACC_ZERO_COLUMNS",
     "DerivativeDomainError",
     "ColumnQualification",
     "OWNER_OUTPUT_IDS",

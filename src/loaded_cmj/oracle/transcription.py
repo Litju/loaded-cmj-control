@@ -22,6 +22,8 @@ from loaded_cmj.oracle.constraints import CATALOG, ConstraintCatalog, Constraint
 from loaded_cmj.oracle.derivatives import (
     CONSTRAINT_CATALOG_ID,
     QACC_DERIVATIVE_NUMERICALLY_NULL,
+    QACC_ERROR_BOUNDS,
+    QACC_ZERO_COLUMNS,
     STATE_STEP_BLOCKS,
     TANGENT_LAYOUT_ID as DERIVATIVE_TANGENT_LAYOUT_ID,
     WrappedLinearization,
@@ -76,14 +78,7 @@ _NATIVE_EUCLIDEAN_STATE_DOMAINS = (
     ("a_minus", A_MINUS_TANGENT_SLICE, 0.0, 1.0),
     ("previous_accepted_action", PREVIOUS_ACCEPTED_ACTION_TANGENT_SLICE, -1.0, 1.0),
 )
-QACC_ZERO_COLUMNS = tuple(range(111, 132))
 QACC_DERIVATIVE_DISPOSITION = QACC_DERIVATIVE_NUMERICALLY_NULL
-QACC_ERROR_BOUNDS = MappingProxyType(
-    {
-        "qacc_translation": 1.0e-7,
-        "qacc_rotation_joint": 1.0e-7,
-    }
-)
 
 # These are the exact blockwise steps in the ML-241/ML-242 receipt.  They are
 # used only for endpoint maps; they are not a new transition FD contract.

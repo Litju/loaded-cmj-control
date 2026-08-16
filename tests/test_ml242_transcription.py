@@ -712,6 +712,19 @@ def test_ml241_metadata_and_invalid_columns_are_not_silently_zeroed(qualified_fi
         )
         problem_with_provider.jacobian_values(_zero_decision(problem_with_provider, actions))
 
+    invalid_qacc = SimpleNamespace(**vars(invalid))
+    invalid_qacc.A = invalid.A.copy()
+    invalid_qacc.A[0, 111] = 1.0e-3
+    invalid_qacc.action_validity = np.ones(15, dtype=bool)
+    with pytest.raises(DerivativeContractError, match="qualified-zero qacc columns were altered"):
+        problem._validate_derivative_metadata(
+            invalid_qacc,
+            base,
+            np.asarray(actions[0]),
+            tuple(range(STATE_DIMENSION)),
+            problem.layout.active_action_indices,
+        )
+
 
 def test_qualified_zero_input_columns_do_not_remove_next_knot_dependency(qualified_fixtures):
     problem, actions = _problem(qualified_fixtures, 1)
