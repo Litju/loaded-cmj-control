@@ -50,7 +50,7 @@
     <geom name="floor" type="plane" pos="0 0 0" size="0 0 0.05"
           contype="1" conaffinity="6"
           friction="0.9 0.005 0.0001"
-          solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
+          solref="0.016 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
           margin="0.0" gap="0.0" condim="3" priority="0"
           rgba="0.35 0.37 0.40 1"/>
 
@@ -105,8 +105,8 @@
           <body name="left_foot" pos="0 0 -0.43" quat="1 0 0 0">
             <joint name="left_ankle" type="hinge" axis="0 1 0" range="-0.70 0.50" limited="true" stiffness="15.0" damping="5.0" armature="0.008"/>
             <inertial pos="0.045 0 -0.020" quat="1 0 0 0" mass="1.0875" diaginertia="0.001262 0.006570 0.006944"/>
-            <!-- robust box foot: center 0.045 relative ankle; half-sizes 0.15 x 0.06 x 0.010 => full length 0.30, width 0.12, thickness 0.02 -->
-            <geom name="left_foot_box" class="foot_box" type="box" pos="0.045 0 -0.030" size="0.150 0.060 0.010"/>
+            <!-- robust box foot: center 0.045 relative ankle; half-sizes 0.15 x 0.06 x 0.010 => full length 0.30, width 0.12, thickness 0.02 ; RES-6 calibrated solref 0.016 -->
+            <geom name="left_foot_box" class="foot_box" type="box" pos="0.045 0 -0.030" size="0.150 0.060 0.010" solref="0.016 1.0" solimp="0.99 0.99 0.001 0.5 2.0"/>
           </body>
         </body>
       </body>
@@ -133,7 +133,7 @@
           <body name="right_foot" pos="0 0 -0.43" quat="1 0 0 0">
             <joint name="right_ankle" type="hinge" axis="0 1 0" range="-0.70 0.50" limited="true" stiffness="15.0" damping="5.0" armature="0.008"/>
             <inertial pos="0.045 0 -0.020" quat="1 0 0 0" mass="1.0875" diaginertia="0.001262 0.006570 0.006944"/>
-            <geom name="right_foot_box" class="foot_box" type="box" pos="0.045 0 -0.030" size="0.150 0.060 0.010"/>
+            <geom name="right_foot_box" class="foot_box" type="box" pos="0.045 0 -0.030" size="0.150 0.060 0.010" solref="0.016 1.0" solimp="0.99 0.99 0.001 0.5 2.0"/>
           </body>
         </body>
       </body>
