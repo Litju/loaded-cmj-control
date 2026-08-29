@@ -48,7 +48,7 @@
   <worldbody>
     <light name="key" pos="1.5 -1.5 3.0" dir="-0.4 0.4 -1" directional="true"/>
     <geom name="floor" type="plane" pos="0 0 0" size="0 0 0.05"
-          contype="1" conaffinity="2"
+          contype="1" conaffinity="6"
           friction="0.9 0.005 0.0001"
           solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
           margin="0.0" gap="0.0" condim="3" priority="0"
@@ -57,16 +57,26 @@
     <!-- pelvis root : sagittal free (x,z, pitch) — y, roll, yaw eliminated -->
     <body name="pelvis" pos="0 0 0" quat="1 0 0 0">
       <joint name="root_tx" type="slide" axis="1 0 0" range="-1 1" limited="true" stiffness="0" damping="10" armature="0"/>
-      <joint name="root_tz" type="slide" axis="0 0 1" range="0.2 2.0" limited="true" stiffness="0" damping="10" armature="0"/>
+      <joint name="root_tz" type="slide" axis="0 0 1" limited="false" stiffness="0" damping="10" armature="0"/>
       <joint name="root_ry" type="hinge" axis="0 1 0" range="-0.52 0.52" limited="true" stiffness="0" damping="5" armature="0"/>
       <inertial pos="0 0 0.070" quat="1 0 0 0" mass="10.65" diaginertia="0.086975 0.040115 0.09230"/>
       <geom name="pelvis_shell" class="shell" type="capsule" fromto="0 -0.10 0.040 0 0.10 0.040" size="0.090"/>
+      <geom name="pelvis_fall" type="capsule" fromto="0 -0.10 0.040 0 0.10 0.040" size="0.090"
+            contype="4" conaffinity="0" group="1"
+            condim="3" margin="0.0" gap="0.0" priority="0"
+            solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
+            friction="0.9 0.005 0.0001" rgba="0.55 0.60 0.68 0.2"/>
 
       <!-- torso + load -->
       <body name="torso_head_arms" pos="0 0 0.10" quat="1 0 0 0">
         <joint name="lumbar" type="hinge" axis="0 1 0" range="-0.60 0.60" limited="true" stiffness="15.0" damping="5.0" armature="0.02"/>
         <inertial pos="0 0 0.260" quat="1 0 0 0" mass="40.20" diaginertia="1.72190 1.48070 0.62712"/>
         <geom name="torso_shell" class="shell" type="capsule" fromto="0 0 0.020 0 0 0.500" size="0.130"/>
+        <geom name="torso_fall" type="capsule" fromto="0 0 0.020 0 0 0.500" size="0.130"
+              contype="4" conaffinity="0" group="1"
+              condim="3" margin="0.0" gap="0.0" priority="0"
+              solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
+              friction="0.9 0.005 0.0001" rgba="0.55 0.60 0.68 0.2"/>
         <body name="external_load" pos="0 0 0.420" quat="1 0 0 0">
           <inertial pos="0 0 0" quat="1 0 0 0" mass="20.0" diaginertia="3.753125 0.006250 3.753125"/>
           <geom name="load_shell" class="shell" type="cylinder" size="0.025 0.750" quat="0.70710678 -0.70710678 0 0" rgba="0.75 0.35 0.15 1"/>
@@ -78,10 +88,20 @@
         <joint name="left_hip" type="hinge" axis="0 1 0" range="-0.50 1.80" limited="true" stiffness="15.0" damping="8.0" armature="0.02"/>
         <inertial pos="0 0 -0.186" quat="1 0 0 0" mass="7.50" diaginertia="0.126109 0.126109 0.021094"/>
         <geom name="left_thigh_shell" class="shell" type="capsule" fromto="0 0 -0.040 0 0 -0.390" size="0.070"/>
+        <geom name="left_thigh_fall" type="capsule" fromto="0 0 -0.040 0 0 -0.390" size="0.070"
+              contype="4" conaffinity="0" group="1"
+              condim="3" margin="0.0" gap="0.0" priority="0"
+              solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
+              friction="0.9 0.005 0.0001" rgba="0.55 0.60 0.68 0.2"/>
         <body name="left_shank" pos="0 0 -0.43" quat="1 0 0 0">
           <joint name="left_knee" type="hinge" axis="0 -1 0" range="0 2.40" limited="true" stiffness="15.0" damping="8.0" armature="0.015"/>
           <inertial pos="0 0 -0.186" quat="1 0 0 0" mass="3.4875" diaginertia="0.056374 0.056374 0.005275"/>
           <geom name="left_shank_shell" class="shell" type="capsule" fromto="0 0 -0.040 0 0 -0.390" size="0.050"/>
+          <geom name="left_shank_fall" type="capsule" fromto="0 0 -0.040 0 0 -0.390" size="0.050"
+                contype="4" conaffinity="0" group="1"
+                condim="3" margin="0.0" gap="0.0" priority="0"
+                solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
+                friction="0.9 0.005 0.0001" rgba="0.55 0.60 0.68 0.2"/>
           <body name="left_foot" pos="0 0 -0.43" quat="1 0 0 0">
             <joint name="left_ankle" type="hinge" axis="0 1 0" range="-0.70 0.50" limited="true" stiffness="15.0" damping="5.0" armature="0.008"/>
             <inertial pos="0.045 0 -0.020" quat="1 0 0 0" mass="1.0875" diaginertia="0.001262 0.006570 0.006944"/>
@@ -96,10 +116,20 @@
         <joint name="right_hip" type="hinge" axis="0 1 0" range="-0.50 1.80" limited="true" stiffness="15.0" damping="8.0" armature="0.02"/>
         <inertial pos="0 0 -0.186" quat="1 0 0 0" mass="7.50" diaginertia="0.126109 0.126109 0.021094"/>
         <geom name="right_thigh_shell" class="shell" type="capsule" fromto="0 0 -0.040 0 0 -0.390" size="0.070"/>
+        <geom name="right_thigh_fall" type="capsule" fromto="0 0 -0.040 0 0 -0.390" size="0.070"
+              contype="4" conaffinity="0" group="1"
+              condim="3" margin="0.0" gap="0.0" priority="0"
+              solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
+              friction="0.9 0.005 0.0001" rgba="0.55 0.60 0.68 0.2"/>
         <body name="right_shank" pos="0 0 -0.43" quat="1 0 0 0">
           <joint name="right_knee" type="hinge" axis="0 -1 0" range="0 2.40" limited="true" stiffness="15.0" damping="8.0" armature="0.015"/>
           <inertial pos="0 0 -0.186" quat="1 0 0 0" mass="3.4875" diaginertia="0.056374 0.056374 0.005275"/>
           <geom name="right_shank_shell" class="shell" type="capsule" fromto="0 0 -0.040 0 0 -0.390" size="0.050"/>
+          <geom name="right_shank_fall" type="capsule" fromto="0 0 -0.040 0 0 -0.390" size="0.050"
+                contype="4" conaffinity="0" group="1"
+                condim="3" margin="0.0" gap="0.0" priority="0"
+                solref="0.004 1.0" solimp="0.99 0.99 0.001 0.5 2.0"
+                friction="0.9 0.005 0.0001" rgba="0.55 0.60 0.68 0.2"/>
           <body name="right_foot" pos="0 0 -0.43" quat="1 0 0 0">
             <joint name="right_ankle" type="hinge" axis="0 1 0" range="-0.70 0.50" limited="true" stiffness="15.0" damping="5.0" armature="0.008"/>
             <inertial pos="0.045 0 -0.020" quat="1 0 0 0" mass="1.0875" diaginertia="0.001262 0.006570 0.006944"/>

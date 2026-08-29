@@ -30,13 +30,13 @@ V2_EPISODE_CONTROL_STEPS = 800
 # Sagittal constraint method (record exact method per spec)
 V2_SAGITTAL_CONSTRAINT_METHOD = "reduced_joint_topology: pelvis has x-slide + z-slide + y-hinge; lateral translation, roll, yaw eliminated mechanically; non-sagittal hip/ankle frontal DoFs welded; task is sagittal-plane dominant but MuJoCo scene remains 3-D with bilateral feet"
 
-# Plant inventory — V2
+# Plant inventory — V2.1
 V2_COMPILED_NBODY = 10
 V2_COMPILED_NJNT = 10  # 3 root + 7 sagittal hinges (lumbar, 2 hip, 2 knee, 2 ankle)
 V2_COMPILED_NQ = 10
 V2_COMPILED_NV = 10
 V2_COMPILED_NU = 7  # 1 lumbar + 2 hip + 2 knee + 2 ankle = 7 physical; 4 effective sym commands
-V2_COMPILED_NGEOM = 10  # 1 floor + 1 pelvis + 1 torso + 1 load + 2 thigh + 2 shank + 2 foot_box
+V2_COMPILED_NGEOM = 16  # V2 baseline 10 + 6 fall-only shells (pelvis, torso, 2 thigh, 2 shank); V2.1 honest fall
 V2_COMPILED_NEQ = 0
 V2_COMPILED_NA = 0
 
@@ -95,12 +95,18 @@ V2_ACTION_DIM = 7  # runtime is physical 7
 V2_GEOM_NAMES = (
     "floor",
     "pelvis_shell",
+    "pelvis_fall",
     "torso_shell",
+    "torso_fall",
     "load_shell",
     "left_thigh_shell",
+    "left_thigh_fall",
     "right_thigh_shell",
+    "right_thigh_fall",
     "left_shank_shell",
+    "left_shank_fall",
     "right_shank_shell",
+    "right_shank_fall",
     "left_foot_box",
     "right_foot_box",
 )

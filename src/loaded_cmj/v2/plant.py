@@ -75,7 +75,7 @@ def resolve_indices(model: mujoco.MjModel) -> V2Indices:
     body = {n: _id(mujoco.mjtObj.mjOBJ_BODY, n) for n in ["pelvis","torso_head_arms","external_load","left_thigh","left_shank","left_foot","right_thigh","right_shank","right_foot"]}
     joint = {n: _id(mujoco.mjtObj.mjOBJ_JOINT, n) for n in V2_JOINT_NAMES}
     actuator = {n: _id(mujoco.mjtObj.mjOBJ_ACTUATOR, n) for n in V2_MJ_ACTUATOR_NAMES}
-    geom = {n: _id(mujoco.mjtObj.mjOBJ_GEOM, n) for n in ["floor","pelvis_shell","torso_shell","load_shell","left_thigh_shell","left_shank_shell","left_foot_box","right_thigh_shell","right_shank_shell","right_foot_box"]}
+    geom = {n: _id(mujoco.mjtObj.mjOBJ_GEOM, n) for n in ["floor","pelvis_shell","pelvis_fall","torso_shell","torso_fall","load_shell","left_thigh_shell","left_thigh_fall","left_shank_shell","left_shank_fall","left_foot_box","right_thigh_shell","right_thigh_fall","right_shank_shell","right_shank_fall","right_foot_box"]}
     qadr = {n: int(model.jnt_qposadr[joint[n]]) for n in V2_JOINT_NAMES}
     vadr = {n: int(model.jnt_dofadr[joint[n]]) for n in V2_JOINT_NAMES}
     return V2Indices(
