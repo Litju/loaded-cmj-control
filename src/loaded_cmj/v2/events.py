@@ -8,11 +8,23 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
-from loaded_cmj.v2.constants import V2_EVENT_THRESHOLDS, V2_TOTAL_MASS_KG, V2_GRAVITY_MAGNITUDE
+from loaded_cmj.v2.constants import (
+    V2_EVENT_THRESHOLDS,
+    V2_TOTAL_MASS_KG,
+    V2_GRAVITY_MAGNITUDE,
+    V2_TRUE_STANDING_ENVELOPE,
+    V2_EVENT_CONTRACT_VERSION,
+)
 
 GRAVITY = V2_GRAVITY_MAGNITUDE
 WEIGHT = V2_TOTAL_MASS_KG * GRAVITY
 DT = 0.000125  # physics timestep, frozen
+
+# Frozen V2.1 True-Standing Contract (RES-16)
+V2_EVENT_CONTRACT_VERSION_EXPORT = V2_EVENT_CONTRACT_VERSION
+TRUE_STANDING_ENVELOPE = V2_TRUE_STANDING_ENVELOPE
+# Reuse existing support threshold, do not add new arbitrary numbers
+BILATERAL_FZ_THRESHOLD_N = float(V2_EVENT_THRESHOLDS["BILATERAL_TAKEOFF_FZ_N"])
 
 EVENT_ORDER = [
     "supported_start",
@@ -244,6 +256,139 @@ class V2EventDetector:
         except Exception:
             return False
 
+    def _is_true_standing_neighborhood(self, s: dict[str, Any]) -> bool:
+        """Frozen TRUE_STANDING_NEIGHBORHOOD predicate (RES-16).
+
+        Requires every controlled joint, COM z, root z, trunk pitch within the
+        qualified standing envelope (empirically derived, expanded by one ULP),
+        plus bilateral plantar support, no fall, no prohibited contact.
+        Reuses existing support threshold (BILATERAL_TAKEOFF_FZ_N = 10.0).
+        """
+        try:
+            # 1. controlled joints q7 within envelope
+            # Accept multiple aliases for joint positions
+            q = None
+            for key in ("joint_position_rad", "joint_q7", "controlled_q7", "q7", "qpos_7", "controlled_q"):
+                if key in s and s[key] is not None:
+                    q = s[key]
+                    break
+            # Also try to extract from 'qpos' full (10) if needed: last 7 are actuated
+            if q is None and "qpos" in s and s["qpos"] is not None:
+                try:
+                    full = list(s["qpos"])
+                    if len(full) >= 10:
+                        # qpos order: root_tx, root_tz, root_ry, lumbar, left_hip, left_knee, left_ankle, right_hip, right_knee, right_ankle
+                        # Map to controlled order lumbar, left_hip, right_hip, left_knee, right_knee, left_ankle, right_ankle
+                        # qpos indices: 3: lumbar, 4:left_hip, 7:right_hip, 5:left_knee, 8:right_knee, 6:left_ankle, 9:right_ankle
+                        q = [float(full[3]), float(full[4]), float(full[7]), float(full[5]), float(full[8]), float(full[6]), float(full[9])]
+                    elif len(full) == 7:
+                        q = full
+                except Exception:
+                    q = None
+            if q is None:
+                return False
+            q_arr = [float(x) for x in q]
+            if len(q_arr) != 7:
+                return False
+            env = TRUE_STANDING_ENVELOPE["Q_STAND_ENVELOPE"]
+            for j in range(7):
+                lo, hi = env[j]
+                if not (lo <= q_arr[j] <= hi):
+                    return False
+            # 2. COM z
+            com_z = None
+            for key in ("com_z", "com_position_z", "COM_Z"):
+                if key in s and s[key] is not None:
+                    com_z = float(s[key])
+                    break
+            # fallback: com_position_m[2]
+            if com_z is None and "com_position_m" in s and s["com_position_m"] is not None:
+                try:
+                    com_z = float(s["com_position_m"][2])
+                except Exception:
+                    pass
+            if com_z is None:
+                return False
+            lo, hi = TRUE_STANDING_ENVELOPE["COM_Z_STAND_ENVELOPE"]
+            if not (lo <= com_z <= hi):
+                return False
+            # 3. root z
+            root_z = None
+            for key in ("root_z", "root_tz", "pelvis_z", "pelvis_position_z"):
+                if key in s and s[key] is not None:
+                    root_z = float(s[key])
+                    break
+            if root_z is None and "pelvis_position_world_m" in s and s["pelvis_position_world_m"] is not None:
+                try:
+                    root_z = float(s["pelvis_position_world_m"][2])
+                except Exception:
+                    pass
+            # Also try qpos[1] is root_tz
+            if root_z is None and "qpos" in s and s["qpos"] is not None:
+                try:
+                    root_z = float(list(s["qpos"])[1])
+                except Exception:
+                    pass
+            if root_z is None:
+                return False
+            lo, hi = TRUE_STANDING_ENVELOPE["ROOT_Z_STAND_ENVELOPE"]
+            if not (lo <= root_z <= hi):
+                return False
+            # 4. trunk pitch / tilt
+            trunk = None
+            for key in ("trunk_tilt", "trunk_pitch", "trunk_tilt_rad", "tilt"):
+                if key in s and s[key] is not None:
+                    trunk = float(s[key])
+                    break
+            if trunk is None:
+                return False
+            lo, hi = TRUE_STANDING_ENVELOPE["TRUNK_PITCH_STAND_ENVELOPE"]
+            # trunk_tilt is absolute angle, envelope lower is -5e-324, upper 0.0032
+            if not (lo <= trunk <= hi):
+                return False
+            # 5. bilateral physical plantar support (reuse existing threshold 10.0)
+            left = None
+            right = None
+            for k in ("left_Fz", "left_fz", "left_foot_Fz"):
+                if k in s and s[k] is not None:
+                    left = float(s[k])
+                    break
+            for k in ("right_Fz", "right_fz", "right_foot_Fz"):
+                if k in s and s[k] is not None:
+                    right = float(s[k])
+                    break
+            # fallback to plantar_normal_force_N
+            if left is None and "plantar_normal_force_N" in s and s["plantar_normal_force_N"] is not None:
+                try:
+                    left = float(s["plantar_normal_force_N"][0])
+                    right = float(s["plantar_normal_force_N"][1])
+                except Exception:
+                    pass
+            if left is None or right is None:
+                return False
+            if not (left > BILATERAL_FZ_THRESHOLD_N and right > BILATERAL_FZ_THRESHOLD_N):
+                return False
+            # 6. no physical fall
+            fall = s.get("fall_contact", s.get("physical_fall", s.get("fall", s.get("prohibited_contact", False))))
+            if bool(fall):
+                return False
+            # 7. no prohibited non-plantar support
+            prohibited = s.get("prohibited", s.get("prohibited_contact", s.get("fall_contact", False)))
+            # If prohibited is explicitly True, fail. If fall already checked, this is redundant but keep.
+            # Need to distinguish fall vs prohibited: fall is prohibited contact via fall shells, prohibited is non-plantar
+            # For true standing, both must be False
+            if bool(s.get("prohibited", False)) or bool(s.get("prohibited_contact", False)):
+                # If sample has explicit prohibited flag, ensure it's False
+                # But note fall_contact is same as prohibited_contact for V2? In V2, prohibited is shell contact, fall is same.
+                # We already checked fall, but also check prohibited separately
+                if bool(s.get("prohibited", False)):
+                    return False
+                if bool(s.get("prohibited_contact", False)):
+                    return False
+            return True
+        except Exception:
+            return False
+
     def _guard_stable_recovery(self, s: dict[str, Any]) -> bool:
         th = self.th
         try:
@@ -252,6 +397,9 @@ class V2EventDetector:
             if abs(float(s.get("com_vz", 0))) >= 0.05:
                 return False
             if float(s.get("whole_Fz", 0)) <= 0.5 * WEIGHT:
+                return False
+            # RES-16: require true standing neighborhood for entire dwell
+            if not self._is_true_standing_neighborhood(s):
                 return False
             return True
         except Exception:

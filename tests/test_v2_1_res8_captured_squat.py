@@ -88,7 +88,6 @@ def test_supported_controller_identical_through_takeoff():
     oldmod=importlib.util.module_from_spec(spec_old)
     spec_old.loader.exec_module(oldmod)
     from loaded_cmj.v2.controller import act as new_act, reset as new_reset
-    import importlib.util
     plant_old=V2Plant()
     d_old=plant_old.make_data()
     plant_old.reset(d_old)
