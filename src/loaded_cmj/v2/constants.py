@@ -24,8 +24,8 @@ V2_PHYSICS_TIMESTEP_S = 0.000125
 V2_SUBSTEPS_PER_CONTROL = 40
 V2_CONTROL_PERIOD_S = 0.005
 V2_CONTROL_RATE_HZ = 200.0
-V2_EPISODE_HORIZON_S = 4.0
-V2_EPISODE_CONTROL_STEPS = 800
+V2_EPISODE_HORIZON_S = 8.0  # R3 extended to 8.0 to observe E12 for T up to 4.0 (E11 2.935 + T 4.0 +0.5 dwell +0.5 observation =7.935) with margin, timestep unchanged
+V2_EPISODE_CONTROL_STEPS = 1600  # 8.0 / 0.005
 
 # Sagittal constraint method (record exact method per spec)
 V2_SAGITTAL_CONSTRAINT_METHOD = "reduced_joint_topology: pelvis has x-slide + z-slide + y-hinge; lateral translation, roll, yaw eliminated mechanically; non-sagittal hip/ankle frontal DoFs welded; task is sagittal-plane dominant but MuJoCo scene remains 3-D with bilateral feet"
