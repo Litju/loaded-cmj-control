@@ -127,11 +127,11 @@ V2_JOINT_SOLIMPLIMIT = (0.90, 0.95, 0.001, 0.5, 2.0)
 V2_FRICTION_FLOOR = (0.9, 0.005, 0.0001)
 V2_FRICTION_FOOT = (0.9, 0.005, 0.0001)
 
-# Joint limits (rad or m)
+# Joint limits (rad or m) — V2.1 RES-31: sagittal root is honestly floating (no positional catch)
 V2_JOINT_RANGES = MappingProxyType({
-    "root_tx": (-1.0, 1.0),
-    "root_tz": (0.2, 2.0),
-    "root_ry": (-0.52, 0.52),  # ~30 deg pitch
+    "root_tx": (float("-inf"), float("inf")),  # unlimited sagittal translation
+    "root_tz": (float("-inf"), float("inf")),  # unlimited vertical (already limited=false)
+    "root_ry": (float("-inf"), float("inf")),  # unlimited sagittal pitch
     "lumbar": (-0.60, 0.60),
     "left_hip": (-0.50, 1.80),
     "right_hip": (-0.50, 1.80),
