@@ -54,11 +54,11 @@
           margin="0.0" gap="0.0" condim="3" priority="0"
           rgba="0.35 0.37 0.40 1"/>
 
-    <!-- pelvis root : sagittal free (x,z, pitch) — y, roll, yaw eliminated — honestly floating, no artificial positional catch -->
+    <!-- pelvis root : sagittal free (x,z, pitch) — y, roll, yaw eliminated — honestly floating, no artificial positional catch, zero passive damping -->
     <body name="pelvis" pos="0 0 0" quat="1 0 0 0">
-      <joint name="root_tx" type="slide" axis="1 0 0" limited="false" stiffness="0" damping="10" armature="0"/>
-      <joint name="root_tz" type="slide" axis="0 0 1" limited="false" stiffness="0" damping="10" armature="0"/>
-      <joint name="root_ry" type="hinge" axis="0 1 0" limited="false" stiffness="0" damping="5" armature="0"/>
+      <joint name="root_tx" type="slide" axis="1 0 0" limited="false" stiffness="0" damping="0" armature="0"/>
+      <joint name="root_tz" type="slide" axis="0 0 1" limited="false" stiffness="0" damping="0" armature="0"/>
+      <joint name="root_ry" type="hinge" axis="0 1 0" limited="false" stiffness="0" damping="0" armature="0"/>
       <inertial pos="0 0 0.070" quat="1 0 0 0" mass="10.65" diaginertia="0.086975 0.040115 0.09230"/>
       <geom name="pelvis_shell" class="shell" type="capsule" fromto="0 -0.10 0.040 0 0.10 0.040" size="0.090"/>
       <geom name="pelvis_fall" type="capsule" fromto="0 -0.10 0.040 0 0.10 0.040" size="0.090"
