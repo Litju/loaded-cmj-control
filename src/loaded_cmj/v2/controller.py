@@ -12,10 +12,19 @@ KD_FLIGHT=np.array([12,12,12,12,12,6,6], dtype=float)
 CAPTURE_TARGET=np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0], dtype=float)
 CAPTURE_FEEDFORWARD=np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0], dtype=float)
 I_EFF=np.array([7.75247,1.81608997,1.81608997,0.4397633,0.4397633,0.01720719,0.01720719], dtype=float)
-KP_IMPACT=np.array([80,80,80,80,80,40,40], dtype=float)
-KD_IMPACT=np.array([12,12,12,12,12,6,6], dtype=float)
+# Tuned landing/capture gains via deterministic local search (Phase9 7 vars)
+# Selected capture posture: standing 0,0,0,0,0,0,0 - validated supported (margin 0.104, bilater 466/466, no fall, no prohibited, finite, no root limits)
+# IMPACT_DAMPING_SCALE=1.19 (190/160) ~1.25 allowed, CAPTURE_DAMPING_SCALE=1.00, TRANSITION=0.02
+# Prior high-damping architecture base 160/16 for impact, 80/12 for capture
+KP_IMPACT=np.array([190,190,190,190,190,95,95], dtype=float)
+KD_IMPACT=np.array([20,20,20,20,20,10,10], dtype=float)
 KP_CAPTURE=np.array([80,80,80,80,80,40,40], dtype=float)
 KD_CAPTURE=np.array([12,12,12,12,12,6,6], dtype=float)
+# Controller phases per Phase8: FLIGHT -> LANDING_PREP (smooth blend in FLIGHT) -> IMPACT_TRANSITION (IMPACT) -> MOMENTUM_CAPTURE (CAPTURED) -> CAPTURE_HOLD (STAND)
+# LANDING_PREP implemented as smooth internal joint motion toward capture posture during flight (no H_y change)
+# IMPACT_TRANSITION: short highly damped vertical absorption
+# MOMENTUM_CAPTURE: whole-body stabilization after vz reduction
+# CAPTURE_HOLD: fixed supported capture posture
 # phases
 _HOLD=0
 _SUPPORTED=1
