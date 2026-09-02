@@ -26,11 +26,27 @@ _STAND=5
 _phase=_HOLD
 _phase_started=0
 _prev_action=np.zeros(7)
+# Optimized launch residual (RES10_R5A2, 16 params, 4 per group)
+# Groups: lumbar, hip, knee, ankle; knots [0,0.2,0.4,0.6]
+_OPT_PARAMS=np.array([0.0, -0.02, -0.01, -0.01, 0.0, 0.0, -0.03, -0.02, 0.0, 0.0, -0.05, -0.04, 0.0, 0.0, 0.0, 0.0], dtype=float)
+_OPT_KNOTS=np.array([0.0,0.2,0.4,0.6], dtype=float)
+def _delta_at(t_in, coeffs):
+    if t_in <= _OPT_KNOTS[0]:
+        return float(coeffs[0])
+    if t_in >= _OPT_KNOTS[-1]:
+        return 0.0 if t_in > _OPT_KNOTS[-1]+1e-9 else float(coeffs[-1])
+    for i in range(len(coeffs)-1):
+        if _OPT_KNOTS[i] <= t_in < _OPT_KNOTS[i+1]:
+            frac=(t_in-_OPT_KNOTS[i])/(_OPT_KNOTS[i+1]-_OPT_KNOTS[i])
+            return float(coeffs[i]*(1-frac)+coeffs[i+1]*frac)
+    return float(coeffs[-1])
+
 def reset(t):
     global _phase, _phase_started, _prev_action
     _phase=_HOLD
     _phase_started=t
     _prev_action=np.zeros(7)
+
 def act(obs):
     global _phase, _phase_started, _prev_action
     try:
@@ -71,7 +87,14 @@ def act(obs):
         elif _phase==_SUPPORTED:
             t_in=t-_phase_started
             tau=FLEX_TAU if t_in<0.30 else (EXTEND_TAU if t_in<0.60 else np.zeros(7))
-            u=np.clip(tau/LIMITS,-1,1)
+            u_seed=tau/LIMITS
+            # residual delta
+            d_lum=_delta_at(t_in, _OPT_PARAMS[0:4])
+            d_hip=_delta_at(t_in, _OPT_PARAMS[4:8])
+            d_knee=_delta_at(t_in, _OPT_PARAMS[8:12])
+            d_ank=_delta_at(t_in, _OPT_PARAMS[12:16])
+            delta_vec=np.array([d_lum, d_hip, d_hip, d_knee, d_knee, d_ank, d_ank], dtype=float)
+            u=np.clip(u_seed+delta_vec,-1,1)
         elif _phase==_FLIGHT:
             err=FLIGHT_TARGET-s
             raw=KP_FLIGHT*err + KD_FLIGHT*(-sd)
