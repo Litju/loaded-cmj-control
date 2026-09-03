@@ -115,3 +115,23 @@ No historical evidence was recreated. All "reproduction" traces cited are fresh 
 
 `RES-10 REBUILD THE HONEST CONTROLLER FROM CAPTURE THROUGH TRUE-STANDING E12` on the frozen honest plant (`5f22441...`), using the sealed `RES-43` E12 envelope (`8b90eea8`) and the sealed `R5A2` launch (`8a7c06c7...`) as entry — with a predeclared experiment (budget/metrics/hard gates, see `EXPERIMENT_REGISTRY.jsonl`). No mechanical Plant/contact/solver change is authorized. No `R5A4`/`E12` rendering/push until `EVIDENCE_DELIVERED` + `EVIDENCE_AUDITED` + `SEALED`.
 
+
+---
+
+## 9. R0.1 Addendum — R5A3 Historical vs Reproduction Split (2026-09-03)
+
+`LCMJ_R0_1_EVIDENCE_CONTRACT_NORMALIZATION` corrects the R5A3 evidence
+classification without manufacturing history:
+
+- `R5A3_ORIGINAL_EVIDENCE_STATUS=EVIDENCE_MISSING` — the original historical
+  R5A3 bundle was not recovered (unchanged from §4).
+- `R5A3_CURRENT_REPRODUCTION_STATUS=RETROACTIVE_REPRODUCTION_ONLY` — the
+  scientific-rebase primary bundle reproduced the R5A3 trajectory from commit
+  `2a5967d359f34562a9e356c3b138062cffdf4d51`; this is present
+  reproducibility only (see `CLAIM_EVIDENCE_MATRIX.csv`
+  `RES10_R5A3_RETROACTIVE_REPRODUCTION`).
+- R5A3 is NOT upgraded to `ORIGINAL_EVIDENCE_VERIFIED` / `SEALED`.
+- `R5B` remains `CONTRADICTED`; no causal conclusions revived.
+
+No controller, Plant, contact, actuator, solver, or scorer semantics changed
+in this addendum.

@@ -105,3 +105,18 @@ RES-10 REBUILD THE HONEST CONTROLLER FROM CAPTURE THROUGH TRUE-STANDING E12
 
 Controller optimization is paused until this checkpoint is sealed — exactly as required.
 
+
+---
+
+## 7. R0.1 Addendum — Evidence Contract Normalization (2026-09-03)
+
+- `R0.1 evidence normalization completed` (contract v2.0.0 + trace schema v2,
+  bundle `LCMJ-R01-EVIDENCE-BRANCH-REPLAY-001`, fresh-process `IDENTICAL`
+  branch replay from a nonzero `mjSTATE_INTEGRATION` branch point).
+- `R5A3 original evidence still missing`; `R5A3 retroactive reproduction
+  verified` (`RETROACTIVE_REPRODUCTION_ONLY`, not sealed).
+- `R5B remains contradicted`.
+- Controller optimization remains paused during R0.1.
+- Next authorized controller experiment after PASS is
+  `RES10_RECOVERY_FEASIBILITY_001` (not executed here; RES-10 not complete;
+  RES-11 not started).

@@ -1,9 +1,12 @@
 # Experiment Protocol
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Date:** 2026-09-03  
 **Constitution:** `PROJECT_SCIENTIFIC_CONSTITUTION.md`  
 **Status:** CANONICAL
+
+Changelog vs 1.0.0 (R0.1): budget semantics fixed — bare `BUDGET=n`
+forbidden; explicit `BUDGET_DEFINITION` counters required (§5).
 
 ---
 
@@ -64,13 +67,49 @@ Each entry (one JSON object per line) must specify:
 
 ## 4. Execution
 
-- The recorder (`tools/evidence_recorder.py`) refuses to run if the matching `EXPERIMENT_REGISTRY.jsonl` entry is not found or if `authority_commit` does not match `git rev-parse HEAD`.
+- The recorder (`tools/evidence_recorder.py` for v1 bundles;
+  `tools/evid_bundle.py` + `tools/evid_spec.py` for R0.1/v2 bundles, which
+  additionally enforce `BUDGET_DEFINITION` counters and `SPEC_EXECUTION_MATCH`)
+  refuses to run if the matching `EXPERIMENT_REGISTRY.jsonl` entry is not
+  found or if the authority commit does not match `git rev-parse HEAD`.
 - At run completion, the manifest's `experiment_id` must equal the predeclared entry, and `experiments.jsonl` inside the bundle must contain the exact predeclared JSON plus the observed `candidate_traces[]` and `gate_results{}`.
 - Any deviation (extra candidates, changed frozen variable, invented metric) marks the bundle `BLOCKED_EXPERIMENT_CONTRACT_VIOLATION` and prevents sealing.
 
 ---
 
 ## 5. Budgets Used by Current Authority (reference)
+
+Every experiment MUST define its budget as an explicit object (see
+`EVIDENCE_CONTRACT.md` §6 and `tools/evid_spec.py`):
+
+```json
+"BUDGET_DEFINITION": {
+  "MAX_FULL_EPISODE_QUALIFICATION_RUNS": 1,
+  "MAX_BRANCH_ROLLOUTS": 1,
+  "MAX_OBJECTIVE_EVALUATIONS": 1,
+  "MAX_SOLVER_MAJOR_ITERATIONS": 0,
+  "MAX_TRANSITION_JACOBIAN_EVALUATIONS": 0
+}
+```
+
+Counter definitions:
+
+- `MAX_FULL_EPISODE_QUALIFICATION_RUNS` — full-horizon episodes executed as
+  qualification candidates (a fresh `reset → horizon` rollout each).
+- `MAX_BRANCH_ROLLOUTS` — continuations from a saved integration state
+  (`mj_setState` restore + recorded control sequence each).
+- `MAX_OBJECTIVE_EVALUATIONS` — metric/objective computations over traces.
+- `MAX_SOLVER_MAJOR_ITERATIONS` — major iterations of any numerical solver
+  (SLSQP/IPOPT/etc.); `0` when no solver runs.
+- `MAX_TRANSITION_JACOBIAN_EVALUATIONS` — `mjd_transitionFD` evaluations;
+  `0` unless a fixed-contact-mode linearization is predeclared.
+
+A bare field such as `BUDGET=12` or `candidate_budget=12` WITHOUT this object
+is forbidden: it does not define what counts as one unit. The grandfathered
+line `EXP-R10-FUTURE-RECOVERY-001` (`candidate_budget 12`) is clarified by
+the appended amendment record to mean
+`MAX_FULL_EPISODE_QUALIFICATION_RUNS=12` (all other counters `0` unless a
+follow-up predeclaration states otherwise).
 
 | Mission | Method | Budget |
 |---|---|---|

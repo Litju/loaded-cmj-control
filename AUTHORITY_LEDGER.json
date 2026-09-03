@@ -1,7 +1,11 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "date": "2026-09-03",
   "constitution": "PROJECT_SCIENTIFIC_CONSTITUTION.md",
+  "R0_1_amendment": "LCMJ_R0_1_EVIDENCE_CONTRACT_NORMALIZATION: split R5A3 historical evidence from present reproducibility; no controller/Plant/contact/actuator/solver/scorer change.",
+  "R5A3_ORIGINAL_EVIDENCE_STATUS": "EVIDENCE_MISSING",
+  "R5A3_CURRENT_REPRODUCTION_STATUS": "RETROACTIVE_REPRODUCTION_ONLY",
+  "R5B_EVIDENCE_STATUS": "CONTRADICTED",
   "entry_head": "2a5967d359f34562a9e356c3b138062cffdf4d51",
   "entry_tree": "b7bec500e9060d1b59e243ca0a929cffe47b162a",
   "mujoco_version": "3.8.0",
@@ -128,7 +132,7 @@
     },
     {
       "id": "experiment_definition",
-      "version": "Experiment Protocol 1.0.0",
+      "version": "Experiment Protocol 1.1.0 (R0.1 budget semantics)",
       "source_paths": ["EXPERIMENT_PROTOCOL.md", "EXPERIMENT_REGISTRY.jsonl"],
       "commit": "PENDING (this rebase)",
       "commit_tree": "PENDING",
@@ -157,8 +161,8 @@
     },
     {
       "id": "evidence_pipeline",
-      "version": "Evidence Contract 1.0.0",
-      "source_paths": ["EVIDENCE_CONTRACT.md", "tools/evidence_recorder.py"],
+      "version": "Evidence Contract 2.0.0 + Trace Schema v2 (R0.1)",
+      "source_paths": ["EVIDENCE_CONTRACT.md", "TRACE_SCHEMA_V2.md", "tools/evid_canonical.py", "tools/evid_state.py", "tools/evid_spec.py", "tools/evid_trace_v2.py", "tools/evid_bundle.py", "tools/evid_finalize.py", "tools/reproduce_branch_replay.py"],
       "commit": "PENDING (this rebase)",
       "commit_tree": "PENDING",
       "sha256": {
@@ -168,7 +172,7 @@
       "dependencies": ["Plant", "solver/integrator", "actuator_contract", "measurement_contract", "event_scorer_contract", "controller"],
       "supersedes": "Ad-hoc receipts (pre-rebase)",
       "superseded_by": null,
-      "known_caveats": "Deterministic bundle: manifest.json, environment.json, initial_integration_state.*, physics_trace.*, control_trace.*, events_online/offline.json, metrics.json, experiments.jsonl, tests/, reviews/, claim_evidence.csv, reproduce.sh, checksums.sha256, FINAL_RECEIPT.md (mechanically generated). Requires MuJoCo exact version, arch, Python, uv.lock hash, model hash, Plant/controller/scorer hashes. Evidence repo is non-Git; bundle hash is authority."
+      "known_caveats": "R0.1 normalizes manifest hashes, spec/run/result separation, sealed reproduction, full mjSTATE_INTEGRATION certs, authority-safe reproduce, trace v2, claim binding. v1 recorder retained for provenance. Deterministic bundle: manifest.json, experiment_spec/run_record/result_assessment.json, environment.json, initial_integration_state.*, physics_trace.*, control_trace.*, events_online/offline.json, metrics.json, experiments.jsonl, tests/, reviews/, claim_evidence.csv, reproduction.*, reproduce.sh, checksums.sha256, FINAL_RECEIPT.md (mechanically generated). Requires MuJoCo exact version, arch, Python, uv.lock hash, model hash, Plant/controller/scorer hashes. Evidence repo is non-Git; bundle hash is authority. No historical evidence manufactured."
     },
     {
       "id": "visualization",
