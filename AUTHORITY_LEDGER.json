@@ -1,0 +1,188 @@
+{
+  "version": "1.0.0",
+  "date": "2026-09-03",
+  "constitution": "PROJECT_SCIENTIFIC_CONSTITUTION.md",
+  "entry_head": "2a5967d359f34562a9e356c3b138062cffdf4d51",
+  "entry_tree": "b7bec500e9060d1b59e243ca0a929cffe47b162a",
+  "mujoco_version": "3.8.0",
+  "uv_lock_hash": "a80b951e5898e0a7f4984cf5a9a6fbc7d50a4ce9633d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1be46bb5433d1d",
+  "python_runtime_qualified": "3.13.13",
+  "python_rebase_host": "3.14.4",
+  "numpy_version": "2.5.1",
+  "authorities": [
+    {
+      "id": "Plant",
+      "version": "loaded-cmj-20kg-athlete-v2@1.0.0",
+      "source_paths": ["src/loaded_cmj/v2/assets/v2_plant.xml", "src/loaded_cmj/v2/plant.py", "src/loaded_cmj/v2/constants.py"],
+      "commit": "2a5967d359f34562a9e356c3b138062cffdf4d51",
+      "commit_tree": "b7bec500e9060d1b59e243ca0a929cffe47b162a",
+      "sha256": {
+        "v2_plant.xml": "5f2244149c6b8831a1bfe6fa29a8ce33be0e41100fbdd61bfd8d9555222be191",
+        "plant.py": "86b22181dd2fbddb864f483ce44f69036e7a28453660dd7f12bfb3dc05d9b52c",
+        "constants.py": "e6608f8eb8118befa27c603b5bb73ff1d263f4e4852b05cbdca9fd4336805756"
+      },
+      "dependencies": ["mechanics/constants", "solver/integrator"],
+      "supersedes": "loaded-cmj-model-1 (V1) and V2 pre-RES31 (limited root)",
+      "superseded_by": null,
+      "known_caveats": "Sagittal-dominant reduced topology; not human-validated. Root is honestly floating (limited=false after RES-31) and zero passive damping after RES-42. 20 kg load is rigid cylinder, not barbell compliance."
+    },
+    {
+      "id": "mechanics/constants",
+      "version": "V2 constants 1.0.0 (RES-43 rebase)",
+      "source_paths": ["src/loaded_cmj/v2/constants.py"],
+      "commit": "9d97bc5cc012d7fd0409a811280a5bad300ecc30",
+      "commit_tree": "efe0c3c85115f57248dc0481e84ec82c7cb534c4",
+      "sha256": {
+        "constants.py": "e6608f8eb8118befa27c603b5bb73ff1d263f4e4852b05cbdca9fd4336805756"
+      },
+      "dependencies": [],
+      "supersedes": "V2 constants pre-RES31 (root limits) and pre-RES43 (old standing envelope)",
+      "superseded_by": null,
+      "known_caveats": "Total mass 95.0 kg frozen. Standing envelopes expanded by 1 ULP. Torque limits symmetric; effective 4-channel vs 7 physical documented. Event thresholds frozen; E12 now 2.1-true-standing-zero-root-damping-v2."
+    },
+    {
+      "id": "model_xml",
+      "version": "v2_plant.xml 1.0.0 (RES-31/42)",
+      "source_paths": ["src/loaded_cmj/v2/assets/v2_plant.xml"],
+      "commit": "87088298139f9b34418c573e8a05af58eed6fcc0",
+      "commit_tree": "d8ecb088c0bccd7de40c8fe6cc32bad6e35dcedd",
+      "sha256": {
+        "v2_plant.xml": "5f2244149c6b8831a1bfe6fa29a8ce33be0e41100fbdd61bfd8d9555222be191"
+      },
+      "dependencies": ["mechanics/constants"],
+      "supersedes": "V2 xml with limited root_tx/ry and root damping (pre-RES31/42) and V1 loaded_jump_athlete.xml (cc122cee...)",
+      "superseded_by": null,
+      "known_caveats": "nbody10 njnt10 nq10 nv10 nu7 ngeom16. Root joints limited=false, stiffness/damping/armature 0. Solref 0.016 for feet/floor (RES-6). Fall shells (6 capsules) contype4, floor conaffinity6."
+    },
+    {
+      "id": "solver/integrator",
+      "version": "MuJoCo 3.8.0 / implicitfast+Newton 1.0.0",
+      "source_paths": ["src/loaded_cmj/v2/assets/v2_plant.xml:option", "src/loaded_cmj/v2/constants.py:V2_SOLVER*"],
+      "commit": "87088298139f9b34418c573e8a05af58eed6fcc0",
+      "commit_tree": "d8ecb088c0bccd7de40c8fe6cc32bad6e35dcedd",
+      "sha256": {
+        "solver_identity": "cf164bdeb0438f211aca05e4583a57d402e4f38b1879d86c0b4e13b359b809f1 (engine fingerprint)"
+      },
+      "dependencies": ["model_xml"],
+      "supersedes": "Earlier MuJoCo 3.1-era absolute times; now pinned 3.8.0",
+      "superseded_by": null,
+      "known_caveats": "dt 0.000125, 40/control, tol 1e-10, Newton 100/50, elliptic cone, impratio10. Horizon 8.0 s. Warmstart enable. Absolute event times shift with MuJoCo version; pre-limit equivalence is the invariant."
+    },
+    {
+      "id": "actuator_contract",
+      "version": "V2 drive 1.0.0",
+      "source_paths": ["src/loaded_cmj/v2/drive.py", "src/loaded_cmj/v2/constants.py:V2_TORQUE_LIMITS*"],
+      "commit": "2a5967d359f34562a9e356c3b138062cffdf4d51",
+      "commit_tree": "b7bec500e9060d1b59e243ca0a929cffe47b162a",
+      "sha256": {
+        "drive.py": "02f30f1ccace3f2de109ca0fbe3a7da271bd437ae6b6b6a4757ce02dbaf6df21"
+      },
+      "dependencies": ["Plant"],
+      "supersedes": "V1 drive with aggregate/hidden state (F2 removed)",
+      "superseded_by": null,
+      "known_caveats": "tau=limit*u, limits 250/250/250/300/300/200/200, fail-closed, no activation/power/rate clipping, no qfrc_applied. 7 physical, effective sym pair is policy convention."
+    },
+    {
+      "id": "measurement_contract",
+      "version": "V2 Plant measurement 1.0.0 (RES-6)",
+      "source_paths": ["src/loaded_cmj/v2/plant.py:foot_contact_summary", "src/loaded_cmj/v2/constants.py:V2_CONTACT_*"],
+      "commit": "818985a320841071e6876c730eae46e924341db3",
+      "commit_tree": "7d8ce939124b119e0f56c867450f5457da467a63",
+      "sha256": {
+        "plant.py": "86b22181dd2fbddb864f483ce44f69036e7a28453660dd7f12bfb3dc05d9b52c"
+      },
+      "dependencies": ["Plant", "model_xml"],
+      "supersedes": "Pre-RES6 solref 0.004 baseline",
+      "superseded_by": null,
+      "known_caveats": "Bilateral 6-axis: left_foot_box/right_foot_box ↔ floor. COP valid iff Fz>20 per foot. Whole = sum(all contacts). Fall shells (contype4) never counted as plantar. Solref 0.016 calibrated, penetration ≤0.010, impulse residual <1%."
+    },
+    {
+      "id": "event_scorer_contract",
+      "version": "2.1-true-standing-zero-root-damping-v2 (RES-43)",
+      "source_paths": ["src/loaded_cmj/v2/events.py", "src/loaded_cmj/v2/constants.py:V2_EVENT_* + V2_TRUE_STANDING_*"],
+      "commit": "9d97bc5cc012d7fd0409a811280a5bad300ecc30",
+      "commit_tree": "efe0c3c85115f57248dc0481e84ec82c7cb534c4",
+      "sha256": {
+        "events.py": "286ef328e4b334a15775df01ba6aad971cf8f808ddbcb028fcda4032164f2deb",
+        "constants.py": "e6608f8eb8118befa27c603b5bb73ff1d263f4e4852b05cbdca9fd4336805756",
+        "contract_sha256": "8b90eea815868495be5f3986a41f1e1e8fcbe82c0648a794c40cba848e8b52b9"
+      },
+      "dependencies": ["measurement_contract", "mechanics/constants"],
+      "supersedes": "2.1-true-standing-recovery-v1 (01e89ac0...) — invalidated by RES-42 zero damping (old envelope 13931/15200 pass → 1269 fail)",
+      "superseded_by": null,
+      "known_caveats": "12-gate monotone DAG, dwell 0.00025..0.500s, 800 physics samples/window max. E12 true-standing envelope from HOLD Kp400 Kd10 median [0.100125,2.0] (15200 samples) ±1 ULP. E12 requires 0.500s dwell, |tilt|<0.2618, |vz|<0.05, whole>0.5W, bilateral, no fall, all Q/COM_Z/ROOT_Z/TRUNK inside envelope. E1-E11 thresholds unchanged (ce6473f...). Pre-RES31 12/12 fabricated traces contradicted; honest frontier is E5..E11 depending on controller."
+    },
+    {
+      "id": "controller",
+      "version": "LCMJ-V2-7MODE-RES10-R5A2 + landing-capture-R013 (HEAD 2a5967d)",
+      "source_paths": ["src/loaded_cmj/v2/controller.py"],
+      "commit": "2a5967d359f34562a9e356c3b138062cffdf4d51",
+      "commit_tree": "b7bec500e9060d1b59e243ca0a929cffe47b162a",
+      "sha256": {
+        "controller.py": "870bab2676069a8fee927c637f3988a0ebbb535b42a1743fd51f2869adf436ed"
+      },
+      "dependencies": ["Plant", "actuator_contract", "event_scorer_contract"],
+      "supersedes": "RES-10 R2/R3 captured-squat controllers (fabricated traces), RES-10 R4 blocked controller (root damping), RES10_R5A2 launch residual (sealed) included in HEAD",
+      "superseded_by": null,
+      "known_caveats": "Honest launch E1-E8 PASS via 16-param SUPPORTED residual (Δvx -0.078, ΔHy +0.42, vz 1.09→1.16 honest), zero root limits/damping, flight genuine 0.16s. Landing capture: standing target [0,0,0,0,0,0,0] (margin 0.104), IMPACT Kp190 Kd20 (1.19× base 160/16), CAPTURE Kp80 Kd12, E10 0.827→E11 0.977, peak 4.49BW, pen 7.34mm, no reflight/chatter before fall 1.928. Recovery to true-standing E12 is still BLOCKED (requires RES-10 rebuild). V1 PFIP baseline preserved as historical only."
+    },
+    {
+      "id": "experiment_definition",
+      "version": "Experiment Protocol 1.0.0",
+      "source_paths": ["EXPERIMENT_PROTOCOL.md", "EXPERIMENT_REGISTRY.jsonl"],
+      "commit": "PENDING (this rebase)",
+      "commit_tree": "PENDING",
+      "sha256": {
+        "protocol": "TBD post-commit",
+        "registry": "TBD post-commit"
+      },
+      "dependencies": ["event_scorer_contract", "evidence_pipeline"],
+      "supersedes": "Undeclared random search and retrospective thresholds (pre-rebase)",
+      "superseded_by": null,
+      "known_caveats": "Every future experiment must predeclare hypothesis, frozen/varied vars, search method, candidate order/budget, metrics, hard gates, stopping rule, diagnostic vs qualification. No undeclared random search."
+    },
+    {
+      "id": "qualification_criteria",
+      "version": "Qualification gates 1.0.0 (RES-43 event contract)",
+      "source_paths": ["src/loaded_cmj/v2/events.py:EVENT_ORDER", "src/loaded_cmj/v2/constants.py:V2_EVENT_THRESHOLDS"],
+      "commit": "9d97bc5cc012d7fd0409a811280a5bad300ecc30",
+      "commit_tree": "efe0c3c85115f57248dc0481e84ec82c7cb534c4",
+      "sha256": {
+        "events.py": "286ef328e4b334a15775df01ba6aad971cf8f808ddbcb028fcda4032164f2deb"
+      },
+      "dependencies": ["event_scorer_contract", "measurement_contract"],
+      "supersedes": "Pre-RES16 insufficient E12 (allowed deep squat)",
+      "superseded_by": null,
+      "known_caveats": "OBJECTIVE_COMPLETE iff 12/12 gates + no PHYSICAL_FALL + true-standing 0.500s dwell. Landing gates: peak ≤8BW, pen ≤0.010, no reflight/chatter 0.100s, margin>0, bilateral. Launch/flight honest (no root limit/damping support). Determinism required (fresh-process identical)."
+    },
+    {
+      "id": "evidence_pipeline",
+      "version": "Evidence Contract 1.0.0",
+      "source_paths": ["EVIDENCE_CONTRACT.md", "tools/evidence_recorder.py"],
+      "commit": "PENDING (this rebase)",
+      "commit_tree": "PENDING",
+      "sha256": {
+        "contract": "TBD post-commit",
+        "recorder": "TBD post-commit"
+      },
+      "dependencies": ["Plant", "solver/integrator", "actuator_contract", "measurement_contract", "event_scorer_contract", "controller"],
+      "supersedes": "Ad-hoc receipts (pre-rebase)",
+      "superseded_by": null,
+      "known_caveats": "Deterministic bundle: manifest.json, environment.json, initial_integration_state.*, physics_trace.*, control_trace.*, events_online/offline.json, metrics.json, experiments.jsonl, tests/, reviews/, claim_evidence.csv, reproduce.sh, checksums.sha256, FINAL_RECEIPT.md (mechanically generated). Requires MuJoCo exact version, arch, Python, uv.lock hash, model hash, Plant/controller/scorer hashes. Evidence repo is non-Git; bundle hash is authority."
+    },
+    {
+      "id": "visualization",
+      "version": "Replay 1.0.0",
+      "source_paths": ["src/loaded_cmj/rendering/replay.py"],
+      "commit": "2a5967d359f34562a9e356c3b138062cffdf4d51",
+      "commit_tree": "b7bec500e9060d1b59e243ca0a929cffe47b162a",
+      "sha256": {
+        "replay.py": "TBD (no physics change)"
+      },
+      "dependencies": ["evidence_pipeline", "Plant", "event_scorer_contract"],
+      "supersedes": null,
+      "superseded_by": null,
+      "known_caveats": "Scored replay identity only; never resimulates. State-to-frame mapping, event-frame coverage, camera/overlays, deterministic encoding. Rendering not part of qualification; blocked until RES-10 passes."
+    }
+  ]
+}
