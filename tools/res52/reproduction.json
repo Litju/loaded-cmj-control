@@ -1,0 +1,596 @@
+{
+  "EXPERIMENT_ID": "EXP-RES10-SOFT-CONTACT-FORCE-REALIZATION-001",
+  "FRESH_PROCESS": true,
+  "STARTED_AT": "2026-09-06T05:27:41Z",
+  "S40_SHA256": "bac51d627bead5f4f23420d80267c5501fc3763327c825dc37c6aa0b964501b7",
+  "S40_REPRODUCED": true,
+  "S50_SHA256": "bb56c0d3df3cd50aa55be515783af5cfb24f212eaaa29d17427bd3e60c6ceae2",
+  "S50_REPRODUCED": true,
+  "S75_SHA256": "e2ea357b0ef9f04defec03682ca06a5553dd8b978ed8c07f2cf6bd7daeffbd0c",
+  "S75_REPRODUCED": true,
+  "S100_SHA256": "e53734422b0838f71068e77e1afc75b649afedaff33e4505a26a679a24ae070b",
+  "S100_REPRODUCED": true,
+  "S_STAND_SHA256": "5cdab2cd9443ac74f4bb00465e4d34c65dccb9a7b5f59cce8dfa4b490b7a2585",
+  "S_STAND_REPRODUCED": true,
+  "SPEC_SHA256": "a8087f02fc78aa7977aedf6d5d819963bb10c355818c57154b3cfb3df2ec42ef",
+  "CELLS": {
+    "P0a_BODYWEIGHT_HOLD_STAND": {
+      "PEAK_FZ_BW": {
+        "sealed": 1.0025834534878995,
+        "repro": 1.0025834534878995,
+        "match": true
+      },
+      "MAX_PENETRATION": {
+        "sealed": 0.00012045146613868726,
+        "repro": 0.00012045146613868726,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_RMS_ERR_BW": {
+        "sealed": 0.0007480208518326791,
+        "repro": 0.0007480208518326791,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_MAX_ABS_ERR_BW": {
+        "sealed": 0.00216970409810305,
+        "repro": 0.00216970409810305,
+        "match": true
+      },
+      "FZ_TRACK_LATE_RMS_ERR_BW": {
+        "sealed": 0.0007667594813035357,
+        "repro": 0.0007667594813035357,
+        "match": true
+      },
+      "FZ_TRACK_LATE_MAX_ABS_ERR_BW": {
+        "sealed": 0.00216970409810305,
+        "repro": 0.00216970409810305,
+        "match": true
+      },
+      "FZ_RIPPLE_LATE_MAX_BW": {
+        "sealed": 0.0005201073640703098,
+        "repro": 0.0005201073640703098,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_L": {
+        "sealed": 0.0,
+        "repro": 0.0,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_R": {
+        "sealed": 0.0,
+        "repro": 0.0,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_L": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_R": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "POST_WALK_LOSS_EPISODES": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "REFLIGHT_EPISODES": {
+        "sealed": [],
+        "repro": [],
+        "match": true
+      },
+      "TRUST_SHRINK_EVENTS": {
+        "sealed": 5,
+        "repro": 5,
+        "match": true
+      },
+      "TRUST_FALLBACKS": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "START_STATE_SHA256": {
+        "sealed": "5cdab2cd9443ac74f4bb00465e4d34c65dccb9a7b5f59cce8dfa4b490b7a2585",
+        "repro": "5cdab2cd9443ac74f4bb00465e4d34c65dccb9a7b5f59cce8dfa4b490b7a2585",
+        "match": true
+      },
+      "END_STATE_SHA256": {
+        "sealed": "7992ed58949204933a32090628b2ca636e131302f9f78886f4dbdb176da69301",
+        "repro": "7992ed58949204933a32090628b2ca636e131302f9f78886f4dbdb176da69301",
+        "match": true
+      },
+      "CHATTER_TRANSITIONS": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "QUALIFIED_SEALED": true,
+      "QUALIFIED_REPRO": true,
+      "SEGMENT_QUALIFIED_SEALED": true,
+      "SEGMENT_QUALIFIED_REPRO": true
+    },
+    "P0b_BODYWEIGHT_HOLD_S75": {
+      "PEAK_FZ_BW": {
+        "sealed": 1.1935941836331612,
+        "repro": 1.1935941836331612,
+        "match": true
+      },
+      "MAX_PENETRATION": {
+        "sealed": 0.003097245629845185,
+        "repro": 0.003097245629845185,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_RMS_ERR_BW": {
+        "sealed": 0.09645924595727771,
+        "repro": 0.09645924595727771,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_MAX_ABS_ERR_BW": {
+        "sealed": 0.3705002734870054,
+        "repro": 0.3705002734870054,
+        "match": true
+      },
+      "FZ_TRACK_LATE_RMS_ERR_BW": {
+        "sealed": 0.03693063163083846,
+        "repro": 0.03693063163083846,
+        "match": true
+      },
+      "FZ_TRACK_LATE_MAX_ABS_ERR_BW": {
+        "sealed": 0.06014963124130538,
+        "repro": 0.06014963124130538,
+        "match": true
+      },
+      "FZ_RIPPLE_LATE_MAX_BW": {
+        "sealed": 0.053864761736087015,
+        "repro": 0.053864761736087015,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_L": {
+        "sealed": 0.0012499999999999734,
+        "repro": 0.0012499999999999734,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_R": {
+        "sealed": 0.0012499999999999734,
+        "repro": 0.0012499999999999734,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_L": {
+        "sealed": 1,
+        "repro": 1,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_R": {
+        "sealed": 1,
+        "repro": 1,
+        "match": true
+      },
+      "POST_WALK_LOSS_EPISODES": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "REFLIGHT_EPISODES": {
+        "sealed": [],
+        "repro": [],
+        "match": true
+      },
+      "TRUST_SHRINK_EVENTS": {
+        "sealed": 10,
+        "repro": 10,
+        "match": true
+      },
+      "TRUST_FALLBACKS": {
+        "sealed": 1,
+        "repro": 1,
+        "match": true
+      },
+      "START_STATE_SHA256": {
+        "sealed": "e2ea357b0ef9f04defec03682ca06a5553dd8b978ed8c07f2cf6bd7daeffbd0c",
+        "repro": "e2ea357b0ef9f04defec03682ca06a5553dd8b978ed8c07f2cf6bd7daeffbd0c",
+        "match": true
+      },
+      "END_STATE_SHA256": {
+        "sealed": "fb165b696badf084e3a262f601668b8678f5cefbf68ae805196319d7b5ba196e",
+        "repro": "fb165b696badf084e3a262f601668b8678f5cefbf68ae805196319d7b5ba196e",
+        "match": true
+      },
+      "CHATTER_TRANSITIONS": {
+        "sealed": 2,
+        "repro": 2,
+        "match": true
+      },
+      "QUALIFIED_SEALED": true,
+      "QUALIFIED_REPRO": true,
+      "SEGMENT_QUALIFIED_SEALED": false,
+      "SEGMENT_QUALIFIED_REPRO": false
+    },
+    "P1a_MODERATE_S50": {
+      "PEAK_FZ_BW": {
+        "sealed": 1.810360793738323,
+        "repro": 1.810360793738323,
+        "match": true
+      },
+      "MAX_PENETRATION": {
+        "sealed": 0.008156421364579683,
+        "repro": 0.008156421364579683,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_RMS_ERR_BW": {
+        "sealed": 0.020058472891872806,
+        "repro": 0.020058472891872806,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_MAX_ABS_ERR_BW": {
+        "sealed": 0.03451896789672081,
+        "repro": 0.03451896789672081,
+        "match": true
+      },
+      "FZ_TRACK_LATE_RMS_ERR_BW": {
+        "sealed": 0.015583413050874613,
+        "repro": 0.015583413050874613,
+        "match": true
+      },
+      "FZ_TRACK_LATE_MAX_ABS_ERR_BW": {
+        "sealed": 0.0331966654383774,
+        "repro": 0.0331966654383774,
+        "match": true
+      },
+      "FZ_RIPPLE_LATE_MAX_BW": {
+        "sealed": 0.06649811118440463,
+        "repro": 0.06649811118440463,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_L": {
+        "sealed": 0.0,
+        "repro": 0.0,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_R": {
+        "sealed": 0.0,
+        "repro": 0.0,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_L": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_R": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "POST_WALK_LOSS_EPISODES": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "REFLIGHT_EPISODES": {
+        "sealed": [],
+        "repro": [],
+        "match": true
+      },
+      "TRUST_SHRINK_EVENTS": {
+        "sealed": 10,
+        "repro": 10,
+        "match": true
+      },
+      "TRUST_FALLBACKS": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "START_STATE_SHA256": {
+        "sealed": "bb56c0d3df3cd50aa55be515783af5cfb24f212eaaa29d17427bd3e60c6ceae2",
+        "repro": "bb56c0d3df3cd50aa55be515783af5cfb24f212eaaa29d17427bd3e60c6ceae2",
+        "match": true
+      },
+      "END_STATE_SHA256": {
+        "sealed": "9db59c45f74b0de092bec904cae2a5ef18c099ef275f3fcaeffe67691c1156bd",
+        "repro": "9db59c45f74b0de092bec904cae2a5ef18c099ef275f3fcaeffe67691c1156bd",
+        "match": true
+      },
+      "CHATTER_TRANSITIONS": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "QUALIFIED_SEALED": true,
+      "QUALIFIED_REPRO": true,
+      "SEGMENT_QUALIFIED_SEALED": true,
+      "SEGMENT_QUALIFIED_REPRO": true
+    },
+    "P1b_MODERATE_S75": {
+      "PEAK_FZ_BW": {
+        "sealed": 1.589765779412331,
+        "repro": 1.589765779412331,
+        "match": true
+      },
+      "MAX_PENETRATION": {
+        "sealed": 0.003097700071536487,
+        "repro": 0.003097700071536487,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_RMS_ERR_BW": {
+        "sealed": 0.054971865006221574,
+        "repro": 0.054971865006221574,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_MAX_ABS_ERR_BW": {
+        "sealed": 0.19663359939864206,
+        "repro": 0.19663359939864206,
+        "match": true
+      },
+      "FZ_TRACK_LATE_RMS_ERR_BW": {
+        "sealed": 0.0366726687218496,
+        "repro": 0.0366726687218496,
+        "match": true
+      },
+      "FZ_TRACK_LATE_MAX_ABS_ERR_BW": {
+        "sealed": 0.0571418770032713,
+        "repro": 0.0571418770032713,
+        "match": true
+      },
+      "FZ_RIPPLE_LATE_MAX_BW": {
+        "sealed": 0.03141316160293901,
+        "repro": 0.03141316160293901,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_L": {
+        "sealed": 0.0,
+        "repro": 0.0,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_R": {
+        "sealed": 0.0,
+        "repro": 0.0,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_L": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_R": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "POST_WALK_LOSS_EPISODES": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "REFLIGHT_EPISODES": {
+        "sealed": [],
+        "repro": [],
+        "match": true
+      },
+      "TRUST_SHRINK_EVENTS": {
+        "sealed": 6,
+        "repro": 6,
+        "match": true
+      },
+      "TRUST_FALLBACKS": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "START_STATE_SHA256": {
+        "sealed": "e2ea357b0ef9f04defec03682ca06a5553dd8b978ed8c07f2cf6bd7daeffbd0c",
+        "repro": "e2ea357b0ef9f04defec03682ca06a5553dd8b978ed8c07f2cf6bd7daeffbd0c",
+        "match": true
+      },
+      "END_STATE_SHA256": {
+        "sealed": "60af2e840e3eb11206520106333511174d572f2d12e7bf5ef068126b59bc8061",
+        "repro": "60af2e840e3eb11206520106333511174d572f2d12e7bf5ef068126b59bc8061",
+        "match": true
+      },
+      "CHATTER_TRANSITIONS": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "QUALIFIED_SEALED": true,
+      "QUALIFIED_REPRO": true,
+      "SEGMENT_QUALIFIED_SEALED": true,
+      "SEGMENT_QUALIFIED_REPRO": true
+    },
+    "P2_LANDING_BRAKE_S50": {
+      "PEAK_FZ_BW": {
+        "sealed": 2.3412515881240066,
+        "repro": 2.3412515881240066,
+        "match": true
+      },
+      "MAX_PENETRATION": {
+        "sealed": 0.00815642297343467,
+        "repro": 0.00815642297343467,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_RMS_ERR_BW": {
+        "sealed": 0.04843462058103214,
+        "repro": 0.04843462058103214,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_MAX_ABS_ERR_BW": {
+        "sealed": 0.09822429658850128,
+        "repro": 0.09822429658850128,
+        "match": true
+      },
+      "FZ_TRACK_LATE_RMS_ERR_BW": {
+        "sealed": 0.05445000940065664,
+        "repro": 0.05445000940065664,
+        "match": true
+      },
+      "FZ_TRACK_LATE_MAX_ABS_ERR_BW": {
+        "sealed": 0.09822429658850128,
+        "repro": 0.09822429658850128,
+        "match": true
+      },
+      "FZ_RIPPLE_LATE_MAX_BW": {
+        "sealed": 1.478367047822929,
+        "repro": 1.478367047822929,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_L": {
+        "sealed": 0.0012499999999999734,
+        "repro": 0.0012499999999999734,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_R": {
+        "sealed": 0.0012499999999999734,
+        "repro": 0.0012499999999999734,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_L": {
+        "sealed": 1,
+        "repro": 1,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_R": {
+        "sealed": 1,
+        "repro": 1,
+        "match": true
+      },
+      "POST_WALK_LOSS_EPISODES": {
+        "sealed": 1,
+        "repro": 1,
+        "match": true
+      },
+      "REFLIGHT_EPISODES": {
+        "sealed": [],
+        "repro": [],
+        "match": true
+      },
+      "TRUST_SHRINK_EVENTS": {
+        "sealed": 7,
+        "repro": 7,
+        "match": true
+      },
+      "TRUST_FALLBACKS": {
+        "sealed": 0,
+        "repro": 0,
+        "match": true
+      },
+      "START_STATE_SHA256": {
+        "sealed": "bb56c0d3df3cd50aa55be515783af5cfb24f212eaaa29d17427bd3e60c6ceae2",
+        "repro": "bb56c0d3df3cd50aa55be515783af5cfb24f212eaaa29d17427bd3e60c6ceae2",
+        "match": true
+      },
+      "END_STATE_SHA256": {
+        "sealed": "958f36ddee0309cc59019371be05389c57fd2aa6e69929686f0019d2e5a0b16e",
+        "repro": "958f36ddee0309cc59019371be05389c57fd2aa6e69929686f0019d2e5a0b16e",
+        "match": true
+      },
+      "CHATTER_TRANSITIONS": {
+        "sealed": 2,
+        "repro": 2,
+        "match": true
+      },
+      "QUALIFIED_SEALED": false,
+      "QUALIFIED_REPRO": false,
+      "SEGMENT_QUALIFIED_SEALED": true,
+      "SEGMENT_QUALIFIED_REPRO": true
+    },
+    "P3_VIABILITY_BOUNDARY_S100": {
+      "PEAK_FZ_BW": {
+        "sealed": 1.0506049239344017,
+        "repro": 1.0506049239344017,
+        "match": true
+      },
+      "MAX_PENETRATION": {
+        "sealed": 0.0004577512505660134,
+        "repro": 0.0004577512505660134,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_RMS_ERR_BW": {
+        "sealed": 0.19487780000351165,
+        "repro": 0.19487780000351165,
+        "match": true
+      },
+      "FZ_TRACK_BOUNDARY_MAX_ABS_ERR_BW": {
+        "sealed": 0.2772227383454701,
+        "repro": 0.2772227383454701,
+        "match": true
+      },
+      "FZ_TRACK_LATE_RMS_ERR_BW": {
+        "sealed": 0.2217818833007591,
+        "repro": 0.2217818833007591,
+        "match": true
+      },
+      "FZ_TRACK_LATE_MAX_ABS_ERR_BW": {
+        "sealed": 0.2772227383454701,
+        "repro": 0.2772227383454701,
+        "match": true
+      },
+      "FZ_RIPPLE_LATE_MAX_BW": {
+        "sealed": 0.8242351988719911,
+        "repro": 0.8242351988719911,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_L": {
+        "sealed": 0.020000000000000018,
+        "repro": 0.020000000000000018,
+        "match": true
+      },
+      "CONTACT_INACTIVE_FRACTION_R": {
+        "sealed": 0.020000000000000018,
+        "repro": 0.020000000000000018,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_L": {
+        "sealed": 2,
+        "repro": 2,
+        "match": true
+      },
+      "MAX_INACTIVE_RUN_R": {
+        "sealed": 2,
+        "repro": 2,
+        "match": true
+      },
+      "POST_WALK_LOSS_EPISODES": {
+        "sealed": 9,
+        "repro": 9,
+        "match": true
+      },
+      "REFLIGHT_EPISODES": {
+        "sealed": [],
+        "repro": [],
+        "match": true
+      },
+      "TRUST_SHRINK_EVENTS": {
+        "sealed": 14,
+        "repro": 14,
+        "match": true
+      },
+      "TRUST_FALLBACKS": {
+        "sealed": 3,
+        "repro": 3,
+        "match": true
+      },
+      "START_STATE_SHA256": {
+        "sealed": "e53734422b0838f71068e77e1afc75b649afedaff33e4505a26a679a24ae070b",
+        "repro": "e53734422b0838f71068e77e1afc75b649afedaff33e4505a26a679a24ae070b",
+        "match": true
+      },
+      "END_STATE_SHA256": {
+        "sealed": "82ad4d388c819d323a79f943ca20b51fb3676d15ae786868000c8483eb6e9700",
+        "repro": "82ad4d388c819d323a79f943ca20b51fb3676d15ae786868000c8483eb6e9700",
+        "match": true
+      },
+      "CHATTER_TRANSITIONS": {
+        "sealed": 20,
+        "repro": 20,
+        "match": true
+      },
+      "QUALIFIED_SEALED": false,
+      "QUALIFIED_REPRO": false,
+      "SEGMENT_QUALIFIED_SEALED": false,
+      "SEGMENT_QUALIFIED_REPRO": false
+    }
+  },
+  "SPEC_EXECUTION_MATCH": "PASS",
+  "WALL_S": 31.73431134223938
+}
