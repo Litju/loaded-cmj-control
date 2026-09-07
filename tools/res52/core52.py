@@ -165,6 +165,24 @@ def foot_floor_contacts(model, data) -> dict:
     return out
 
 
+def true_foot_point_velocity(model, data, body_id: int, point_world: np.ndarray) -> np.ndarray:
+    """RES-55 true foot-point velocity authority (non-mutating, same-state).
+
+    v_point = J_point(q) @ qvel via MuJoCo mj_jac at the exact material point.
+    Proven equivalent to v_xipos + omega x (p - xipos) to 1e-16 (M1≈M2).
+    Must NOT use mj_objectVelocity(BODY).linear + omega x (p - xpos): that
+    linear term already equals the xipos-point velocity (RES-54 proof via
+    jacBodyCom identity), so (p - xpos) transport double-counts rotation.
+    No mj_forward on live solely for measurement refresh; caller passes the
+    already-synchronized same-state MjData.
+    """
+    Jp = np.zeros((3, model.nv), dtype=np.float64)
+    Jr = np.zeros((3, model.nv), dtype=np.float64)
+    mujoco.mj_jac(model, data, Jp, Jr, np.asarray(point_world, dtype=np.float64),
+                  int(body_id))
+    return (Jp @ np.asarray(data.qvel, dtype=np.float64)).copy()
+
+
 def soft_contact_state(model, data, *, gap_half_height: float) -> dict:
     """Phase B per-foot soft-contact state from the CURRENT synchronized MjData.
 
@@ -187,15 +205,12 @@ def soft_contact_state(model, data, *, gap_half_height: float) -> dict:
             fb = _IDX.left_foot_body if side == "L" else _IDX.right_foot_body
             fz = float(data.geom_xpos[fg][2])
             dist = float(fz) - gap_half_height  # distance of lowest point to floor
-            # separating velocity of the lowest foot point along world -z normal:
-            vel = np.zeros(6)
-            mujoco.mj_objectVelocity(model, data, mujoco.mjtObj.mjOBJ_BODY, fb, vel, 0)
-            omega = vel[:3]
-            v_body = vel[3:]
+            # separating velocity of the lowest foot point along world +z normal
+            # (RES-55 authority): J_point @ qvel at the exact material corner.
+            # Prohibited: mj_objectVelocity.linear + omega x (p - xpos).
             p_low = np.asarray(data.geom_xpos[fg], float).copy()
             p_low[2] -= gap_half_height
-            r = p_low - np.asarray(data.xpos[fb], float)
-            v_pt = v_body + np.cross(omega, r)
+            v_pt = true_foot_point_velocity(model, data, fb, p_low)
             nvel = float(v_pt[2])  # +z motion = separating from floor
             active_row = False
         pen = max(0.0, -dist)

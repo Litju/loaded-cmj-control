@@ -40,6 +40,19 @@ Y_NAMES = ["FZ_WHOLE", "FZ_L", "FZ_R", "DIST_L", "DIST_R", "NVEL_L", "NVEL_R", "
 NY = len(Y_NAMES)
 
 
+def true_foot_point_velocity(model, data, body_id: int, point_world: np.ndarray) -> np.ndarray:
+    """RES-55 true foot-point velocity authority (identical to core52).
+
+    v_point = J_point(q) @ qvel, non-mutating same-state. Prohibited:
+    mj_objectVelocity.linear + omega x (p - xpos).
+    """
+    Jp = np.zeros((3, model.nv), dtype=np.float64)
+    Jr = np.zeros((3, model.nv), dtype=np.float64)
+    mujoco.mj_jac(model, data, Jp, Jr, np.asarray(point_world, dtype=np.float64),
+                  int(body_id))
+    return (Jp @ np.asarray(data.qvel, dtype=np.float64)).copy()
+
+
 class SoftContactPolicy:
     def __init__(self, constants: dict, plant, probes: list):
         self.k = constants
@@ -75,12 +88,13 @@ class SoftContactPolicy:
                 nvel = float(pd.efc_vel[pd.contact[i].efc_address])
             else:
                 dist = float(pd.geom_xpos[fg][2]) - gap_hh
-                vel = np.zeros(6)
-                mujoco.mj_objectVelocity(self.m, pd, mujoco.mjtObj.mjOBJ_BODY, fb, vel, 0)
-                v_pt = vel[3:] + np.cross(
-                    vel[:3],
-                    np.asarray(pd.geom_xpos[fg], float) - np.asarray(pd.xpos[fb], float))
-                nvel = float(v_pt[2])
+                # RES-55 authority: J_point @ qvel at the exact lowest corner.
+                # Prohibited: mj_objectVelocity.linear + omega x (p - xpos).
+                # Note: previous code used geom center for velocity; z identical
+                # (vertical offset contributes zero to z), now unified to p_low.
+                p_low = np.asarray(pd.geom_xpos[fg], float).copy()
+                p_low[2] -= gap_hh
+                nvel = float(true_foot_point_velocity(self.m, pd, fb, p_low)[2])
             st[side] = (dist, nvel)
         cv = p.center_of_mass_velocity(pd)
         qd = np.asarray(pd.qvel, dtype=float)[self.vadr]
