@@ -47,9 +47,14 @@ def state_record(plant, d, meas, label: str, vec: np.ndarray) -> dict:
     cs = soft_contact_state(plant.model, d, gap_half_height=foot_gap_half_height(plant.model))
     FZ = float(s.whole_Fz_N)
     az = (FZ - WEIGHT_N) / MASS_KG
-    # count active contact rows via efc types
+    # count active contact rows via efc types (RES-54 re-derived telemetry fix:
+    # the Plant declares cone="elliptic" (opt.cone=1), so contact rows are
+    # mjCNSTR_CONTACT_ELLIPTIC; the previous PYRAMIDAL-only test counted
+    # structurally zero rows. Telemetry-only correction.)
+    contact_types = {int(mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL),
+                     int(mujoco.mjtConstraint.mjCNSTR_CONTACT_ELLIPTIC)}
     contact_rows = sum(1 for e in range(meas.nefc)
-                       if int(meas.efc_type[e]) == int(mujoco.mjtConstraint.mjCNSTR_CONTACT_PYRAMIDAL))
+                       if int(meas.efc_type[e]) in contact_types)
     rec = {
         "LABEL": label,
         "STATE_TIME": float(s.time),
@@ -230,10 +235,16 @@ def main() -> None:
     # S_STAND record + standing reference
     rec_stand = state_record(plant, d, meas, "S_STAND", stand["STATE_VECTOR"])
     # Hy via centroidal momentum for each state (tools.evid_trace_v2 authority)
+    # RES-54 re-derived telemetry fix: re-synchronize the measurement shadow to the
+    # restored state BEFORE evaluating centroidal_H_world. The previous loop
+    # reused the shadow from the previous state's from_live_state call, so
+    # every state after the first was evaluated with stale kinematics.
+    # Telemetry-only correction.
     from tools.evid_trace_v2 import centroidal_H_world
     for lab, vec in [("S_STAND", stand["STATE_VECTOR"])] + [(k, vecs[k]) for k in ["S40", "S50", "S75", "S100"]]:
         restore_state(m, d, vec)
-        H = centroidal_H_world(m, meas, plant.center_of_mass(d))
+        SynchronizedPhysicsSample.from_live_state(plant, d, meas)
+        H = centroidal_H_world(m, meas, plant.center_of_mass(meas))
         rec = recs.get(lab)
         if rec is None:
             rec = rec_stand

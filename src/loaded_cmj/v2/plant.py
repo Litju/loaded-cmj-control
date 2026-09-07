@@ -97,6 +97,16 @@ class V2Plant:
         self._assert_identity()
         # torque limits in actuator order
         self.torque_limits = np.array([V2_TORQUE_LIMITS_NM[n] for n in ["lumbar","left_hip","right_hip","left_knee","right_knee","left_ankle","right_ankle"]], dtype=np.float64)
+        # RES-54: proven whole-system subtree root for true COM velocity.
+        # body 0 (world) and body 1 (pelvis) both have subtreemass == total mass;
+        # world is static, pelvis is the dynamic root (parent world, mass>0,
+        # all dynamic bodies descend from it). Runtime authority uses pelvis.
+        self._com_root_body_id = int(self.idx.pelvis_body)
+        _root_mass = float(self.model.body_subtreemass[self._com_root_body_id])
+        if abs(_root_mass - float(V2_TOTAL_MASS_KG)) > 1e-9:
+            raise V2PlantError(f"COM root subtreemass {_root_mass} != {V2_TOTAL_MASS_KG}")
+        self._com_root_body_name = "pelvis"
+        self._com_total_mass = float(V2_TOTAL_MASS_KG)
 
     def _assert_identity(self):
         m=self.model
@@ -146,45 +156,24 @@ class V2Plant:
         return com.copy()
 
     def center_of_mass_velocity(self, data: mujoco.MjData) -> np.ndarray:
-        # Use linear momentum / total mass
-        # Compute via object velocities weighted
-        # Simpler: use qvel + mass
-        # We'll compute COM velocity via finite diff of com? Use linear momentum
-        # Use technique: sum m * v_body / M where v_body is body center vel
-        # mujoco.mj_objectVelocity for each body
-        total=np.zeros(3)
-        for bid in range(1, self.model.nbody):
-            vel=np.zeros(6)
-            mujoco.mj_objectVelocity(self.model, data, mujoco.mjtObj.mjOBJ_BODY, bid, vel, 0)
-            # vel[3:] is linear of body origin, but COM may offset? Use xipos? For now approximate with body origin vel (close, since bodies are extended but COM offset small)
-            # For accurate COM vel, use data.qvel and jac? Alternative compute via simulation: use momentum
-            # We'll use linear momentum from dynamics: data.qfrc? Not.
-            # Simpler: use pelvis linear velocity as COM surrogate for sagittal task? But we want COM.
-            # We'll compute via body's center velocity using xipos offset?
-            # Use Jacobian method: for each body, compute vel at COM via point
-            # Mujoco has body com pos: xipos, and body rotation: xmat.
-            # Velocity of COM point = vel_linear + omega × (com - body_pos)
-            # We can get via data.cvel? data.cvel is COM spatial velocity
-            pass
-        # Alternative: use data.qvel for root_tx,tz gives COM vel approx? For our sagittal model, root_tx dot is COM x vel plus leg contributions.
-        # For simplicity, use sensor: compute COM via xipos difference over time? But we have no history.
-        # Use mujoco's ability: mj_comPos already computes com; we want its derivative via finite diff approximated by linear momentum?
-        # Let's use data.subtree_com? Actually mjsim has no direct com vel.
-        # We can compute via math: com_vel = sum(m_i * v_i_com) / M, where v_i_com = v_body + omega × (xipos - xpos)
-        masses=self.model.body_mass
-        com_vel=np.zeros(3)
-        for bid in range(1, self.model.nbody):
-            # get body velocity (spatial) at body origin: vel[3:] linear, vel[:3] angular
-            vel=np.zeros(6)
-            mujoco.mj_objectVelocity(self.model, data, mujoco.mjtObj.mjOBJ_BODY, bid, vel, 0)
-            omega=vel[:3]
-            v_body=vel[3:]
-            # offset from body origin to its COM (xipos)
-            # body origin is xpos[bid], com is xipos[bid]
-            offset = np.asarray(data.xipos[bid]) - np.asarray(data.xpos[bid])
-            v_com = v_body + np.cross(omega, offset)
-            com_vel += float(masses[bid]) * v_com
-        return com_vel / float(masses.sum())
+        # RES-54 true whole-body COM velocity authority (TRUE_COM_VELOCITY_CONTRACT.md).
+        # MuJoCo-native subtree-COM Jacobian on the SAME state (non-mutating):
+        #   mj_jacSubtreeCom(model, data, J, pelvis) ; v = J @ qvel
+        # pelvis (body 1) is the proven dynamic subtree root whose
+        # body_subtreemass equals the full 95 kg athlete+load system.
+        # Proven M1==M2 to 1e-16 (mj_subtreeVel after mj_forward equals this).
+        # Jacobian form is used because raw data.subtree_linvel WITHOUT a
+        # preceding mj_forward lags one physics step on live post-step data
+        # (proven g*DT lag), while mj_forward inside this function would
+        # mutate live qacc/contact staging. Jacobian is exact on both
+        # shadow (forwarded) and live (post-step) paths without mutation.
+        # Previous implementation mass-weighted mj_objectVelocity linear plus
+        # omega x (xipos-xpos); that double-counted rotation because
+        # mj_objectVelocity.linear already equals the xipos-point velocity
+        # (proven by jacBodyCom@qvel identity to 1e-16). No raw cvel use.
+        jac = np.zeros((3, self.model.nv), dtype=np.float64)
+        mujoco.mj_jacSubtreeCom(self.model, data, jac, self._com_root_body_id)
+        return (jac @ np.asarray(data.qvel, dtype=np.float64)).copy()
 
     def trunk_tilt(self, data: mujoco.MjData) -> float:
         # lumbar + root pitch
