@@ -30,6 +30,33 @@ The example defaults to local execution without an account switch. Pass
 the policy still runs in a fresh isolated process with bounded protocol,
 timeout, and action validation.
 
+## V2.1 canonical qualification runtime (V2.1-R001)
+
+V2.1-R001 is the single frozen V2.1 candidate: 95 kg athlete+load, NQ/NV/NU
+10/10/7, ACTION_DIM 7, physics_dt 0.000125 s, nominal control_dt 0.005 s with
+committed 28/33/40 hybrid truncations, horizon 20.0 s through E12 confirmation
+plus 0.30 s posthold. It runs the exact committed production composition
+(Res72Policy C01/RES58 → BalanceController RES-73 → StableRecoveryController
+RES-74 incl RES43 hold) from canonical reset with synchronized
+sample-before-update observations and observational scorer only.
+
+Execute exactly:
+
+```bash
+python -m loaded_cmj.v2.canonical_runtime --candidate V2.1-R001
+```
+
+Contract: `CANONICAL_V2_RUNTIME_CONTRACT.md`. Spec: `CANONICAL_V2_CANDIDATE_SPEC.json`.
+Module: `src/loaded_cmj/v2/canonical_runtime.py`.
+
+PASS requires 12/12 exact event identity, 7/7 checkpoint identity
+(S_APEX/S_E10/S_E11/S_RR/S_RR_CONFIRMED/S_STAND_HANDOFF/S_E12), exact
+28/33/40 schedule (3045×40, 2×28, 1×33), same modes/termination/hard gates,
+post-landing loss 0 reflight [] chatter 0, online/offline PASS, and fresh-process
+identical reproduction. Results/evidence go to
+`EXP-RES12A-CANONICAL-RUNTIME-AUTHORITY-001` (Evidence Contract v2).
+RES-12 consumes this runtime without redefining authority.
+
 ## Scope
 
 This repository is scientific simulation and control software, not a medical
