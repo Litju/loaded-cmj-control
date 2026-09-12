@@ -1,0 +1,101 @@
+{
+  "MISSION": "V2_1_POST_RENDER_FULL_SYSTEM_FORENSIC_AUDIT_001",
+  "CANDIDATE_ID": "V2.1-R001",
+  "TRACE_SHA256": "4d0478793dbdc000cd84b26392e611b8d665c3b5f1996f3663b8241470f97561",
+  "SOURCE": "Recomputed from sealed RES-79 replay arrays (qpos/qvel/time) plus the sealed RES-12 action schedule; Plant XML hash 5f224414...; read-only audit probes.",
+  "EVENT_TIMES": {
+    "E1_supported_start_occ": 0.000125,
+    "E2_cm_onset_occ": 0.16125,
+    "E3_valid_cm_occ": 0.380125,
+    "E4_upward_reversal_occ": 0.4875,
+    "E5_vertical_propulsion_occ": 0.497375,
+    "E6_bilateral_takeoff_occ": 0.648125,
+    "E7_genuine_flight_conf": 0.737875,
+    "E8_apex_occ": 0.7719764,
+    "E9_descending_landing_occ": 0.875,
+    "E10_impact_absorption_occ": 0.973625,
+    "E11_balance_capture_occ": 0.9935,
+    "E12_stable_recovery_occ": 14.43625,
+    "E12_conf": 14.936125,
+    "RR_entry": 1.237,
+    "handoff": 14.487
+  },
+  "JUMP": {
+    "standing_com_z_m": 1.07491458,
+    "takeoff_com_z_E6occ_m": 1.0360222,
+    "apex_com_z_m": 1.11117995,
+    "net_jump_height_above_standing_m": 0.03627,
+    "com_rise_from_E6occ_to_apex_m": 0.07516,
+    "com_rise_true_takeoff_to_apex_m": 0.07684,
+    "takeoff_com_vz_E6occ_mps": 1.21446,
+    "takeoff_com_vz_true_off_start_mps": 1.22743,
+    "landing_com_vz_E9occ_mps": -1.01063,
+    "true_support_off_start_s": 0.648125,
+    "true_support_off_end_s": 0.874875,
+    "true_flight_duration_s": 0.22675,
+    "E6_E9_event_flight_time_s": 0.226875,
+    "max_foot_clearance_left_m": 0.0496061,
+    "max_foot_clearance_right_m": 0.0496061,
+    "geometric_clearance_flight_duration_s": 0.223125,
+    "pelvis_rise_flight_m": 0.077003,
+    "ballistic_height_from_takeoff_vz_m": 0.076788,
+    "ballistic_height_from_time_m": 0.063815,
+    "note": "COM flight is not a point-mass parabola: joints continue to extend in the air; measured rise exceeds the time-based ballistic estimate."
+  },
+  "TAKEOFF": {
+    "control_switch_PRL_SUPPORTED_to_FLIGHT_s": 0.64,
+    "true_support_loss_s": 0.648125,
+    "switch_lead_ms": 8.125,
+    "max_du_at_switch": 0.9439,
+    "pelvis_pitch_rate_min_radps": -9.6837,
+    "pelvis_pitch_rate_min_s": 0.649875,
+    "knee_at_E6_rad": 0.54127,
+    "hip_at_E6_rad": -0.31806,
+    "ankle_at_E6_rad": 0.27869,
+    "foot_pitch_at_E6_rad": 0.0043,
+    "pelvis_x_at_E4_m": 0.0728,
+    "pelvis_x_at_apex_m": -0.0276
+  },
+  "LANDING": {
+    "E9_com_vx_mps": 0.18142,
+    "E10_com_vx_mps": 0.21145,
+    "E11_com_vx_mps": 0.27903,
+    "peak_com_vx_after_touchdown_mps": 0.34183,
+    "peak_com_vx_time_s": 1.0385,
+    "Hy_at_E9_occ_kgm2ps": 3.333,
+    "Hy_at_E10_occ_kgm2ps": 9.88,
+    "Hy_at_RR_conf_kgm2ps": 0.531,
+    "root_pitch_at_E9_rad": 0.2351,
+    "root_pitch_at_E10_rad": 0.2922,
+    "root_pitch_at_RR_rad": 0.4315,
+    "trunk_tilt_forward_E11_deg": 25.01,
+    "com_x_E9_m": 0.0644,
+    "com_x_max_m": 0.1728,
+    "com_x_at_RR_conf_m": 0.1604,
+    "recovery_span_s": 13.15,
+    "peak_total_Fz_BW": 4.7755,
+    "peak_total_Fz_t_s": 0.90025,
+    "max_penetration_m": 0.0096389,
+    "foot_pitch_landing_max_rad": 0.1384
+  },
+  "DWELL_OFF_BY_ONE_S": -0.000125,
+  "SUPPORT_MARGIN_PRODUCTION_FORMULA": {
+    "min_all_samples_m": 0.08385,
+    "during_flight_m": [
+      0.0966,
+      0.12852
+    ],
+    "gate_E1_m": 0.02,
+    "gate_RR_m": 0.05
+  },
+  "PRODUCTION_SUPPORT_ADJUDICATION": {
+    "SUPPORT_FULL": "NOT_QUALIFIED",
+    "CANONICAL_REFLIGHT": [
+      4,
+      8,
+      1815
+    ],
+    "CHATTER_TRANSITIONS": 188,
+    "SUPPORT_POST_LANDING": "QUALIFIED"
+  }
+}

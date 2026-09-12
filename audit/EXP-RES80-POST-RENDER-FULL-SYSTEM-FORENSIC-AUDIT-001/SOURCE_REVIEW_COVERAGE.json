@@ -1,0 +1,1319 @@
+{
+  "MISSION": "V2_1_POST_RENDER_FULL_SYSTEM_FORENSIC_AUDIT_001",
+  "METHOD": "Every tracked file classified. AUDITED_EXECUTION_CRITICAL = read in full during this audit (V2.1 plant/controller/measurement/events/runtime + packaging/authority files). AUDITED_TEST/DOCUMENTATION/SUPPORTING = audited at the level required by the mission. OUT_OF_SCOPE = legacy V1/F4/Gen1 or unrelated subsystem not on the V2.1 canonical path; not claimed as line-audited.",
+  "SUMMARY": {
+    "TRACKED_FILES_TOTAL": 186,
+    "TRACKED_FILES_AUDITED": 133,
+    "TRACKED_FILES_OUT_OF_SCOPE": 53,
+    "AUDITED_EXECUTION_CRITICAL": 34,
+    "AUDITED_TEST": 62,
+    "AUDITED_DOCUMENTATION": 34,
+    "AUDITED_SUPPORTING": 3,
+    "TOTAL_TRACKED_LINES": 56854,
+    "AUDITED_LINES": 33335
+  },
+  "FILES": [
+    {
+      "PATH": ".gitignore",
+      "LANGUAGE": "other",
+      "LINES": 6,
+      "CLASS": "AUDITED_SUPPORTING",
+      "REASON": ""
+    },
+    {
+      "PATH": ".skills/lcmj-controller-ship/LEARNINGS.md",
+      "LANGUAGE": "markdown",
+      "LINES": 503,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "AUTHORITY_GRAPH.md",
+      "LANGUAGE": "markdown",
+      "LINES": 102,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "AUTHORITY_LEDGER.json",
+      "LANGUAGE": "json",
+      "LINES": 192,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "BILATERAL_SUPPORT_CONTINUITY_CONTRACT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 135,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "CANONICAL_CANDIDATE_IDENTITY.json",
+      "LANGUAGE": "json",
+      "LINES": 1,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "CANONICAL_RUNTIME_AUTHORITY.md",
+      "LANGUAGE": "markdown",
+      "LINES": 142,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "CANONICAL_V2_CANDIDATE_SPEC.json",
+      "LANGUAGE": "json",
+      "LINES": 1,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "CANONICAL_V2_RUNTIME_CONTRACT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 160,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "CLAIM_EVIDENCE_MATRIX.csv",
+      "LANGUAGE": "csv",
+      "LINES": 28,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "CONTROLLER_OBSERVATION_CONTRACT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 126,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "CORRECTED_APEX_TO_E10_AUTHORITY.md",
+      "LANGUAGE": "markdown",
+      "LINES": 42,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "EVIDENCE_CONTRACT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 374,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "EXISTING_CONTACT_SEMANTICS_AUTHORITY.json",
+      "LANGUAGE": "json",
+      "LINES": 1,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "EXPERIMENT_PROTOCOL.md",
+      "LANGUAGE": "markdown",
+      "LINES": 148,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "EXPERIMENT_REGISTRY.jsonl",
+      "LANGUAGE": "jsonl",
+      "LINES": 8,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "FORENSIC_REBASE_REPORT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 137,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "INTENDED_USE_AND_CLAIM_BOUNDARY.md",
+      "LANGUAGE": "markdown",
+      "LINES": 102,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "PROJECT_REBASE_CHECKPOINT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 122,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "PROJECT_SCIENTIFIC_CONSTITUTION.md",
+      "LANGUAGE": "markdown",
+      "LINES": 127,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "README.md",
+      "LANGUAGE": "markdown",
+      "LINES": 63,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "SUPPORT_SEMANTICS_CALLGRAPH.md",
+      "LANGUAGE": "markdown",
+      "LINES": 189,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "TERMINAL_CAPTURE_SEAL_AUTHORITY.md",
+      "LANGUAGE": "markdown",
+      "LINES": 121,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "TRACE_SCHEMA_V2.md",
+      "LANGUAGE": "markdown",
+      "LINES": 114,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "TRUE_COM_VELOCITY_CONTRACT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 40,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "TRUE_FOOT_POINT_VELOCITY_CONTRACT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 68,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "VVUQ_AND_QUALIFICATION_TAXONOMY.md",
+      "LANGUAGE": "markdown",
+      "LINES": 110,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/ADR_F2_CURRENT_V1_ARCHITECTURE.md",
+      "LANGUAGE": "markdown",
+      "LINES": 124,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/ADR_F4_ML240_ORACLE_CONSTRAINT_CATALOG.md",
+      "LANGUAGE": "markdown",
+      "LINES": 34,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/ADR_F4_ML241_WRAPPED_DERIVATIVES.md",
+      "LANGUAGE": "markdown",
+      "LINES": 61,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/ADR_F4_ML242_SPARSE_TRANSCRIPTION.md",
+      "LANGUAGE": "markdown",
+      "LINES": 69,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/ADR_F4_ML243_IPOPT_BACKEND.md",
+      "LANGUAGE": "markdown",
+      "LINES": 53,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/ML212B_E3_E4_FEASIBILITY_OWNER_CLOSURE.md",
+      "LANGUAGE": "markdown",
+      "LINES": 287,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/ML212C_WITNESS_SIGN_SECTOR_OWNER_CLOSURE.md",
+      "LANGUAGE": "markdown",
+      "LINES": 212,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/MUJOCO_STATE_STAGE_CONTRACT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 113,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/architecture.md",
+      "LANGUAGE": "markdown",
+      "LINES": 27,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "docs/contracts.md",
+      "LANGUAGE": "markdown",
+      "LINES": 15,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "experiments/run_gen1.py",
+      "LANGUAGE": "python",
+      "LINES": 90,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "pyproject.toml",
+      "LANGUAGE": "toml",
+      "LINES": 30,
+      "CLASS": "AUDITED_SUPPORTING",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 12,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "src/loaded_cmj/assets/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 1,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "src/loaded_cmj/assets/loaded_jump_athlete.xml",
+      "LANGUAGE": "xml",
+      "LINES": 223,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "src/loaded_cmj/biomechanics/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 19,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/biomechanics/capturability.py",
+      "LANGUAGE": "python",
+      "LINES": 164,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/biomechanics/effectiveness.py",
+      "LANGUAGE": "python",
+      "LINES": 254,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/biomechanics/events.py",
+      "LANGUAGE": "python",
+      "LINES": 2927,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/biomechanics/metrics.py",
+      "LANGUAGE": "python",
+      "LINES": 333,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/control/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 6,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1 control subsystem not on the V2.1 canonical path (res51/gen3 are untracked WIP)."
+    },
+    {
+      "PATH": "src/loaded_cmj/control/pfip.py",
+      "LANGUAGE": "python",
+      "LINES": 1266,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1 control subsystem not on the V2.1 canonical path (res51/gen3 are untracked WIP)."
+    },
+    {
+      "PATH": "src/loaded_cmj/control/policy_spec.json",
+      "LANGUAGE": "json",
+      "LINES": 182,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/oracle/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 43,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/oracle/composition.py",
+      "LANGUAGE": "python",
+      "LINES": 411,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/oracle/constraints.py",
+      "LANGUAGE": "python",
+      "LINES": 839,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/oracle/derivatives.py",
+      "LANGUAGE": "python",
+      "LINES": 2199,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/oracle/ipopt_backend.py",
+      "LANGUAGE": "python",
+      "LINES": 413,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/oracle/nlp_binding.py",
+      "LANGUAGE": "python",
+      "LINES": 409,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/oracle/transcription.py",
+      "LANGUAGE": "python",
+      "LINES": 1638,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/rendering/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 5,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/rendering/replay.py",
+      "LANGUAGE": "python",
+      "LINES": 28,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 23,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/engine.py",
+      "LANGUAGE": "python",
+      "LINES": 675,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/errors.py",
+      "LANGUAGE": "python",
+      "LINES": 53,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/numeric.py",
+      "LANGUAGE": "python",
+      "LINES": 166,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/observations.py",
+      "LANGUAGE": "python",
+      "LINES": 158,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/policy_protocol.py",
+      "LANGUAGE": "python",
+      "LINES": 167,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/policy_spec/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 34,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/policy_spec/api.py",
+      "LANGUAGE": "python",
+      "LINES": 54,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/policy_spec/py.typed",
+      "LANGUAGE": "other",
+      "LINES": 0,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/policy_spec/spec.py",
+      "LANGUAGE": "python",
+      "LINES": 289,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/policy_spec/versions.py",
+      "LANGUAGE": "python",
+      "LINES": 10,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/policy_worker.py",
+      "LANGUAGE": "python",
+      "LINES": 1232,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/runtime/results.py",
+      "LANGUAGE": "python",
+      "LINES": 322,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/simulation/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 1,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/simulation/constants.py",
+      "LANGUAGE": "python",
+      "LINES": 632,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/simulation/drive.py",
+      "LANGUAGE": "python",
+      "LINES": 767,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/simulation/plant.py",
+      "LANGUAGE": "python",
+      "LINES": 1815,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/simulation/snapshot.py",
+      "LANGUAGE": "python",
+      "LINES": 340,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/simulation/so3.py",
+      "LANGUAGE": "python",
+      "LINES": 428,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/simulation/tangent.py",
+      "LANGUAGE": "python",
+      "LINES": 247,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/simulation/transition.py",
+      "LANGUAGE": "python",
+      "LINES": 176,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "Legacy V1/F4/Gen1 subsystem not on the V2.1 canonical execution path; reviewed only for import coupling (see PROVENANCE_REVIEW.md)."
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 1,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/assets/v2_plant.xml",
+      "LANGUAGE": "xml",
+      "LINES": 165,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/balance_capture.py",
+      "LANGUAGE": "python",
+      "LINES": 329,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/canonical_runtime.py",
+      "LANGUAGE": "python",
+      "LINES": 636,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/constants.py",
+      "LANGUAGE": "python",
+      "LINES": 274,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/controller.py",
+      "LANGUAGE": "python",
+      "LINES": 128,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/drive.py",
+      "LANGUAGE": "python",
+      "LINES": 46,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/events.py",
+      "LANGUAGE": "python",
+      "LINES": 1247,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/full_closure.py",
+      "LANGUAGE": "python",
+      "LINES": 75,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/measurement.py",
+      "LANGUAGE": "python",
+      "LINES": 418,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/plant.py",
+      "LANGUAGE": "python",
+      "LINES": 390,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/res72_integration.py",
+      "LANGUAGE": "python",
+      "LINES": 248,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/stable_recovery.py",
+      "LANGUAGE": "python",
+      "LINES": 634,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/support_continuity.py",
+      "LANGUAGE": "python",
+      "LINES": 217,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/sync_rollout.py",
+      "LANGUAGE": "python",
+      "LINES": 412,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "src/loaded_cmj/v2/terminal_capture.py",
+      "LANGUAGE": "python",
+      "LINES": 97,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "support_continuity_spec.json",
+      "LANGUAGE": "json",
+      "LINES": 54,
+      "CLASS": "AUDITED_DOCUMENTATION",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/__init__.py",
+      "LANGUAGE": "python",
+      "LINES": 1,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_actuator_dynamics.py",
+      "LANGUAGE": "python",
+      "LINES": 297,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_causal_runtime.py",
+      "LANGUAGE": "python",
+      "LINES": 501,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_cmj_events.py",
+      "LANGUAGE": "python",
+      "LINES": 467,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_contact_force_plates.py",
+      "LANGUAGE": "python",
+      "LINES": 206,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_determinism.py",
+      "LANGUAGE": "python",
+      "LINES": 126,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_f2_model_measurement.py",
+      "LANGUAGE": "python",
+      "LINES": 456,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_f3_actuator.py",
+      "LANGUAGE": "python",
+      "LINES": 198,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_f3_capturability.py",
+      "LANGUAGE": "python",
+      "LINES": 179,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_f3_closure.py",
+      "LANGUAGE": "python",
+      "LINES": 229,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_f3_effectiveness.py",
+      "LANGUAGE": "python",
+      "LINES": 153,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_f3_metrics.py",
+      "LANGUAGE": "python",
+      "LINES": 86,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_f3_plant.py",
+      "LANGUAGE": "python",
+      "LINES": 172,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_mechanics.py",
+      "LANGUAGE": "python",
+      "LINES": 886,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_ml241_wrapped_derivatives.py",
+      "LANGUAGE": "python",
+      "LINES": 839,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_ml242_transcription.py",
+      "LANGUAGE": "python",
+      "LINES": 836,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_numerical_mechanics.py",
+      "LANGUAGE": "python",
+      "LINES": 312,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_passive_energetics.py",
+      "LANGUAGE": "python",
+      "LINES": 207,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_policy_isolation.py",
+      "LANGUAGE": "python",
+      "LINES": 275,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/qualification_semantic_contracts.py",
+      "LANGUAGE": "python",
+      "LINES": 506,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_g4r1b_support_margin.py",
+      "LANGUAGE": "python",
+      "LINES": 481,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_g4r2_composition.py",
+      "LANGUAGE": "python",
+      "LINES": 347,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml237_transition.py",
+      "LANGUAGE": "python",
+      "LINES": 172,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml238_macro_state.py",
+      "LANGUAGE": "python",
+      "LINES": 528,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml239_tangent_state.py",
+      "LANGUAGE": "python",
+      "LINES": 412,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml240_constraint_catalog.py",
+      "LANGUAGE": "python",
+      "LINES": 371,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml241_direct_state_owner.py",
+      "LANGUAGE": "python",
+      "LINES": 378,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml241_g3_derivatives.py",
+      "LANGUAGE": "python",
+      "LINES": 267,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml241_qacc_resolution.py",
+      "LANGUAGE": "python",
+      "LINES": 310,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml241_wrapped_derivatives.py",
+      "LANGUAGE": "python",
+      "LINES": 247,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml242_g5_rho_epigraph.py",
+      "LANGUAGE": "python",
+      "LINES": 429,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml242_transcription.py",
+      "LANGUAGE": "python",
+      "LINES": 783,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml243_ipopt_backend.py",
+      "LANGUAGE": "python",
+      "LINES": 676,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml243_mode_schedule.py",
+      "LANGUAGE": "python",
+      "LINES": 77,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_ml243_witness_initializer.py",
+      "LANGUAGE": "python",
+      "LINES": 67,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_public_qualification.py",
+      "LANGUAGE": "python",
+      "LINES": 49,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_r01_bundle_contract.py",
+      "LANGUAGE": "python",
+      "LINES": 120,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_r01_manifest_hash.py",
+      "LANGUAGE": "python",
+      "LINES": 57,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_r01_spec_binding.py",
+      "LANGUAGE": "python",
+      "LINES": 131,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_r01_state_replay.py",
+      "LANGUAGE": "python",
+      "LINES": 132,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_rec01a_synchronized_dynamics.py",
+      "LANGUAGE": "python",
+      "LINES": 269,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res10_controller_obs_sync.py",
+      "LANGUAGE": "python",
+      "LINES": 220,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res11_deterministic_offline.py",
+      "LANGUAGE": "python",
+      "LINES": 99,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res52_soft_contact.py",
+      "LANGUAGE": "python",
+      "LINES": 397,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res54_true_com_velocity.py",
+      "LANGUAGE": "python",
+      "LINES": 194,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res55_true_foot_point_velocity.py",
+      "LANGUAGE": "python",
+      "LINES": 242,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res57_support_continuity.py",
+      "LANGUAGE": "python",
+      "LINES": 199,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res58_terminal_capture_seal.py",
+      "LANGUAGE": "python",
+      "LINES": 243,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res72_corrected_apex_to_e10.py",
+      "LANGUAGE": "python",
+      "LINES": 183,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res73_balance_capture.py",
+      "LANGUAGE": "python",
+      "LINES": 158,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res74_stable_recovery.py",
+      "LANGUAGE": "python",
+      "LINES": 180,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res76_full_closure.py",
+      "LANGUAGE": "python",
+      "LINES": 170,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res78_canonical_runtime.py",
+      "LANGUAGE": "python",
+      "LINES": 223,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_res79_smoke_replay.py",
+      "LANGUAGE": "python",
+      "LINES": 192,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_v2_1_res10_honest_full_jump.py",
+      "LANGUAGE": "python",
+      "LINES": 220,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_v2_1_res16_true_standing.py",
+      "LANGUAGE": "python",
+      "LINES": 308,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_v2_1_res31_honest_planar_root.py",
+      "LANGUAGE": "python",
+      "LINES": 347,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_v2_1_res42_zero_root_damping.py",
+      "LANGUAGE": "python",
+      "LINES": 342,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_v2_1_res43_true_standing_rebase.py",
+      "LANGUAGE": "python",
+      "LINES": 277,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_v2_1_res5_honest_fall.py",
+      "LANGUAGE": "python",
+      "LINES": 278,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_v2_1_res6_compliant_landing_contact.py",
+      "LANGUAGE": "python",
+      "LINES": 348,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tests/test_v2_1_res8_captured_squat.py",
+      "LANGUAGE": "python",
+      "LINES": 243,
+      "CLASS": "AUDITED_TEST",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/evid_bundle.py",
+      "LANGUAGE": "python",
+      "LINES": 662,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/evid_canonical.py",
+      "LANGUAGE": "python",
+      "LINES": 91,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/evid_finalize.py",
+      "LANGUAGE": "python",
+      "LINES": 132,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/evid_spec.py",
+      "LANGUAGE": "python",
+      "LINES": 139,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/evid_state.py",
+      "LANGUAGE": "python",
+      "LINES": 121,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/evid_trace_v2.py",
+      "LANGUAGE": "python",
+      "LINES": 276,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/evidence_recorder.py",
+      "LANGUAGE": "python",
+      "LINES": 580,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/rec01a_sync_dynamics.py",
+      "LANGUAGE": "python",
+      "LINES": 880,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/replay_from_state.py",
+      "LANGUAGE": "python",
+      "LINES": 194,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/reproduce_branch_replay.py",
+      "LANGUAGE": "python",
+      "LINES": 189,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/reproduce_rec01a.py",
+      "LANGUAGE": "python",
+      "LINES": 200,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/res11_independent_verify.py",
+      "LANGUAGE": "python",
+      "LINES": 733,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "tools/res52/LOCAL_ACTION_EFFECTIVENESS_METHOD.md",
+      "LANGUAGE": "markdown",
+      "LINES": 80,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/SOFT_CONTACT_STATE_CONTRACT.md",
+      "LANGUAGE": "markdown",
+      "LINES": 76,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/core52.py",
+      "LANGUAGE": "python",
+      "LINES": 347,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/reproduce.sh",
+      "LANGUAGE": "shell",
+      "LINES": 6,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/reproduce_res52.py",
+      "LANGUAGE": "python",
+      "LINES": 102,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/reproduction.json",
+      "LANGUAGE": "json",
+      "LINES": 596,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/run_cell.py",
+      "LANGUAGE": "python",
+      "LINES": 326,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/s1_branch_states.py",
+      "LANGUAGE": "python",
+      "LINES": 301,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/s4_run_profiles.py",
+      "LANGUAGE": "python",
+      "LINES": 140,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/s6_finalize.py",
+      "LANGUAGE": "python",
+      "LINES": 499,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/soft_contact.py",
+      "LANGUAGE": "python",
+      "LINES": 344,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res52/spec.py",
+      "LANGUAGE": "python",
+      "LINES": 263,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/res79_smoke_replay.py",
+      "LANGUAGE": "python",
+      "LINES": 1697,
+      "CLASS": "AUDITED_EXECUTION_CRITICAL",
+      "REASON": ""
+    },
+    {
+      "PATH": "tools/run_res10_controller_obs_sync.py",
+      "LANGUAGE": "python",
+      "LINES": 729,
+      "CLASS": "OUT_OF_SCOPE_WITH_REASON",
+      "REASON": "No role in V2.1 execution/release; not reviewed line-by-line."
+    },
+    {
+      "PATH": "uv.lock",
+      "LANGUAGE": "lock",
+      "LINES": 244,
+      "CLASS": "AUDITED_SUPPORTING",
+      "REASON": ""
+    }
+  ]
+}

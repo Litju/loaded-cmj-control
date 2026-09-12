@@ -1,0 +1,40 @@
+RES-80 AUDIT COMMAND LOG (abridged; read-only commands except audit-artifact writes)
+====================================================================================
+# Phase 0 reconciliation
+git rev-parse HEAD -> 8f26736db1231042cbedc61f61ca4862b7be871c
+git rev-parse HEAD^{tree} -> 855fe3b418c09b5028396adeaed3ba8cda51e89f
+git log -1 --oneline -> "8f26736 V2.1: add accepted trajectory visual smoke replay"
+git status --porcelain -> tracked worktree clean; untracked WIP preserved
+
+# Frozen hash verification
+sha256sum src/loaded_cmj/v2/assets/v2_plant.xml src/loaded_cmj/v2/events.py CANONICAL_V2_CANDIDATE_SPEC.json CANONICAL_V2_RUNTIME_CONTRACT.md
+  PLANT 5f224414... match; SCORER 286ef328... match; SPEC b02c74b8... match; CONTRACT cafb91fe... match
+python: composition sha256 over res72_integration, balance_capture, stable_recovery, terminal_capture, full_closure
+  -> 6f56ffa180b12c128d67ea13fd9c08413554a9d964d175615f16a8e572185d12 match
+python: per-file controller hashes -> all five match CANONICAL_CANDIDATE_IDENTITY.json CONTROLLER_FILES
+
+# Deterministic probes (repo venv python 3.13.13, mujoco 3.8.0)
+.venv/bin/python audit/.../probes/probe_geometry.py          # knee/foot geometry, joint sign FK
+.venv/bin/python audit/.../probes/probe_contact_frame.py     # contact frame convention vs qfrc_constraint
+.venv/bin/python audit/.../probes/probe_trajectory.py        # full R001 COM/flight/landing quantification (45 s)
+.venv/bin/python audit/.../probes/probe_skeleton.py          # body positions + action jumps from sealed schedule
+.venv/bin/python audit/.../probes/probe_landing.py           # E9-E12 posture/momentum
+.venv/bin/python audit/.../probes/probe_forces2.py           # ctrl-aware Fz, true off window, margin formula (rewritten; recursive EOF line removed)
+.venv/bin/python audit/.../probes/probe_fzmin.py             # FZ_MIN row-loss proof (monkeypatched lsq_linear)
+.venv/bin/python audit/.../probes/probe_footpitch.py         # R001 foot pitch over all 121,889 samples
+.venv/bin/python audit/.../probes/probe_step.py              # one-step dynamics vs forces (ctrl-aware)
+.venv/bin/python audit/.../probes/probe_state.py             # mjSTATE_INTEGRATION contains ctrl
+
+# Test forensics
+.venv/bin/python -m pytest --collect-only -q  -> 2 collection errors
+  tests/test_ml241_qacc_resolution.py: FileNotFoundError F4-ORACLE-INFRASTRUCTURE evidence
+  tests/test_public_support_wrench_contract.py: ImportError shift_wrench_to_origin
+PASS_ONLY regex, assert True / or True counts, pytest.skip enumerations
+
+# Packaging audit
+uv build --wheel -o /tmp/opencode/res80/wheel  -> loaded_cmj_control-0.1.0-py3-none-any.whl
+wheel listing: tools/ absent; v2_plant.xml present; scipy absent from metadata
+rg 'name = "scipy"' uv.lock -> no match
+
+# Git/untracked preservation
+untracked WIP listed in AUDIT_REPOSITORY_INVENTORY.json (audit/ excluded from preserved list)

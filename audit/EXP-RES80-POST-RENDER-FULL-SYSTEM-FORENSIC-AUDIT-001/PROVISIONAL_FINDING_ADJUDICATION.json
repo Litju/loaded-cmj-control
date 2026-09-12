@@ -1,0 +1,307 @@
+{
+  "MISSION": "V2_1_POST_RENDER_FULL_SYSTEM_FORENSIC_AUDIT_001",
+  "PROVISIONAL_FINDINGS": [
+    {
+      "ID": "P01",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CRIT-003"
+    },
+    {
+      "ID": "P02",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CRIT-003"
+    },
+    {
+      "ID": "P03",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-008"
+    },
+    {
+      "ID": "P04",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CRIT-007"
+    },
+    {
+      "ID": "P05",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CRIT-007"
+    },
+    {
+      "ID": "P06",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-010"
+    },
+    {
+      "ID": "P07",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-011"
+    },
+    {
+      "ID": "P08",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-001"
+    },
+    {
+      "ID": "P09",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-002"
+    },
+    {
+      "ID": "P10",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-019"
+    },
+    {
+      "ID": "P11",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-009"
+    },
+    {
+      "ID": "P12",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-008"
+    },
+    {
+      "ID": "P13",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-005"
+    },
+    {
+      "ID": "P14",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-002"
+    },
+    {
+      "ID": "P15",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-004"
+    },
+    {
+      "ID": "P16",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-004"
+    },
+    {
+      "ID": "P17",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-004"
+    },
+    {
+      "ID": "P18",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-003"
+    },
+    {
+      "ID": "P19",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-005"
+    },
+    {
+      "ID": "P20",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-006"
+    },
+    {
+      "ID": "P21",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-014"
+    },
+    {
+      "ID": "P22",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-014"
+    },
+    {
+      "ID": "P23",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-003"
+    },
+    {
+      "ID": "P24",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-009"
+    },
+    {
+      "ID": "P25",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CRIT-005"
+    },
+    {
+      "ID": "P26",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-007"
+    },
+    {
+      "ID": "P27",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-013"
+    },
+    {
+      "ID": "P28",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-011"
+    },
+    {
+      "ID": "P29",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-001"
+    },
+    {
+      "ID": "P30",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-007"
+    },
+    {
+      "ID": "P31",
+      "STATUS": "REJECTED",
+      "LINKED_DEFECT": "LOW-003"
+    },
+    {
+      "ID": "P32",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CRIT-006"
+    },
+    {
+      "ID": "P33",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CRIT-006"
+    },
+    {
+      "ID": "P34",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-016"
+    },
+    {
+      "ID": "P35",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-014"
+    },
+    {
+      "ID": "P36",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-012"
+    },
+    {
+      "ID": "P37",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-010"
+    },
+    {
+      "ID": "P38",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-017"
+    },
+    {
+      "ID": "P39",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-006"
+    },
+    {
+      "ID": "P40",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-011"
+    },
+    {
+      "ID": "P41",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "MED-011"
+    },
+    {
+      "ID": "P42",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "HIGH-015"
+    },
+    {
+      "ID": "P43",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CRIT-003"
+    },
+    {
+      "ID": "P44",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CRIT-003"
+    },
+    {
+      "ID": "P45",
+      "STATUS": "CONFIRMED",
+      "LINKED_DEFECT": "CLAIM_CEILING.md; render non-invasiveness independently re-verified from RES-79 gates"
+    }
+  ],
+  "COUNTS": {
+    "CONFIRMED": 44,
+    "REJECTED": 1,
+    "LIMITATION": 0,
+    "NEEDS_MORE_EVIDENCE": 0
+  },
+  "NEW_FINDINGS_BEYOND_PREFLIGHT": [
+    [
+      "CRIT-002",
+      "Hip range/convention inversion (not in P-list)"
+    ],
+    [
+      "HIGH-012",
+      "Envelope overfit quantified to micron-scale windows (P36 framing sharpened)"
+    ],
+    [
+      "HIGH-013",
+      "Canonical output violates its own required schema fields (beyond P27)"
+    ],
+    [
+      "MED-012",
+      "SUPPORT_FULL NOT_QUALIFIED vs sliced gates (new)"
+    ],
+    [
+      "MED-013",
+      "E12 fires 50.8 ms before RES-43 handoff (new)"
+    ],
+    [
+      "MED-015",
+      "Entry-head fragmentation and corrupted ledger hash (new)"
+    ],
+    [
+      "HIGH-011",
+      "Apex fallback path without flight check (new sub-mechanism under P07)"
+    ],
+    [
+      "MED-020",
+      "E1 supported-start omits fall_contact (new)"
+    ],
+    [
+      "MED-006",
+      "prohibited_contact is structurally dead (new sub-mechanism under P30)"
+    ],
+    [
+      "MED-007",
+      "20 kg load has no collision geometry at all; foot-shank ~6 mm fragility (new)"
+    ],
+    [
+      "MED-017",
+      "Adjudication/checkpoint exceptions become sentinel values (new)"
+    ],
+    [
+      "MED-018",
+      "Duplicated authority literals across dead mirror and external JSON (new)"
+    ],
+    [
+      "MED-019",
+      "V2.1-named tests drive the legacy controller (new)"
+    ],
+    [
+      "LOW-004",
+      "KD ramp is an identity no-op (new)"
+    ],
+    [
+      "LOW-005",
+      "Dead code + misleading helper contract (new)"
+    ],
+    [
+      "LOW-006",
+      "WALL_S breaks result byte-determinism (new)"
+    ],
+    [
+      "LOW-007",
+      "Ankle sign comment inverted (new)"
+    ]
+  ],
+  "NOTE": "P31 rejected as an active defect: frame.T @ sign*force matched qfrc_constraint on non-identity contact frames and both geom orderings; the code comments are wrong/fragile (LOW-003) but the implementation is correct for MuJoCo 3.8.0."
+}
