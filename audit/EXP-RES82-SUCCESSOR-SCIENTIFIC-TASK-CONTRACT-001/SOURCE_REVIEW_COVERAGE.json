@@ -1,0 +1,261 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "RES82-SOURCE-REVIEW-COVERAGE",
+  "mission": "RES82_SUCCESSOR_LOADED_CMJ_SCIENTIFIC_TASK_CONTRACT_001",
+  "linear_issue": "RES-82",
+  "review_method": {
+    "databases": [
+      "PubMed",
+      "Europe PMC (REST)",
+      "publisher pages via web search"
+    ],
+    "search_dates": "2026-09-13",
+    "verification": "every PMID/DOI used in the evidence table was resolved against Europe PMC metadata before inclusion; query strings, resolved metadata, response SHA-256 digests, and status are archived in citation_resolution.json (23/23 resolved, 0 identifier mismatches after correction)",
+    "seed_references_from_mission": [
+      "PMID 39425876",
+      "PMID 38863789",
+      "PMID 31711369",
+      "PMID 30902539",
+      "PMID 18037546",
+      "PMID 41017646"
+    ],
+    "citation_resolution_artifact": "citation_resolution.json"
+  },
+  "source_classes": [
+    {
+      "CLASS": "SYSTEMATIC_REVIEWS_METHODOLOGICAL_REVIEWS",
+      "CANDIDATES_IDENTIFIED": 6,
+      "ROWS_INCLUDED": 5,
+      "SOURCE_IDS": [
+        "S01",
+        "S02",
+        "S03",
+        "S15",
+        "S19"
+      ],
+      "COVERAGE": "COMPLETE_FOR_DECLARED_QUESTIONS",
+      "GAPS": []
+    },
+    {
+      "CLASS": "PRIMARY_FORCE_PLATFORM_CMJ_METHODOLOGY",
+      "CANDIDATES_IDENTIFIED": 8,
+      "ROWS_INCLUDED": 8,
+      "SOURCE_IDS": [
+        "S04",
+        "S05",
+        "S06",
+        "S10",
+        "S11",
+        "S12",
+        "S13",
+        "S14"
+      ],
+      "COVERAGE": "COMPLETE_FOR_DECLARED_QUESTIONS",
+      "GAPS": []
+    },
+    {
+      "CLASS": "LOADED_CMJ_STUDIES",
+      "CANDIDATES_IDENTIFIED": 5,
+      "ROWS_INCLUDED": 4,
+      "SOURCE_IDS": [
+        "S06",
+        "S07",
+        "S08",
+        "S09"
+      ],
+      "COVERAGE": "COMPLETE_FOR_DECLARED_QUESTIONS",
+      "GAPS": [
+        "no study located that reports direct-COM-displacement 20 kg loaded CMJ in a 95 kg system; load scale inferred from flight-time and peak-velocity studies (recorded as a limitation on OD-01)"
+      ]
+    },
+    {
+      "CLASS": "LANDING_WHOLE_BODY_BIOMECHANICS",
+      "CANDIDATES_IDENTIFIED": 6,
+      "ROWS_INCLUDED": 4,
+      "SOURCE_IDS": [
+        "S15",
+        "S16",
+        "S17",
+        "S18"
+      ],
+      "COVERAGE": "COMPLETE_FOR_DECLARED_QUESTIONS",
+      "GAPS": []
+    },
+    {
+      "CLASS": "DYNAMIC_POSTURAL_STABILITY_LANDING_STABILITY",
+      "CANDIDATES_IDENTIFIED": 7,
+      "ROWS_INCLUDED": 5,
+      "SOURCE_IDS": [
+        "S19",
+        "S20",
+        "S21",
+        "S22",
+        "S23"
+      ],
+      "COVERAGE": "COMPLETE_FOR_DECLARED_QUESTIONS",
+      "GAPS": [
+        "no deterministic-simulator capture threshold exists in the literature; structure was adopted and numerics left to the owner (OD-05)"
+      ]
+    },
+    {
+      "CLASS": "COMPUTATIONAL_MODEL_VVUQ_CONTEXT_OF_USE",
+      "CANDIDATES_IDENTIFIED": 3,
+      "ROWS_INCLUDED": 2,
+      "SOURCE_IDS": [
+        "S24",
+        "S25"
+      ],
+      "COVERAGE": "COMPLETE_FOR_DECLARED_QUESTIONS",
+      "GAPS": []
+    },
+    {
+      "CLASS": "PROJECT_INTERNAL_AUTHORITY",
+      "CANDIDATES_IDENTIFIED": 8,
+      "ROWS_INCLUDED": 8,
+      "SOURCE_IDS": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08"
+      ],
+      "COVERAGE": "COMPLETE_FOR_DECLARED_QUESTIONS",
+      "GAPS": []
+    },
+    {
+      "CLASS": "AUTHORITATIVE_BOOKS",
+      "CANDIDATES_IDENTIFIED": 4,
+      "ROWS_INCLUDED": 4,
+      "SOURCE_IDS": [
+        "B01",
+        "B02",
+        "B03",
+        "B04"
+      ],
+      "COVERAGE": "NOT_LOCATED",
+      "GAPS": [
+        "none of the four books were present in the repository, evidence root, or accessible project paths; they are recorded as NOT_LOCATED and no citation, threshold, or definition was taken from them"
+      ],
+      "SUBSTITUTIONS": [
+        "V&V principles represented by ASME V&V 40 (S24) and project taxonomy (P02); biomechanics methodology represented by peer-reviewed sources"
+      ]
+    }
+  ],
+  "totals": {
+    "EXTERNAL_SOURCES_ROWS": 25,
+    "PROJECT_SOURCES_ROWS": 8,
+    "BOOKS_ATTEMPTED_NOT_LOCATED": 4,
+    "TOTAL_ROWS": 37,
+    "SYSTEMATIC_REVIEWS_OR_META_ANALYSES": 5,
+    "PRIMARY_STUDIES": 16,
+    "METHODOLOGICAL_STUDIES": 2,
+    "STANDARDS_OR_METHOD_GUIDANCE": 2,
+    "PROJECT_INTERNAL_AUTHORITY": 5,
+    "PROJECT_HISTORICAL_EVIDENCE": 3,
+    "BUCKETING_RULE": "external buckets: SR/MA (5) + primary studies (16) + methodological studies (2) + standards/guidance (2) = 25; project rows: authority (P01-P04,P08=5) + historical evidence (P05-P07=3) = 8"
+  },
+  "questions_coverage": [
+    {
+      "QUESTION": "Jump-height equation definitions and comparability",
+      "ANSWERED_BY": [
+        "S01",
+        "S02",
+        "S03"
+      ],
+      "STATUS": "CLOSED"
+    },
+    {
+      "QUESTION": "Takeoff threshold methodology",
+      "ANSWERED_BY": [
+        "S04",
+        "S05",
+        "S06"
+      ],
+      "STATUS": "CLOSED"
+    },
+    {
+      "QUESTION": "Loaded-CMJ threshold/processing sensitivity",
+      "ANSWERED_BY": [
+        "S06",
+        "S07",
+        "S02"
+      ],
+      "STATUS": "CLOSED"
+    },
+    {
+      "QUESTION": "Landing whole-body biomechanics / trunk coupling",
+      "ANSWERED_BY": [
+        "S16",
+        "S17",
+        "S18"
+      ],
+      "STATUS": "CLOSED"
+    },
+    {
+      "QUESTION": "Landing stability methods (TTS/DPSI)",
+      "ANSWERED_BY": [
+        "S19",
+        "S20",
+        "S21",
+        "S22"
+      ],
+      "STATUS": "CLOSED_STRUCTURE_ONLY"
+    },
+    {
+      "QUESTION": "Dynamic capture condition",
+      "ANSWERED_BY": [
+        "S23"
+      ],
+      "STATUS": "CLOSED_STRUCTURE_ONLY"
+    },
+    {
+      "QUESTION": "V&V context-of-use principles",
+      "ANSWERED_BY": [
+        "S24",
+        "S25",
+        "P02",
+        "P03"
+      ],
+      "STATUS": "CLOSED"
+    },
+    {
+      "QUESTION": "Performance-floor plausibility for 20 kg loaded CMJ",
+      "ANSWERED_BY": [
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "STATUS": "CLOSED_OWNER_DECISION_REQUIRED"
+    },
+    {
+      "QUESTION": "Landing force scale",
+      "ANSWERED_BY": [
+        "S15",
+        "S12"
+      ],
+      "STATUS": "CLOSED_DIAGNOSTIC"
+    }
+  ],
+  "prohibited_uses_respected": [
+    "no clinical landing-stability threshold imported as a task gate",
+    "no medical-device risk threshold imported",
+    "no book citation used without locating the source",
+    "no threshold adopted without a provenance row"
+  ],
+  "search_limitations": [
+    "no access to subscription-only full texts beyond abstracts/metadata for some sources; conclusions limited to verified metadata + abstract content",
+    "project books not available; recorded honestly",
+    "no human loaded-CMJ dataset with a 95 kg system + 20 kg load located; the performance floor remains an owner task decision"
+  ],
+  "class_totals_check": {
+    "SUM_EXTERNAL_BUCKETS": 25,
+    "SUM_PROJECT_BUCKETS": 8,
+    "BOOKS_ATTEMPTED_NOT_LOCATED": 4,
+    "TOTAL": 37,
+    "MATCHES_TABLE_ROWS": true
+  }
+}

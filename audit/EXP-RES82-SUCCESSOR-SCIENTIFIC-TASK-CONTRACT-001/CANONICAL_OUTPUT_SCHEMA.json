@@ -1,0 +1,1284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://loaded-cmj.local/schemas/RES82-CANONICAL-OUTPUT-SCHEMA.json",
+  "title": "RES-82 Successor Loaded-CMJ Canonical Result",
+  "description": "Mandatory canonical output schema for a successor nominal 20 kg loaded-CMJ candidate. Every metric that is computed must be retained. No important performance variable may be computed and then discarded.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "candidate_id",
+    "provenance",
+    "events",
+    "result",
+    "metrics",
+    "support_continuity",
+    "hard_gates",
+    "consistency_gates",
+    "owner_decisions_pending"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "identifier of the produced canonical result (NOT the schema id)"
+    },
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "ENTRY_HEAD",
+        "ENTRY_TREE",
+        "MODEL_IDENTITY",
+        "RUNTIME_IDENTITY",
+        "TRACE_SHA256"
+      ],
+      "properties": {
+        "ENTRY_HEAD": {
+          "type": "string"
+        },
+        "ENTRY_TREE": {
+          "type": "string"
+        },
+        "MODEL_IDENTITY": {
+          "type": "string"
+        },
+        "RUNTIME_IDENTITY": {
+          "type": "string"
+        },
+        "TRACE_SHA256": {
+          "type": "string"
+        },
+        "CONTRACT_ARTIFACTS": {
+          "type": "object"
+        }
+      }
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5",
+        "E6",
+        "E7",
+        "E8",
+        "E9",
+        "E10",
+        "E11",
+        "E12"
+      ],
+      "patternProperties": {
+        "^E([1-9]|1[0-2])$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "NAME",
+            "CONFIRMED",
+            "ONSET_SAMPLE",
+            "FIRST_TRUE_TIME",
+            "CONFIRMATION_SAMPLE",
+            "CONFIRMATION_TIME",
+            "DWELL_TYPE",
+            "REQUIRED_DURATION",
+            "K_D",
+            "vDWELL"
+          ],
+          "properties": {
+            "NAME": {
+              "type": "string"
+            },
+            "CONFIRMED": {
+              "type": "boolean"
+            },
+            "ONSET_SAMPLE": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "FIRST_TRUE_TIME": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "CONFIRMATION_SAMPLE": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "CONFIRMATION_TIME": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "DWELL_TYPE": {
+              "enum": [
+                "NONE",
+                "PHYSICAL_TIME",
+                "SAMPLE_COUNT"
+              ]
+            },
+            "REQUIRED_DURATION": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "K_D": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "vDWELL": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "BLOCKERS": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "EXECUTION_VALID",
+        "MODEL_STATE_VALID",
+        "EVENT_CHAIN_VALID",
+        "TASK_PERFORMANCE_VALID",
+        "LANDING_VALID",
+        "BALANCE_VALID",
+        "RECOVERY_VALID",
+        "NO_HARD_FAILURE",
+        "TASK_SUCCESS",
+        "TASK_SUCCESS_RULE"
+      ],
+      "properties": {
+        "EXECUTION_VALID": {
+          "type": "boolean"
+        },
+        "MODEL_STATE_VALID": {
+          "type": "boolean"
+        },
+        "EVENT_CHAIN_VALID": {
+          "type": "boolean"
+        },
+        "TASK_PERFORMANCE_VALID": {
+          "type": "boolean"
+        },
+        "LANDING_VALID": {
+          "type": "boolean"
+        },
+        "BALANCE_VALID": {
+          "type": "boolean"
+        },
+        "RECOVERY_VALID": {
+          "type": "boolean",
+          "description": "L5: E12 envelope/robustness AND FULL_EPISODE support continuity QUALIFIED AND post-E12 observation margin satisfied"
+        },
+        "NO_HARD_FAILURE": {
+          "type": "boolean"
+        },
+        "TASK_SUCCESS": {
+          "type": "boolean"
+        },
+        "TASK_SUCCESS_RULE": {
+          "const": "EXECUTION_VALID AND MODEL_STATE_VALID AND EVENT_CHAIN_VALID AND TASK_PERFORMANCE_VALID AND LANDING_VALID AND BALANCE_VALID AND RECOVERY_VALID AND NO_HARD_FAILURE (and RECOVERY_VALID internally requires FULL_EPISODE QUALIFIED)"
+        },
+        "CANDIDATE_CREDIBILITY_VALID": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "L6: provenance + determinism + test validity + owner visual review; owned by later RES; not part of TASK_SUCCESS but required for a release claim"
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "INITIAL_STANDING_COM_Z",
+        "COUNTERMOVEMENT_MIN_COM_Z",
+        "COUNTERMOVEMENT_DEPTH",
+        "PHYSICAL_TAKEOFF_TIME",
+        "FORCE_THRESHOLD_TAKEOFF_TIME",
+        "FORCE_TAKEOFF_LEAD",
+        "TAKEOFF_COM_Z",
+        "TAKEOFF_COM_VZ",
+        "APEX_TIME",
+        "APEX_COM_Z",
+        "COM_APEX_ABOVE_INITIAL_STANDING",
+        "COM_RISE_TAKEOFF_TO_APEX",
+        "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ",
+        "BALLISTIC_HEIGHT_RESIDUAL",
+        "FLIGHT_TIME_HEIGHT",
+        "FORCE_INTEGRATED_COM_DISPLACEMENT",
+        "FORCE_DEFINED_FLIGHT_DURATION",
+        "PHYSICAL_FLIGHT_DURATION",
+        "MAX_LEFT_FOOT_CLEARANCE",
+        "MAX_RIGHT_FOOT_CLEARANCE",
+        "LANDING_FIRST_CONTACT_TIME",
+        "BILATERAL_LANDING_TIME",
+        "LANDING_ASYMMETRY_S",
+        "LANDING_PEAK_FZ",
+        "LANDING_PEAK_FZ_BW",
+        "LOADING_RATE_MAX_SLOPE",
+        "MAX_PENETRATION",
+        "COM_VX_AT_LANDING",
+        "COM_VZ_AT_LANDING",
+        "HY_AT_LANDING",
+        "COM_VX_AT_E10",
+        "COM_VZ_AT_E10",
+        "HY_AT_E10",
+        "COM_VX_AT_E11",
+        "COM_VZ_AT_E11",
+        "COM_SPEED_SAGITTAL_AT_E11",
+        "HY_AT_E11",
+        "ROOT_PITCH_AT_E9",
+        "ROOT_PITCH_AT_E10",
+        "ROOT_PITCH_AT_E11",
+        "TRUNK_PITCH_AT_E9",
+        "TRUNK_PITCH_AT_E10",
+        "TRUNK_PITCH_AT_E11",
+        "ROOT_PITCH_RATE_AT_E9",
+        "ROOT_PITCH_RATE_AT_E10",
+        "ROOT_PITCH_RATE_AT_E11",
+        "TRUNK_PITCH_RATE_AT_E9",
+        "TRUNK_PITCH_RATE_AT_E10",
+        "TRUNK_PITCH_RATE_AT_E11",
+        "SUPPORT_HULL_MARGIN_MIN_LANDING",
+        "SUPPORT_HULL_MARGIN_MIN_RECOVERY",
+        "COP_X",
+        "COP_Y",
+        "COP_VALIDITY",
+        "RECOVERY_READY_TIME",
+        "E12_TIME",
+        "STABLE_HOLD_DURATION",
+        "POST_LANDING_REFLIGHT",
+        "REFLIGHT_RUNS",
+        "FZ_CHATTER_TRANSITIONS",
+        "FALL",
+        "FALL_TIME",
+        "PROHIBITED_CONTACT",
+        "CONTROLLER_HANDOFF_TIME",
+        "CONTROLLER_REGIME_AT_E12_ONSET",
+        "TASK_SUCCESS_COMPONENTS",
+        "MAX_ABS_COM_VX_FIRST_CONTACT_TO_E10",
+        "MAX_ABS_COM_VX_POST_E10",
+        "COM_X_MAX_AFTER_LANDING",
+        "PEAK_ABS_ROOT_PITCH_RATE_LANDING_WINDOW",
+        "PEAK_ABS_TRUNK_PITCH_RATE_LANDING_WINDOW",
+        "PEAK_ABS_HY_LANDING_WINDOW",
+        "FORCE_THRESHOLD_LANDING_TIME",
+        "FIRST_TRANSIENT_FORCE_DROPOUT_TIME",
+        "SUSTAINED_FORCE_OFF_TIME",
+        "SUPPORT_HULL_MARGIN_MIN_CAPTURE",
+        "POST_E12_OBSERVATION_DURATION",
+        "MAX_ABS_COM_VZ_LANDING_WINDOW",
+        "MAX_COM_SPEED_SAGITTAL_CAPTURE_RUN",
+        "MAX_ABS_HY_CAPTURE_RUN"
+      ],
+      "properties": {
+        "INITIAL_STANDING_COM_Z": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM world z at E1 confirmation reference sample [m]"
+        },
+        "COUNTERMOVEMENT_MIN_COM_Z": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "minimum COM world z before physical takeoff [m]"
+        },
+        "COUNTERMOVEMENT_DEPTH": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "INITIAL_STANDING_COM_Z - COUNTERMOVEMENT_MIN_COM_Z [m]"
+        },
+        "PHYSICAL_TAKEOFF_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "E6 physical takeoff first-true time [s]"
+        },
+        "FORCE_THRESHOLD_TAKEOFF_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "force-threshold comparability takeoff [s]"
+        },
+        "FORCE_TAKEOFF_LEAD": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "PHYSICAL_TAKEOFF_TIME - FORCE_THRESHOLD_TAKEOFF_TIME [s] (diagnostic)"
+        },
+        "TAKEOFF_COM_Z": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM world z at physical takeoff [m]"
+        },
+        "TAKEOFF_COM_VZ": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM vertical velocity at physical takeoff [m/s]"
+        },
+        "APEX_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "interpolated apex zero-crossing time [s]"
+        },
+        "APEX_COM_Z": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM world z at apex (absolute; never called a height) [m]"
+        },
+        "COM_APEX_ABOVE_INITIAL_STANDING": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "APEX_COM_Z - INITIAL_STANDING_COM_Z [m] (context, not primary jump height)"
+        },
+        "COM_RISE_TAKEOFF_TO_APEX": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "PRIMARY_CANONICAL_JUMP_HEIGHT = APEX_COM_Z - TAKEOFF_COM_Z [m]"
+        },
+        "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "TAKEOFF_COM_VZ^2/(2g) [m] (cross-check)"
+        },
+        "BALLISTIC_HEIGHT_RESIDUAL": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM_RISE_TAKEOFF_TO_APEX - BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ [m] (consistency)"
+        },
+        "FLIGHT_TIME_HEIGHT": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "g * PHYSICAL_FLIGHT_DURATION^2 / 8 [m] (comparability)"
+        },
+        "FORCE_INTEGRATED_COM_DISPLACEMENT": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "double-integrated force displacement diagnostic [m]"
+        },
+        "FORCE_DEFINED_FLIGHT_DURATION": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "force-threshold flight duration [s]"
+        },
+        "PHYSICAL_FLIGHT_DURATION": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "E9 - E6 physical flight duration [s] (hard-gate input for GENUINE_FLIGHT_DWELL; single class)"
+        },
+        "MAX_LEFT_FOOT_CLEARANCE": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max signed clearance of left foot during flight [m]"
+        },
+        "MAX_RIGHT_FOOT_CLEARANCE": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max signed clearance of right foot during flight [m]"
+        },
+        "LANDING_FIRST_CONTACT_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "geometric first floor contact after flight [s]"
+        },
+        "BILATERAL_LANDING_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "bilateral landing established [s]"
+        },
+        "LANDING_ASYMMETRY_S": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "left-right first-contact time difference [s]"
+        },
+        "LANDING_PEAK_FZ": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "peak Fz_whole in landing window [N]"
+        },
+        "LANDING_PEAK_FZ_BW": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "LANDING_PEAK_FZ / body weight [BW]"
+        },
+        "LOADING_RATE_MAX_SLOPE": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max positive dFz/dt in landing window [N/s]"
+        },
+        "MAX_PENETRATION": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max floor penetration depth [m]"
+        },
+        "COM_VX_AT_LANDING": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM vx at LANDING_FIRST_CONTACT [m/s]"
+        },
+        "COM_VZ_AT_LANDING": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM vz at LANDING_FIRST_CONTACT [m/s]"
+        },
+        "HY_AT_LANDING": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Hy at LANDING_FIRST_CONTACT [kg*m^2/s]"
+        },
+        "COM_VX_AT_E10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM vx at E10 confirmation [m/s]"
+        },
+        "COM_VZ_AT_E10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM vz at E10 confirmation [m/s]"
+        },
+        "HY_AT_E10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Hy at E10 confirmation [kg*m^2/s]"
+        },
+        "COM_VX_AT_E11": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM vx at E11 confirmation [m/s]"
+        },
+        "COM_VZ_AT_E11": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "COM vz at E11 confirmation [m/s]"
+        },
+        "COM_SPEED_SAGITTAL_AT_E11": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "sqrt(vx^2+vz^2) at E11 confirmation [m/s]"
+        },
+        "HY_AT_E11": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Hy at E11 confirmation [kg*m^2/s]"
+        },
+        "ROOT_PITCH_AT_E9": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "signed root pitch at E9 confirmation [rad]"
+        },
+        "ROOT_PITCH_AT_E10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "signed root pitch at E10 confirmation [rad]"
+        },
+        "ROOT_PITCH_AT_E11": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "signed root pitch at E11 confirmation [rad]"
+        },
+        "TRUNK_PITCH_AT_E9": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "signed trunk pitch at E9 confirmation [rad]"
+        },
+        "TRUNK_PITCH_AT_E10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "signed trunk pitch at E10 confirmation [rad]"
+        },
+        "TRUNK_PITCH_AT_E11": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "signed trunk pitch at E11 confirmation [rad]"
+        },
+        "ROOT_PITCH_RATE_AT_E9": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "root pitch rate at E9 confirmation [rad/s]"
+        },
+        "ROOT_PITCH_RATE_AT_E10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "root pitch rate at E10 confirmation [rad/s]"
+        },
+        "ROOT_PITCH_RATE_AT_E11": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "root pitch rate at E11 confirmation [rad/s]"
+        },
+        "TRUNK_PITCH_RATE_AT_E9": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "trunk pitch rate at E9 confirmation [rad/s]"
+        },
+        "TRUNK_PITCH_RATE_AT_E10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "trunk pitch rate at E10 confirmation [rad/s]"
+        },
+        "TRUNK_PITCH_RATE_AT_E11": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "trunk pitch rate at E11 confirmation [rad/s]"
+        },
+        "SUPPORT_HULL_MARGIN_MIN_LANDING": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "min support margin in landing window [m] (diagnostic; no L4 margin gate)"
+        },
+        "SUPPORT_HULL_MARGIN_MIN_RECOVERY": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "min support margin over the recovery window [m] (E12 envelope hard-gate input)"
+        },
+        "COP_X": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number"
+          },
+          "description": "CoP x series or anchor sample [m]"
+        },
+        "COP_Y": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number"
+          },
+          "description": "CoP y series or anchor sample [m]"
+        },
+        "COP_VALIDITY": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "CoP validity at the reported anchor samples; per-foot validities and resultant CoP reported; gate consumes the run-wide validity per the declared threshold"
+        },
+        "RECOVERY_READY_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "first time the recovery-ready state holds [s]"
+        },
+        "E12_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "E12 confirmation time [s]"
+        },
+        "STABLE_HOLD_DURATION": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "confirmed E12 dwell duration [s]"
+        },
+        "POST_LANDING_REFLIGHT": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "true iff any canonical REFLIGHT run (whole Fz < 10 N, K>=4 span) occurs after E9 confirmation; chatter transitions are separate"
+        },
+        "REFLIGHT_RUNS": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "integer"
+          },
+          "description": "run lengths of whole-support force-off events [samples]"
+        },
+        "FZ_CHATTER_TRANSITIONS": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "whole-Fz 10.0 N threshold crossing count (diagnostic; gate limit 8 per RES-57)"
+        },
+        "FALL": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "physical fall occurred"
+        },
+        "FALL_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "first fall contact time [s]"
+        },
+        "PROHIBITED_CONTACT": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "any prohibited/support-substitute contact"
+        },
+        "CONTROLLER_HANDOFF_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "controller regime handoff time, reported separately from E12 [s]"
+        },
+        "CONTROLLER_REGIME_AT_E12_ONSET": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "controller regime label at E12 onset"
+        },
+        "TASK_SUCCESS_COMPONENTS": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "EXECUTION_VALID",
+            "MODEL_STATE_VALID",
+            "EVENT_CHAIN_VALID",
+            "TASK_PERFORMANCE_VALID",
+            "LANDING_VALID",
+            "BALANCE_VALID",
+            "RECOVERY_VALID",
+            "NO_HARD_FAILURE",
+            "TASK_SUCCESS"
+          ],
+          "properties": {
+            "EXECUTION_VALID": {
+              "type": "boolean"
+            },
+            "MODEL_STATE_VALID": {
+              "type": "boolean"
+            },
+            "EVENT_CHAIN_VALID": {
+              "type": "boolean"
+            },
+            "TASK_PERFORMANCE_VALID": {
+              "type": "boolean"
+            },
+            "LANDING_VALID": {
+              "type": "boolean"
+            },
+            "BALANCE_VALID": {
+              "type": "boolean"
+            },
+            "RECOVERY_VALID": {
+              "type": "boolean"
+            },
+            "NO_HARD_FAILURE": {
+              "type": "boolean"
+            },
+            "TASK_SUCCESS": {
+              "type": "boolean"
+            }
+          }
+        },
+        "MAX_ABS_COM_VX_FIRST_CONTACT_TO_E10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max abs(com_vx) over [LANDING_FIRST_CONTACT, E10_confirmation] [m/s] (L4-T9)"
+        },
+        "MAX_ABS_COM_VX_POST_E10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max abs(com_vx) over [E10_confirmation, E11_onset] [m/s] (L4-T8 operand)"
+        },
+        "COM_X_MAX_AFTER_LANDING": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "one-sided forward COM x excursion: max over [LANDING_FIRST_CONTACT, E11_onset] of (com_x(t) - com_x(LANDING_FIRST_CONTACT)) [m] (L4-T8 operand; positive forward)"
+        },
+        "PEAK_ABS_ROOT_PITCH_RATE_LANDING_WINDOW": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max abs(root pitch rate) over [LANDING_FIRST_CONTACT, E10_confirmation] [rad/s] (L4-T10)"
+        },
+        "PEAK_ABS_TRUNK_PITCH_RATE_LANDING_WINDOW": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max abs(trunk pitch rate) over [LANDING_FIRST_CONTACT, E10_confirmation] [rad/s] (L4-T10)"
+        },
+        "PEAK_ABS_HY_LANDING_WINDOW": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max abs(Hy) over [LANDING_FIRST_CONTACT, E10_confirmation] [kg*m^2/s] (L4-T10)"
+        },
+        "FORCE_THRESHOLD_LANDING_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "force-threshold comparability landing time [s]"
+        },
+        "FIRST_TRANSIENT_FORCE_DROPOUT_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "first transient bilateral below-F_thr sample regardless of contact [s]"
+        },
+        "SUSTAINED_FORCE_OFF_TIME": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "first sample of the final uninterrupted sustained below-F_thr bilateral run [s]"
+        },
+        "SUPPORT_HULL_MARGIN_MIN_CAPTURE": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "min support margin over the E11 capture run [m] (M_11 operand)"
+        },
+        "POST_E12_OBSERVATION_DURATION": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "duration observed after E12 confirmation with no fall/reflight and envelope membership [s]; required >= POST_E12_OBSERVATION_MARGIN"
+        },
+        "MAX_ABS_COM_VZ_LANDING_WINDOW": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max abs(com_vz) over [LANDING_FIRST_CONTACT, E10_confirmation] [m/s] (L4-T2 transient operand; point value subsumed by E10 predicate)"
+        },
+        "MAX_COM_SPEED_SAGITTAL_CAPTURE_RUN": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max com_speed_sagittal over the confirmed E11 capture run [m/s] (C_11 operand)"
+        },
+        "MAX_ABS_HY_CAPTURE_RUN": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "max abs(Hy) over the confirmed E11 capture run [kg*m^2/s] (HY_11 operand)"
+        }
+      }
+    },
+    "support_continuity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "SUPPORT_CONTINUITY_SCOPE_RESULTS",
+        "FULL_EPISODE"
+      ],
+      "properties": {
+        "SUPPORT_CONTINUITY_SCOPE_RESULTS": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "SUPPORT_CONTINUITY_SCOPE_ID",
+              "WINDOW_T0",
+              "WINDOW_T1",
+              "RESULT"
+            ],
+            "properties": {
+              "SUPPORT_CONTINUITY_SCOPE_ID": {
+                "enum": [
+                  "SUPPORTED_PHASE",
+                  "PROPULSION",
+                  "TAKEOFF_TRANSITION",
+                  "FLIGHT",
+                  "LANDING_CAPTURE",
+                  "RECOVERY",
+                  "FULL_EPISODE"
+                ]
+              },
+              "WINDOW_T0": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "WINDOW_T1": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "RESULT": {
+                "enum": [
+                  "QUALIFIED",
+                  "NOT_QUALIFIED",
+                  "NOT_EVALUABLE"
+                ]
+              }
+            }
+          }
+        },
+        "FULL_EPISODE": {
+          "enum": [
+            "QUALIFIED",
+            "NOT_QUALIFIED",
+            "NOT_EVALUABLE"
+          ]
+        }
+      }
+    },
+    "hard_gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "GATE",
+          "PASS",
+          "INVALID_OUTCOME_PREVENTED"
+        ],
+        "properties": {
+          "GATE": {
+            "type": "string"
+          },
+          "PASS": {
+            "type": "boolean"
+          },
+          "OBSERVED": {
+            "type": [
+              "number",
+              "string",
+              "boolean",
+              "null"
+            ]
+          },
+          "THRESHOLD": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ]
+          },
+          "PROVENANCE": {
+            "type": "string"
+          },
+          "INVALID_OUTCOME_PREVENTED": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "consistency_gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "GATE",
+          "PASS",
+          "CLASS"
+        ],
+        "properties": {
+          "GATE": {
+            "type": "string"
+          },
+          "PASS": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "OBSERVED": {
+            "type": [
+              "number",
+              "string",
+              "boolean",
+              "null"
+            ]
+          },
+          "CLASS": {
+            "enum": [
+              "CONSISTENCY_GATE",
+              "DIAGNOSTIC"
+            ]
+          },
+          "NOTE": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "owner_decisions_pending": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "OWNER_DECISION",
+          "STATUS"
+        ],
+        "properties": {
+          "OWNER_DECISION": {
+            "type": "string"
+          },
+          "STATUS": {
+            "type": "string"
+          },
+          "AFFECTED_GATES": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-metric-classes": {
+    "HARD_GATE": [
+      "COM_RISE_TAKEOFF_TO_APEX",
+      "PHYSICAL_TAKEOFF_TIME",
+      "PHYSICAL_FLIGHT_DURATION",
+      "LANDING_PEAK_FZ_BW",
+      "MAX_PENETRATION",
+      "COM_VX_AT_E10",
+      "COM_VZ_AT_E10",
+      "HY_AT_E10",
+      "ROOT_PITCH_AT_E10",
+      "TRUNK_PITCH_AT_E10",
+      "ROOT_PITCH_RATE_AT_E10",
+      "TRUNK_PITCH_RATE_AT_E10",
+      "COM_SPEED_SAGITTAL_AT_E11",
+      "HY_AT_E11",
+      "COP_VALIDITY",
+      "RECOVERY_READY_TIME",
+      "E12_TIME",
+      "STABLE_HOLD_DURATION",
+      "POST_LANDING_REFLIGHT",
+      "FALL",
+      "PROHIBITED_CONTACT",
+      "MAX_ABS_COM_VX_FIRST_CONTACT_TO_E10",
+      "MAX_ABS_COM_VX_POST_E10",
+      "COM_X_MAX_AFTER_LANDING",
+      "PEAK_ABS_ROOT_PITCH_RATE_LANDING_WINDOW",
+      "PEAK_ABS_TRUNK_PITCH_RATE_LANDING_WINDOW",
+      "PEAK_ABS_HY_LANDING_WINDOW",
+      "SUPPORT_HULL_MARGIN_MIN_CAPTURE",
+      "POST_E12_OBSERVATION_DURATION",
+      "SUPPORT_HULL_MARGIN_MIN_RECOVERY"
+    ],
+    "CONSISTENCY_GATE": [
+      "BALLISTIC_HEIGHT_RESIDUAL"
+    ],
+    "DIAGNOSTIC": [
+      "FORCE_THRESHOLD_TAKEOFF_TIME",
+      "FORCE_TAKEOFF_LEAD",
+      "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ",
+      "FLIGHT_TIME_HEIGHT",
+      "FORCE_INTEGRATED_COM_DISPLACEMENT",
+      "FORCE_DEFINED_FLIGHT_DURATION",
+      "MAX_LEFT_FOOT_CLEARANCE",
+      "MAX_RIGHT_FOOT_CLEARANCE",
+      "LANDING_FIRST_CONTACT_TIME",
+      "BILATERAL_LANDING_TIME",
+      "LANDING_ASYMMETRY_S",
+      "LANDING_PEAK_FZ",
+      "LOADING_RATE_MAX_SLOPE",
+      "COM_VX_AT_LANDING",
+      "COM_VZ_AT_LANDING",
+      "HY_AT_LANDING",
+      "COM_VX_AT_E11",
+      "COM_VZ_AT_E11",
+      "ROOT_PITCH_AT_E9",
+      "ROOT_PITCH_AT_E11",
+      "TRUNK_PITCH_AT_E9",
+      "TRUNK_PITCH_AT_E11",
+      "ROOT_PITCH_RATE_AT_E9",
+      "ROOT_PITCH_RATE_AT_E11",
+      "TRUNK_PITCH_RATE_AT_E9",
+      "TRUNK_PITCH_RATE_AT_E11",
+      "REFLIGHT_RUNS",
+      "FZ_CHATTER_TRANSITIONS",
+      "SUPPORT_HULL_MARGIN_MIN_LANDING",
+      "FORCE_THRESHOLD_LANDING_TIME",
+      "FIRST_TRANSIENT_FORCE_DROPOUT_TIME",
+      "SUSTAINED_FORCE_OFF_TIME",
+      "MAX_ABS_COM_VZ_LANDING_WINDOW",
+      "MAX_COM_SPEED_SAGITTAL_CAPTURE_RUN",
+      "MAX_ABS_HY_CAPTURE_RUN"
+    ],
+    "REPORT_ONLY": [
+      "INITIAL_STANDING_COM_Z",
+      "COUNTERMOVEMENT_MIN_COM_Z",
+      "COUNTERMOVEMENT_DEPTH",
+      "TAKEOFF_COM_Z",
+      "TAKEOFF_COM_VZ",
+      "APEX_TIME",
+      "APEX_COM_Z",
+      "COM_APEX_ABOVE_INITIAL_STANDING",
+      "COP_X",
+      "COP_Y",
+      "FALL_TIME",
+      "CONTROLLER_HANDOFF_TIME",
+      "CONTROLLER_REGIME_AT_E12_ONSET",
+      "TASK_SUCCESS_COMPONENTS"
+    ]
+  },
+  "x-retention-rule": "Every computed metric in this schema is retained in the canonical output; no important performance variable may be computed and then discarded.",
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "properties": {
+              "TASK_SUCCESS": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "properties": {
+              "EXECUTION_VALID": {
+                "const": true
+              },
+              "MODEL_STATE_VALID": {
+                "const": true
+              },
+              "EVENT_CHAIN_VALID": {
+                "const": true
+              },
+              "TASK_PERFORMANCE_VALID": {
+                "const": true
+              },
+              "LANDING_VALID": {
+                "const": true
+              },
+              "BALANCE_VALID": {
+                "const": true
+              },
+              "RECOVERY_VALID": {
+                "const": true
+              },
+              "NO_HARD_FAILURE": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "properties": {
+              "TASK_SUCCESS": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "support_continuity": {
+            "properties": {
+              "FULL_EPISODE": {
+                "const": "QUALIFIED"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "properties": {
+              "TASK_SUCCESS": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "owner_decisions_pending": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "STATUS": {
+                  "const": "CLOSED"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "x-open-decision-rule": "while any owner decision affecting a component is open, that component must be false/unresolved; TASK_SUCCESS may never be true",
+  "x-full-episode-rule": "the top-level support_continuity.FULL_EPISODE must equal the FULL_EPISODE entry in SUPPORT_CONTINUITY_SCOPE_RESULTS; TASK_SUCCESS requires QUALIFIED",
+  "x-reflight-topic": "REFLIGHT uses SAMPLE_COUNT semantics (N_true >= 4 consecutive samples, span 0.375 ms), preserving RES-57 frozen detection"
+}

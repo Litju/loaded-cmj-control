@@ -1,0 +1,507 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "RES82-PERFORMANCE-METRIC-CONTRACT",
+  "mission": "RES82_SUCCESSOR_LOADED_CMJ_SCIENTIFIC_TASK_CONTRACT_001",
+  "linear_issue": "RES-82",
+  "status": "STRUCTURALLY_FROZEN",
+  "closed_defects": [
+    "CRIT-003",
+    "MED-002",
+    "MED-011"
+  ],
+  "jump_height_definitions": [
+    {
+      "ID": "A",
+      "NAME": "COM_RISE_TAKEOFF_TO_APEX",
+      "SYMBOL": "h_direct",
+      "DEFINITION": "COM_Z(apex) - COM_Z(physical_takeoff)",
+      "UNITS": "m",
+      "STATUS": "PRIMARY_CANONICAL_JUMP_HEIGHT",
+      "RATIONALE": "Direct model-truth displacement; no force threshold, no integration drift, no flight-time assumption"
+    },
+    {
+      "ID": "B",
+      "NAME": "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ",
+      "SYMBOL": "h_tov",
+      "DEFINITION": "vz(physical_takeoff)^2 / (2g)",
+      "UNITS": "m",
+      "STATUS": "SECONDARY_CROSS_CHECK",
+      "RATIONALE": "Impulse-momentum-equivalent estimate; differs from A only by internal segment motion during flight"
+    },
+    {
+      "ID": "C",
+      "NAME": "FLIGHT_TIME_HEIGHT",
+      "SYMBOL": "h_ft",
+      "DEFINITION": "g * T_flight_physical^2 / 8 with T_flight_physical = LANDING_FIRST_CONTACT_TIME - PHYSICAL_TAKEOFF_TIME; g = 9.81 m/s^2 (project constant)",
+      "UNITS": "m",
+      "STATUS": "EXPERIMENTAL_COMPARABILITY_METRIC_REPORT_ONLY",
+      "RATIONALE": "Assumes equal COM heights at takeoff and landing and no posture asymmetry; retained only for comparison with flight-time-method studies"
+    },
+    {
+      "ID": "D",
+      "NAME": "COM_APEX_ABOVE_INITIAL_STANDING",
+      "SYMBOL": "h_standing",
+      "DEFINITION": "COM_Z(apex) - COM_Z(initial_standing)",
+      "UNITS": "m",
+      "STATUS": "SECONDARY_CONTEXT_METRIC",
+      "RATIONALE": "Standing-to-apex definition family; never interchangeable with A"
+    },
+    {
+      "ID": "E",
+      "NAME": "FORCE_INTEGRATED_COM_DISPLACEMENT",
+      "SYMBOL": null,
+      "DEFINITION": "double integration of (Fz_whole - m*g)/m from initial standing to apex",
+      "UNITS": "m",
+      "STATUS": "EXPERIMENTAL_COMPARABILITY_METRIC_REPORT_ONLY",
+      "RATIONALE": "Experimental double-integration equivalent; verification diagnostic in simulation"
+    }
+  ],
+  "naming_rules": {
+    "bare_jump_height": "PROHIBITED",
+    "apex_com_z": "absolute world coordinate, never called a height",
+    "required_qualifiers": [
+      "COM_RISE_TAKEOFF_TO_APEX",
+      "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ",
+      "FLIGHT_TIME_HEIGHT",
+      "COM_APEX_ABOVE_INITIAL_STANDING",
+      "FORCE_INTEGRATED_COM_DISPLACEMENT"
+    ],
+    "retired_conflation": "0.0363 m and 0.0752 m may never share one jump-height label (ERR-001)"
+  },
+  "primary_performance_gate": {
+    "GATE_ID": "PRIMARY_PERFORMANCE_GATE",
+    "VARIABLE": "COM_RISE_TAKEOFF_TO_APEX",
+    "COMPARATOR": ">=",
+    "THRESHOLD": {
+      "STATUS": "OWNER_DECISION_REQUIRED",
+      "OWNER_DECISION": "OD-01",
+      "VALUE": null,
+      "CANDIDATE_RECOMMENDED": 0.15,
+      "CANDIDATE_RECOMMENDED_LABEL": "PF-1"
+    },
+    "CANDIDATES": [
+      {
+        "LABEL": "PF-1",
+        "VALUE_M": 0.15,
+        "RECOMMENDED": true,
+        "BASIS": "Kraska 2009 PMID 20029097: strong-group 20 kg CMJ 27.57 +/- 8.64 cm (mean-SD ~18.9 cm); 0 kg CMJ group means 28.3-33.5 cm; weak-stratum 20 kg mean not directly reported; derived estimate ~19-20 cm by applying the weak group's larger SJ percent decrease (~30.4% vs 17.8%); 0.150 m is ~20-25% below that derived estimate and ~2x R001's 0.0752 m; CROSS-FAMILY LIMITATION: human values are flight-time JH, gate is direct COM displacement (plausibility band, not calibration)",
+        "FALSE_PASS_PREVENTED": "trivial hop, force-threshold artifact, 3.6-7.5 cm hop",
+        "TRADEOFF": "conservative task-plausibility floor, not a performance target"
+      },
+      {
+        "LABEL": "PF-2",
+        "VALUE_M": 0.2,
+        "RECOMMENDED": false,
+        "BASIS": "near the derived weak-stratum 20 kg estimate (~19-20 cm)",
+        "FALSE_PASS_PREVENTED": "sub-loaded-scale jumps",
+        "TRADEOFF": "may exceed rebuilt Plant/controller capability; converts task floor into performance target"
+      },
+      {
+        "LABEL": "PF-3",
+        "VALUE_M": 0.1,
+        "RECOMMENDED": false,
+        "BASIS": "structural false-pass floor only",
+        "FALSE_PASS_PREVENTED": "R001-scale hop (0.075 m)",
+        "TRADEOFF": "12-15 cm hop would qualify; weak scientific statement"
+      },
+      {
+        "LABEL": "PF-4",
+        "VALUE_M": null,
+        "RECOMMENDED": false,
+        "BASIS": "no numeric floor frozen; numeric deferred until after RES-83 capability known",
+        "FALSE_PASS_PREVENTED": "none until resolved",
+        "TRADEOFF": "TASK_PERFORMANCE_VALID unresolved; no qualification possible"
+      }
+    ],
+    "INVALID_OUTCOME_PREVENTED": "trivial hop qualifying as a loaded countermovement jump"
+  },
+  "physics_consistency_gates": [
+    {
+      "GATE_ID": "CG-01",
+      "NAME": "FLIGHT_ACCELERATION_CONSISTENCY",
+      "DEFINITION": "In the physical flight interval, mean(d(com_vz)/dt) + g within +/- epsilon_acc, excluding samples adjacent to contact",
+      "CLASS": "CONSISTENCY_GATE",
+      "THRESHOLD": {
+        "STATUS": "NUMERICAL_TOLERANCE_DEFERRED_TO_RES89",
+        "VALUE": null
+      },
+      "PROVENANCE": "PHYSICS_IDENTITY + NUMERICAL_TOLERANCE"
+    },
+    {
+      "GATE_ID": "CG-02",
+      "NAME": "BALLISTIC_HEIGHT_RESIDUAL",
+      "DEFINITION": "residual = h_direct - h_tov over the certified physical flight interval; because the only external force in flight is gravity, the whole-body COM is ballistic and the residual is numerical only",
+      "CLASS": "CONSISTENCY_GATE",
+      "THRESHOLD": {
+        "STATUS": "NUMERICAL_TOLERANCE",
+        "VALUE": 0.001,
+        "COMPARATOR": "relative",
+        "NOTE": "tighten with RES-89 solver data"
+      },
+      "PROVENANCE": "PHYSICS_IDENTITY + NUMERICAL_TOLERANCE"
+    },
+    {
+      "GATE_ID": "CG-03",
+      "NAME": "TAKEOFF_TRANSITION_WHIP",
+      "DEFINITION": "max abs(root_pitch_rate) over [E5_onset, E6+0.050 s] <= R_WHIP; max abs(trunk_pitch_rate) <= R_WHIP_TRUNK",
+      "CLASS": "HARD_GATE",
+      "THRESHOLD": {
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-06",
+        "VALUE": null,
+        "CANDIDATE_R_WHIP_RADPS": 5.0,
+        "R001_OBSERVED_RADPS": 9.6837,
+        "CANDIDATE_R_WHIP_TRUNK_RADPS": 5.0
+      },
+      "PROVENANCE": "PROJECT_HISTORICAL_EVIDENCE + ENGINEERING_INFERENCE (model-dependent)",
+      "INVALID_OUTCOME_PREVENTED": "pitched/whipping takeoff non-human transient"
+    },
+    {
+      "GATE_ID": "CG-04",
+      "NAME": "EXTENSION_STATE_AT_TAKEOFF",
+      "DEFINITION": "At physical takeoff, hip/knee/ankle configuration lies inside the RES-83-declared robust extension set",
+      "CLASS": "HARD_GATE",
+      "THRESHOLD": {
+        "STATUS": "MODEL_DEPENDENT_DEFERRED",
+        "VALUE": null
+      },
+      "PROVENANCE": "MODEL_DEPENDENT_DEFERRED (RES-83)",
+      "INVALID_OUTCOME_PREVENTED": "anatomically invalid takeoff configuration (reverse knee / hip extension)"
+    },
+    {
+      "GATE_ID": "CG-05",
+      "NAME": "FORCE_PHYSICAL_TAKEOFF_ORDER",
+      "DEFINITION": "FORCE_TAKEOFF_LEAD = t_physical_takeoff - t_force_threshold_takeoff; reported, no fence",
+      "CLASS": "DIAGNOSTIC",
+      "THRESHOLD": {
+        "STATUS": "N/A",
+        "VALUE": null
+      },
+      "PROVENANCE": "MEASUREMENT"
+    },
+    {
+      "GATE_ID": "CG-06",
+      "NAME": "FLIGHT_TIME_HEIGHT_DIFFERENCE",
+      "DEFINITION": "h_ft - h_direct; reported",
+      "CLASS": "DIAGNOSTIC",
+      "THRESHOLD": {
+        "STATUS": "N/A",
+        "VALUE": null
+      },
+      "PROVENANCE": "MEASUREMENT_COMPARABILITY"
+    }
+  ],
+  "minimum_physical_flight_validity": {
+    "REQUIREMENTS": [
+      "E7 confirms with the declared dwell (OD-03)",
+      "APEX lies strictly inside the physical-flight interval (E8)",
+      "physical flight interval bounded by E6 and E9 contains no foot-floor contact rows",
+      "no force-threshold quantity participates in physical flight definition"
+    ]
+  },
+  "metric_classes": [
+    "HARD_GATE",
+    "CONSISTENCY_GATE",
+    "DIAGNOSTIC",
+    "REPORT_ONLY"
+  ],
+  "hard_gate_catalog": [
+    {
+      "GATE": "FINITE_STATE",
+      "VARIABLE": "all state and measurement values",
+      "DEFINITION": "every declared value is finite at every sample",
+      "UNITS": "boolean",
+      "THRESHOLD_STATUS": "FROZEN",
+      "THRESHOLD_VALUE": true,
+      "PROVENANCE": "PHYSICS_IDENTITY",
+      "AFFECTED_LAYER": "L1",
+      "INVALID_OUTCOME_PREVENTED": "non-finite state posing as a trajectory"
+    },
+    {
+      "GATE": "EXECUTION_COMPLETED",
+      "VARIABLE": "runtime completion status",
+      "DEFINITION": "canonical runtime reaches the declared episode horizon without fault",
+      "UNITS": "boolean",
+      "THRESHOLD_STATUS": "FROZEN",
+      "THRESHOLD_VALUE": true,
+      "PROVENANCE": "NUMERICAL_TOLERANCE",
+      "AFFECTED_LAYER": "L0",
+      "INVALID_OUTCOME_PREVENTED": "truncated run posing as a completed task"
+    },
+    {
+      "GATE": "HORIZON_SUFFICIENT",
+      "VARIABLE": "episode horizon",
+      "DEFINITION": "horizon covers E12 confirmation plus POST_E12_OBSERVATION_MARGIN (OD-13 candidate 0.250 s) or the declared termination",
+      "UNITS": "s",
+      "THRESHOLD_STATUS": "MODEL_DEPENDENT_DEFERRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "NUMERICAL_TOLERANCE",
+      "AFFECTED_LAYER": "L0",
+      "INVALID_OUTCOME_PREVENTED": "success declared before the recovery dwell could elapse"
+    },
+    {
+      "GATE": "NO_FALL_CONTACT",
+      "VARIABLE": "fall_contact",
+      "DEFINITION": "no fall-shell collision geom loads the floor during the episode",
+      "UNITS": "boolean",
+      "THRESHOLD_STATUS": "FROZEN",
+      "THRESHOLD_VALUE": false,
+      "PROVENANCE": "PROJECT_HARD_RULE",
+      "AFFECTED_LAYER": "L1",
+      "INVALID_OUTCOME_PREVENTED": "standing/landing on a fall shell"
+    },
+    {
+      "GATE": "NO_PROHIBITED_CONTACT",
+      "VARIABLE": "prohibited_contact",
+      "DEFINITION": "no non-plantar non-fall geom supports load",
+      "UNITS": "boolean",
+      "THRESHOLD_STATUS": "FROZEN",
+      "THRESHOLD_VALUE": false,
+      "PROVENANCE": "PROJECT_HARD_RULE",
+      "AFFECTED_LAYER": "L1",
+      "INVALID_OUTCOME_PREVENTED": "support substitutes (load, torso, limb shells)"
+    },
+    {
+      "GATE": "PENETRATION_MAX",
+      "VARIABLE": "MAX_PENETRATION",
+      "DEFINITION": "maximum floor penetration of any body point",
+      "UNITS": "m",
+      "THRESHOLD_STATUS": "OWNER_REAPPROVAL_OD04",
+      "THRESHOLD_VALUE": 0.01,
+      "PROVENANCE": "PROJECT_HISTORICAL_AUTHORITY",
+      "AFFECTED_LAYER": "L1",
+      "INVALID_OUTCOME_PREVENTED": "sinking through the floor beyond declared tolerance"
+    },
+    {
+      "GATE": "NO_ARTIFICIAL_SUPPORT",
+      "VARIABLE": "artificial_support (forces and state/integration overrides)",
+      "DEFINITION": "no external support force and no state/integration override (velocity clamp, position injection, integration bypass) outside the Plant",
+      "UNITS": "boolean",
+      "THRESHOLD_STATUS": "FROZEN",
+      "THRESHOLD_VALUE": false,
+      "PROVENANCE": "PROJECT_HARD_RULE",
+      "AFFECTED_LAYER": "L1",
+      "INVALID_OUTCOME_PREVENTED": "external support or state manipulation not in the Plant (freeze exploits)"
+    },
+    {
+      "GATE": "JOINT_LIMITS_RESPECTED",
+      "VARIABLE": "joint configuration",
+      "DEFINITION": "joints remain inside the RES-83-declared anatomical ranges",
+      "UNITS": "rad",
+      "THRESHOLD_STATUS": "MODEL_DEPENDENT_DEFERRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "MODEL_DEPENDENT_DEFERRED",
+      "AFFECTED_LAYER": "L1",
+      "INVALID_OUTCOME_PREVENTED": "anatomically invalid joint configurations"
+    },
+    {
+      "GATE": "ACTUATOR_BOUNDS_RESPECTED",
+      "VARIABLE": "actuator command",
+      "DEFINITION": "commands inside declared actuator limits",
+      "UNITS": "normalized/[-1,1] or Nm",
+      "THRESHOLD_STATUS": "MODEL_DEPENDENT_DEFERRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "MODEL_DEPENDENT_DEFERRED",
+      "AFFECTED_LAYER": "L1",
+      "INVALID_OUTCOME_PREVENTED": "commands outside declared actuator limits"
+    },
+    {
+      "GATE": "PHYSICAL_TAKEOFF_DEFINED",
+      "VARIABLE": "E6 predicate",
+      "DEFINITION": "physical takeover predicate (contact-free + clearance + upward COM) satisfied",
+      "UNITS": "boolean",
+      "THRESHOLD_STATUS": "STRUCTURE_FROZEN_NUMERIC_OD02",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "PHYSICS_IDENTITY + OWNER_TASK_DECISION",
+      "AFFECTED_LAYER": "L2",
+      "INVALID_OUTCOME_PREVENTED": "force-threshold artifact declared as takeoff"
+    },
+    {
+      "GATE": "GENUINE_FLIGHT_DWELL",
+      "VARIABLE": "E7 dwell",
+      "DEFINITION": "sustained physical no-contact + clearance for the declared dwell",
+      "UNITS": "s",
+      "THRESHOLD_STATUS": "OWNER_DECISION_REQUIRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "OWNER_TASK_DECISION",
+      "AFFECTED_LAYER": "L2",
+      "INVALID_OUTCOME_PREVENTED": "single-sample force dropout declared as flight"
+    },
+    {
+      "GATE": "APEX_IN_FLIGHT",
+      "VARIABLE": "E8 crossing",
+      "DEFINITION": "COM vz zero-crossing strictly inside physical flight",
+      "UNITS": "boolean",
+      "THRESHOLD_STATUS": "FROZEN",
+      "THRESHOLD_VALUE": true,
+      "PROVENANCE": "PHYSICS_IDENTITY",
+      "AFFECTED_LAYER": "L2",
+      "INVALID_OUTCOME_PREVENTED": "contact-phase zero-crossing declared as apex"
+    },
+    {
+      "GATE": "TAKEOFF_TRANSITION_WHIP",
+      "VARIABLE": "max abs(root_pitch_rate)",
+      "DEFINITION": "peak root/trunk pitch rate over the takeoff transition window",
+      "UNITS": "rad/s",
+      "THRESHOLD_STATUS": "OWNER_DECISION_REQUIRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "MODEL_DEPENDENT_DEFERRED + OWNER_TASK_DECISION",
+      "AFFECTED_LAYER": "L2/L3",
+      "INVALID_OUTCOME_PREVENTED": "pitched/whipping takeoff"
+    },
+    {
+      "GATE": "EXTENSION_STATE_AT_TAKEOFF",
+      "VARIABLE": "takeoff joint configuration",
+      "DEFINITION": "hip/knee/ankle inside RES-83 robust extension set",
+      "UNITS": "rad",
+      "THRESHOLD_STATUS": "MODEL_DEPENDENT_DEFERRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "MODEL_DEPENDENT_DEFERRED",
+      "AFFECTED_LAYER": "L2/L3",
+      "INVALID_OUTCOME_PREVENTED": "anatomically invalid takeoff configuration"
+    },
+    {
+      "GATE": "PRIMARY_PERFORMANCE_GATE",
+      "VARIABLE": "COM_RISE_TAKEOFF_TO_APEX",
+      "DEFINITION": "direct COM rise from physical takeoff to apex",
+      "UNITS": "m",
+      "THRESHOLD_STATUS": "OWNER_DECISION_REQUIRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "LITERATURE_INFORMED + OWNER_TASK_DECISION",
+      "AFFECTED_LAYER": "L3",
+      "INVALID_OUTCOME_PREVENTED": "trivial hop qualifying as a loaded countermovement jump"
+    },
+    {
+      "GATE": "BILATERAL_LANDING",
+      "VARIABLE": "bilateral landing establishment time",
+      "DEFINITION": "both feet loaded within the declared establishment dwell",
+      "UNITS": "s",
+      "THRESHOLD_STATUS": "OWNER_DECISION_REQUIRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "OWNER_TASK_DECISION",
+      "AFFECTED_LAYER": "L4",
+      "INVALID_OUTCOME_PREVENTED": "single-foot or foot-avoidance landing"
+    },
+    {
+      "GATE": "LANDING_BOUNDS",
+      "VARIABLE": "whole-body landing state vector",
+      "DEFINITION": "L4-T1..T8 bounds including behavioral momentum capture",
+      "UNITS": "mixed (m/s, kg*m^2/s, rad, rad/s, m)",
+      "THRESHOLD_STATUS": "OWNER_DECISION_REQUIRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "OWNER_TASK_DECISION",
+      "AFFECTED_LAYER": "L4",
+      "INVALID_OUTCOME_PREVENTED": "forward lunge / pitched landing arrested only vertically"
+    },
+    {
+      "GATE": "NO_POST_LANDING_REFLIGHT",
+      "VARIABLE": "reflight, chatter transitions",
+      "DEFINITION": "no reflight beyond approved chatter after landing",
+      "UNITS": "boolean/count",
+      "THRESHOLD_STATUS": "FROZEN_PROJECT_AUTHORITY",
+      "THRESHOLD_VALUE": {
+        "reflight": false,
+        "max_chatter_transitions": 8
+      },
+      "PROVENANCE": "PROJECT_HISTORICAL_AUTHORITY",
+      "AFFECTED_LAYER": "L4/L5",
+      "INVALID_OUTCOME_PREVENTED": "support loss after landing beyond approved chatter"
+    },
+    {
+      "GATE": "BALANCE_CAPTURE_BOUNDS",
+      "VARIABLE": "com_speed_sagittal, abs(Hy), support_margin",
+      "DEFINITION": "E11 capture bounds",
+      "UNITS": "m/s, kg*m^2/s, m",
+      "THRESHOLD_STATUS": "OWNER_DECISION_REQUIRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "OWNER_TASK_DECISION",
+      "AFFECTED_LAYER": "L5",
+      "INVALID_OUTCOME_PREVENTED": "vertically stopped declared as captured"
+    },
+    {
+      "GATE": "STABLE_STANDING_ENVELOPE",
+      "VARIABLE": "standing_envelope membership",
+      "DEFINITION": "robust physical standing predicate calibrated by RES-87",
+      "UNITS": "boolean",
+      "THRESHOLD_STATUS": "MODEL_DEPENDENT_DEFERRED",
+      "THRESHOLD_VALUE": null,
+      "PROVENANCE": "MODEL_DEPENDENT_DEFERRED",
+      "AFFECTED_LAYER": "L5",
+      "INVALID_OUTCOME_PREVENTED": "micron-overfit or brittle standing"
+    },
+    {
+      "GATE": "STABLE_HOLD_DURATION",
+      "VARIABLE": "E12 dwell",
+      "DEFINITION": "sustained standing-envelope membership",
+      "UNITS": "s",
+      "THRESHOLD_STATUS": "FROZEN",
+      "THRESHOLD_VALUE": 0.5,
+      "PROVENANCE": "OWNER_TASK_DECISION",
+      "AFFECTED_LAYER": "L5",
+      "INVALID_OUTCOME_PREVENTED": "momentary standing instant declared as recovery"
+    }
+  ],
+  "diagnostics_never_gate": [
+    "FORCE_THRESHOLD_TAKEOFF_TIME",
+    "FORCE_THRESHOLD_LANDING_TIME",
+    "FORCE_DEFINED_FLIGHT_DURATION",
+    "FORCE_TAKEOFF_LEAD",
+    "FLIGHT_TIME_HEIGHT",
+    "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ",
+    "FORCE_INTEGRATED_COM_DISPLACEMENT",
+    "LANDING_PEAK_FZ",
+    "LOADING_RATE_MAX_SLOPE",
+    "FZ_CHATTER_TRANSITIONS",
+    "REFLIGHT_RUNS",
+    "COP_EXCURSION",
+    "MAX_LEFT_FOOT_CLEARANCE",
+    "MAX_RIGHT_FOOT_CLEARANCE",
+    "COM_X_MAX_AFTER_LANDING",
+    "COM_VX_PEAK_AFTER_TOUCHDOWN",
+    "HY_TIMELINE",
+    "ROOT_TRUNK_PITCH_TIMELINE",
+    "CONTROLLER_REGIME_TIMELINE",
+    "CONTROLLER_HANDOFF_TIME"
+  ],
+  "retired_naming_audit": {
+    "apex_height_alias": "APEX_COM_Z absolute coordinate; rise reported as COM_RISE_TAKEOFF_TO_APEX",
+    "bare_jump_height": "prohibited",
+    "balance_capture_com_speed_mps": "retired; successor quantity com_speed_sagittal = sqrt(vx^2+vz^2)",
+    "support_continuity_pass_on_slice": "retired; scoped QUALIFIED/NOT_QUALIFIED with SUPPORT_CONTINUITY_SCOPE_ID",
+    "loading_rate_peak_over_time": "retired; LOADING_RATE_MAX_SLOPE is the max slope of Fz(t)",
+    "unqualified_takeoff": "retired; PHYSICAL_TAKEOFF or FORCE_THRESHOLD_TAKEOFF required"
+  },
+  "owner_decisions_referenced": [
+    "OD-01",
+    "OD-02",
+    "OD-03",
+    "OD-04",
+    "OD-05",
+    "OD-06",
+    "OD-07",
+    "OD-09",
+    "OD-10"
+  ],
+  "provenance_class_map": {
+    "PROJECT_HARD_RULE": "OWNER_TASK_DECISION",
+    "PROJECT_HISTORICAL_AUTHORITY": "OWNER_TASK_DECISION",
+    "PROJECT_HISTORICAL_HARD_RULE_CANDIDATE_OD04": "OWNER_TASK_DECISION",
+    "PROJECT_AUTHORITY_SUPPORT_CONTINUITY": "OWNER_TASK_DECISION",
+    "TASK_OD10": "OWNER_TASK_DECISION",
+    "ENGINEERING_INFERENCE": "LITERATURE_INFORMED_OR_OWNER_TASK_DECISION",
+    "MEASUREMENT": "NO_NUMERIC_THRESHOLD_DIAGNOSTIC",
+    "PHYSICS_IDENTITY": "PHYSICS_IDENTITY",
+    "NUMERICAL_TOLERANCE": "NUMERICAL_TOLERANCE",
+    "MODEL_DEPENDENT_DEFERRED": "MODEL_DEPENDENT_DEFERRED",
+    "OWNER_TASK_DECISION": "OWNER_TASK_DECISION",
+    "LITERATURE_INFORMED": "LITERATURE_INFORMED",
+    "PHYSICS_IDENTITY + NUMERICAL_TOLERANCE": "PHYSICS_IDENTITY_AND_NUMERICAL_TOLERANCE",
+    "MODEL_DEPENDENT_DEFERRED + OWNER_TASK_DECISION": "MODEL_DEPENDENT_DEFERRED",
+    "LITERATURE_INFORMED + OWNER_TASK_DECISION": "LITERATURE_INFORMED_AND_OWNER_TASK_DECISION",
+    "PROJECT_EVENT_CONTRACT": "OWNER_TASK_DECISION",
+    "PROVENANCE_CLASS_MAP_NOTE": "numeric thresholds must map to exactly one of the six declared classes; project labels are source labels mapped here",
+    "PHYSICS_IDENTITY + OWNER_TASK_DECISION": "PHYSICS_IDENTITY_AND_OWNER_TASK_DECISION",
+    "PHYSICS_EVENT_CONTRACT": "OWNER_TASK_DECISION",
+    "PROJECT_HISTORICAL_AUTHORITY_CANDIDATE_OD04": "OWNER_TASK_DECISION"
+  }
+}

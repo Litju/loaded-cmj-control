@@ -1,0 +1,260 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "RES82-DWELL-SEMANTICS",
+  "mission": "RES82_SUCCESSOR_LOADED_CMJ_SCIENTIFIC_TASK_CONTRACT_001",
+  "linear_issue": "RES-82",
+  "status": "FROZEN",
+  "closed_defects": [
+    "MED-001"
+  ],
+  "physics_timestep_s": 0.000125,
+  "normative_convention": {
+    "DWELL_TYPE": "PHYSICAL_TIME",
+    "definition": "elapsed_time(i,j) = t[j] - t[i] == K * dt with K = j - i; confirmed iff K >= K_D where K_D = ceil(D / dt)",
+    "comparison_domain": "integer sample indices",
+    "float_time_role": "reporting_only",
+    "boundary_inclusivity": "predicate true at every sample from i through i+K_D inclusive",
+    "ONSET_SAMPLE": "i",
+    "FIRST_TRUE_TIME": "t[i]",
+    "CONFIRMATION_SAMPLE": "i + K_D",
+    "CONFIRMATION_TIME": "t[i + K_D]",
+    "occurred_at_equals": "FIRST_TRUE_TIME",
+    "confirmed_at_equals": "CONFIRMATION_TIME",
+    "K_D_derivation": "K_D is an integer constant from the exact ratio (K_D = D_ns / 125); runtime ceil(D/dt) on floating values is prohibited",
+    "K_D_invariant": "(K_D - 1)*dt < D <= K_D*dt"
+  },
+  "dwell_types": {
+    "NONE": "instantaneous latch at first true sample; ONSET_SAMPLE == CONFIRMATION_SAMPLE",
+    "PHYSICAL_TIME": "sustained predicate, elapsed time requirement D (normative default)",
+    "SAMPLE_COUNT": "sustained predicate, declared consecutive true-sample count N (explicit per event only)"
+  },
+  "retired_erroneous_conventions": [
+    "sample-inclusive count N_true = j - i + 1 confirmed against K_D (confirms one sample early; MED-001)",
+    "distance-minus-one K >= K_D - 1 (equivalent early confirmation)",
+    "floating accumulated t[j]-t[i] comparison without declared tolerance",
+    "dwell reconstruction on a control-rate grid instead of the physics grid"
+  ],
+  "run_reset_rule": "a single false sample ends the run; a later true sample starts a fresh candidate with no carryover",
+  "two_phase_rule": {
+    "start": "first sample satisfying ONSET_PREDICATE",
+    "continuation": "SUSTAIN_PREDICATE at every subsequent sample",
+    "requirement": "ONSET_PREDICATE samples must also satisfy SUSTAIN_PREDICATE; onset predicates are defined strictly stronger",
+    "dwell_arithmetic": "unchanged"
+  },
+  "worked_examples_dt_0_000125": [
+    {
+      "D_s": 0.005,
+      "K_D": 40,
+      "i": 100,
+      "FIRST_TRUE_TIME_s": 0.0125,
+      "CONFIRMATION_SAMPLE": 140,
+      "CONFIRMATION_TIME_s": 0.0175,
+      "elapsed_s": 0.005
+    },
+    {
+      "D_s": 0.01,
+      "K_D": 80,
+      "i": 1000,
+      "FIRST_TRUE_TIME_s": 0.125,
+      "CONFIRMATION_SAMPLE": 1080,
+      "CONFIRMATION_TIME_s": 0.135,
+      "elapsed_s": 0.01
+    },
+    {
+      "D_s": 0.02,
+      "K_D": 160,
+      "i": 2000,
+      "FIRST_TRUE_TIME_s": 0.25,
+      "CONFIRMATION_SAMPLE": 2160,
+      "CONFIRMATION_TIME_s": 0.27,
+      "elapsed_s": 0.02
+    },
+    {
+      "D_s": 0.03,
+      "K_D": 240,
+      "i": 2000,
+      "FIRST_TRUE_TIME_s": 0.25,
+      "CONFIRMATION_SAMPLE": 2240,
+      "CONFIRMATION_TIME_s": 0.28,
+      "elapsed_s": 0.03
+    },
+    {
+      "D_s": 0.05,
+      "K_D": 400,
+      "i": 4000,
+      "FIRST_TRUE_TIME_s": 0.5,
+      "CONFIRMATION_SAMPLE": 4400,
+      "CONFIRMATION_TIME_s": 0.55,
+      "elapsed_s": 0.05
+    },
+    {
+      "D_s": 0.08,
+      "K_D": 640,
+      "i": 4000,
+      "FIRST_TRUE_TIME_s": 0.5,
+      "CONFIRMATION_SAMPLE": 4640,
+      "CONFIRMATION_TIME_s": 0.58,
+      "elapsed_s": 0.08
+    },
+    {
+      "D_s": 0.1,
+      "K_D": 800,
+      "i": 1000,
+      "FIRST_TRUE_TIME_s": 0.125,
+      "CONFIRMATION_SAMPLE": 1800,
+      "CONFIRMATION_TIME_s": 0.225,
+      "elapsed_s": 0.1
+    },
+    {
+      "D_s": 0.15,
+      "K_D": 1200,
+      "i": 5000,
+      "FIRST_TRUE_TIME_s": 0.625,
+      "CONFIRMATION_SAMPLE": 6200,
+      "CONFIRMATION_TIME_s": 0.775,
+      "elapsed_s": 0.15
+    },
+    {
+      "D_s": 0.5,
+      "K_D": 4000,
+      "i": 1000,
+      "FIRST_TRUE_TIME_s": 0.125,
+      "CONFIRMATION_SAMPLE": 5000,
+      "CONFIRMATION_TIME_s": 0.625,
+      "elapsed_s": 0.5
+    }
+  ],
+  "retired_worked_example": {
+    "D_s": 0.1,
+    "i": 1000,
+    "retired_confirmation_sample": 1799,
+    "retired_confirmation_time_s": 0.224875,
+    "retired_elapsed_s": 0.099875,
+    "early_by_s": 0.000125,
+    "successor_confirmation_sample": 1800,
+    "successor_confirmation_time_s": 0.225,
+    "successor_elapsed_s": 0.1
+  },
+  "events": [
+    {
+      "EVENT_ID": "E1",
+      "NAME": "supported_start",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "REQUIRED_DURATION_S": 0.1,
+      "two_phase": false
+    },
+    {
+      "EVENT_ID": "E2",
+      "NAME": "countermovement_onset",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "REQUIRED_DURATION_S": 0.03,
+      "two_phase": true
+    },
+    {
+      "EVENT_ID": "E3",
+      "NAME": "valid_countermovement",
+      "DWELL_TYPE": "NONE",
+      "REQUIRED_DURATION_S": null,
+      "two_phase": false
+    },
+    {
+      "EVENT_ID": "E4",
+      "NAME": "upward_reversal",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "REQUIRED_DURATION_S": 0.01,
+      "two_phase": true
+    },
+    {
+      "EVENT_ID": "E5",
+      "NAME": "vertical_propulsion",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "REQUIRED_DURATION_S": 0.05,
+      "two_phase": false
+    },
+    {
+      "EVENT_ID": "E6",
+      "NAME": "physical_takeoff",
+      "DWELL_TYPE": "NONE",
+      "REQUIRED_DURATION_S": null,
+      "two_phase": false
+    },
+    {
+      "EVENT_ID": "E7",
+      "NAME": "genuine_flight",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "REQUIRED_DURATION_S": 0.05,
+      "two_phase": false,
+      "threshold_status": "OWNER_DECISION_REQUIRED",
+      "owner_decision": "OD-03"
+    },
+    {
+      "EVENT_ID": "E8",
+      "NAME": "apex",
+      "DWELL_TYPE": "NONE",
+      "REQUIRED_DURATION_S": null,
+      "two_phase": false
+    },
+    {
+      "EVENT_ID": "E9",
+      "NAME": "descending_landing",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "REQUIRED_DURATION_S": 0.01,
+      "two_phase": true
+    },
+    {
+      "EVENT_ID": "E10",
+      "NAME": "impact_absorption",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "REQUIRED_DURATION_S": 0.02,
+      "two_phase": false
+    },
+    {
+      "EVENT_ID": "E11",
+      "NAME": "balance_capture",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "REQUIRED_DURATION_S": 0.15,
+      "two_phase": false
+    },
+    {
+      "EVENT_ID": "E12",
+      "NAME": "stable_recovery",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "REQUIRED_DURATION_S": 0.5,
+      "two_phase": false
+    }
+  ],
+  "reporting_requirements": [
+    "ONSET_SAMPLE",
+    "FIRST_TRUE_TIME",
+    "CONFIRMATION_SAMPLE",
+    "CONFIRMATION_TIME",
+    "DWELL_TYPE",
+    "REQUIRED_DURATION",
+    "K_D",
+    "vDWELL"
+  ],
+  "implementation_tests_required_later": [
+    "boundary: confirm at exactly K_D, reject at K_D - 1",
+    "gap: a single false sample resets the candidate",
+    "inequality: confirmed_at - occurred_at >= REQUIRED_DURATION for every event",
+    "binding: dwell constants declared once and hash-bound to this artifact"
+  ],
+  "source_facts": {
+    "MED_001": "RES-80 defect register: every dwell event confirmed one physics sample (0.125 ms) before its declared duration",
+    "physics_timestep": "src/loaded_cmj/v2/constants.py V2_PHYSICS_TIMESTEP_S",
+    "historical_implementation": "src/loaded_cmj/v2/events.py using elapsed = idx - start_idx + 1 compared to round(dwell_s/dt)"
+  },
+  "non_event_sample_count_rules": {
+    "REFLIGHT": {
+      "DWELL_TYPE": "SAMPLE_COUNT",
+      "REQUIRED_SAMPLES": 4,
+      "FORCE_ONLY": true,
+      "SPAN_MS": 0.375,
+      "NOTE": "preserves RES-57 frozen detection (CANONICAL_REFLIGHT_MIN_STEPS=4); historical 0.5 ms wording recorded as erratum"
+    },
+    "CHATTER_TRANSITION": {
+      "THRESHOLD_N": 10.0,
+      "MAX_TRANSITIONS": 8
+    }
+  }
+}

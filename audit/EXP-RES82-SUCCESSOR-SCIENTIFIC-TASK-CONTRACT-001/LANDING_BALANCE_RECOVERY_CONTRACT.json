@@ -1,0 +1,423 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "RES82-LANDING-BALANCE-RECOVERY-CONTRACT",
+  "mission": "RES82_SUCCESSOR_LOADED_CMJ_SCIENTIFIC_TASK_CONTRACT_001",
+  "linear_issue": "RES-82",
+  "status": "STRUCTURALLY_FROZEN",
+  "closed_defects": [
+    "HIGH-001",
+    "HIGH-002",
+    "HIGH-004",
+    "HIGH-012_contract_side",
+    "MED-002",
+    "MED-012",
+    "MED-013"
+  ],
+  "landing_event_structure": {
+    "LANDING_FIRST_CONTACT": "first sample after physical takeoff with any foot-floor contact row AND foot_clearance <= 0 for that foot",
+    "BILATERAL_LANDING_ESTABLISHED": "first time after LANDING_FIRST_CONTACT where both feet have plantar contact rows AND both feet carry Fz > F_thr, sustained D_BL",
+    "D_BL": {
+      "STATUS": "OWNER_DECISION_REQUIRED",
+      "OWNER_DECISION": "OD-10",
+      "CANDIDATE_S": 0.05
+    },
+    "LANDING_ASYMMETRY": "abs(t_first_contact_left - t_first_contact_right) plus force-share asymmetry over the establishment window",
+    "asymmetry_policy": "slight asynchrony allowed within declared bounds; microsecond equality neither required nor claimed; no evidence supports exact simultaneity"
+  },
+  "L4_landing_validity": {
+    "principle": "whole-body post-impact admissible state; abs(com_vz) < V_ABS_TAIL alone is insufficient",
+    "hard_gates": [
+      {
+        "GATE": "L4-G1",
+        "VARIABLE": "prior flight + descending COM",
+        "DEFINITION": "prior certified physical flight (E7) and descending COM at first contact",
+        "UNITS": "boolean",
+        "THRESHOLD_STATUS": "FROZEN",
+        "THRESHOLD_VALUE": true,
+        "PROVENANCE": "PHYSICS_EVENT_CONTRACT",
+        "INVALID_OUTCOME_PREVENTED": "landing scored without a preceding genuine flight",
+        "CATEGORY": "HARD/PHYSICAL"
+      },
+      {
+        "GATE": "L4-G2",
+        "VARIABLE": "fall_contact, prohibited_contact",
+        "DEFINITION": "no fall contact and no prohibited contact in [E9, E10_confirmation]",
+        "UNITS": "boolean",
+        "THRESHOLD_STATUS": "FROZEN",
+        "THRESHOLD_VALUE": false,
+        "PROVENANCE": "PROJECT_HARD_RULE",
+        "INVALID_OUTCOME_PREVENTED": "landing on a fall shell or support substitute",
+        "CATEGORY": "HARD/PHYSICAL"
+      },
+      {
+        "GATE": "L4-G3",
+        "VARIABLE": "BILATERAL_LANDING_ESTABLISHED",
+        "DEFINITION": "bilateral landing established: t_bilateral_load - t_LANDING_FIRST_CONTACT <= D_EST (OD-10 candidate 0.050 s), then both feet loaded sustained for D_BL",
+        "UNITS": "s",
+        "THRESHOLD_STATUS": "OWNER_DECISION_REQUIRED",
+        "THRESHOLD_VALUE": null,
+        "PROVENANCE": "TASK_OD10",
+        "OWNER_DECISION": "OD-10",
+        "INVALID_OUTCOME_PREVENTED": "single-foot landing strategy",
+        "CATEGORY": "HARD/PHYSICAL"
+      },
+      {
+        "GATE": "L4-G4",
+        "VARIABLE": "MAX_PENETRATION",
+        "DEFINITION": "maximum floor penetration in landing window",
+        "UNITS": "m",
+        "THRESHOLD_STATUS": "OWNER_REAPPROVAL_OD04",
+        "THRESHOLD_VALUE": 0.01,
+        "PROVENANCE": "PROJECT_HISTORICAL_AUTHORITY_CANDIDATE_OD04",
+        "INVALID_OUTCOME_PREVENTED": "contact solver pushed beyond its admissible regime",
+        "CATEGORY": "HARD/PHYSICAL"
+      },
+      {
+        "GATE": "L4-G5",
+        "VARIABLE": "reflight, chatter transitions",
+        "DEFINITION": "no post-landing reflight beyond approved chatter (chatter transitions <= 8)",
+        "UNITS": "boolean/count",
+        "THRESHOLD_STATUS": "FROZEN_PROJECT_AUTHORITY",
+        "THRESHOLD_VALUE": {
+          "reflight": false,
+          "max_chatter_transitions": 8
+        },
+        "PROVENANCE": "PROJECT_AUTHORITY_SUPPORT_CONTINUITY",
+        "INVALID_OUTCOME_PREVENTED": "lost landing hidden by a later nominal frame",
+        "CATEGORY": "HARD/PHYSICAL"
+      },
+      {
+        "GATE": "L4-G6",
+        "VARIABLE": "LANDING_PEAK_FZ_BW",
+        "DEFINITION": "peak landing whole-body vertical force normalized to body weight",
+        "UNITS": "BW",
+        "THRESHOLD_STATUS": "OWNER_REAPPROVAL_OD04",
+        "THRESHOLD_VALUE": 8.0,
+        "PROVENANCE": "PROJECT_HISTORICAL_HARD_RULE_CANDIDATE_OD04",
+        "INVALID_OUTCOME_PREVENTED": "impact beyond the declared landing-force envelope",
+        "CATEGORY": "HUMAN-PLAUSIBILITY/TASK"
+      }
+    ],
+    "task_gates": [
+      {
+        "GATE": "L4-T1",
+        "VARIABLE": "COM_VX_AT_E10",
+        "DEFINITION": "sagittal COM horizontal velocity at E10 confirmation",
+        "UNITS": "m/s",
+        "CANDIDATE": {
+          "COMPARATOR": "abs<=",
+          "VALUE": 0.3
+        },
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-04"
+      },
+      {
+        "GATE": "L4-T2",
+        "VARIABLE": "COM_VZ_AT_E10",
+        "DEFINITION": "RETIRED_REDUNDANT: the E10 predicate already requires abs(com_vz) < V_ABS_TAIL continuously through confirmation; retained only as the transient window operand MAX_ABS_COM_VZ_LANDING_WINDOW (diagnostic)",
+        "UNITS": "m/s",
+        "CANDIDATE": {
+          "COMPARATOR": "abs<=",
+          "VALUE": 0.1
+        },
+        "STATUS": "RETIRED_REDUNDANT",
+        "OWNER_DECISION": "OD-04",
+        "RETIRED": true
+      },
+      {
+        "GATE": "L4-T3",
+        "VARIABLE": "HY_AT_E10",
+        "DEFINITION": "abs(Hy) at E10 confirmation",
+        "UNITS": "kg*m^2/s",
+        "CANDIDATE": {
+          "COMPARATOR": "abs<=",
+          "VALUE": 5
+        },
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-04",
+        "NOTE": "no literature threshold; engineering bound"
+      },
+      {
+        "GATE": "L4-T4",
+        "VARIABLE": "ROOT_PITCH_AT_E10",
+        "DEFINITION": "signed root/pelvis sagittal pitch",
+        "UNITS": "rad",
+        "CANDIDATE": {
+          "COMPARATOR": "abs<=",
+          "VALUE": 0.35
+        },
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-04"
+      },
+      {
+        "GATE": "L4-T5",
+        "VARIABLE": "TRUNK_PITCH_AT_E10",
+        "DEFINITION": "signed trunk sagittal pitch",
+        "UNITS": "rad",
+        "CANDIDATE": {
+          "COMPARATOR": "abs<=",
+          "VALUE": 0.45
+        },
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-04",
+        "NOTE": "trunk flexion at landing is mechanically permissible (Blackburn 2008/2009); the defect is the un-captured forward lunge"
+      },
+      {
+        "GATE": "L4-T6",
+        "VARIABLE": "ROOT_PITCH_RATE_AT_E10",
+        "DEFINITION": "root pitch rate",
+        "UNITS": "rad/s",
+        "CANDIDATE": {
+          "COMPARATOR": "abs<=",
+          "VALUE": 3.0
+        },
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-04"
+      },
+      {
+        "GATE": "L4-T7",
+        "VARIABLE": "TRUNK_PITCH_RATE_AT_E10",
+        "DEFINITION": "trunk pitch rate",
+        "UNITS": "rad/s",
+        "CANDIDATE": {
+          "COMPARATOR": "abs<=",
+          "VALUE": 3.0
+        },
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-04"
+      },
+      {
+        "GATE": "L4-T8",
+        "VARIABLE": "POST_LANDING_MOMENTUM_CAPTURE",
+        "DEFINITION": "behavioral window [E10_confirmation, E11_onset]: max(abs(com_vx)) <= max(abs(COM_VX_AT_E10), VX_TAIL_CAP) AND COM_X_MAX_AFTER_LANDING := max over [LANDING_FIRST_CONTACT, E11_onset] of (com_x(t) - com_x(LANDING_FIRST_CONTACT)) <= X_FWD_MAX; if E11 never onsets the gate is NOT_EVALUABLE and LANDING_VALID=false",
+        "UNITS": "m/s, m",
+        "CANDIDATE": {
+          "VX_TAIL_CAP_MPS": 0.15,
+          "X_FWD_MAX_M": 0.1
+        },
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-04",
+        "NOTE": "prevents the R001 forward lunge (com_vx 0.211 -> 0.342 m/s after touchdown) directly; the window is explicit and is evaluated by the L4 layer"
+      },
+      {
+        "GATE": "L4-T9",
+        "VARIABLE": "MAX_ABS_COM_VX_FIRST_CONTACT_TO_E10",
+        "DEFINITION": "max(abs(com_vx)) over [LANDING_FIRST_CONTACT, E10_confirmation]",
+        "UNITS": "m/s",
+        "CANDIDATE": {
+          "COMPARATOR": "abs<=",
+          "VALUE": 0.4
+        },
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-04",
+        "NOTE": "bounds horizontal momentum during the impact-absorption interval (ADV-7 closure)"
+      },
+      {
+        "GATE": "L4-T10",
+        "VARIABLE": "LANDING_TRANSIENT_WINDOW_MAXIMA",
+        "DEFINITION": "over [LANDING_FIRST_CONTACT, E10_confirmation]: max abs(root_pitch_rate) <= RATE_LAND_W, max abs(trunk_pitch_rate) <= RATE_LAND_W, max abs(Hy) <= HY_LAND_W, and mid-window posture envelope max root_pitch <= PITCH_LAND_W, max trunk_pitch <= TRUNK_LAND_W; prevent a transient landing whip that decays before the E10 point-in-time sample",
+        "UNITS": "rad/s, kg*m^2/s",
+        "CANDIDATE": {
+          "RATE_LAND_W_RADPS": 5.0,
+          "HY_LAND_W": 5.0,
+          "PITCH_LAND_W_RAD": 0.45,
+          "TRUNK_LAND_W_RAD": 0.55
+        },
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-04",
+        "NOTE": "ADV-4 closure; bound (not a proof); NC-05 includes a decaying-whip fixture; HY_LAND_W aligned with HY_AT_E10 (no evidence for allowing a larger transient)",
+        "EVIDENCE_BASIS": "none from R001 landing-window rates (UNKNOWN_NOT_EVALUABLE); engineering bound pending OD-04"
+      }
+    ]
+  },
+  "L5_balance_recovery": {
+    "balance_capture_variables": [
+      {
+        "VARIABLE": "com_speed_sagittal",
+        "DEFINITION": "sqrt(com_vx^2 + com_vz^2)",
+        "UNITS": "m/s",
+        "REQUIRED": true
+      },
+      {
+        "VARIABLE": "Hy",
+        "DEFINITION": "centroidal angular momentum about sagittal y",
+        "UNITS": "kg*m^2/s",
+        "REQUIRED": true
+      },
+      {
+        "VARIABLE": "support_margin",
+        "DEFINITION": "COM ground projection to active support hull boundary",
+        "UNITS": "m",
+        "REQUIRED": true
+      },
+      {
+        "VARIABLE": "cop_valid",
+        "DEFINITION": "CoP valid in declared frame",
+        "UNITS": "boolean",
+        "REQUIRED": true
+      },
+      {
+        "VARIABLE": "bilateral_support",
+        "DEFINITION": "both feet plantar and loaded",
+        "UNITS": "boolean",
+        "REQUIRED": true
+      },
+      {
+        "VARIABLE": "reflight_fall_prohibited",
+        "DEFINITION": "flags false",
+        "UNITS": "boolean",
+        "REQUIRED": true
+      },
+      {
+        "VARIABLE": "recovery_entry_posture_rates",
+        "DEFINITION": "posture and rates for recovery readiness",
+        "UNITS": "rad, rad/s",
+        "REQUIRED": true
+      }
+    ],
+    "E11_bounds": [
+      {
+        "BOUND": "C_11",
+        "DEFINITION": "max com_speed_sagittal in capture run",
+        "UNITS": "m/s",
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-05",
+        "CANDIDATE_PRIMARY": 0.2,
+        "CANDIDATE_ALT": 0.3,
+        "PROVENANCE": "structure informed by TTS/DPSI (Chen 2026; Ross 2005; Wikstrom 2007) and capture-point reasoning (Hof 2005); clinical thresholds NOT imported"
+      },
+      {
+        "BOUND": "HY_11",
+        "DEFINITION": "max abs(Hy) in capture run",
+        "UNITS": "kg*m^2/s",
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-05",
+        "CANDIDATE": 2,
+        "PROVENANCE": "no literature threshold; engineering bound"
+      },
+      {
+        "BOUND": "M_11",
+        "DEFINITION": "min support_margin in capture run",
+        "UNITS": "m",
+        "STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-05",
+        "CANDIDATE": 0.02,
+        "PROVENANCE": "positive margin required; numeric tied to RES-84 support-hull measurement"
+      }
+    ],
+    "dynamic_postural_stability_research_note": {
+      "methods": [
+        "TTS",
+        "DPSI"
+      ],
+      "sources": [
+        "Chen 2026 PMID 41017646",
+        "Ross 2005 PMID 16404451",
+        "Wikstrom 2007 PMID 17473764"
+      ],
+      "structure_supported": [
+        "capture is sustained over a window not an instant",
+        "AP and vertical dimensions both matter",
+        "stability relative to quiet-stance variability"
+      ],
+      "transfer_prohibition": "clinical ACLI/ACLR and ankle-instability thresholds are not task-success thresholds for this simulation COU"
+    },
+    "RECOVERY_READY": {
+      "DEFINITION": "E11 predicate holds AND posture within RES-87 recovery-entry set AND posture rates within RES-87 bounds AND CoP inside recovery-entry hull fraction AND no penetration issue during [E9, s]",
+      "IS_DAG_EVENT": false,
+      "REPORTED_METRIC": "RECOVERY_READY_TIME",
+      "L5_REQUIREMENT": "RECOVERY_READY_TIME <= E12_onset",
+      "NON_RETROACTIVITY": "an eventual E12 cannot validate a bad E10/E11 state; layers evaluated on their own windows"
+    },
+    "E12_standing_envelope": {
+      "components": [
+        {
+          "COMPONENT": "POSTURE",
+          "REQUIREMENT": "inside standing posture set from multiple perturbed holds",
+          "NUMERIC": "RES-87"
+        },
+        {
+          "COMPONENT": "VELOCITY",
+          "REQUIREMENT": "com_speed_sagittal and joint rates below quiet-standing bounds",
+          "NUMERIC": "RES-87"
+        },
+        {
+          "COMPONENT": "ANGULAR_MOMENTUM",
+          "REQUIREMENT": "abs(Hy) below bound",
+          "NUMERIC": "RES-87"
+        },
+        {
+          "COMPONENT": "SUPPORT",
+          "REQUIREMENT": "bilateral plantar support; Fz_whole in band around body weight",
+          "NUMERIC": "RES-87"
+        },
+        {
+          "COMPONENT": "COP",
+          "REQUIREMENT": "valid CoP inside standing hull fraction",
+          "NUMERIC": "RES-87"
+        },
+        {
+          "COMPONENT": "MARGIN",
+          "REQUIREMENT": "support_margin > 0 with declared minimum",
+          "NUMERIC": "RES-87"
+        },
+        {
+          "COMPONENT": "NO_FALL_NO_REFLIGHT_NO_PROHIBITED",
+          "REQUIREMENT": "flags false for entire dwell",
+          "NUMERIC": null
+        },
+        {
+          "COMPONENT": "DWELL",
+          "REQUIREMENT": "PHYSICAL_TIME 0.500 s",
+          "NUMERIC": 0.5
+        }
+      ],
+      "calibration_requirement": "RES-87 must derive the envelope from a family of perturbed initial standing states with a declared robustness target (remain in or return to the envelope)",
+      "prohibited_definitions": [
+        "equality to one historical deterministic standing trace",
+        "micron-scale windows derived from a single hold",
+        "ULP-adjacent bound expansion presented as robustness",
+        "a dwell certified across controller regimes without separate reporting"
+      ]
+    },
+    "recovery_maintenance": {
+      "REQUIREMENT": "over [E11_confirmation, E12_confirmation] the E11 capture bounds (com_speed_sagittal, abs(Hy), support_margin, cop_valid, bilateral support) continue to hold at every sample; a capture->excursion->re-stabilize sequence fails RECOVERY_VALID",
+      "STATUS": "FROZEN_STRUCTURE",
+      "NUMERIC": "same bounds as E11 (OD-05)",
+      "NOTE": "closes the F6 scope gap; fall/reflight/prohibited remain whole-episode hard gates"
+    }
+  },
+  "hard_safety_vs_task_separation": {
+    "HARD_SAFETY_PHYSICAL": [
+      "fall",
+      "prohibited_contact",
+      "penetration",
+      "reflight",
+      "non_finite",
+      "joint_limits",
+      "actuator_limits"
+    ],
+    "HUMAN_PLAUSIBILITY_TASK": [
+      "landing vx/Hy/pitch bounds",
+      "capture speed",
+      "recovery-entry posture",
+      "standing envelope"
+    ],
+    "RULE": "no human-plausibility gate is presented as physical impossibility; no physical failure is hidden as style"
+  },
+  "layer_outputs": {
+    "LANDING_VALID": "boolean: point-in-time L4-T1..T7 at E10 confirmation AND hard gates L4-G1..G6 over their declared windows AND L4-T8 over [E10_confirmation, E11_onset] AND L4-T9/L4-T10 over [LANDING_FIRST_CONTACT, E10_confirmation]; if E11 does not onset, L4-T8 is NOT_EVALUABLE and LANDING_VALID=false",
+    "BALANCE_VALID": "boolean over [E10_confirmation, E11_confirmation]",
+    "RECOVERY_VALID": "boolean over [E11_confirmation, E12_confirmation or horizon] AND continued E11 capture bounds over that interval AND FULL_EPISODE support continuity QUALIFIED AND POST_E12_OBSERVATION_MARGIN satisfied",
+    "rule": "TASK_SUCCESS requires all three; EVENT_CHAIN_VALID alone never implies them"
+  },
+  "r001_landing_evidence": {
+    "Hy_at_E10": 9.88,
+    "root_pitch_at_E10": 0.2922,
+    "trunk_forward_at_E11_deg": 25.01,
+    "com_vx_peak_after_touchdown": 0.34183,
+    "peak_total_Fz_BW": 4.7755,
+    "max_penetration_m": 0.0096389,
+    "verdict_under_candidates": "FAIL L4-T3 and L4-T8; layer failed by independent causes"
+  }
+}

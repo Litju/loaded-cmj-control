@@ -1,0 +1,460 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "RES82-OWNER-DECISIONS-REQUIRED",
+  "mission": "RES82_SUCCESSOR_LOADED_CMJ_SCIENTIFIC_TASK_CONTRACT_001",
+  "linear_issue": "RES-82",
+  "status": "OPEN_ITEMS",
+  "count": 13,
+  "rule": "no candidate may be classified TASK_SUCCESS=true while an affected decision is open",
+  "decisions": [
+    {
+      "ID": "OD-01",
+      "TITLE": "Primary performance floor H_MIN",
+      "VARIABLE": "COM_RISE_TAKEOFF_TO_APEX",
+      "OPTIONS": [
+        {
+          "LABEL": "PF-1",
+          "VALUE_M": 0.15,
+          "RECOMMENDED": true
+        },
+        {
+          "LABEL": "PF-2",
+          "VALUE_M": 0.2,
+          "RECOMMENDED": false
+        },
+        {
+          "LABEL": "PF-3",
+          "VALUE_M": 0.1,
+          "RECOMMENDED": false
+        },
+        {
+          "LABEL": "PF-4",
+          "VALUE_M": null,
+          "RECOMMENDED": false,
+          "MEANING": "no numeric floor frozen"
+        }
+      ],
+      "EVIDENCE": [
+        "S08",
+        "S09",
+        "S10",
+        "S11"
+      ],
+      "RECOMMENDATION": "PF-1 0.150 m anchored to the published 20 kg CMJ scale; the weak-stratum 20 kg value is derived (not reported) by applying the weak group's SJ percent decrease to its 0 kg mean; cross-family limitation (human flight-time JH vs direct COM displacement) disclosed; confirm post-RES-83 that the floor is a task floor, not a capability target",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "OWNER_TASK_DECISION",
+      "AFFECTED_GATES": [
+        "PRIMARY_PERFORMANCE_GATE",
+        "TASK_PERFORMANCE_VALID",
+        "NC-01"
+      ]
+    },
+    {
+      "ID": "OD-02",
+      "TITLE": "Geometric clearance tolerance C_GEOM",
+      "VARIABLE": "foot_clearance floor",
+      "OPTIONS": [
+        {
+          "LABEL": "contact-tolerance-derived",
+          "RECOMMENDED": true,
+          "NOTE": "numeric fixed by RES-84"
+        },
+        {
+          "LABEL": "absolute-0.001-m",
+          "RECOMMENDED": false
+        },
+        {
+          "LABEL": "historical-0.010-m",
+          "RECOMMENDED": false,
+          "NOTE": "obsolete unexecuted declaration"
+        }
+      ],
+      "EVIDENCE": [
+        "S24",
+        "P04"
+      ],
+      "RECOMMENDATION": "contact/numerical-tolerance-derived; never a human-performance gap",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "MODEL_DEPENDENT_DEFERRED",
+      "DEFERRED_TO": "RES-84",
+      "AFFECTED_GATES": [
+        "E6",
+        "E7",
+        "PHYSICAL_TAKEOFF_DEFINED",
+        "GENUINE_FLIGHT_DWELL",
+        "NC-02"
+      ]
+    },
+    {
+      "ID": "OD-03",
+      "TITLE": "Genuine-flight dwell",
+      "VARIABLE": "E7 REQUIRED_DURATION",
+      "OPTIONS": [
+        {
+          "VALUE_S": 0.005,
+          "MEANING": "one control interval; pure dechatter"
+        },
+        {
+          "VALUE_S": 0.05,
+          "RECOMMENDED": true
+        },
+        {
+          "VALUE_S": 0.15,
+          "MEANING": "qualitative flight statement"
+        }
+      ],
+      "EVIDENCE": [
+        "P04"
+      ],
+      "RECOMMENDATION": "0.050 s",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "OWNER_TASK_DECISION",
+      "AFFECTED_GATES": [
+        "E7",
+        "GENUINE_FLIGHT_DWELL",
+        "NC-02",
+        "NC-08"
+      ]
+    },
+    {
+      "ID": "OD-04",
+      "TITLE": "Landing (L4) numeric bounds",
+      "VARIABLES": [
+        "L4-T1 COM_VX_AT_E10",
+        "L4-T2 RETIRED_REDUNDANT",
+        "L4-T3 HY_AT_E10",
+        "L4-T4 ROOT_PITCH_AT_E10",
+        "L4-T5 TRUNK_PITCH_AT_E10",
+        "L4-T6/T7 ROOT/TRUNK_PITCH_RATE_AT_E10",
+        "L4-T8 momentum capture + COM_X_MAX window [first contact, E11_onset]",
+        "L4-T9 MAX_ABS_COM_VX_FIRST_CONTACT_TO_E10",
+        "L4-T10 landing transient maxima + mid-window posture envelope",
+        "MAX_PENETRATION re-approval",
+        "LANDING_PEAK_FZ_BW re-approval"
+      ],
+      "OPTIONS": [
+        "strict set",
+        "medium set (contract candidates, recommended)",
+        "permissive set"
+      ],
+      "EVIDENCE": [
+        "S15",
+        "S16",
+        "S17",
+        "S18",
+        "P02",
+        "P05"
+      ],
+      "RECOMMENDATION": "medium candidate set; L4-T8 behavioral momentum-capture gate is primary; L4-T10 is a bound plus NC-05 decaying-whip fixture; explicitly re-approve 0.010 m and 8 BW; E10 trunk pitch is UNKNOWN_NOT_EVALUABLE in the sealed R001 summary",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "OWNER_TASK_DECISION",
+      "AFFECTED_GATES": [
+        "LANDING_VALID",
+        "LANDING_BOUNDS",
+        "NC-05",
+        "NC-09"
+      ]
+    },
+    {
+      "ID": "OD-05",
+      "TITLE": "Balance-capture (E11) numeric bounds",
+      "VARIABLES": [
+        "C_11",
+        "HY_11",
+        "M_11"
+      ],
+      "OPTIONS": [
+        {
+          "C_11_MPS": 0.2,
+          "HY_11": 2,
+          "M_11_M": 0.02,
+          "RECOMMENDED": true
+        },
+        {
+          "C_11_MPS": 0.3,
+          "HY_11": 5,
+          "M_11_M": 0.05,
+          "RECOMMENDED": false
+        }
+      ],
+      "EVIDENCE": [
+        "S19",
+        "S20",
+        "S21",
+        "S23",
+        "P05"
+      ],
+      "RECOMMENDATION": "0.20 m/s, 2 kg*m^2/s, 0.02 m initially; revisit with RES-84/RES-87 data",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "OWNER_TASK_DECISION",
+      "AFFECTED_GATES": [
+        "E11",
+        "BALANCE_VALID",
+        "NC-06"
+      ]
+    },
+    {
+      "ID": "OD-06",
+      "TITLE": "Takeoff transition whip bounds",
+      "VARIABLES": [
+        "R_WHIP",
+        "R_WHIP_TRUNK"
+      ],
+      "OPTIONS": [
+        {
+          "VALUE_RADPS": 5.0,
+          "RECOMMENDED": true
+        },
+        {
+          "VALUE_RADPS": 8.0,
+          "RECOMMENDED": false
+        },
+        {
+          "LABEL": "model-derived from RES-83/RES-85 actuator declaration",
+          "RECOMMENDED": false
+        }
+      ],
+      "EVIDENCE": [
+        "P05"
+      ],
+      "RECOMMENDATION": "5.0 rad/s initially; finalize with RES-85",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "MODEL_DEPENDENT_DEFERRED",
+      "DEFERRED_TO": "RES-83/RES-85",
+      "AFFECTED_GATES": [
+        "CG-03",
+        "TAKEOFF_TRANSITION_WHIP"
+      ]
+    },
+    {
+      "ID": "OD-07",
+      "TITLE": "Countermovement depth DEPTH_MIN",
+      "VARIABLE": "E3 depth threshold",
+      "OPTIONS": [
+        {
+          "VALUE_M": 0.1,
+          "MEANING": "historical"
+        },
+        {
+          "VALUE_M": 0.15
+        },
+        {
+          "VALUE_M": 0.2
+        },
+        {
+          "LABEL": "Plant-relative depth",
+          "NOTE": "requires RES-83 achievable depth report"
+        }
+      ],
+      "EVIDENCE": [
+        "S12",
+        "S08",
+        "S09",
+        "P05"
+      ],
+      "RECOMMENDATION": "concept frozen now; numeric after RES-83 reports achievable anatomical depth",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "MODEL_DEPENDENT_DEFERRED",
+      "DEFERRED_TO": "RES-83",
+      "AFFECTED_GATES": [
+        "E3",
+        "VALID_COUNTERMOVEMENT",
+        "NC-01"
+      ]
+    },
+    {
+      "ID": "OD-08",
+      "TITLE": "Landing-phase vertical-rate thresholds",
+      "VARIABLES": [
+        "V_DESC",
+        "V_ABS_TAIL"
+      ],
+      "OPTIONS": [
+        {
+          "V_DESC_MPS": 0.1,
+          "V_ABS_TAIL_MPS": 0.05,
+          "RECOMMENDED": true
+        },
+        {
+          "V_DESC_MPS": 0.2,
+          "V_ABS_TAIL_MPS": 0.1,
+          "RECOMMENDED": false
+        }
+      ],
+      "EVIDENCE": [
+        "P05",
+        "P06",
+        "S19",
+        "S20"
+      ],
+      "RECOMMENDATION": "retain 0.10 / 0.05",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "OWNER_TASK_DECISION",
+      "AFFECTED_GATES": [
+        "E9",
+        "E10"
+      ]
+    },
+    {
+      "ID": "OD-09",
+      "TITLE": "Force-threshold comparability value and sensitivity set",
+      "VARIABLES": [
+        "F_thr",
+        "sensitivity set"
+      ],
+      "OPTIONS": [
+        {
+          "VALUE_N": 10,
+          "SENSITIVITY": [
+            1,
+            5,
+            10,
+            20,
+            "PkRes/5SD"
+          ],
+          "RECOMMENDED": true
+        },
+        {
+          "LABEL": "noise-derived only",
+          "RECOMMENDED": false
+        }
+      ],
+      "EVIDENCE": [
+        "S04",
+        "S06",
+        "S02"
+      ],
+      "RECOMMENDATION": "retain 10 N as the declared comparability threshold plus sensitivity reporting; the 'never in a hard gate' rule is scoped to physical-state definitions (OD-11), while canonical reflight/chatter remain frozen force-only de-chatter gates (RES-57: whole-Fz 10 N, K>=4 span, chatter <= 8)",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "OWNER_TASK_DECISION",
+      "AFFECTED_GATES": [
+        "FORCE_THRESHOLD_TAKEOFF_TIME",
+        "FORCE_TAKEOFF_LEAD",
+        "FORCE_DEFINED_FLIGHT_DURATION"
+      ]
+    },
+    {
+      "ID": "OD-10",
+      "TITLE": "Landing asynchrony allowance and bilateral-establishment dwell",
+      "VARIABLES": [
+        "D_EST establishment latency",
+        "D_BL sustain dwell",
+        "LANDING_ASYMMETRY_S bound"
+      ],
+      "OPTIONS": [
+        {
+          "D_EST_S": 0.05,
+          "D_BL_S": 0.05,
+          "RECOMMENDED": true,
+          "NOTE": "D_EST and D_BL are separate; reusing one value for both makes L4-G3 ambiguous"
+        },
+        {
+          "D_EST_S": 0.1,
+          "D_BL_S": 0.1,
+          "RECOMMENDED": false
+        }
+      ],
+      "EVIDENCE": [
+        "S12"
+      ],
+      "RECOMMENDATION": "allow asynchrony; establish bilateral loading within D_EST = 0.050 s of first contact and sustain both feet for D_BL = 0.050 s; report asymmetry; gate only on establishment and no-single-support",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "OWNER_TASK_DECISION",
+      "AFFECTED_GATES": [
+        "BILATERAL_LANDING",
+        "L4-G3",
+        "NC-05"
+      ]
+    },
+    {
+      "ID": "OD-11",
+      "TITLE": "Force threshold participation in hard gates",
+      "QUESTION": "May any force-threshold observable participate in physical takeoff/flight/apex/landing definitions?",
+      "RECOMMENDATION": "NO; exact contact geometry and clearance are available; force thresholds are comparability observables only",
+      "STATUS": "ACKNOWLEDGMENT_REQUESTED",
+      "PROVENANCE_CLASS": "OWNER_TASK_DECISION",
+      "AFFECTED_GATES": [
+        "E6",
+        "E7",
+        "E8",
+        "E9",
+        "NC-02",
+        "NC-03"
+      ]
+    },
+    {
+      "ID": "OD-12",
+      "TITLE": "Standing-envelope tolerance class and robustness target",
+      "VARIABLES": [
+        "standing_envelope tolerances",
+        "perturbation family",
+        "settling criterion"
+      ],
+      "OPTIONS": [
+        {
+          "LABEL": "perturbed-hold calibrated",
+          "RECOMMENDED": false
+        },
+        {
+          "LABEL": "physical standing manifold",
+          "RECOMMENDED": false
+        },
+        {
+          "LABEL": "combined",
+          "RECOMMENDED": true
+        }
+      ],
+      "EVIDENCE": [
+        "S22",
+        "S23",
+        "P05"
+      ],
+      "RECOMMENDATION": "combined: RES-87 calibration from perturbed holds cross-checked against the physical standing manifold; bind results into this contract by version",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "MODEL_DEPENDENT_DEFERRED",
+      "DEFERRED_TO": "RES-87",
+      "AFFECTED_GATES": [
+        "E12",
+        "RECOVERY_VALID",
+        "NC-07"
+      ]
+    },
+    {
+      "ID": "OD-13",
+      "TITLE": "Initial quiescence and post-recovery observation bounds",
+      "VARIABLES": [
+        "E1 abs(com_vx)",
+        "E1 joint-rate/CoP quiescence (candidate)",
+        "POST_E12_OBSERVATION_MARGIN"
+      ],
+      "OPTIONS": [
+        {
+          "LABEL": "com_vx <= 0.05 m/s; post-E12 margin 0.250 s",
+          "RECOMMENDED": true
+        },
+        {
+          "LABEL": "com_vx <= 0.10 m/s; post-E12 margin 0.500 s",
+          "RECOMMENDED": false
+        },
+        {
+          "LABEL": "no com_vx quiescence (rejected by adversarial review; opens ADV-7)",
+          "RECOMMENDED": false
+        }
+      ],
+      "EVIDENCE": [
+        "P05",
+        "P02"
+      ],
+      "RECOMMENDATION": "accept com_vx <= 0.05 m/s and a 0.250 s post-E12 observation margin; the internal-quiescence structural requirement is frozen as an E1 blocker placeholder with numeric joint-rate/CoP bounds deferred to RES-84",
+      "STATUS": "OPEN",
+      "PROVENANCE_CLASS": "OWNER_TASK_DECISION",
+      "AFFECTED_GATES": [
+        "E1",
+        "NC-11",
+        "HORIZON_SUFFICIENT",
+        "RECOVERY_VALID",
+        "NC-12"
+      ]
+    }
+  ]
+}

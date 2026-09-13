@@ -1,0 +1,263 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "RES82-SUCCESSOR-TASK-CONTRACT",
+  "mission": "RES82_SUCCESSOR_LOADED_CMJ_SCIENTIFIC_TASK_CONTRACT_001",
+  "linear_issue": "RES-82",
+  "status": "STRUCTURALLY_FROZEN",
+  "entry_head": "12ea42029489ddc2839389beafcf0811b7b45271",
+  "entry_tree": "79f183724486ff95a1269a87cdb21d078b1893a5",
+  "core_distinction": "EVENT_CHAIN_VALID != TASK_SUCCESS",
+  "layers": {
+    "L0_EXECUTION_VALIDITY": {
+      "question": "canonical runtime executed to a valid completion (no fault, sufficient horizon, deterministic identity)",
+      "owner": "RES-88",
+      "defined_here": true
+    },
+    "L1_MODEL_STATE_VALIDITY": {
+      "question": "every state physically admissible (finite, no fall, no prohibited contact, penetration bounded, joint/actuator limits, no artificial support)",
+      "owner": "this contract",
+      "defined_here": true
+    },
+    "L2_EVENT_SEQUENCE_VALIDITY": {
+      "question": "E1-E12 monotone order with declared physical semantics and dwells",
+      "owner": "this contract",
+      "defined_here": true
+    },
+    "L3_TASK_PERFORMANCE_VALIDITY": {
+      "question": "primary performance floor met and physics consistency checks pass",
+      "owner": "this contract",
+      "defined_here": true
+    },
+    "L4_LANDING_CAPTURE_VALIDITY": {
+      "question": "whole-body admissible landing capture; point-in-time at E10 confirmation + explicit behavioral windows L4-T8 [E10, E11_onset], L4-T9/L4-T10 [first contact, E10]",
+      "owner": "this contract",
+      "defined_here": true
+    },
+    "L5_RECOVERY_VALIDITY": {
+      "question": "balance captured and robust standing envelope achieved; recovery maintenance over [E11_confirmation, E12_confirmation]; FULL_EPISODE QUALIFIED; post-E12 observation margin",
+      "owner": "this contract + RES-87 calibration",
+      "defined_here": true
+    },
+    "L6_CANDIDATE_CREDIBILITY": {
+      "question": "provenance, determinism, test validity, owner visual review",
+      "owner": "RES-88/RES-89/RES-91/owner",
+      "defined_here": true
+    }
+  },
+  "success_composition": {
+    "TASK_SUCCESS": "EXECUTION_VALID AND MODEL_STATE_VALID AND EVENT_CHAIN_VALID AND TASK_PERFORMANCE_VALID AND LANDING_VALID AND BALANCE_VALID AND RECOVERY_VALID AND NO_HARD_FAILURE",
+    "candidate_qualification_adds": [
+      "PROVENANCE_VALID",
+      "DETERMINISM_VALID",
+      "TEST_VALID",
+      "OWNER_VISUAL_VALID"
+    ],
+    "non_inference_rules": [
+      "EVENT_CHAIN_VALID=true never implies any other component",
+      "a component with an open owner decision is unresolved/false, never inferred",
+      "later-layer success never repairs earlier-layer failure",
+      "RECOVERY_VALID is false unless FULL_EPISODE support continuity is QUALIFIED",
+      "a support scope whose closing event does not confirm is NOT_EVALUABLE, never silently QUALIFIED",
+      "while any owner decision affecting a component is open, that component is unresolved/false and TASK_SUCCESS can never be true",
+      "L4-T8 is NOT_EVALUABLE if E11 never onsets, and LANDING_VALID is then false"
+    ]
+  },
+  "machine_readable_result_template": {
+    "EXECUTION_VALID": null,
+    "MODEL_STATE_VALID": null,
+    "EVENT_CHAIN_VALID": null,
+    "TASK_PERFORMANCE_VALID": null,
+    "LANDING_VALID": null,
+    "BALANCE_VALID": null,
+    "RECOVERY_VALID": null,
+    "NO_HARD_FAILURE": null,
+    "TASK_SUCCESS": null
+  },
+  "terminology_freeze": {
+    "INITIAL_STANDING_COM_Z": "COM world z at E1 confirmation reference sample",
+    "COUNTERMOVEMENT_MIN_COM_Z": "minimum COM world z after E1 and before physical takeoff",
+    "COUNTERMOVEMENT_DEPTH": "INITIAL_STANDING_COM_Z - COUNTERMOVEMENT_MIN_COM_Z",
+    "UPWARD_REVERSAL": "supported COM vz negative-to-positive transition (E4)",
+    "PROPULSION": "sustained net-positive upward COM propulsion under bilateral support (E5 window)",
+    "FORCE_THRESHOLD_TAKEOFF": "measurement observable: first bilateral Fz < F_thr sustained 0.010 s; comparability only",
+    "FIRST_TRANSIENT_FORCE_DROPOUT": "first transient bilateral below-F_thr sample regardless of contact (diagnostic)",
+    "SUSTAINED_FORCE_OFF": "first sample of the final uninterrupted sustained below-F_thr bilateral run (diagnostic)",
+    "PHYSICAL_TAKEOFF": "first sample with both contact sets empty, positive clearance both feet, COM vz > 0, no non-plantar support (E6)",
+    "GENUINE_FLIGHT": "sustained physical no-contact + positive clearance both feet for the declared dwell (E7)",
+    "PHYSICAL_FLIGHT_INTERVAL": "[PHYSICAL_TAKEOFF, descending-landing first contact]; contains no foot-floor contact rows",
+    "APEX": "deterministic COM vz positive-to-non-positive crossing strictly inside physical flight (E8); no dwell",
+    "COM_APEX_Z": "COM world z at apex (absolute, never called a height)",
+    "COM_APEX_ABOVE_INITIAL_STANDING": "COM_APEX_Z - INITIAL_STANDING_COM_Z (context)",
+    "COM_RISE_TAKEOFF_TO_APEX": "COM_APEX_Z - TAKEOFF_COM_Z = PRIMARY_CANONICAL_JUMP_HEIGHT",
+    "TAKEOFF_COM_VZ": "COM vertical velocity at physical takeoff",
+    "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ": "TAKEOFF_COM_VZ^2 / (2g) (cross-check)",
+    "FLIGHT_TIME_FORCE_DEFINED": "force-threshold landing time - force-threshold takeoff time (comparability only)",
+    "FLIGHT_TIME_PHYSICAL": "LANDING_FIRST_CONTACT_TIME - PHYSICAL_TAKEOFF_TIME",
+    "LEFT_FOOT_CLEARANCE": "signed minimum distance left foot lowest geometry point to floor; > 0 separated",
+    "RIGHT_FOOT_CLEARANCE": "signed minimum distance right foot lowest geometry point to floor; > 0 separated",
+    "LANDING_FIRST_CONTACT": "first physical floor contact after flight with contact row and foot_clearance <= 0",
+    "BILATERAL_LANDING": "both feet establish plantar contact with load within declared establishment dwell D_BL",
+    "IMPACT_ABSORPTION": "E10: bilateral-support run with residual vertical COM speed below V_ABS_TAIL and admissible L4 whole-body state",
+    "BALANCE_CAPTURE": "E11: sustained whole-body captured state (sagittal COM speed, Hy, support margin, CoP validity, bilateral support)",
+    "RECOVERY_READY": "reported state: captured and in recovery-entry set allowing standing recovery without an extreme corrective maneuver",
+    "STABLE_STANDING": "E12: robust physical standing-envelope membership sustained 0.500 s; RES-87-calibrated envelope",
+    "FALL": "fall-shell collision geom contacts/loads floor",
+    "PROHIBITED_CONTACT": "support by any non-plantar non-fall geom or artificial support",
+    "REFLIGHT": "force-only CANONICAL_REFLIGHT (RES-57): whole Fz < 10.0 N for N_true >= 4 consecutive physics samples (declared SAMPLE_COUNT semantics; span 0.375 ms); historical 0.5 ms wording is an erratum; window-bound after E9 confirmation; chatter separate",
+    "SUPPORT_CONTINUITY": "scoped support-episode quality per SUPPORT_CONTINUITY_SCOPE_ID; QUALIFIED/NOT_QUALIFIED only",
+    "BW": "SYSTEM_WEIGHT = m_system * g = 95.0 kg * 9.81 = 931.95 N; the single normative body-weight quantity (athlete + load)",
+    "g": "9.81 m/s^2 (project V2 constant)",
+    "cop_valid": "CoP valid under the declared per-foot validity threshold; per-foot validities and resultant CoP reported; frame per RES-84 (PD-05)",
+    "FLIGHT_TIME_HEIGHT": "g * T_flight_physical^2 / 8 with T_flight_physical = LANDING_FIRST_CONTACT_TIME - PHYSICAL_TAKEOFF_TIME; g = 9.81",
+    "RECOVERY_VALID": "E12 envelope/robustness AND FULL_EPISODE QUALIFIED AND post-E12 observation margin (OD-13)",
+    "TAKEOFF_COM_Z": "COM world z at physical takeoff [m]; used by COM_RISE_TAKEOFF_TO_APEX",
+    "E11_ONSET": "ONSET_SAMPLE of the confirmed E11 run; >= E10_confirmation; NOT_EVALUABLE window if E11 never confirms"
+  },
+  "retired_conflations": [
+    "apex_height as absolute coordinate called a height",
+    "unqualified jump height",
+    "vertical component called COM speed",
+    "unqualified takeoff",
+    "slice support result presented as full-episode qualification",
+    "0.0363 m and 0.0752 m sharing one label"
+  ],
+  "event_chain_summary": [
+    {
+      "EVENT_ID": "E1",
+      "NAME": "supported_start",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.1
+    },
+    {
+      "EVENT_ID": "E2",
+      "NAME": "countermovement_onset",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.03
+    },
+    {
+      "EVENT_ID": "E3",
+      "NAME": "valid_countermovement",
+      "DWELL_TYPE": "NONE",
+      "DWELL_VALUE_S": null
+    },
+    {
+      "EVENT_ID": "E4",
+      "NAME": "upward_reversal",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.01
+    },
+    {
+      "EVENT_ID": "E5",
+      "NAME": "vertical_propulsion",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.05
+    },
+    {
+      "EVENT_ID": "E6",
+      "NAME": "physical_takeoff",
+      "DWELL_TYPE": "NONE",
+      "DWELL_VALUE_S": null
+    },
+    {
+      "EVENT_ID": "E7",
+      "NAME": "genuine_flight",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.05
+    },
+    {
+      "EVENT_ID": "E8",
+      "NAME": "apex",
+      "DWELL_TYPE": "NONE",
+      "DWELL_VALUE_S": null
+    },
+    {
+      "EVENT_ID": "E9",
+      "NAME": "descending_landing",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.01
+    },
+    {
+      "EVENT_ID": "E10",
+      "NAME": "impact_absorption",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.02
+    },
+    {
+      "EVENT_ID": "E11",
+      "NAME": "balance_capture",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.15
+    },
+    {
+      "EVENT_ID": "E12",
+      "NAME": "stable_recovery",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.5
+    }
+  ],
+  "performance_summary": {
+    "PRIMARY_CANONICAL_JUMP_HEIGHT": "COM_RISE_TAKEOFF_TO_APEX",
+    "cross_check": "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ",
+    "comparability": "FLIGHT_TIME_HEIGHT",
+    "context": "COM_APEX_ABOVE_INITIAL_STANDING",
+    "primary_magnitude_gate": "COM_RISE_TAKEOFF_TO_APEX >= H_MIN",
+    "H_MIN_STATUS": "OWNER_DECISION_REQUIRED (OD-01)",
+    "ballistic_related_quantities_not_triple_gated": true
+  },
+  "threshold_provenance_classes": [
+    "LITERATURE_DIRECT",
+    "LITERATURE_INFORMED",
+    "PHYSICS_IDENTITY",
+    "NUMERICAL_TOLERANCE",
+    "OWNER_TASK_DECISION",
+    "MODEL_DEPENDENT_DEFERRED"
+  ],
+  "metric_classes": [
+    "HARD_GATE",
+    "CONSISTENCY_GATE",
+    "DIAGNOSTIC",
+    "REPORT_ONLY"
+  ],
+  "support_continuity_scopes": [
+    "SUPPORTED_PHASE",
+    "PROPULSION",
+    "TAKEOFF_TRANSITION",
+    "FLIGHT",
+    "LANDING_CAPTURE",
+    "RECOVERY",
+    "FULL_EPISODE"
+  ],
+  "regime_handoff_semantics": "E12 is a physical-state event; CONTROLLER_HANDOFF_TIME and CONTROLLER_REGIME_AT_E12_ONSET reported separately",
+  "negative_control_count": 12,
+  "owner_decision_count": 13,
+  "claim_ceiling_artifact": "SCIENTIFIC_CLAIM_CEILING.md",
+  "model_dependency_artifact": "MODEL_DEPENDENCY_MATRIX.json",
+  "consistency_enforcement": "validate_contract.py (14 gates)",
+  "r001_expected": "FAIL with multiple independent causes",
+  "referenced_artifacts": [
+    "SUCCESSOR_CONTEXT_OF_USE.md",
+    "SCIENTIFIC_CONTRACT_EVIDENCE_TABLE.csv",
+    "SCIENTIFIC_CONTRACT_EVIDENCE_TABLE.md",
+    "EVENT_CONTRACT_E1_E12.md",
+    "EVENT_CONTRACT_E1_E12.json",
+    "PERFORMANCE_METRIC_CONTRACT.md",
+    "PERFORMANCE_METRIC_CONTRACT.json",
+    "LANDING_BALANCE_RECOVERY_CONTRACT.md",
+    "LANDING_BALANCE_RECOVERY_CONTRACT.json",
+    "DWELL_SEMANTICS.md",
+    "DWELL_SEMANTICS.json",
+    "NEGATIVE_CONTROL_CONTRACT.md",
+    "NEGATIVE_CONTROL_CONTRACT.json",
+    "CANONICAL_OUTPUT_SCHEMA.json",
+    "MODEL_DEPENDENCY_MATRIX.json",
+    "SCIENTIFIC_CLAIM_CEILING.md",
+    "OWNER_DECISIONS_REQUIRED.md",
+    "OWNER_DECISIONS_REQUIRED.json",
+    "SOURCE_REVIEW_COVERAGE.json",
+    "CONTRACT_CONSISTENCY_REPORT.md",
+    "CONTRACT_CONSISTENCY_REPORT.json",
+    "citation_resolution.json",
+    "INDEPENDENT_REVIEW_PASSES.md",
+    "RES82_RECEIPT.md"
+  ]
+}

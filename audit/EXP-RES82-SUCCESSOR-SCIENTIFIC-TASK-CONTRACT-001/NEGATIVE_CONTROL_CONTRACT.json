@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "RES82-NEGATIVE-CONTROL-CONTRACT",
+  "mission": "RES82_SUCCESSOR_LOADED_CMJ_SCIENTIFIC_TASK_CONTRACT_001",
+  "linear_issue": "RES-82",
+  "status": "FROZEN_DESIGN",
+  "executable_obligation": "RES-89 / RES-91",
+  "defects_addressed": [
+    "CRIT-003",
+    "HIGH-001",
+    "HIGH-010",
+    "HIGH-011",
+    "HIGH-012",
+    "MED-002",
+    "MED-020",
+    "EVENT_CHAIN_COMPLETION_NOT_TASK_SUCCESS"
+  ],
+  "negative_controls": [
+    {
+      "CONTROL_ID": "NC-01",
+      "NAME": "TRIVIAL_HOP",
+      "CONSTRUCTION": "event-like ordering with COM_RISE_TAKEOFF_TO_APEX below the approved performance floor (e.g., R001-scale ~0.075 m)",
+      "EXPECTED": {
+        "TASK_PERFORMANCE_VALID": false,
+        "TASK_SUCCESS": false
+      },
+      "PREVENTS": "CRIT-003 trivial-hop false pass",
+      "ASSERTION_ANCHOR": "primary performance gate OD-01"
+    },
+    {
+      "CONTROL_ID": "NC-02",
+      "NAME": "FORCE_DROPOUT_WITHOUT_PHYSICAL_FLIGHT",
+      "CONSTRUCTION": "bilateral Fz below F_thr while geometric contact/recontact persists",
+      "EXPECTED": {
+        "PHYSICAL_TAKEOFF": "FAIL",
+        "GENUINE_PHYSICAL_FLIGHT": "FAIL"
+      },
+      "PREVENTS": "HIGH-010 force-only flight declaration",
+      "ASSERTION_ANCHOR": "E6/E7 contact rows and foot_clearance"
+    },
+    {
+      "CONTROL_ID": "NC-03",
+      "NAME": "CONTACT_PHASE_APEX_ZERO_CROSSING",
+      "CONSTRUCTION": "com_vz positive-to-nonpositive crossing while a foot still contacts the floor",
+      "EXPECTED": {
+        "APEX": "FAIL"
+      },
+      "PREVENTS": "HIGH-011 apex latch outside physical flight",
+      "ASSERTION_ANCHOR": "E8 bracketing samples in physical flight"
+    },
+    {
+      "CONTROL_ID": "NC-04",
+      "NAME": "FALL_AT_INITIAL_SUPPORT",
+      "CONSTRUCTION": "adequate plantar Fz with a fall-shell collision loading the floor at start",
+      "EXPECTED": {
+        "E1": "FAIL"
+      },
+      "PREVENTS": "MED-020 fall-unaware supported-start guard",
+      "ASSERTION_ANCHOR": "E1 fall_contact and prohibited_contact"
+    },
+    {
+      "CONTROL_ID": "NC-05",
+      "NAME": "PITCHING_LANDING",
+      "CONSTRUCTION": "vertical velocity arrested but horizontal momentum/Hy/pitch outside L4 bounds, or forward momentum grows after E10, or a landing-window transient whip decays before the E10 point-in-time sample",
+      "EXPECTED": {
+        "E10": "FAIL",
+        "LANDING_VALID": false,
+        "TASK_SUCCESS": false
+      },
+      "PREVENTS": "HIGH-001 vertical-only impact absorption",
+      "ASSERTION_ANCHOR": "L4-T1..T10 (T2 retired redundant); behavioral L4-T8; transient L4-T10"
+    },
+    {
+      "CONTROL_ID": "NC-06",
+      "NAME": "FALSE_BALANCE",
+      "CONSTRUCTION": "com_vz small while com_vx or Hy outside E11 bounds",
+      "EXPECTED": {
+        "E11": "FAIL",
+        "BALANCE_VALID": false
+      },
+      "PREVENTS": "MED-002 single-component COM speed",
+      "ASSERTION_ANCHOR": "E11 com_speed_sagittal and Hy"
+    },
+    {
+      "CONTROL_ID": "NC-07",
+      "NAME": "BRITTLE_STANDING",
+      "CONSTRUCTION": "nominal trace inside envelope but perturbed holds cannot remain/return",
+      "EXPECTED": {
+        "E12_QUALIFICATION": "FAIL"
+      },
+      "PREVENTS": "HIGH-012 one-trajectory overfit envelope",
+      "ASSERTION_ANCHOR": "standing_envelope robustness calibration (RES-87)"
+    },
+    {
+      "CONTROL_ID": "NC-08",
+      "NAME": "POST_LANDING_REFLIGHT",
+      "CONSTRUCTION": "landing then support loss beyond approved chatter/reflight tolerance",
+      "EXPECTED": {
+        "TASK_SUCCESS": false
+      },
+      "PREVENTS": "hidden lost landing",
+      "ASSERTION_ANCHOR": "NO_POST_LANDING_REFLIGHT; FULL_EPISODE support scope"
+    },
+    {
+      "CONTROL_ID": "NC-09",
+      "NAME": "EXCESSIVE_PENETRATION",
+      "CONSTRUCTION": "penetration beyond declared tolerance",
+      "EXPECTED": {
+        "TASK_SUCCESS": false,
+        "PENETRATION_MAX": "FAIL"
+      },
+      "PREVENTS": "inadmissible physical state scored as success",
+      "ASSERTION_ANCHOR": "MAX_PENETRATION <= 0.010 m (OD-04 re-approval)"
+    },
+    {
+      "CONTROL_ID": "NC-10",
+      "NAME": "EVENT_CHAIN_WITHOUT_TASK_SUCCESS",
+      "CONSTRUCTION": "all twelve event labels achieved while performance and/or layer gates fail",
+      "EXPECTED": {
+        "EVENT_CHAIN_VALID": true,
+        "TASK_SUCCESS": false
+      },
+      "PREVENTS": "12/12 event latching implies success (R001 disposition)",
+      "ASSERTION_ANCHOR": "SUCCESSOR_TASK_CONTRACT result conjunction rule"
+    },
+    {
+      "CONTROL_ID": "NC-11",
+      "NAME": "MOVING_START_CMJ_HYBRID",
+      "CONSTRUCTION": "non-quiescent horizontal start or horizontal momentum smuggled through the flight and scrubbed in landing (standing-broad-jump hybrid)",
+      "EXPECTED": {
+        "E1": "FAIL",
+        "L4_T9": "FAIL"
+      },
+      "PREVENTS": "a CMJ contract satisfied by a horizontal-momentum hybrid (ADV-7)",
+      "ASSERTION_ANCHOR": "E1 abs(com_vx) < 0.05 m/s (OD-13); MAX_ABS_COM_VX_FIRST_CONTACT_TO_E10 (OD-04)"
+    },
+    {
+      "CONTROL_ID": "NC-12",
+      "NAME": "FREEZE_OR_STATE_OVERRIDE_RECOVERY",
+      "CONSTRUCTION": "state freeze/override or immediate post-E12 termination faking a stable recovery",
+      "EXPECTED": {
+        "TASK_SUCCESS": false,
+        "NO_ARTIFICIAL_SUPPORT": "FAIL",
+        "HORIZON_SUFFICIENT": "FAIL",
+        "RECOVERY_VALID": false
+      },
+      "PREVENTS": "recovery by freezing / recovery certified by short horizon (ADV-5)",
+      "ASSERTION_ANCHOR": "NO_ARTIFICIAL_SUPPORT state-override scope; HORIZON_SUFFICIENT post-E12 margin (OD-13); RECOVERY_VALID"
+    }
+  ],
+  "adversarial_false_pass_mandate": "the adversarial review pass must attempt to construct a physically bad trajectory satisfying the contract as written; success invalidates the contract until the gap is closed",
+  "mapping_to_future_tests": {
+    "NC-01": "RES-89/RES-91",
+    "NC-02": "RES-89/RES-91",
+    "NC-03": "RES-89/RES-91",
+    "NC-04": "RES-89/RES-91",
+    "NC-05": "RES-89/RES-91",
+    "NC-06": "RES-89/RES-91",
+    "NC-07": "RES-87/RES-89",
+    "NC-08": "RES-89/RES-91",
+    "NC-09": "RES-89/RES-91",
+    "NC-10": "RES-89/RES-91",
+    "NC-11": "RES-89/RES-91",
+    "NC-12": "RES-88/RES-89"
+  }
+}

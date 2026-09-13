@@ -1,0 +1,593 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "RES82-EVENT-CONTRACT-E1-E12",
+  "mission": "RES82_SUCCESSOR_LOADED_CMJ_SCIENTIFIC_TASK_CONTRACT_001",
+  "linear_issue": "RES-82",
+  "status": "STRUCTURALLY_FROZEN",
+  "status_qualifier": "numeric values marked OWNER_DECISION_REQUIRED or MODEL_DEPENDENT_DEFERRED remain open per OWNER_DECISIONS_REQUIRED.json",
+  "closed_defects": [
+    "HIGH-010",
+    "HIGH-011",
+    "MED-001",
+    "MED-002",
+    "MED-012",
+    "MED-013",
+    "MED-020",
+    "EVENT_CHAIN_COMPLETION_NOT_TASK_SUCCESS"
+  ],
+  "dwell_convention_artifact": "DWELL_SEMANTICS.json",
+  "shared_vocabulary": {
+    "fall_contact": "any fall-shell collision geom has a floor contact row or carries normal load",
+    "prohibited_contact": "any non-plantar non-fall geom contacts floor or supports load; includes support substitutes",
+    "plantar_contact": "foot plantar box has at least one floor contact row",
+    "foot_clearance": "signed minimum distance of the lowest foot geometry point to the floor plane; > 0 separated; rotated geometry must be correct",
+    "Fz": "virtual-plate normal force per foot",
+    "Fz_whole": "left + right + any other measured vertical load",
+    "BW": "SYSTEM_WEIGHT = m_system * g = 95.0 kg * 9.81 m/s^2 = 931.95 N; the single normative body-weight quantity (total system weight, athlete + load); never athlete-only weight",
+    "g": "gravity constant 9.81 m/s^2 (project V2 constant, matches Plant gravity)",
+    "F_thr": "declared per-foot comparability force threshold (candidate 10 N; OD-09); never defines physical takeoff/flight",
+    "bilateral_loaded": "Fz(left) > F_thr and Fz(right) > F_thr",
+    "bilateral_plantar": "plantar_contact left and right",
+    "no_nonplantar_support": "not prohibited_contact, no fall shell loading, no artificial support force and no state/integration override outside the Plant",
+    "com_speed_sagittal": "sqrt(com_vx^2 + com_vz^2); the only quantity allowed to be called COM speed in this sagittal model",
+    "Hy": "whole-body centroidal angular momentum about the sagittal y axis",
+    "support_margin": "signed distance from COM ground projection to the active support hull boundary; positive inside; must be <= 0 during true flight (no support)",
+    "cop_valid": "CoP valid under the declared per-foot validity threshold; per-foot validities and the resultant CoP are reported; frame per RES-84 (PD-05)",
+    "reflight": "CANONICAL_REFLIGHT (force-only, RES-57): whole Fz < 10.0 N at every physics sample for N_true >= 4 consecutive samples (declared SAMPLE_COUNT semantics; span 0.375 ms = 3 intervals; the historical 0.5 ms wording spans 4 intervals and is an erratum, see DWELL_SEMANTICS). No separation evidence required; window-bound after E9 confirmation. Chatter transitions are a separate count.",
+    "standing_envelope": "physical robust-standing predicate calibrated by RES-87 over perturbed holds; never one deterministic trace",
+    "C_GEOM": "geometric clearance tolerance derived from contact/numerical tolerances (OD-02)",
+    "V_DESC": "vertical descent-rate threshold on |com_vz| at first landing contact (candidate 0.10 m/s; OD-08)",
+    "V_ABS_TAIL": "residual vertical speed |com_vz| defining impact arrest (candidate 0.05 m/s; OD-08)",
+    "E11_ONSET": "ONSET_SAMPLE of the CONFIRMED E11 run; must satisfy E11_onset >= E10_confirmation; if E11 never confirms, the L4-T8 window is NOT_EVALUABLE and LANDING_VALID=false"
+  },
+  "event_order": [
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5",
+    "E6",
+    "E7",
+    "E8",
+    "E9",
+    "E10",
+    "E11",
+    "E12"
+  ],
+  "events": [
+    {
+      "EVENT_ID": "E1",
+      "NAME": "supported_start",
+      "SCIENTIFIC_MEANING": "The athlete is in a valid quiet bilateral standing state on the floor and has not fallen.",
+      "PREDECESSOR": null,
+      "ONSET_PREDICATE": "finite AND bilateral_loaded AND Fz_whole > 0.30*BW AND support_margin > 0.02 AND abs(trunk_pitch) < 0.1745 AND abs(com_vz) < 0.05 AND abs(com_vx) < 0.05 AND NOT fall_contact AND NOT prohibited_contact",
+      "SUSTAIN_PREDICATE": "identical to ONSET_PREDICATE",
+      "CONFIRMATION_PREDICATE": "continuous run with PHYSICAL_TIME dwell D=0.100 s (K_D=800)",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.1,
+      "REQUIRED_MEASUREMENTS": [
+        "Fz_left",
+        "Fz_right",
+        "Fz_whole",
+        "com_z",
+        "com_vx",
+        "com_vz",
+        "support_margin",
+        "trunk_pitch",
+        "fall_contact",
+        "prohibited_contact",
+        "finite",
+        "internal_quiescence_proxy (joint rates, Hy, CoP position; numeric RES-84)"
+      ],
+      "FAILURE_BLOCKERS": [
+        "fall_contact_true",
+        "prohibited_contact_true",
+        "support_margin_le_0",
+        "non_finite_state",
+        "no_bilateral_plantar_support",
+        "internal_quiescence_violation (joint-rate/CoP placeholder; numeric RES-84)"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-04"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "The trajectory began from a physically supported, quiescent standing state, not from a fall shell.",
+      "NUMERIC": {
+        "FZ_FLOOR_BW": 0.3,
+        "MARGIN_MIN_M": 0.02,
+        "TRUNK_TILT_MAX_RAD": 0.1745,
+        "COM_VZ_MAX_MPS": 0.05,
+        "COM_VX_MAX_MPS": 0.05,
+        "STATUS": "OWNER_TASK_DECISION",
+        "OWNER_DECISION": "OD-13"
+      }
+    },
+    {
+      "EVENT_ID": "E2",
+      "NAME": "countermovement_onset",
+      "SCIENTIFIC_MEANING": "The athlete begins the deliberate downward eccentric motion while supported.",
+      "PREDECESSOR": "E1",
+      "ONSET_PREDICATE": "com_vz < -0.08 AND Fz_whole > 0.30*BW AND NOT fall_contact AND NOT prohibited_contact",
+      "SUSTAIN_PREDICATE": "com_vz < -0.03",
+      "CONFIRMATION_PREDICATE": "run with PHYSICAL_TIME dwell D=0.030 s (K_D=240); onset predicate strictly stronger than sustain",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.03,
+      "REQUIRED_MEASUREMENTS": [
+        "com_vz",
+        "Fz_whole",
+        "fall_contact",
+        "prohibited_contact"
+      ],
+      "FAILURE_BLOCKERS": [
+        "support_loss_before_confirmation",
+        "fall_contact_true",
+        "prohibited_contact_true"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-01"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "A countermovement was initiated from supported standing."
+    },
+    {
+      "EVENT_ID": "E3",
+      "NAME": "valid_countermovement",
+      "SCIENTIFIC_MEANING": "The countermovement reached a meaningful depth while supported: a genuine eccentric phase.",
+      "PREDECESSOR": "E2",
+      "ONSET_PREDICATE": "(INITIAL_STANDING_COM_Z - com_z) > DEPTH_MIN AND Fz_whole > 0.30*BW AND bilateral_plantar AND NOT fall_contact AND NOT prohibited_contact",
+      "SUSTAIN_PREDICATE": null,
+      "CONFIRMATION_PREDICATE": "first sample satisfying ONSET_PREDICATE (DWELL_TYPE=NONE)",
+      "DWELL_TYPE": "NONE",
+      "DWELL_VALUE_S": null,
+      "REQUIRED_MEASUREMENTS": [
+        "com_z",
+        "INITIAL_STANDING_COM_Z",
+        "Fz_whole",
+        "bilateral_plantar",
+        "fall_contact",
+        "prohibited_contact"
+      ],
+      "FAILURE_BLOCKERS": [
+        "depth_never_reached_before_reversal",
+        "fall_contact_true",
+        "prohibited_contact_true"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-01"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "The movement contained a genuine countermovement depth, not a hop or a threshold artifact.",
+      "NUMERIC": {
+        "DEPTH_MIN_M": 0.1,
+        "STATUS": "MODEL_DEPENDENT_DEFERRED",
+        "OWNER_DECISION": "OD-07"
+      }
+    },
+    {
+      "EVENT_ID": "E4",
+      "NAME": "upward_reversal",
+      "SCIENTIFIC_MEANING": "The COM vertical velocity reverses from negative to positive under support.",
+      "PREDECESSOR": "E3",
+      "ONSET_PREDICATE": "com_vz > +0.02 after a confirmed negative-com_vz countermovement run",
+      "SUSTAIN_PREDICATE": "com_vz > 0",
+      "CONFIRMATION_PREDICATE": "run with PHYSICAL_TIME dwell D=0.010 s (K_D=80)",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.01,
+      "REQUIRED_MEASUREMENTS": [
+        "com_vz",
+        "support_state"
+      ],
+      "FAILURE_BLOCKERS": [
+        "support_loss",
+        "fall_contact_true",
+        "non_finite_state"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-01"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "A true reversal existed between eccentric and concentric phases."
+    },
+    {
+      "EVENT_ID": "E5",
+      "NAME": "vertical_propulsion",
+      "SCIENTIFIC_MEANING": "The athlete produces sustained net-positive upward propulsion while bilaterally supported.",
+      "PREDECESSOR": "E4",
+      "ONSET_PREDICATE": "com_vz > 0 AND Fz_whole > 1.05*BW AND bilateral_plantar AND NOT prohibited_contact",
+      "SUSTAIN_PREDICATE": "identical to ONSET_PREDICATE",
+      "CONFIRMATION_PREDICATE": "run with PHYSICAL_TIME dwell D=0.050 s (K_D=400)",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.05,
+      "REQUIRED_MEASUREMENTS": [
+        "com_vz",
+        "Fz_whole",
+        "bilateral_plantar",
+        "prohibited_contact"
+      ],
+      "FAILURE_BLOCKERS": [
+        "unilateral_support_during_run",
+        "fall_contact_true",
+        "prohibited_contact_true",
+        "physical_takeoff_before_dwell"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-02"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "A sustained propulsive phase existed under bilateral support."
+    },
+    {
+      "EVENT_ID": "E6",
+      "NAME": "physical_takeoff",
+      "SCIENTIFIC_MEANING": "The instant the system physically leaves the floor: all foot-floor contacts ended with positive geometric clearance, upward COM velocity, and no other support.",
+      "PREDECESSOR": "E5",
+      "ONSET_PREDICATE": "NOT plantar_contact(left) AND NOT plantar_contact(right) AND foot_clearance(left) > C_GEOM AND foot_clearance(right) > C_GEOM AND com_vz > 0 AND NOT fall_contact AND no_nonplantar_support",
+      "SUSTAIN_PREDICATE": null,
+      "CONFIRMATION_PREDICATE": "first sample satisfying ONSET_PREDICATE (DWELL_TYPE=NONE)",
+      "DWELL_TYPE": "NONE",
+      "DWELL_VALUE_S": null,
+      "REQUIRED_MEASUREMENTS": [
+        "plantar_contact_left",
+        "plantar_contact_right",
+        "foot_clearance_left",
+        "foot_clearance_right",
+        "com_vz",
+        "fall_contact",
+        "prohibited_contact"
+      ],
+      "FAILURE_BLOCKERS": [
+        "fall_contact_support_substitute",
+        "prohibited_contact_true",
+        "clearance_condition_never_met"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-02"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "Physical flight began here; this is not a force-threshold artifact.",
+      "NOTES": "FORCE_THRESHOLD_TAKEOFF is a separate measurement observable with D=0.010 s at F_thr and never defines E6; sustain of the no-contact condition is owned by E7 so no predicate depends on future events."
+    },
+    {
+      "EVENT_ID": "E7",
+      "NAME": "genuine_flight",
+      "SCIENTIFIC_MEANING": "Sustained physical flight: both feet physically separated from the floor continuously for the declared dwell.",
+      "PREDECESSOR": "E6",
+      "ONSET_PREDICATE": "NOT plantar_contact(left) AND NOT plantar_contact(right) AND foot_clearance(left) > C_GEOM AND foot_clearance(right) > C_GEOM AND no_nonplantar_support",
+      "SUSTAIN_PREDICATE": "identical to ONSET_PREDICATE",
+      "CONFIRMATION_PREDICATE": "run with PHYSICAL_TIME dwell D=0.050 s (K_D=400)",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.05,
+      "REQUIRED_MEASUREMENTS": [
+        "plantar_contact_left",
+        "plantar_contact_right",
+        "foot_clearance_left",
+        "foot_clearance_right",
+        "fall_contact",
+        "prohibited_contact"
+      ],
+      "FAILURE_BLOCKERS": [
+        "recontact_inside_dwell",
+        "fall_contact_true",
+        "prohibited_contact_true",
+        "clearance_violation"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-02",
+        "NC-08"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "The feet were genuinely off the floor for a sustained interval; no geometry is declared that is not executed.",
+      "NUMERIC": {
+        "DWELL_STATUS": "OWNER_DECISION_REQUIRED",
+        "OWNER_DECISION": "OD-03",
+        "CANDIDATE_S": 0.05
+      }
+    },
+    {
+      "EVENT_ID": "E8",
+      "NAME": "apex",
+      "SCIENTIFIC_MEANING": "The deterministic instant of maximum COM height during physical flight where com_vz crosses from positive to non-positive.",
+      "PREDECESSOR": "E7",
+      "ONSET_PREDICATE": "sample pair (s_prev, s_cur) in physical flight (no plantar contact AND foot_clearance > C_GEOM both feet at both samples) with com_vz(s_prev) > 0 AND com_vz(s_cur) <= 0",
+      "SUSTAIN_PREDICATE": null,
+      "CONFIRMATION_PREDICATE": "APEX_TIME = t_prev + (com_vz(s_prev)/(com_vz(s_prev)-com_vz(s_cur)))*(t_cur-t_prev); APEX_COM_Z by linear interpolation over the bracketing pair; crossing strictly inside the physical-flight interval",
+      "DWELL_TYPE": "NONE",
+      "DWELL_VALUE_S": null,
+      "REQUIRED_MEASUREMENTS": [
+        "com_vz",
+        "com_z",
+        "plantar_contact",
+        "foot_clearance",
+        "time_s"
+      ],
+      "FAILURE_BLOCKERS": [
+        "crossing_with_contact_present",
+        "crossing_outside_certified_flight_interval",
+        "fall_during_flight"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-03"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "The apex is a deterministic ballistic zero-crossing inside physical flight.",
+      "APEX_DWELL_REQUIRED": false,
+      "NOTES": "The historical APEX_DWELL_S=0.005 declaration is retired; a mathematical apex is an instant. HIGH-011 closed by zero-crossing semantics plus the physical-flight guard."
+    },
+    {
+      "EVENT_ID": "E9",
+      "NAME": "descending_landing",
+      "SCIENTIFIC_MEANING": "First physical re-contact with the floor after flight, with the COM still descending.",
+      "PREDECESSOR": "E8",
+      "ONSET_PREDICATE": "(plantar_contact(left) OR plantar_contact(right)) AND com_vz < -V_DESC AND NOT fall_contact AND NOT prohibited_contact",
+      "SUSTAIN_PREDICATE": "plantar_contact(left) OR plantar_contact(right)",
+      "CONFIRMATION_PREDICATE": "run with PHYSICAL_TIME dwell D=0.010 s (K_D=80)",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.01,
+      "REQUIRED_MEASUREMENTS": [
+        "plantar_contact_left",
+        "plantar_contact_right",
+        "com_vz",
+        "fall_contact",
+        "prohibited_contact",
+        "geometric_first_contact_time"
+      ],
+      "FAILURE_BLOCKERS": [
+        "fall_shell_landing",
+        "prohibited_contact_true",
+        "no_contact_after_flight"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-03",
+        "NC-08"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "The flight ended in a physical bilateral-capable foot landing.",
+      "NUMERIC": {
+        "V_DESC_MPS": 0.1,
+        "STATUS": "OWNER_TASK_DECISION",
+        "OWNER_DECISION": "OD-08"
+      },
+      "NOTES": "LANDING_FIRST_CONTACT (geometric) and BILATERAL_LANDING_ESTABLISHED are separate metrics; V_DESC is a vertical descent-rate threshold on abs(com_vz) (OD-08)."
+    },
+    {
+      "EVENT_ID": "E10",
+      "NAME": "impact_absorption",
+      "SCIENTIFIC_MEANING": "After first landing contact the athlete establishes bilateral support and arrests downward COM motion, producing a whole-body post-impact admissible state.",
+      "PREDECESSOR": "E9",
+      "ONSET_PREDICATE": "bilateral_plantar AND bilateral_loaded AND abs(com_vz) < V_ABS_TAIL AND NOT reflight AND NOT fall_contact AND NOT prohibited_contact",
+      "SUSTAIN_PREDICATE": "identical to ONSET_PREDICATE",
+      "CONFIRMATION_PREDICATE": "run with PHYSICAL_TIME dwell D=0.020 s (K_D=160); at confirmation the point-in-time L4 state (L4-T1..T7) is evaluated. The behavioral L4-T8 window is [E10_confirmation, E11_onset] and is evaluated by the L4 layer, not by the E10 event latch.",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.02,
+      "REQUIRED_MEASUREMENTS": [
+        "com_vz",
+        "bilateral_plantar",
+        "bilateral_loaded",
+        "reflight",
+        "fall_contact",
+        "prohibited_contact",
+        "com_vx",
+        "Hy",
+        "root_pitch",
+        "trunk_pitch",
+        "root_pitch_rate",
+        "trunk_pitch_rate"
+      ],
+      "FAILURE_BLOCKERS": [
+        "reflight_within_run",
+        "fall_contact_true",
+        "prohibited_contact_true",
+        "unilateral_support_at_confirmation",
+        "layer_landing_gate_failure (layer-owned; does not unlatch E10)"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-05",
+        "NC-08"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "The impact was absorbed into an admissible whole-body landing state.",
+      "NOTES": "The local predicate is deliberately minimal; whole-body point-in-time gates L4-T1..T7 are evaluated by the L4 layer at E10 confirmation and the behavioral gates L4-T8/T9/T10 on their declared windows. E10 itself is a physical-history fact and is never unlatched by a layer failure."
+    },
+    {
+      "EVENT_ID": "E11",
+      "NAME": "balance_capture",
+      "SCIENTIFIC_MEANING": "The whole-body state is dynamically captured: sagittal COM speed small, centroidal angular momentum bounded, COM inside the active support hull with margin, CoP valid, bilateral support.",
+      "PREDECESSOR": "E10",
+      "ONSET_PREDICATE": "bilateral_plantar AND bilateral_loaded AND com_speed_sagittal <= C_11 AND abs(Hy) <= HY_11 AND support_margin > M_11 AND cop_valid AND NOT reflight AND NOT fall_contact AND NOT prohibited_contact",
+      "SUSTAIN_PREDICATE": "identical to ONSET_PREDICATE",
+      "CONFIRMATION_PREDICATE": "run with PHYSICAL_TIME dwell D=0.150 s (K_D=1200)",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.15,
+      "REQUIRED_MEASUREMENTS": [
+        "com_vx",
+        "com_vz",
+        "com_speed_sagittal",
+        "Hy",
+        "support_margin",
+        "cop_valid",
+        "bilateral_plantar",
+        "bilateral_loaded",
+        "reflight",
+        "fall_contact",
+        "prohibited_contact"
+      ],
+      "FAILURE_BLOCKERS": [
+        "com_vx_outside_bound",
+        "Hy_outside_bound",
+        "no_support_margin",
+        "cop_invalid",
+        "reflight",
+        "fall_contact_true"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-06"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "The landing momentum was captured; the athlete is not merely vertically stopped.",
+      "NOTES": "The historical COM_SPEED name/implementation mismatch is closed (MED-002): the successor quantity is com_speed_sagittal; bounds are OD-05, structure informed by TTS/DPSI and capture-point methods but not imported as clinical thresholds. E11_onset closes the L4-T8 behavioral window; there is no separate latency bound because L4-T8 bounds the whole inter-window momentum."
+    },
+    {
+      "EVENT_ID": "E12",
+      "NAME": "stable_recovery",
+      "SCIENTIFIC_MEANING": "The athlete is in the robust physical standing envelope continuously for the declared dwell: quiet bilateral support with no fall and no reflight.",
+      "PREDECESSOR": "E11",
+      "ONSET_PREDICATE": "standing_envelope AND NOT reflight AND NOT fall_contact AND NOT prohibited_contact",
+      "SUSTAIN_PREDICATE": "identical to ONSET_PREDICATE",
+      "CONFIRMATION_PREDICATE": "run with PHYSICAL_TIME dwell D=0.500 s (K_D=4000)",
+      "DWELL_TYPE": "PHYSICAL_TIME",
+      "DWELL_VALUE_S": 0.5,
+      "REQUIRED_MEASUREMENTS": [
+        "posture_vector",
+        "com_z",
+        "com_vx",
+        "com_vz",
+        "Hy",
+        "joint_rates",
+        "Fz_left",
+        "Fz_right",
+        "support_margin",
+        "cop_valid",
+        "fall_contact",
+        "reflight",
+        "prohibited_contact"
+      ],
+      "FAILURE_BLOCKERS": [
+        "envelope_exit",
+        "fall_contact_true",
+        "reflight",
+        "prohibited_contact_true",
+        "cop_invalid"
+      ],
+      "NEGATIVE_CONTROLS": [
+        "NC-07",
+        "NC-08"
+      ],
+      "PRIMARY_OR_DIAGNOSTIC": "PRIMARY",
+      "CLAIM_SUPPORTED": "The athlete recovered to a robust physical standing envelope, not an equality to one historical trace.",
+      "NOTES": "standing_envelope calibration is a RES-87 obligation (multiple perturbed holds, declared robustness target); the micron-scale one-trajectory/ULP envelope is retired (HIGH-012). E12 is a physical-state event independent of controller mode; CONTROLLER_HANDOFF_TIME is reported separately (MED-013 closure, Option B)."
+    }
+  ],
+  "event_numeric_provenance": {
+    "E1": {
+      "0.30*BW": "OWNER_TASK_DECISION (OD-13; historical project floor)",
+      "0.02 m margin": "OWNER_TASK_DECISION (OD-13; historical project margin)",
+      "0.1745 rad trunk tilt": "OWNER_TASK_DECISION (OD-13; historical project tilt limit)",
+      "0.05 m/s com_vz": "OWNER_TASK_DECISION (OD-13; historical project quiescence)",
+      "0.05 m/s com_vx": "OWNER_TASK_DECISION (OD-13; ADV-7 quiescence closure)"
+    },
+    "E2": {
+      "-0.08 m/s onset": "OWNER_TASK_DECISION (historical project onset; retained)",
+      "-0.03 m/s sustain": "OWNER_TASK_DECISION (historical project onset; retained)",
+      "0.30*BW": "OWNER_TASK_DECISION (as E1)"
+    },
+    "E3": {
+      "0.30*BW": "OWNER_TASK_DECISION (as E1)",
+      "DEPTH_MIN": "MODEL_DEPENDENT_DEFERRED (OD-07)"
+    },
+    "E4": {
+      "+0.02 m/s onset": "OWNER_TASK_DECISION (historical project reversal; retained)",
+      "0 m/s sustain": "PHYSICS_IDENTITY (sign reversal)"
+    },
+    "E5": {
+      "1.05*BW": "PHYSICS_IDENTITY (net positive upward impulse) + OWNER_TASK_DECISION margin"
+    },
+    "E6": {
+      "C_GEOM": "NUMERICAL_TOLERANCE (OD-02)"
+    },
+    "E7": {
+      "C_GEOM": "NUMERICAL_TOLERANCE (OD-02)",
+      "0.05 s dwell": "OWNER_TASK_DECISION (OD-03)"
+    },
+    "E8": {
+      "zero crossing": "PHYSICS_IDENTITY (no numeric constant)"
+    },
+    "E9": {
+      "V_DESC 0.10 m/s": "OWNER_TASK_DECISION (OD-08)"
+    },
+    "E10": {
+      "V_ABS_TAIL 0.05 m/s": "OWNER_TASK_DECISION (OD-08)"
+    },
+    "E11": {
+      "C_11": "OWNER_TASK_DECISION (OD-05)",
+      "HY_11": "OWNER_TASK_DECISION (OD-05)",
+      "M_11": "OWNER_TASK_DECISION (OD-05)",
+      "E11_ONSET": "EVENT_CONTRACT_SEMANTICS (confirmed-run onset; non-retroactive)"
+    },
+    "E12": {
+      "0.500 s dwell": "OWNER_TASK_DECISION (structural; retained)",
+      "envelope numerics": "MODEL_DEPENDENT_DEFERRED (OD-12)"
+    }
+  },
+  "force_threshold_observables": [
+    {
+      "NAME": "FORCE_THRESHOLD_TAKEOFF_TIME",
+      "DEFINITION": "first sample with Fz(left) < F_thr AND Fz(right) < F_thr sustained 0.010 s (PHYSICAL_TIME)",
+      "ROLE": "measurement_only"
+    },
+    {
+      "NAME": "FORCE_THRESHOLD_LANDING_TIME",
+      "DEFINITION": "first sample after takeoff with Fz(left) > F_thr OR Fz(right) > F_thr sustained 0.010 s",
+      "ROLE": "measurement_only"
+    },
+    {
+      "NAME": "FORCE_DEFINED_FLIGHT_DURATION",
+      "DEFINITION": "FORCE_THRESHOLD_LANDING_TIME - FORCE_THRESHOLD_TAKEOFF_TIME",
+      "ROLE": "measurement_only"
+    },
+    {
+      "NAME": "FIRST_TRANSIENT_FORCE_DROPOUT_TIME",
+      "DEFINITION": "first sample with transient bilateral force below F_thr regardless of contact",
+      "ROLE": "defect_evidence_diagnostic"
+    },
+    {
+      "NAME": "SUSTAINED_FORCE_OFF_TIME",
+      "DEFINITION": "first sample of the final sustained bilateral below-F_thr run not interrupted by above-threshold force before landing",
+      "ROLE": "measurement_only"
+    }
+  ],
+  "non_event_dechatter_dwells": {
+    "REFLIGHT": {
+      "DEFINITION": "whole Fz < 10.0 N for N_true >= 4 consecutive physics samples (declared SAMPLE_COUNT semantics; span 0.375 ms)",
+      "FORCE_VALUES": "RES-57 frozen project authority (WHOLE_FZ_THRESHOLD_N=10.0, CANONICAL_REFLIGHT_MIN_STEPS=4)",
+      "EVIDENCE_REQUIRED": false,
+      "ARITHMETIC_NOTE": "4 samples span 3 intervals = 0.375 ms; the historical 0.5 ms wording counted 4 intervals and is preserved as an erratum"
+    },
+    "CHATTER_TRANSITION": {
+      "DEFINITION": "whole-Fz crossing of the 10.0 N threshold",
+      "MAX_TRANSITIONS": 8
+    },
+    "note": "these are project-authority force-only dechatter rules retained unchanged; they are not physical-state definitions and do not conflict with OD-11"
+  },
+  "support_continuity_scopes": {
+    "SUPPORTED_PHASE": "[E1_confirmation, E6)",
+    "PROPULSION": "[E5_onset, E6)",
+    "TAKEOFF_TRANSITION": "[E5_confirmation, E7_confirmation]",
+    "FLIGHT": "[E6, E9)",
+    "LANDING_CAPTURE": "[E9, E11_confirmation)",
+    "RECOVERY": "[E11_confirmation, E12_confirmation]",
+    "FULL_EPISODE": "[t_0, E12_confirmation] or [t_0, horizon] if E12 does not confirm",
+    "t_0": "episode start sample (reset state)",
+    "endpoint_rule": "if a closing event does not confirm, the window closes at the episode horizon and the scope result is NOT_EVALUABLE (never silently QUALIFIED)",
+    "rules": [
+      "results are QUALIFIED/NOT_QUALIFIED/NOT_EVALUABLE per scope; the phrase support continuity PASS is invalid",
+      "TASK_SUCCESS requires FULL_EPISODE QUALIFIED; RECOVERY_VALID is false unless FULL_EPISODE is QUALIFIED",
+      "the top-level FULL_EPISODE field must agree with the FULL_EPISODE entry in SUPPORT_CONTINUITY_SCOPE_RESULTS",
+      "post-landing slice results are LANDING_CAPTURE/RECOVERY diagnostics only",
+      "RES-57 measurement layer supplies sample/episode definitions; this contract supplies the scope binding"
+    ]
+  },
+  "regime_handoff_semantics": {
+    "ADJUDICATION": "Option B: scientific events describe physical state, not controller mode",
+    "CONTROLLER_HANDOFF_TIME": "mandatory separate reported metadata",
+    "CONTROLLER_REGIME_AT_E12_ONSET": "mandatory separate reported metadata",
+    "E12_REQUIREMENT": "physical standing predicate; L6 candidate credibility separately requires the declared final standing regime or an explicitly reduced claim"
+  },
+  "r001_expected": {
+    "E6_E7": "historical force-only semantics; physical takeoff/flight not demonstrated",
+    "E8": "historical apex fallback not independently auditable as flight-guarded; NC-03 required",
+    "E10": "FAIL on Hy/root pitch/trunk pitch/forward momentum",
+    "E11": "FAIL/not demonstrated on sagittal COM speed and Hy",
+    "E12": "FAIL on robustness envelope and regime",
+    "FULL_EPISODE": "FAIL; historical support NOT_QUALIFIED, chatter 188, reflight runs [4,8,1815]"
+  }
+}

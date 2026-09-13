@@ -1,0 +1,281 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "RES82-MODEL-DEPENDENCY-MATRIX",
+  "mission": "RES82_SUCCESSOR_LOADED_CMJ_SCIENTIFIC_TASK_CONTRACT_001",
+  "linear_issue": "RES-82",
+  "purpose": "Separate successor contract requirements that can be frozen independently of the Plant representation from those that must wait for RES-83 (human-valid Plant rebuild), RES-84 (measurement rebuild), or RES-87 (recovery envelope calibration).",
+  "categories": {
+    "PLANT_INDEPENDENT_FROZEN_NOW": [
+      {
+        "ID": "PI-01",
+        "REQUIREMENT": "Task identity: nominal bilateral 20 kg loaded countermovement jump",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-02",
+        "REQUIREMENT": "Context of use and claim ceiling",
+        "FROZEN": true,
+        "ARTIFACT": "SUCCESSOR_CONTEXT_OF_USE.md / SCIENTIFIC_CLAIM_CEILING.md"
+      },
+      {
+        "ID": "PI-03",
+        "REQUIREMENT": "Jump-height definition families and the primary canonical quantity (direct COM rise physical-takeoff to apex)",
+        "FROZEN": true,
+        "ARTIFACT": "PERFORMANCE_METRIC_CONTRACT"
+      },
+      {
+        "ID": "PI-04",
+        "REQUIREMENT": "Physical takeoff semantics (contact geometry + clearance + upward COM velocity), independent of force thresholds",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-05",
+        "REQUIREMENT": "Genuine-flight semantics (sustained no-contact + clearance)",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-06",
+        "REQUIREMENT": "Apex semantics (zero crossing inside physical flight, no dwell)",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-07",
+        "REQUIREMENT": "Event DAG E1-E12 order, predecessors, dwell types/convention, blockers, negative controls",
+        "FROZEN": true,
+        "ARTIFACT": "EVENT_CONTRACT_E1_E12 / DWELL_SEMANTICS"
+      },
+      {
+        "ID": "PI-08",
+        "REQUIREMENT": "No-fall / no-prohibited-contact semantics",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-09",
+        "REQUIREMENT": "Countermovement concept: supported negative COM motion, depth, reversal, sustained propulsion",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-10",
+        "REQUIREMENT": "Landing capture concept: whole-body state, momentum capture not vertical-arrest alone",
+        "FROZEN": true,
+        "ARTIFACT": "LANDING_BALANCE_RECOVERY_CONTRACT"
+      },
+      {
+        "ID": "PI-11",
+        "REQUIREMENT": "Balance capture variables (sagittal COM speed, Hy, support margin, CoP validity, bilateral support)",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-12",
+        "REQUIREMENT": "Recovery/standing envelope structure and robustness-calibration obligation (RES-87)",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-13",
+        "REQUIREMENT": "Support continuity scope IDs and full-episode requirement",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-14",
+        "REQUIREMENT": "E12 is a physical-state event; controller handoff reported separately",
+        "FROZEN": true
+      },
+      {
+        "ID": "PI-15",
+        "REQUIREMENT": "Task-success composition (independent layers, conjunction rule)",
+        "FROZEN": true,
+        "ARTIFACT": "SUCCESSOR_TASK_CONTRACT"
+      },
+      {
+        "ID": "PI-16",
+        "REQUIREMENT": "Canonical metric retention list and metric classes",
+        "FROZEN": true,
+        "ARTIFACT": "CANONICAL_OUTPUT_SCHEMA"
+      },
+      {
+        "ID": "PI-17",
+        "REQUIREMENT": "Negative control designs NC-01..NC-10 and expected verdicts",
+        "FROZEN": true,
+        "ARTIFACT": "NEGATIVE_CONTROL_CONTRACT"
+      },
+      {
+        "ID": "PI-18",
+        "REQUIREMENT": "Terminology freeze (see SUCCESSOR_TASK_CONTRACT terminology section)",
+        "FROZEN": true
+      }
+    ],
+    "PLANT_DEPENDENT_DEFERRED": [
+      {
+        "ID": "PD-01",
+        "REQUIREMENT": "Exact knee/hip/ankle joint-angle bounds and sign conventions",
+        "DEFERRED_TO": "RES-83",
+        "AFFECTS": [
+          "E3 numeric depth realization",
+          "CG-04 extension state",
+          "E12 posture envelope"
+        ],
+        "REASON": "CRIT-001/CRIT-002: current Plant knee/hip conventions are anatomically invalid"
+      },
+      {
+        "ID": "PD-02",
+        "REQUIREMENT": "MTP/toe/arch representation or explicit reduced-foot claim",
+        "DEFERRED_TO": "RES-83",
+        "AFFECTS": [
+          "push-off fidelity",
+          "takeoff configuration claim"
+        ],
+        "REASON": "HIGH-019"
+      },
+      {
+        "ID": "PD-03",
+        "REQUIREMENT": "Foot-clearance numerical tolerance tied to the new foot model",
+        "DEFERRED_TO": "RES-83/RES-84",
+        "AFFECTS": [
+          "C_GEOM (OD-02)",
+          "E6/E7"
+        ],
+        "REASON": "clearance geometry depends on foot contact model"
+      },
+      {
+        "ID": "PD-04",
+        "REQUIREMENT": "Support-hull geometry and active-foot margin numeric",
+        "DEFERRED_TO": "RES-84",
+        "AFFECTS": [
+          "M_11",
+          "E12 margin",
+          "support-continuity scopes"
+        ],
+        "REASON": "HIGH-008; current margin is an AABB over inactive feet and positive in flight"
+      },
+      {
+        "ID": "PD-05",
+        "REQUIREMENT": "CoP origin/frame and validity threshold binding",
+        "DEFERRED_TO": "RES-84",
+        "AFFECTS": [
+          "cop_valid",
+          "L5 CoP gates"
+        ],
+        "REASON": "MED-005"
+      },
+      {
+        "ID": "PD-06",
+        "REQUIREMENT": "Signed pelvis orientation and signed trunk pitch/rate measurements",
+        "DEFERRED_TO": "RES-84",
+        "AFFECTS": [
+          "L4 pitch/rate gates",
+          "E12 posture"
+        ],
+        "REASON": "MED-003/MED-004"
+      },
+      {
+        "ID": "PD-07",
+        "REQUIREMENT": "Countermovement depth numeric (DEPTH_MIN)",
+        "DEFERRED_TO": "RES-83 + owner OD-07",
+        "AFFECTS": [
+          "E3"
+        ],
+        "REASON": "achievable depth depends on corrected hip/knee ranges"
+      },
+      {
+        "ID": "PD-08",
+        "REQUIREMENT": "Takeoff extension numeric set and takeoff-whip rate bound",
+        "DEFERRED_TO": "RES-83/RES-85 + owner OD-06",
+        "AFFECTS": [
+          "CG-03",
+          "CG-04"
+        ],
+        "REASON": "anatomically valid extension state must exist before bounding it"
+      },
+      {
+        "ID": "PD-09",
+        "REQUIREMENT": "Ballistic height residual epsilon_ball (CG-02): purely numerical (flight COM is ballistic; no model mechanism remains)",
+        "DEFERRED_TO": "RES-89 solver data",
+        "AFFECTS": [
+          "CG-02"
+        ],
+        "REASON": "physics identity + numerical tolerance; candidate 1e-3 relative"
+      },
+      {
+        "ID": "PD-10",
+        "REQUIREMENT": "Contact/fall collision policy including load collider",
+        "DEFERRED_TO": "RES-83",
+        "AFFECTS": [
+          "fall_contact",
+          "prohibited_contact",
+          "penetration"
+        ],
+        "REASON": "MED-007"
+      },
+      {
+        "ID": "PD-11",
+        "REQUIREMENT": "Actuator dynamics/rate-limit declaration or explicit limitation",
+        "DEFERRED_TO": "RES-83/RES-85",
+        "AFFECTS": [
+          "takeoff whip gates",
+          "claim ceiling"
+        ],
+        "REASON": "HIGH-006"
+      },
+      {
+        "ID": "PD-12",
+        "REQUIREMENT": "Standing envelope numeric calibration from perturbed holds",
+        "DEFERRED_TO": "RES-87",
+        "AFFECTS": [
+          "E12",
+          "RECOVERY_READY posture set"
+        ],
+        "REASON": "HIGH-012"
+      },
+      {
+        "ID": "PD-13",
+        "REQUIREMENT": "Landing bounds numeric values (L4-T1..T10)",
+        "DEFERRED_TO": "owner OD-04 after RES-83 capability known",
+        "AFFECTS": [
+          "LANDING_VALID"
+        ],
+        "REASON": "no literature threshold exists for a deterministic reduced model; must not be invented"
+      },
+      {
+        "ID": "PD-14",
+        "REQUIREMENT": "E11 bounds numeric values (C_11, HY_11, M_11)",
+        "DEFERRED_TO": "owner OD-05 after RES-84/RES-87",
+        "AFFECTS": [
+          "BALANCE_VALID"
+        ],
+        "REASON": "clinical methods do not transfer; bounds are simulation-task decisions"
+      },
+      {
+        "ID": "PD-15",
+        "REQUIREMENT": "Force-threshold comparability value and sensitivity set",
+        "DEFERRED_TO": "owner OD-09",
+        "AFFECTS": [
+          "FORCE_THRESHOLD_* observables"
+        ],
+        "REASON": "measurement convention only; candidate 10 N retained"
+      },
+      {
+        "ID": "PD-16",
+        "REQUIREMENT": "Landing asymmetry tolerance and bilateral-establishment dwell",
+        "DEFERRED_TO": "owner OD-10",
+        "AFFECTS": [
+          "BILATERAL_LANDING_ESTABLISHED"
+        ],
+        "REASON": "task tolerance, not a human-performance finding"
+      },
+      {
+        "ID": "PD-17",
+        "REQUIREMENT": "Primary performance floor H_MIN confirmation against rebuilt Plant capability",
+        "DEFERRED_TO": "owner OD-01 confirmation after RES-83",
+        "AFFECTS": [
+          "TASK_PERFORMANCE_VALID"
+        ],
+        "REASON": "the floor is a task definition; the owner confirms it is not silently a capability target"
+      }
+    ]
+  },
+  "invariants": [
+    "A Plant-dependent numeric value may never be silently filled with a convenient number",
+    "Changing the Plant representation triggers COU re-adjudication per SUCCESSOR_CONTEXT_OF_USE section 10",
+    "The structural semantics frozen under PLANT_INDEPENDENT_FROZEN_NOW survive the RES-83 rebuild unless the owner re-opens the COU"
+  ]
+}
