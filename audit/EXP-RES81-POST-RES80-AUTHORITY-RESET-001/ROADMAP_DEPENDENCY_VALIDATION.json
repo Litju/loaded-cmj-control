@@ -1,0 +1,47 @@
+{
+  "MISSION": "LCMJ_POST_RES80_REMEDIATION_PROGRAM_001",
+  "LINEAR_ISSUE": "RES-81",
+  "PHASE": "H — ROADMAP DEPENDENCY VALIDATION",
+  "SOURCE": "Linear relations read via Linear API for RES-81..RES-94",
+  "LINEAR_READ_ONLY_CHECK": true,
+  "LINEAR_RELATION_EDITS_REQUIRED": false,
+  "RESULT": "PASS",
+  "INTENDED_GRAPH": [
+    "RES-81 -> RES-82",
+    "RES-81 -> RES-83",
+    "RES-82 + RES-83 -> RES-84",
+    "RES-82 + RES-83 + RES-84 -> RES-85",
+    "RES-82 + RES-83 + RES-84 + RES-85 -> RES-86",
+    "RES-82 + RES-84 + RES-86 -> RES-87",
+    "RES-81 -> RES-88",
+    "RES-82 + RES-84 + RES-88 -> RES-89",
+    "RES-82..RES-89 -> RES-94",
+    "RES-82..RES-89 + RES-94 -> RES-90",
+    "RES-90 -> RES-91",
+    "RES-91 -> RES-92",
+    "RES-92 -> RES-93"
+  ],
+  "ACTUAL_BLOCKED_BY": {
+    "RES-82": ["RES-81"],
+    "RES-83": ["RES-81"],
+    "RES-84": ["RES-82", "RES-83"],
+    "RES-85": ["RES-82", "RES-83", "RES-84"],
+    "RES-86": ["RES-82", "RES-83", "RES-84", "RES-85"],
+    "RES-87": ["RES-82", "RES-84", "RES-86"],
+    "RES-88": ["RES-81"],
+    "RES-89": ["RES-82", "RES-84", "RES-88"],
+    "RES-94": ["RES-82", "RES-83", "RES-84", "RES-85", "RES-86", "RES-87", "RES-88", "RES-89"],
+    "RES-90": ["RES-82", "RES-83", "RES-84", "RES-85", "RES-86", "RES-87", "RES-88", "RES-89", "RES-94"],
+    "RES-91": ["RES-90"],
+    "RES-92": ["RES-91"],
+    "RES-93": ["RES-92"]
+  },
+  "EXTRA_DEPENDENCIES_OUTSIDE_INTENDED_GRAPH": [],
+  "MISSING_DEPENDENCIES": [],
+  "CONTRADICTIONS": [],
+  "NOTES": [
+    "RES-81 blocks RES-82, RES-83 and RES-88, matching the intended graph.",
+    "Every downstream gate (RES-90 candidate authorization, RES-91 full qualification, RES-92 exact replay + owner visual review, RES-93 final render + ship) is reachable only through the intended dependency chain.",
+    "No relation was edited; the existing Linear graph already matches the intended graph."
+  ]
+}

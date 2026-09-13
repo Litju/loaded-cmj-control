@@ -1,0 +1,65 @@
+{
+  "MISSION": "LCMJ_POST_RES80_REMEDIATION_PROGRAM_001",
+  "LINEAR_ISSUE": "RES-81",
+  "BASELINE_NAME": "POST_RES80_AUTHORITY_BASELINE",
+  "BASELINE_DESCRIPTION": "Durable post-audit baseline binding the historical R001 authorities, the sealed RES-80 audit authority, and the active successor remediation roadmap.",
+  "HISTORICAL_R001_HEAD": "8f26736db1231042cbedc61f61ca4862b7be871c",
+  "HISTORICAL_R001_TREE": "855fe3b418c09b5028396adeaed3ba8cda51e89f",
+  "HISTORICAL_R001_COMMIT_MESSAGE": "V2.1: add accepted trajectory visual smoke replay",
+  "RES80_AUDIT_HEAD": "8c1cbb49c91ba9e6d504a1df63fba242efcf7c64",
+  "RES80_AUDIT_TREE": "79544558e6fff05d7cd22e3692d580127730a410",
+  "RES80_AUDIT_COMMIT_MESSAGE": "V2.1: seal post-render forensic defect audit",
+  "RES80_AUDIT_PARENT": "8f26736db1231042cbedc61f61ca4862b7be871c",
+  "RES80_AUDIT_REMOTE_DURABLE": true,
+  "RES80_EVIDENCE_SEAL": "c921e6de29a263be1bdcee78c9fa62c22b968388991cda50afa34bf3260a9341",
+  "RES80_EVIDENCE_PATH": "/home/litju/Projects/loaded-cmj-control-evidence/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001",
+  "RES80_EVIDENCE_CHECKSUMS_FILE_COUNT": 43,
+  "RES80_EVIDENCE_CHECKSUM_MISMATCHES": 0,
+  "RES80_DEFECTS": {
+    "DEFECT_TOTAL": 53,
+    "CRITICAL": 7,
+    "HIGH": 19,
+    "MEDIUM": 20,
+    "LOW": 7
+  },
+  "R001_TRACE": "4d0478793dbdc000cd84b26392e611b8d665c3b5f1996f3663b8241470f97561",
+  "R001_STATUS": "HISTORICAL_REPRODUCIBILITY_ONLY",
+  "R001_HISTORICAL_REPRODUCIBILITY": "PASS",
+  "OWNER_PHYSICAL_VISUAL_CREDIBILITY": "FAIL",
+  "SHIP_STATUS": "BLOCKED",
+  "OLD_R001_FINAL_PATH": [
+    "RES-13 CANCELED",
+    "RES-14 CANCELED",
+    "RES-15 CANCELED"
+  ],
+  "ACTIVE_ROADMAP_ROOT": "RES-81",
+  "NO_SUCCESSOR_CANDIDATE_AUTHORIZED": true,
+  "ERRATA_AUTHORITY": "RES80_ERRATA_001",
+  "ERRATA_IDS": [
+    "ERR-001",
+    "ERR-002",
+    "ERR-003",
+    "ERR-004",
+    "ERR-005"
+  ],
+  "DEFECT_COVERAGE": {
+    "TOTAL_DEFECTS": 53,
+    "MAPPED_DEFECTS": 53,
+    "ORPHAN_DEFECTS": 0,
+    "DUPLICATE_PRIMARY_OWNERSHIP": 0
+  },
+  "REQUIREMENT_COVERAGE": {
+    "REQUIREMENTS_TOTAL": 50,
+    "REQUIREMENTS_MAPPED": 50,
+    "REQUIREMENT_ORPHANS": 0
+  },
+  "ROADMAP_DEPENDENCY_VALIDATION": {
+    "STATUS": "PASS",
+    "SOURCE": "Linear RES-81..RES-94 relations cross-checked against the intended graph",
+    "INTENDED_GRAPH_SATISFIED": true
+  },
+  "NEXT_AUTHORIZED_ACTION": "RES-82_SCIENTIFIC_TASK_CONTRACT",
+  "FINAL_RES81_HEAD": "recorded in POSTCOMMIT_SIDECAR.json after the dedicated RES-81 authority-reset commit",
+  "FINAL_RES81_TREE": "recorded in POSTCOMMIT_SIDECAR.json after the dedicated RES-81 authority-reset commit",
+  "NOTE": "This baseline is additive. It does not modify, amend, squash, or rewrite the sealed RES-80 audit commit or its evidence bundle."
+}

@@ -1,0 +1,306 @@
+{
+  "MISSION": "LCMJ_POST_RES80_REMEDIATION_PROGRAM_001",
+  "LINEAR_ISSUE": "RES-81",
+  "ERRATA_AUTHORITY": "RES80_ERRATA_001",
+  "IMMUTABILITY_STATEMENT": "THE ORIGINAL RES-80 BUNDLE IS IMMUTABLE. This document is additive and supersedes only the listed numeric/causal wording, not the historical bundle contents. The sealed RES-80 audit commit, evidence bundle, and disposition are not modified, rewritten, or amended.",
+  "HISTORICAL_AUTHORITIES": {
+    "RES80_AUDIT_HEAD": "8c1cbb49c91ba9e6d504a1df63fba242efcf7c64",
+    "RES80_AUDIT_TREE": "79544558e6fff05d7cd22e3692d580127730a410",
+    "RES80_EVIDENCE_SEAL_SHA256": "c921e6de29a263be1bdcee78c9fa62c22b968388991cda50afa34bf3260a9341",
+    "R001_TRACE_SHA256": "4d0478793dbdc000cd84b26392e611b8d665c3b5f1996f3663b8241470f97561"
+  },
+  "RECOMPUTE_OUTPUT": "RES81_RECOMPUTE.json",
+  "RECOMPUTE_SCRIPT": "recompute_errata.py",
+  "ERRATA": [
+    {
+      "ERRATUM_ID": "ERR-001",
+      "ORIGINAL_SOURCE": [
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/AUDIT_RECEIPT.md lines 68, 73-78",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/R001_METRICS.json lines 27-41",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/diagnostics/traj_summary.json lines 39-40",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/CLAIM_CEILING.md line 24",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/CLAIM_REVIEW.md line 35"
+      ],
+      "ORIGINAL_STATEMENT": "Several distinct vertical quantities are reported under overlapping 'jump height'/'rise' labels: 'net jump height above standing 0.0363 m'; 'takeoff-to-apex COM rise 0.0768 m' (true support-off) and '0.07516 m from E6 occurrence'; traj_summary fields 'jump_height_from_vz' (0.07678788378539196) and 'jump_height_from_time' (0.06381529541019887); 'ballistic_height_from_takeoff_vz_m' (0.076788). No unique, non-interchangeable names are bound to the quantities.",
+      "CORRECTED_STATEMENT": "Use only definition-qualified names: APEX_ABOVE_INITIAL_STANDING_COM = 0.036265362 m; TAKEOFF_TO_APEX_COM_RISE_E6 = 0.075157748 m (E6 occurrence); true-support-off-to-apex rise = 0.07683555062394909 m (segment start 0.64675 s); E6_COM_VZ = 1.214460306 m/s; BALLISTIC_HEIGHT_FROM_E6_VZ = 0.075173998 m; E6_TO_E9_DURATION = 0.226875 s. APEX_COM_Z is an absolute world coordinate, not a height. traj_summary 'jump_height_from_time' (g*t^2/8 over the full force-off segment) is a ballistic time estimate, not an apex rise.",
+      "REPRODUCTION_METHOD": "Loaded sealed diagnostics/traj_metrics.npz (com, cv, T) and RES-79 extraction_report.json; apex = argmax(com_z); E6 = sealed bilateral_takeoff occurred_at; g = 9.81. No hard-coded values.",
+      "NUMERIC_EVIDENCE": {
+        "INITIAL_STANDING_COM_Z": 1.074914584,
+        "E6_COM_Z": 1.036022198,
+        "APEX_COM_Z": 1.111179945,
+        "APEX_INDEX": 6174,
+        "APEX_TIME": 0.771875,
+        "APEX_ABOVE_INITIAL_STANDING_COM": 0.036265362,
+        "TAKEOFF_TO_APEX_COM_RISE_E6": 0.075157748,
+        "E6_COM_VZ": 1.214460306,
+        "BALLISTIC_HEIGHT_FROM_E6_VZ": 0.075173998,
+        "E6_TO_E9_DURATION_S": 0.226875,
+        "TRUE_SUPPORT_OFF_START_S": 0.64675,
+        "CANONICAL_E6_OCCURRENCE_S": 0.648125
+      },
+      "SOURCE_EVIDENCE": {
+        "traj_metrics_npz_sha256": "d16af5b65c9fb2b8d181ce73790bbd93a7d3de6ab2c8ea90d3fa1c444f7aeaac",
+        "extraction_report_sha256": "ce4a6f3a3bf97e678fee6d2569cd91a26f79d81f8e66869e41de09f56108d7f5"
+      },
+      "SEVERITY_BEFORE": "N/A (terminology, no defect severity attached)",
+      "SEVERITY_AFTER": "N/A",
+      "R001_DISPOSITION_EFFECT": "NONE \u2014 R001_JUMP_CLASSIFICATION=SMALL_HOP and the blocked ship status are unchanged.",
+      "CLAIM_EFFECT": "Performance citations must use the qualified names above; no numeric disposition changes.",
+      "JUMP_HEIGHT_TERMINOLOGY_CORRECTION": "CONFIRMED"
+    },
+    {
+      "ERRATUM_ID": "ERR-002",
+      "ORIGINAL_SOURCE": [
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/AUDIT_RECEIPT.md lines 73-75, 80",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/R001_METRICS.json lines 33-36, 46-47",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/diagnostics/traj_summary.json lines 20-22",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/DEFECT_REGISTER.md line 230 (CRIT-007)"
+      ],
+      "ORIGINAL_STATEMENT": "Sealed artifacts use conflicting takeoff/support-loss definitions: 'control switch t=0.640'; 'true support loss t=0.648125'; R001_METRICS true_support_off_start_s=0.648125 vs traj_summary true_support_off_start_t=0.646750; flight duration quoted as 0.22675 / 0.228125 / 0.226875. The phrase 'true support loss' is applied to both the first sustained force-free sample and canonical E6.",
+      "CORRECTED_STATEMENT": "Use one named timeline and never conflate the members: FIRST_TRANSIENT_BILATERAL_FORCE_DROPOUT = 0.64 s (within the 0.640-0.650 review window; force chatter begins earlier at 0.603375 s); FIRST_LONGER_ZERO_FORCE_INTERVAL = 0.640875-0.641125 s; LAST_FORCE_BEARING_RECONTACT = 0.64625 s (58->44 N bilateral); LAST_PHYSICAL_CONTACT_REGISTRATION_BEFORE_FLIGHT = 0.64775-0.648 s (force-free solver registration, not support); SUSTAINED_TAKEOFF_START = 0.64675 s (forces zero, contacts zero, true clearance); CANONICAL_E6_OCCURRENCE = 0.648125 s (sealed event authority, final accepted takeoff definition). Durations: E6->E9 = 0.226875 s; force-free segment = 0.64675->0.874875 = 0.228125 s; support-loss-from-E6 = 0.22675 s (this is why 0.22675 and 0.228125 coexisted).",
+      "REPRODUCTION_METHOD": "Classified every 0.125 ms sample in [0.640, 0.650] from sealed fzL/fzR/conL/conR/lowL/lowR; threshold 10 N; exact-zero runs; bilateral physical-contact intervals; sealed canonical E6 from extraction_report.json.",
+      "NUMERIC_EVIDENCE": {
+        "FIRST_TRANSIENT_BILATERAL_FORCE_DROPOUT_S": 0.64,
+        "FIRST_LONGER_ZERO_FORCE_INTERVAL": {
+          "start_t": 0.640875,
+          "end_t": 0.641125,
+          "samples": 3.0
+        },
+        "LAST_FORCE_BEARING_RECONTACT_S": 0.64625,
+        "LAST_PHYSICAL_CONTACT_REGISTRATION_BEFORE_FLIGHT": [
+          0.64775,
+          0.648,
+          3
+        ],
+        "SUSTAINED_TAKEOFF_START_S": 0.64675,
+        "SUSTAINED_TAKEOFF_END_S": 0.874875,
+        "CANONICAL_E6_OCCURRENCE_S": 0.648125,
+        "FORCE_FREE_SEGMENT_DURATION_S": 0.228125,
+        "E6_TO_E9_DURATION_S": 0.226875,
+        "intervals_force_above_threshold": [
+          [
+            0.6401250000000056,
+            0.6407500000000058,
+            6
+          ],
+          [
+            0.641250000000006,
+            0.6426250000000064,
+            12
+          ],
+          [
+            0.6431250000000066,
+            0.6437500000000068,
+            6
+          ],
+          [
+            0.6441250000000069,
+            0.6448750000000072,
+            7
+          ],
+          [
+            0.6452500000000073,
+            0.6456250000000074,
+            4
+          ],
+          [
+            0.6462500000000077,
+            0.6466250000000078,
+            4
+          ]
+        ],
+        "intervals_zero_force_exact": [
+          [
+            0.6400000000000056,
+            0.6400000000000056,
+            1
+          ],
+          [
+            0.6408750000000059,
+            0.6411250000000059,
+            3
+          ],
+          [
+            0.6427500000000065,
+            0.6430000000000066,
+            3
+          ],
+          [
+            0.6438750000000069,
+            0.6440000000000069,
+            2
+          ],
+          [
+            0.6450000000000072,
+            0.6451250000000073,
+            2
+          ],
+          [
+            0.6457500000000075,
+            0.6461250000000076,
+            4
+          ],
+          [
+            0.6467500000000078,
+            0.6500000000000089,
+            27
+          ]
+        ],
+        "intervals_bilateral_physical_contact": [
+          [
+            0.6400000000000056,
+            0.6448750000000072,
+            40
+          ],
+          [
+            0.6452500000000073,
+            0.6456250000000074,
+            4
+          ],
+          [
+            0.6462500000000077,
+            0.6466250000000078,
+            4
+          ],
+          [
+            0.6477500000000082,
+            0.6480000000000082,
+            3
+          ]
+        ]
+      },
+      "SOURCE_EVIDENCE": {
+        "traj_metrics_npz_sha256": "d16af5b65c9fb2b8d181ce73790bbd93a7d3de6ab2c8ea90d3fa1c444f7aeaac",
+        "extraction_report_sha256": "ce4a6f3a3bf97e678fee6d2569cd91a26f79d81f8e66869e41de09f56108d7f5"
+      },
+      "SEVERITY_BEFORE": "N/A (definition ambiguity; CRIT-007 severity is separate)",
+      "SEVERITY_AFTER": "N/A",
+      "R001_DISPOSITION_EFFECT": "NONE \u2014 no defect disposition changes; only which timestamp answers which question.",
+      "CLAIM_EFFECT": "Takeoff claims must cite the named definition; canonical takeoff authority remains E6 = 0.648125 s."
+    },
+    {
+      "ERRATUM_ID": "ERR-003",
+      "ORIGINAL_SOURCE": [
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/R001_METRICS.json line 49 (max_du_at_switch)",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/DEFECT_REGISTER.md line 230 (CRIT-007 NUMERIC_EVIDENCE switch_t_s=0.64)",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/DEFECT_REGISTER.md HIGH-006 ('0.944 (t=0.640)')"
+      ],
+      "ORIGINAL_STATEMENT": "The ~0.944 action step is timestamped at the pre-action control index: 'max_du_at_switch: 0.9439' paired with 'control_switch_PRL_SUPPORTED_to_FLIGHT_s: 0.64' and 'switch_t_s: 0.64'.",
+      "CORRECTED_STATEMENT": "For dU[k] = U[k+1] - U[k], the step belongs to the NEW action U[k+1]; its timestamp is control_time[k+1], not control_time[k]. MAX_DU = 0.943906783 between PRE_ACTION_INDEX 128 (t = 0.64 s, mode PRELANDING|PRL_SUPPORTED) and POST_ACTION_INDEX 129 (t = 0.645 s, mode PRELANDING|PRL_FLIGHT). The first FLIGHT-regime action is applied at 0.645 s; the correct step timestamp is 0.645 s. The finding (premature single-sample switch commanding an unbounded step) is unchanged.",
+      "REPRODUCTION_METHOD": "Loaded the sealed RES-12 canonical action schedule (V2.1-R001_ACTION_SCHEDULE.npz); computed signed diff per channel; took argmax of max-|dU|; reported control_time and mode at k and k+1. Audit probe cross-reference: probes/probe_skeleton.py lines 44-53 (indexing bug source location).",
+      "NUMERIC_EVIDENCE": {
+        "MAX_DU": 0.943906783,
+        "PRE_ACTION_INDEX": 128,
+        "POST_ACTION_INDEX": 129,
+        "PRE_ACTION_TIME": 0.64,
+        "POST_ACTION_TIME": 0.645,
+        "PRE_ACTION_VECTOR": [
+          -0.01,
+          -0.323,
+          -0.323,
+          -0.543,
+          -0.543,
+          -0.1,
+          -0.1
+        ],
+        "POST_ACTION_VECTOR": [
+          0.179176353,
+          0.620906783,
+          0.620906783,
+          0.358128132,
+          0.358128132,
+          0.100316151,
+          0.100316151
+        ],
+        "SIGNED_DELTA_AT_MAX": [
+          0.189176353,
+          0.943906783,
+          0.943906783,
+          0.901128132,
+          0.901128132,
+          0.200316151,
+          0.200316151
+        ],
+        "PRE_MODE": "PRELANDING|PRL_SUPPORTED",
+        "POST_MODE": "PRELANDING|PRL_FLIGHT"
+      },
+      "SOURCE_EVIDENCE": {
+        "action_schedule_npz_sha256": "a22183730b7362cf325c019855ac26793b0fc89d0dc6d19b121397e04ac0e9d9",
+        "probe_skeleton_sha256": "90f2d09acbef705275164cbda9bfdc76b5f1c084549e2cc181c16bbf3efe3ae9"
+      },
+      "SEVERITY_BEFORE": "CRITICAL (CRIT-007)",
+      "SEVERITY_AFTER": "CRITICAL (CRIT-007)",
+      "R001_DISPOSITION_EFFECT": "NONE \u2014 CRIT-007 remains CRITICAL; only its evidence timestamp is corrected from 0.640 s to 0.645 s.",
+      "CLAIM_EFFECT": "Cite the action step at 0.645 s (not 0.640 s)."
+    },
+    {
+      "ERRATUM_ID": "ERR-004",
+      "ORIGINAL_SOURCE": [
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/AUDIT_RECEIPT.md line 80",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/R001_METRICS.json lines 46-49"
+      ],
+      "ORIGINAL_STATEMENT": "'R001_TAKEOFF_SWITCH_LEAD_MS=8.125 (control switch t=0.640 vs true support loss t=0.648125)'; R001_METRICS switch_lead_ms: 8.125.",
+      "CORRECTED_STATEMENT": "FLIGHT command = 0.645 s (first FLIGHT-regime action; corrected from the pre-action index). Corrected leads from the command: FLIGHT_COMMAND_TO_FIRST_ZERO_FORCE = 0.0 ms (literal first command-sample zero); FLIGHT_COMMAND_TO_FIRST_ZERO_FORCE_AFTER_LAST_FB = 1.75 ms; FLIGHT_COMMAND_TO_SUSTAINED_TAKEOFF = 1.75 ms (to 0.64675 s); FLIGHT_COMMAND_TO_CANONICAL_E6 = 3.125 ms (to 0.648125 s). The old 8.125 ms figure is retired: it measured from the pre-action control index 0.640 s (legacy value 8.125 ms for reference).",
+      "REPRODUCTION_METHOD": "Post-action timestamp from the sealed action schedule; the zero-force/sustained/E6 instants from the sealed force timeline and sealed event extraction.",
+      "NUMERIC_EVIDENCE": {
+        "FLIGHT_COMMAND_TIME_S": 0.645,
+        "FLIGHT_COMMAND_TO_FIRST_ZERO_FORCE_MS": 0.0,
+        "FLIGHT_COMMAND_TO_FIRST_ZERO_FORCE_AFTER_LAST_FB_MS": 1.75,
+        "FLIGHT_COMMAND_TO_SUSTAINED_TAKEOFF_MS": 1.75,
+        "FLIGHT_COMMAND_TO_E6_MS": 3.125,
+        "OLD_WORDING_LEAD_FROM_PRE_ACTION_TIME_MS": 8.125
+      },
+      "SOURCE_EVIDENCE": {
+        "action_schedule_npz_sha256": "a22183730b7362cf325c019855ac26793b0fc89d0dc6d19b121397e04ac0e9d9",
+        "traj_metrics_npz_sha256": "d16af5b65c9fb2b8d181ce73790bbd93a7d3de6ab2c8ea90d3fa1c444f7aeaac",
+        "extraction_report_sha256": "ce4a6f3a3bf97e678fee6d2569cd91a26f79d81f8e66869e41de09f56108d7f5"
+      },
+      "SEVERITY_BEFORE": "N/A (wording/measurement of lead time)",
+      "SEVERITY_AFTER": "N/A",
+      "R001_DISPOSITION_EFFECT": "NONE \u2014 premature-switch disposition unchanged.",
+      "CLAIM_EFFECT": "Retire '8.125 ms'; use 3.125 ms FLIGHT-command-to-canonical-E6 (1.75 ms to sustained takeoff start)."
+    },
+    {
+      "ERRATUM_ID": "ERR-005",
+      "ORIGINAL_SOURCE": [
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/DEFECT_REGISTER.json HIGH-003",
+        "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/DEFECT_REGISTER.md line 289 (HIGH-003)"
+      ],
+      "ORIGINAL_STATEMENT": "'Balance controller authority is braking-only and cannot command forward CoP/Fx; forward lunge is uncorrectable in principle'; reproduction text: 'com_vx accelerates 0.181 -> 0.342 m/s after touchdown while the controller can only brake'. The phrase 'uncorrectable in principle' overstates the authority loss.",
+      "CORRECTED_STATEMENT": "The live balance outer law is one-sided but not inert. Verified from source: FX_BRAKE_MIN = -120.0 < 0 and FX_BRAKE_MAX = 0.0, and Fx_raw = -px/T_rem (px = MASS*cv[0]). For vx > 0 the raw demand is negative and inside [-120, 0], so the controller CAN command braking Fx < 0; at the R001 peak (vx = 0.34183 m/s) the raw demand -120.27 N saturates the -120 N bound. The one-sided set cannot command positive Fx, so it cannot regulate symmetrically through zero or command the opposite correction after overshoot. R001 trend: vx 0.18142 (E9) -> 0.34183 peak (t=1.0385) -> crosses zero at 1.601125 -> minimum -0.058181 (t=2.117) -> final -0.001276 m/s. Conclusion: 'horizontal/CAM authority is one-sided; it can brake the initially positive forward state but cannot regulate symmetrically through zero or command the opposite correction after overshoot.'",
+      "REPRODUCTION_METHOD": "Read balance_capture.py source and canonical_runtime.py dispatch (BALANCE = BalanceController); recomputed COM vx from sealed diagnostics/traj_metrics.npz; computed Fx_raw at the post-touchdown peak with MASS=95.0, T_BAL=0.27.",
+      "NUMERIC_EVIDENCE": {
+        "FX_BRAKE_MIN": -120.0,
+        "FX_BRAKE_MAX": 0.0,
+        "Fx_raw_expression": "-px/T_rem",
+        "R001_vx_at_E9": 0.181418588,
+        "R001_vx_at_E10": 0.21145234,
+        "R001_vx_at_E11": 0.279027093,
+        "R001_vx_peak_after_touchdown": 0.341829295,
+        "R001_vx_peak_time": 1.0385,
+        "R001_vx_first_nonpositive_crossing_t": 1.601125,
+        "R001_vx_min_after_touchdown": -0.058180554,
+        "R001_vx_min_time": 2.117,
+        "R001_vx_final": -0.001275741,
+        "Fx_raw_at_peak_N": -120.273270356,
+        "saturated_at_FX_BRAKE_MIN": true
+      },
+      "SOURCE_EVIDENCE": {
+        "balance_capture_py_sha256": "37b2e703ef0c77b9926b0260121a995b3b4ea5d7adee8d60e5b8561aec225979",
+        "balance_capture_py_lines": [
+          33,
+          130,
+          133
+        ],
+        "canonical_runtime_py_sha256": "32244a9a55fdb5d2f29cc213a79ea1bc94cd058dce62594b119828901172346c",
+        "traj_metrics_npz_sha256": "d16af5b65c9fb2b8d181ce73790bbd93a7d3de6ab2c8ea90d3fa1c444f7aeaac"
+      },
+      "SEVERITY_BEFORE": "HIGH (HIGH-003)",
+      "SEVERITY_AFTER": "HIGH (HIGH-003)",
+      "R001_DISPOSITION_EFFECT": "NONE \u2014 R001 remains physical-visual credibility FAIL and ship BLOCKED.",
+      "CLAIM_EFFECT": "HIGH-003 must be cited as one-sided (half-plane) authority with no symmetric zero-crossing regulation; the 'cannot brake forward motion' / 'uncorrectable in principle' wording is withdrawn. Severity unchanged because asymmetric authority remains a genuine control-authority defect and R001 exhibits an uncorrected negative-velocity overshoot.",
+      "HIGH003_ERRATUM_RESULT": "CORRECTED_WORDING_SEVERITY_UNCHANGED",
+      "HIGH003_SEVERITY_UNCHANGED": true
+    }
+  ]
+}

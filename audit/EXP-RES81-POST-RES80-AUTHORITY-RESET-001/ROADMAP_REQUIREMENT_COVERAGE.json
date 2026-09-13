@@ -1,0 +1,641 @@
+{
+  "SOURCE_AUTHORITY": "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/NEXT_CANDIDATE_REQUIREMENTS.md",
+  "SOURCE_AUTHORITY_SHA256": "8b1c51cf3edc1b07c4c482772f9f361c1e6ba419c673c58d22277c816368a143",
+  "REQUIREMENTS_TOTAL": 50,
+  "REQUIREMENTS_MAPPED": 50,
+  "REQUIREMENT_ORPHANS": 0,
+  "PRIMARY_OWNER_HISTOGRAM": {
+    "RES-82": 11,
+    "RES-83": 6,
+    "RES-84": 6,
+    "RES-85": 2,
+    "RES-86": 4,
+    "RES-87": 6,
+    "RES-88": 6,
+    "RES-89": 5,
+    "RES-91": 2,
+    "RES-92": 2
+  },
+  "REQUIREMENTS": [
+    {
+      "REQUIREMENT_ID": "P-1",
+      "REQUIREMENT": "Correct knee joint anatomy",
+      "DEFECTS_CLOSED": "CRIT-001",
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "FK sign probe + countermovement pose proof; new Plant hash",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "P-2",
+      "REQUIREMENT": "Correct hip joint range/convention",
+      "DEFECTS_CLOSED": "CRIT-002",
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Range/FK proof + crouch pose signature",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "P-3",
+      "REQUIREMENT": "Foot model with MTP/toe or owner-approved reduced-foot claim",
+      "DEFECTS_CLOSED": "HIGH-019",
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-85",
+        "RES-92"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Geometry/joint tests, foot-roll evidence, push-off comparison",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "P-4",
+      "REQUIREMENT": "Activation dynamics or documented command-slew limit / declared limitation",
+      "DEFECTS_CLOSED": "HIGH-006",
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-85",
+        "RES-82"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Rise-time model + test, or an approved claim boundary",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "P-5",
+      "REQUIREMENT": "Collision/fall-state collision policy incl. load collider and self-collision",
+      "DEFECTS_CLOSED": "MED-007",
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-84"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Collision matrix test, fall interpenetration audit",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "P-6",
+      "REQUIREMENT": "Anthropometry/inertia provenance against an external reference dataset",
+      "DEFECTS_CLOSED": "MODEL_FORM_LIMITATIONS #10",
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Traceable table with citations",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "M-1",
+      "REQUIREMENT": "Support margin from active-contact convex hull; no positive margin in flight",
+      "DEFECTS_CLOSED": "HIGH-008",
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-86",
+        "RES-87"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Hull tests incl. rotated/single support; flight margin <=0",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "M-2",
+      "REQUIREMENT": "Correct rotated lowest-foot-point geometry for gap and velocity",
+      "DEFECTS_CLOSED": "HIGH-009, RES-55 requalification",
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-86",
+        "RES-87"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Gap/velocity tests at ankle extremes",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "M-3",
+      "REQUIREMENT": "CoP origin/frame explicit, unified validity threshold, measured CoP used where claimed",
+      "DEFECTS_CLOSED": "MED-005",
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-87"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Frame-reconstruction test (origin + force + moment -> world wrench)",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "M-4",
+      "REQUIREMENT": "True pelvis orientation quaternion; signed trunk pitch/rate",
+      "DEFECTS_CLOSED": "MED-003, MED-004",
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Orientation/tilt tests under nonzero pitch",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "M-5",
+      "REQUIREMENT": "prohibited/penetration flags scan actual colliders or are removed from claims",
+      "DEFECTS_CLOSED": "MED-006",
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Injected-contact tests",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "M-6",
+      "REQUIREMENT": "Correct metric definitions: jump height vs apex z, loading rate, CoP invalid intervals",
+      "DEFECTS_CLOSED": "MED-011",
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-88"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "EXPECTED_EVIDENCE": "Definition tests on synthetic signals",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "C-1",
+      "REQUIREMENT": "Takeoff switching requires sustained bilateral unload and physical separation",
+      "DEFECTS_CLOSED": "CRIT-007",
+      "PRIMARY_MITIGATION_ISSUE": "RES-85",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-89"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Adversarial guard tests",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "C-2",
+      "REQUIREMENT": "Takeoff command extension/COM-authoritative, rate-bounded, respects slew/activation model",
+      "DEFECTS_CLOSED": "CRIT-007, HIGH-006",
+      "PRIMARY_MITIGATION_ISSUE": "RES-85",
+      "SECONDARY_ISSUES": [
+        "RES-83",
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Bounded-step test + ballistic consistency",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "C-3",
+      "REQUIREMENT": "Terminal/landing control with horizontal CAM/CoP authority or reduced landing claim",
+      "DEFECTS_CLOSED": "HIGH-001, HIGH-002",
+      "PRIMARY_MITIGATION_ISSUE": "RES-86",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Perturbation landing test with CoM/CAM bounds",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "C-4",
+      "REQUIREMENT": "Two-sided, support-feasible balance authority (or reduced braking-only claim)",
+      "DEFECTS_CLOSED": "HIGH-003, MED-009",
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Two-sided perturbation test; CoP-line exactness",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "C-5",
+      "REQUIREMENT": "Action continuity across every regime switch; trust region anchored to applied action",
+      "DEFECTS_CLOSED": "HIGH-005",
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-88"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "sup|du| bounded at all switches",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "C-6",
+      "REQUIREMENT": "Soft-contact inner layer retains all active constraint families; one-sided crossings",
+      "DEFECTS_CLOSED": "HIGH-014",
+      "PRIMARY_MITIGATION_ISSUE": "RES-86",
+      "SECONDARY_ISSUES": [
+        "RES-87",
+        "RES-85"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Unit proofs: FZ_MIN row present each pass; crossing test",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "C-7",
+      "REQUIREMENT": "No assert for runtime contracts; fail-closed errors with diagnostics",
+      "DEFECTS_CLOSED": "MED-017, BUG-06",
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-86",
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Fault-injection tests",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "C-8",
+      "REQUIREMENT": "Truncated control intervals represented in validation (or excluded from claims)",
+      "DEFECTS_CLOSED": "CONTROL_REVIEW 2.5, BUG-11",
+      "PRIMARY_MITIGATION_ISSUE": "RES-86",
+      "SECONDARY_ISSUES": [
+        "RES-88",
+        "RES-89"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Interval-coverage test",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "E-1",
+      "REQUIREMENT": "Wire GENUINE_FLIGHT_GAP_M into E7 or delete the declaration",
+      "DEFECTS_CLOSED": "HIGH-010",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-84",
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Force-dropout-without-clearance negative control",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "E-2",
+      "REQUIREMENT": "Apex dwell + mandatory physical flight in every apex path",
+      "DEFECTS_CLOSED": "HIGH-011",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-84"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Contact-phase crossing negative control",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "E-3",
+      "REQUIREMENT": "E10 horizontal/angular/posture criteria; E11 declared CoM speed; E12 physical standing envelope",
+      "DEFECTS_CLOSED": "HIGH-001, MED-002, HIGH-012",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-87",
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Negative controls per predicate",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "E-4",
+      "REQUIREMENT": "Dwell timing matches declared durations",
+      "DEFECTS_CLOSED": "MED-001",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Boundary tests at exact D",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "E-5",
+      "REQUIREMENT": "E1 must check fall contact",
+      "DEFECTS_CLOSED": "MED-020",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Fall-at-start negative control",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "E-6",
+      "REQUIREMENT": "Adjudicated support-continuity window stated and full verdict surfaced",
+      "DEFECTS_CLOSED": "MED-012",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-89",
+        "RES-84"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Slice-scope contract test",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "E-7",
+      "REQUIREMENT": "E12/handoff regime coverage defined",
+      "DEFECTS_CLOSED": "MED-013",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-87",
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Regime-boundary test",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "T-1",
+      "REQUIREMENT": "Declare minimum jump performance (height, rise, flight time, clearance, extension)",
+      "DEFECTS_CLOSED": "CRIT-003",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Owner-approved task contract + gates",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "T-2",
+      "REQUIREMENT": "Declare landing criteria (horizontal momentum, CAM/trunk posture, support continuity, CoP)",
+      "DEFECTS_CLOSED": "HIGH-001/002/003/004",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-86",
+        "RES-87"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Task contract + gates",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "T-3",
+      "REQUIREMENT": "Declare recovery criteria (posture at entry, robustness, hold duration)",
+      "DEFECTS_CLOSED": "HIGH-004, HIGH-012",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-87",
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Task contract + robustness study",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "T-4",
+      "REQUIREMENT": "Canonical result exposes all performance/landing/recovery metrics and declared gates",
+      "DEFECTS_CLOSED": "HIGH-013, MED-011",
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-88",
+        "RES-84"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "EXPECTED_EVIDENCE": "Schema + metrics presence tests",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "L-1",
+      "REQUIREMENT": "Landing strategy with explicit momentum inheritance and capture objective",
+      "DEFECTS_CLOSED": "HIGH-001/002/003",
+      "PRIMARY_MITIGATION_ISSUE": "RES-86",
+      "SECONDARY_ISSUES": [
+        "RES-87",
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Momentum-budget trace + perturbation tests",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "L-2",
+      "REQUIREMENT": "Balance capture with measured CoP feedback and two-sided authority inside true hull",
+      "DEFECTS_CLOSED": "HIGH-003, HIGH-008, MED-005",
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-84",
+        "RES-86"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "CoP tracking within hull",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "L-3",
+      "REQUIREMENT": "Recovery entry gate with absolute posture and CoP criteria",
+      "DEFECTS_CLOSED": "HIGH-004",
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Posture-at-entry test",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "L-4",
+      "REQUIREMENT": "Recovery path tracked against actual entry state; bounded transit unless declared",
+      "DEFECTS_CLOSED": "HIGH-004",
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Tracking error bound + duration rationale",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "TS-1",
+      "REQUIREMENT": "Remove placeholders/`or True`/pass-only bodies; restore failure-capable assertions",
+      "DEFECTS_CLOSED": "HIGH-015/016",
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Mutation tests that fail",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "TS-2",
+      "REQUIREMENT": "Live canonical-composition test with hash binding; clean-clone collection",
+      "DEFECTS_CLOSED": "HIGH-017, CRIT-006",
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [
+        "RES-88"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Fresh-process smoke test in CI",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "TS-3",
+      "REQUIREMENT": "Qualification orchestrator runs all suites; no hardcoded PASS",
+      "DEFECTS_CLOSED": "HIGH-018",
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Coverage + mutation tests",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "TS-4",
+      "REQUIREMENT": "Tests exercise the current composition; historical suites marked",
+      "DEFECTS_CLOSED": "MED-019",
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [
+        "RES-88"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Import-coverage audit",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "TS-5",
+      "REQUIREMENT": "Scientific-gate tests bind to declared contracts, not local re-implementations",
+      "DEFECTS_CLOSED": "WEAK-class tests",
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Contract-binding review",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "PR-1",
+      "REQUIREMENT": "Candidate identity covers full executed closure and verifies at runtime",
+      "DEFECTS_CLOSED": "CRIT-004",
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Identity verifier + mutation negative test",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "PR-2",
+      "REQUIREMENT": "External authorities vendored/hash-pinned in identity and verified at load",
+      "DEFECTS_CLOSED": "CRIT-005",
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Authority hash verification test",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "PR-3",
+      "REQUIREMENT": "Self-contained installable package; no absolute developer paths; single module identity",
+      "DEFECTS_CLOSED": "CRIT-006, MED-016",
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Clean-venv install + canonical run test",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "PR-4",
+      "REQUIREMENT": "Single entry-head/identity artifact; regenerated ledger; schema has ENTRY_HEAD/TREE",
+      "DEFECTS_CLOSED": "MED-015, HIGH-013, MED-014",
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Identity-consistency + schema tests",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "PR-5",
+      "REQUIREMENT": "Shared physical predicates out of scorer code or included in control identity",
+      "DEFECTS_CLOSED": "HIGH-007",
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "EXPECTED_EVIDENCE": "Separation test with mutation",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "V-1",
+      "REQUIREMENT": "Keep non-invasive replay contract; owner visual review before success classification",
+      "DEFECTS_CLOSED": "owner-observed failures",
+      "PRIMARY_MITIGATION_ISSUE": "RES-92",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M10 \u2014 Owner Visual Validation, Final Render & Ship",
+      "EXPECTED_EVIDENCE": "Stills + video + owner adjudication",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "V-2",
+      "REQUIREMENT": "Overlay truly gated quantities (clearance, support hull, CoP, posture) in review render",
+      "DEFECTS_CLOSED": "HIGH-008/013, MED-005",
+      "PRIMARY_MITIGATION_ISSUE": "RES-92",
+      "SECONDARY_ISSUES": [
+        "RES-84",
+        "RES-82"
+      ],
+      "MILESTONE": "M10 \u2014 Owner Visual Validation, Final Render & Ship",
+      "EXPECTED_EVIDENCE": "Review packet with numeric overlays",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "V-3",
+      "REQUIREMENT": "Independent validator recomputes gates from raw arrays, not stored JSON",
+      "DEFECTS_CLOSED": "HIGH-013/017",
+      "PRIMARY_MITIGATION_ISSUE": "RES-91",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M9 \u2014 Successor Candidate Integration & Full Requalification",
+      "EXPECTED_EVIDENCE": "Independent recomputation report",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "V-4",
+      "REQUIREMENT": "Negative-control candidates (trivial hop, single-support landing, perturbed standing) must FAIL",
+      "DEFECTS_CLOSED": "CRIT-003, HIGH-012",
+      "PRIMARY_MITIGATION_ISSUE": "RES-91",
+      "SECONDARY_ISSUES": [
+        "RES-89",
+        "RES-82"
+      ],
+      "MILESTONE": "M9 \u2014 Successor Candidate Integration & Full Requalification",
+      "EXPECTED_EVIDENCE": "Calibration/negative-control study",
+      "STATUS": "PLANNED"
+    },
+    {
+      "REQUIREMENT_ID": "V-5",
+      "REQUIREMENT": "Re-derive true-standing envelope from multiple perturbed holds with robustness target",
+      "DEFECTS_CLOSED": "HIGH-012",
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-89"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "EXPECTED_EVIDENCE": "Envelope robustness study",
+      "STATUS": "PLANNED"
+    }
+  ]
+}

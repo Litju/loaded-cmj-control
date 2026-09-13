@@ -1,0 +1,1255 @@
+{
+  "MISSION": "LCMJ_POST_RES80_REMEDIATION_PROGRAM_001",
+  "LINEAR_ISSUE": "RES-81",
+  "SOURCE_AUTHORITY": "audit/EXP-RES80-POST-RENDER-FULL-SYSTEM-FORENSIC-AUDIT-001/DEFECT_REGISTER.json",
+  "SOURCE_AUTHORITY_SHA256": "2a1ba8e03c629139d463b3a827412a2cddb70caa988938f99cbc4c28c5f9c992",
+  "OWNERSHIP_RULE": "exactly one PRIMARY_MITIGATION_ISSUE per defect; SECONDARY_ISSUES are consumers/verifiers only",
+  "ALLOWED_ROADMAP_OWNERS": [
+    "RES-82",
+    "RES-83",
+    "RES-84",
+    "RES-85",
+    "RES-86",
+    "RES-87",
+    "RES-88",
+    "RES-89",
+    "RES-94"
+  ],
+  "OWNERSHIP_RESOLUTIONS": [
+    {
+      "DEFECT_ID": "MED-011",
+      "CANDIDATE_OWNERS_IN_LINEAR_DESCRIPTIONS": [
+        "RES-82",
+        "RES-84"
+      ],
+      "ADJUDICATED_PRIMARY": "RES-84",
+      "RATIONALE": "Metric definitions (loading-rate semantics, apex-height alias, CoP invalid intervals) are measurement/reporting definitions; RES-84 acceptance explicitly includes metric-definition unit tests. RES-82 remains the reporting-contract authority (secondary)."
+    },
+    {
+      "DEFECT_ID": "HIGH-012",
+      "CANDIDATE_OWNERS_IN_LINEAR_DESCRIPTIONS": [
+        "RES-82",
+        "RES-87"
+      ],
+      "ADJUDICATED_PRIMARY": "RES-87",
+      "RATIONALE": "Closure requires a perturbed-hold robustness study; RES-87 acceptance requires the standing/recovery envelope to pass declared perturbation robustness rather than one nominal trace. RES-82 declares the envelope tolerance (secondary)."
+    },
+    {
+      "DEFECT_ID": "MED-013",
+      "CANDIDATE_OWNERS_IN_LINEAR_DESCRIPTIONS": [
+        "RES-82",
+        "RES-87"
+      ],
+      "ADJUDICATED_PRIMARY": "RES-82",
+      "RATIONALE": "The defect is the missing declaration of whether E12 must complete under RES-43 or across regimes; that is an event/handoff contract decision. RES-87 implements regime transitions (secondary)."
+    }
+  ],
+  "COVERAGE": {
+    "TOTAL_DEFECTS": 53,
+    "MAPPED_DEFECTS": 53,
+    "ORPHAN_DEFECTS": 0,
+    "DUPLICATE_PRIMARY_OWNERSHIP": 0,
+    "COUNTS_BY_SEVERITY": {
+      "CRITICAL": 7,
+      "HIGH": 19,
+      "MEDIUM": 20,
+      "LOW": 7
+    },
+    "PRIMARY_OWNER_HISTOGRAM": {
+      "RES-82": 8,
+      "RES-83": 4,
+      "RES-84": 7,
+      "RES-85": 3,
+      "RES-86": 4,
+      "RES-87": 5,
+      "RES-88": 9,
+      "RES-89": 5,
+      "RES-94": 8
+    }
+  },
+  "DEFECTS": [
+    {
+      "DEFECT_ID": "CRIT-001",
+      "SEVERITY": "CRITICAL",
+      "TITLE": "Knee hinge direction is anatomically inverted; human knee flexion is outside the joint range",
+      "TYPE": [
+        "MODEL_FORM_DEFECT",
+        "SOFTWARE_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/assets/v2_plant.xml",
+        "src/loaded_cmj/v2/constants.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-84",
+        "RES-85",
+        "RES-89"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "Lower-limb joint anatomy lives in the Plant XML/constants; flipping the knee hinge sign/range and re-deriving FK is the Plant rebuild mission.",
+      "EXPECTED_CLOSURE_EVIDENCE": "FK sign test: positive knee q must move the ankle posteriorly (-x) relative to the knee; R001-class run must show human knee flexion during countermovement.",
+      "REQUALIFICATION_SCOPE": "Plant, controller, events/scorer, measurements, full V2.1 requalification; historical R001 remains reproducible-only.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "CRIT-002",
+      "SEVERITY": "CRITICAL",
+      "TITLE": "Hip range/convention allocates 1.80 rad to extension and only 0.50 rad to flexion; countermovement is driven into hip extension",
+      "TYPE": [
+        "MODEL_FORM_DEFECT",
+        "CONTROL_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/assets/v2_plant.xml",
+        "src/loaded_cmj/v2/constants.py",
+        "src/loaded_cmj/v2/res72_integration.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-85",
+        "RES-89"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "Hip axis sign/range allocation is a Plant model-form defect; controller sign re-derivation follows the corrected Plant.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Hip flexion >= 1.0 rad reachable during countermovement with human femoral direction; postural signature test.",
+      "REQUALIFICATION_SCOPE": "Plant/controller/events; full V2.1 requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "CRIT-003",
+      "SEVERITY": "CRITICAL",
+      "TITLE": "No meaningful jump-performance requirement exists; a 3.6 cm hop qualifies as task success",
+      "TYPE": [
+        "SCORER_SPEC_DEFECT",
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/constants.py",
+        "src/loaded_cmj/v2/events.py",
+        "src/loaded_cmj/v2/canonical_runtime.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "WHY_THIS_OWNER": "The missing jump-performance requirement is a scientific task-contract decision that only the owner-approved contract can close.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Negative-control trajectory that completes 12/12 events with an objectively trivial hop must FAIL the task gate.",
+      "REQUALIFICATION_SCOPE": "Scorer spec + qualification scope; no plant change required for the gate itself.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "CRIT-004",
+      "SEVERITY": "CRITICAL",
+      "TITLE": "Candidate identity does not freeze the executing system",
+      "TYPE": [
+        "PROVENANCE_DEFECT",
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "CANONICAL_V2_CANDIDATE_SPEC.json",
+        "CANONICAL_CANDIDATE_IDENTITY.json",
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "tests/test_res78_canonical_runtime.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Candidate identity must cover the full executed closure; this is the runtime/provenance package mission.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Clean-clone test: mutate any executed-but-unhashed module -> identity verifier must FAIL before execution.",
+      "REQUALIFICATION_SCOPE": "Successor candidate identity definition; R001 historical hash remains valid as a partial fingerprint.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "CRIT-005",
+      "SEVERITY": "CRITICAL",
+      "TITLE": "Five external evidence JSON authorities are loaded at runtime without hash verification",
+      "TYPE": [
+        "PROVENANCE_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/canonical_runtime.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Hash-pinning/vendoring external runtime authorities and verifying at load is runtime provenance scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Hash-mutation negative test: alter one authority byte -> run must fail closed before any controller construction.",
+      "REQUALIFICATION_SCOPE": "Successor qualification; historical evidence remains valid as reproduced.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "CRIT-006",
+      "SEVERITY": "CRITICAL",
+      "TITLE": "Production package is not self-contained and cannot run from a clean install",
+      "TYPE": [
+        "PROVENANCE_DEFECT",
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "pyproject.toml",
+        "uv.lock",
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "tools/res52/soft_contact.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Self-contained packaging (tools into package, scipy declared, no absolute paths) is the packaging/provenance mission.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Clean-venv install test: install wheel + declared deps, run canonical runtime against a vendored evidence fixture.",
+      "REQUALIFICATION_SCOPE": "Successor release qualification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "CRIT-007",
+      "SEVERITY": "CRITICAL",
+      "TITLE": "Premature SUPPORTED->FLIGHT switch (single-sample guard) commands a ~0.94 action step while feet are still loaded; violent non-human takeoff",
+      "TYPE": [
+        "CONTROL_BUG",
+        "MODEL_FORM_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/res72_integration.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-85",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-89"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "Premature SUPPORTED->FLIGHT switching is launch/flight control; RES-82 supplies the approved takeoff definition and RES-89 the adversarial guard tests.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Adversarial guard test: single noisy control sample of maxf<10 must not switch to FLIGHT; takeoff action step must be bounded and occur at/after support loss.",
+      "REQUALIFICATION_SCOPE": "Controller + events requalification; successor candidate.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-001",
+      "SEVERITY": "HIGH",
+      "TITLE": "E10 impact-absorption predicate is underconstrained (vertical-only, no horizontal/angular/posture)",
+      "TYPE": [
+        "SCORER_SPEC_DEFECT",
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/events.py",
+        "src/loaded_cmj/v2/canonical_runtime.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-86",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-87"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "E10 landing admissibility is a terminal/landing-control predicate; the contract side is owned by RES-82 and balance continuation by RES-87.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Negative control: a landing with large inherited vx/Hy must not latch E10.",
+      "REQUALIFICATION_SCOPE": "Events + landing qualification; successor candidate.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-002",
+      "SEVERITY": "HIGH",
+      "TITLE": "RES-58 terminal capture regulates only vertical momentum; it has no horizontal/angular/CoP authority",
+      "TYPE": [
+        "CONTROL_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/terminal_capture.py",
+        "tools/res52/soft_contact.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-86",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "RES-58 terminal capture must gain horizontal/CAM/CoP authority (or a reduced claim) in the terminal landing mission.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Landing with a lateral/forward perturbation must keep CoM/CAM bounded through capture.",
+      "REQUALIFICATION_SCOPE": "Controller + landing requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-003",
+      "SEVERITY": "HIGH",
+      "TITLE": "Balance controller authority is braking-only and cannot command forward CoP/Fx; forward lunge is uncorrectable in principle",
+      "TYPE": [
+        "CONTROL_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/balance_capture.py",
+        "src/loaded_cmj/v2/stable_recovery.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-86"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "Two-sided balance authority and feasible CoP regulation is the balance/recovery mission; landing-layer interaction is secondary.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Perturbation test requiring both forward and backward CoP authority; posture bound during capture.",
+      "REQUALIFICATION_SCOPE": "Balance/landing requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-004",
+      "SEVERITY": "HIGH",
+      "TITLE": "RECOVERY_READY predicate constrains rates only; recovery begins from a 24-degree forward lean with 0.65 rad knee and 15 cm forward CoM",
+      "TYPE": [
+        "CONTROL_BUG",
+        "SCORER_SPEC_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/full_closure.py",
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "src/loaded_cmj/v2/stable_recovery.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "Recovery-entry posture admissibility is recovery control; the declared posture set is fixed by the contract.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Posture-at-entry test: recovery may only start inside a declared standing-approach posture set.",
+      "REQUALIFICATION_SCOPE": "Balance/recovery requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-005",
+      "SEVERITY": "HIGH",
+      "TITLE": "BALANCE->RECOVERY resets the held action to zeros, discarding up to 0.545 and breaking the previous-action continuity nominal",
+      "TYPE": [
+        "CONTROL_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "src/loaded_cmj/v2/stable_recovery.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-88",
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "Action-history continuity across BALANCE->RECOVERY is recovery-control behavior; runtime held-action propagation is a supporting change.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Continuity test: sup |u_k - u_{k-1}| bounded by the trust region across every regime switch.",
+      "REQUALIFICATION_SCOPE": "Controller requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-006",
+      "SEVERITY": "HIGH",
+      "TITLE": "Direct torque at 200 Hz with no activation dynamics or action-rate limiting produces non-physiological command steps",
+      "TYPE": [
+        "MODEL_FORM_DEFECT",
+        "CONTROL_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/drive.py",
+        "src/loaded_cmj/v2/res72_integration.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-85",
+      "SECONDARY_ISSUES": [
+        "RES-83",
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "Command-step/slew bounding is a controller command issue during launch; if activation dynamics are chosen as model form, Plant-side work is secondary.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Activation/slew regression test: command steps bounded by the declared rise-time model and documented as a limitation.",
+      "REQUALIFICATION_SCOPE": "Plant/controller model-form decision + requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-007",
+      "SEVERITY": "HIGH",
+      "TITLE": "Scorer-code predicate is a control input (RES-43 handoff gate) despite the declared scorer/controller separation",
+      "TYPE": [
+        "SCORER_SPEC_DEFECT",
+        "PROVENANCE_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "src/loaded_cmj/v2/events.py",
+        "src/loaded_cmj/v2/stable_recovery.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-87"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Scorer/control separation and shared-predicate binding are identity/provenance concerns.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Separation test: changing scorer-only code must not change the action stream; shared predicate must live in the hashed closure.",
+      "REQUALIFICATION_SCOPE": "Successor candidate identity + separation proof.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-008",
+      "SEVERITY": "HIGH",
+      "TITLE": "Support margin does not represent the active support polygon and is positive even in flight",
+      "TYPE": [
+        "MEASUREMENT_BUG",
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/plant.py",
+        "src/loaded_cmj/v2/constants.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-86",
+        "RES-87"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "Active-hull support margin is a measurement authority defect; consumers (events/landing/balance) are secondary.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Support-margin adversarial test: single-support and airborne states must not report positive margins; rotated-foot hull test.",
+      "REQUALIFICATION_SCOPE": "Measurement + qualification requalification; invalidates margin-based gate evidence.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-009",
+      "SEVERITY": "HIGH",
+      "TITLE": "Inactive-foot geometric gap and normal velocity are wrong when the foot is rotated (up to 0.094 m)",
+      "TYPE": [
+        "MEASUREMENT_BUG",
+        "SOFTWARE_BUG"
+      ],
+      "SOURCE_FILES": [
+        "tools/res52/core52.py",
+        "tools/res52/soft_contact.py",
+        "src/loaded_cmj/v2/balance_capture.py",
+        "src/loaded_cmj/v2/stable_recovery.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-86",
+        "RES-87"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "Rotated-foot gap/normal-velocity geometry is a measurement/contact authority defect used by soft-contact.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Rotated-foot gap test: code gap must equal true lowest-corner height within 1e-6 m for ankle q in [-0.7,0.5].",
+      "REQUALIFICATION_SCOPE": "Measurement/soft-contact requalification; rotated-foot successors blocked until fixed.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-010",
+      "SEVERITY": "HIGH",
+      "TITLE": "Declared genuine-flight geometric gap is never implemented (E7 checks force only)",
+      "TYPE": [
+        "SCORER_SPEC_DEFECT",
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/constants.py",
+        "src/loaded_cmj/v2/events.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-84",
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "WHY_THIS_OWNER": "The genuine-flight geometric-gap declaration must be wired into E7 or removed; event contract scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Force-dropout-without-clearance negative control must not latch E7.",
+      "REQUALIFICATION_SCOPE": "Event requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-011",
+      "SEVERITY": "HIGH",
+      "TITLE": "Apex has no dwell and its fallback path can latch without a flight check",
+      "TYPE": [
+        "SCORER_SPEC_DEFECT",
+        "SOFTWARE_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/constants.py",
+        "src/loaded_cmj/v2/events.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-84"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "WHY_THIS_OWNER": "Apex dwell and mandatory flight checks are event-predicate semantics.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Contact-phase vz-crossing negative control must not latch E8.",
+      "REQUALIFICATION_SCOPE": "Event requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-012",
+      "SEVERITY": "HIGH",
+      "TITLE": "True-standing envelope is a one-trajectory overfit (micron-scale windows, one-U LP expansion)",
+      "TYPE": [
+        "QUALIFICATION_DEFECT",
+        "SCORER_SPEC_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/constants.py",
+        "src/loaded_cmj/v2/events.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-89"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "A physical (non-overfit) true-standing envelope is closed by the perturbed-hold robustness study; RES-82 declares the envelope tolerance semantics.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Multiple perturbed standing holds must pass/fail E12 consistently with the declared envelope; envelope width must be traceable to a robustness requirement.",
+      "REQUALIFICATION_SCOPE": "Recovery qualification; successor candidate.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-013",
+      "SEVERITY": "HIGH",
+      "TITLE": "Canonical output omits all jump-performance metrics and violates its own required result schema",
+      "TYPE": [
+        "QUALIFICATION_DEFECT",
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "CANONICAL_V2_RUNTIME_CONTRACT.md",
+        "src/loaded_cmj/v2/events.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Canonical output schema/metrics serialization is the runtime output/provenance mission.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Schema conformance test against CANONICAL_V2_RUNTIME_CONTRACT.md; performance metrics presence test.",
+      "REQUALIFICATION_SCOPE": "Successor qualification output.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-014",
+      "SEVERITY": "HIGH",
+      "TITLE": "Soft-contact FZ-min rows are silently dropped during LS refinement; active-set crossings are not handled in the derivative",
+      "TYPE": [
+        "SOFTWARE_BUG",
+        "CONTROL_BUG"
+      ],
+      "SOURCE_FILES": [
+        "tools/res52/soft_contact.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-86",
+      "SECONDARY_ISSUES": [
+        "RES-87",
+        "RES-85"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "Soft-contact refinement row construction (FZ_MIN retention, active-set crossing) is the terminal/contact realization mission; balance/recovery are consumers.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Unit test: FZ_MIN row must be present in every refinement pass; crossing test must be one-sided/zero but never a two-sided secant across modes.",
+      "REQUALIFICATION_SCOPE": "Soft-contact/terminal/balance requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-015",
+      "SEVERITY": "HIGH",
+      "TITLE": "Legacy 'honest full jump' acceptance file is false assurance: 10 assert-True stubs and >=9 events accepted as 12/12",
+      "TYPE": [
+        "TEST_DEFECT",
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "tests/test_v2_1_res10_honest_full_jump.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [
+        "RES-88"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "False-assurance tests are qualification-suite scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Mutation test: a trajectory truncated at E9 must fail every test whose name claims E12/stable recovery.",
+      "REQUALIFICATION_SCOPE": "Test suite requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-016",
+      "SEVERITY": "HIGH",
+      "TITLE": "Seven assertions are neutralized by `or True` (unconditional pass) and one test body is a bare pass",
+      "TYPE": [
+        "TEST_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "tests/test_v2_1_res31_honest_planar_root.py",
+        "tests/test_res10_controller_obs_sync.py",
+        "tests/test_res11_deterministic_offline.py",
+        "tests/test_v2_1_res6_compliant_landing_contact.py",
+        "tests/test_res52_soft_contact.py",
+        "tests/test_res76_full_closure.py",
+        "tests/test_res73_balance_capture.py",
+        "tests/test_v2_1_res8_captured_squat.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Neutralized assertions are qualification-suite scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Each restored assertion must be shown to fail on a deliberately mutated implementation.",
+      "REQUALIFICATION_SCOPE": "Test suite requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-017",
+      "SEVERITY": "HIGH",
+      "TITLE": "No test executes the canonical composition; the suite validates stored JSON and breaks at collection",
+      "TYPE": [
+        "TEST_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "tests/test_res78_canonical_runtime.py",
+        "tests/test_ml241_qacc_resolution.py",
+        "tests/test_public_support_wrench_contract.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [
+        "RES-88"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "A live canonical-composition test and clean-clone collection are qualification-suite scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Fresh-process canonical smoke test with hash binding; collection must succeed on a clean clone without external evidence.",
+      "REQUALIFICATION_SCOPE": "Test suite + qualification requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-018",
+      "SEVERITY": "HIGH",
+      "TITLE": "Qualification orchestration omits two scripts (one hardcodes PASS); test_public_qualification runs only 10 of 19 suites",
+      "TYPE": [
+        "TEST_DEFECT",
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "tests/test_public_qualification.py",
+        "tests/qualification_causal_runtime.py",
+        "tests/qualification_ml241_wrapped_derivatives.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Qualification orchestration coverage and hardcoded PASS removal are qualification-suite scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Orchestrator coverage test: enumerated scripts == executed scripts; each script must fail on a mutated input.",
+      "REQUALIFICATION_SCOPE": "Qualification orchestration requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "HIGH-019",
+      "SEVERITY": "HIGH",
+      "TITLE": "Rigid single-box foot: no MTP/toe/arch; R001 push-off is flat-footed with no heel rise",
+      "TYPE": [
+        "MODEL_FORM_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/assets/v2_plant.xml"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-85",
+        "RES-92"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "Foot topology (MTP/toe/arch) is Plant model form; push-off control and visual review consume it.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Foot-roll/heel-rise capability test with declared geoms and joint; push-off visual/physics coherence review.",
+      "REQUALIFICATION_SCOPE": "Successor plant + full requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-001",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Systematic dwell off-by-one: every dwell event confirms one physics sample (0.125 ms) before the declared duration",
+      "TYPE": [
+        "SCORER_SPEC_DEFECT",
+        "SOFTWARE_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/events.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "WHY_THIS_OWNER": "Dwell off-by-one is an event-predicate timing semantics defect.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Dwell boundary unit test at the exact declared duration.",
+      "REQUALIFICATION_SCOPE": "Event requalification (numeric shift only).",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-002",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "E11 threshold is named COM_SPEED but implemented on com_vz only",
+      "TYPE": [
+        "SCORER_SPEC_DEFECT",
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/events.py",
+        "src/loaded_cmj/v2/constants.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-87"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "WHY_THIS_OWNER": "E11 COM_SPEED misnomer/implementation mismatch is event semantics.",
+      "EXPECTED_CLOSURE_EVIDENCE": "E11 negative control with |vz|<0.30 but speed>0.30.",
+      "REQUALIFICATION_SCOPE": "Event requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-003",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Pelvis orientation observation is a hardcoded identity quaternion",
+      "TYPE": [
+        "MEASUREMENT_BUG",
+        "SOFTWARE_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/plant.py",
+        "src/loaded_cmj/v2/measurement.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "Pelvis orientation observation is measurement authority.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Observation test: quaternion must match MuJoCo pelvis xmat/quat under nonzero root pitch.",
+      "REQUALIFICATION_SCOPE": "Measurement requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-004",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Trunk tilt measurement is unsigned",
+      "TYPE": [
+        "MEASUREMENT_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/plant.py",
+        "src/loaded_cmj/v2/events.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "Signed trunk tilt is measurement authority.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Signed-tilt test under forward and backward lean.",
+      "REQUALIFICATION_SCOPE": "Measurement/event requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-005",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "CoP frame/origin is misdeclared and its validity threshold disagrees with the declared constant",
+      "TYPE": [
+        "MEASUREMENT_BUG",
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/plant.py",
+        "TRACE_SCHEMA_V2.md",
+        "src/loaded_cmj/v2/constants.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-87",
+        "RES-92"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "CoP frame/origin/threshold unification is measurement authority; balance consumes it.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Frame-identity test: CoP + origin + force must reconstruct the world wrench at the contact plane.",
+      "REQUALIFICATION_SCOPE": "Measurement requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-006",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "prohibited_contact is structurally always False; PROHIB=false in the canonical result carries no information",
+      "TYPE": [
+        "MEASUREMENT_BUG",
+        "SOFTWARE_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/plant.py",
+        "src/loaded_cmj/v2/canonical_runtime.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "prohibited/penetration flags must scan real colliders; measurement authority.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Injected fall-contact test must raise prohibited/fall flags.",
+      "REQUALIFICATION_SCOPE": "Measurement/qualification requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-007",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Collision topology permits anatomically impossible intersections and the 20 kg load has no collision geometry at all",
+      "TYPE": [
+        "MODEL_FORM_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/assets/v2_plant.xml"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-83",
+      "SECONDARY_ISSUES": [
+        "RES-84"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "Collision topology and load colliders are Plant model form.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Fall-state interpenetration audit; load-floor collision detection test.",
+      "REQUALIFICATION_SCOPE": "Successor plant; fall requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-008",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "FLEX->EXTEND program switch is a hard scheduled step (0.568) unrelated to state",
+      "TYPE": [
+        "CONTROL_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/res72_integration.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-85",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "The hard FLEX->EXTEND schedule step is launch-control phase semantics.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Program-switch continuity test bounded by declared slew.",
+      "REQUALIFICATION_SCOPE": "Controller requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-009",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Post-projection clamps can leave the CoP/Fx/Hdot triple off the feasible line",
+      "TYPE": [
+        "SOFTWARE_BUG",
+        "CONTROL_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/balance_capture.py",
+        "src/loaded_cmj/v2/stable_recovery.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-87",
+      "SECONDARY_ISSUES": [
+        "RES-86"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "Final joint projection of (Fx,Hdot) onto the CoP line is balance/recovery authority computation.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Property test: commanded (Fx,Hdot,Fz) always satisfies the CoP line within tolerance.",
+      "REQUALIFICATION_SCOPE": "Balance/recovery requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-010",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Legacy controller swallows all exceptions and commands zero action",
+      "TYPE": [
+        "SOFTWARE_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/controller.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-94",
+      "SECONDARY_ISSUES": [
+        "RES-88"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Legacy controller exception swallowing is residual cleanup outside the successor causal layers.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Malformed-observation test must surface an error, not zeros.",
+      "REQUALIFICATION_SCOPE": "Legacy module deprecation or requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-011",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Reporting metrics are misdefined or dead: loading rate, apex_height alias, CoP invalid-interval analysis",
+      "TYPE": [
+        "MEASUREMENT_BUG",
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/events.py",
+        "src/loaded_cmj/v2/measurement.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-84",
+      "SECONDARY_ISSUES": [
+        "RES-82",
+        "RES-88"
+      ],
+      "MILESTONE": "M6 \u2014 Human Biomechanics Plant & Measurement Rebuild",
+      "WHY_THIS_OWNER": "Metric definitions (loading rate, apex alias, CoP intervals) are measurement/reporting definitions; serialization is RES-88.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Metric definition tests against a synthetic force trace; CoP validity interval presence test.",
+      "REQUALIFICATION_SCOPE": "Scorer reporting requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-012",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Full-trajectory support adjudication is NOT_QUALIFIED while reported gates use the post-landing slice only",
+      "TYPE": [
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "src/loaded_cmj/v2/support_continuity.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-89",
+        "RES-84"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "WHY_THIS_OWNER": "The support-adjudication window contract must be declared before gates can cite it.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Contract test: the reported gate window must match the declared contract scope.",
+      "REQUALIFICATION_SCOPE": "Qualification reporting.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-013",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "E12 fires 50.8 ms before the RES-43 handoff; part of its dwell is earned under SETTLE, not the final hold",
+      "TYPE": [
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "src/loaded_cmj/v2/stable_recovery.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-87",
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "WHY_THIS_OWNER": "E12/handoff regime coverage is an event/handoff-contract decision; RES-87 implements transitions.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Regime-boundary test: E12 dwell must satisfy the declared regime coverage.",
+      "REQUALIFICATION_SCOPE": "Recovery qualification reporting.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-014",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Horizon authority drift: four coexisting horizons (4.0/8.0/20.0) with no runtime binding",
+      "TYPE": [
+        "DOCUMENTATION_DEFECT",
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/constants.py",
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "tools/res52/core52.py",
+        "src/loaded_cmj/v2/events.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Horizon authority drift is provenance/constant-binding scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Authority-consistency test comparing constants/spec/runtime horizon values.",
+      "REQUALIFICATION_SCOPE": "Documentation and constants reconciliation.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-015",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Provenance artifacts disagree on entry heads and the authority ledger is stale/corrupted",
+      "TYPE": [
+        "PROVENANCE_DEFECT",
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "CANONICAL_CANDIDATE_IDENTITY.json",
+        "CANONICAL_V2_CANDIDATE_SPEC.json",
+        "CANONICAL_V2_RUNTIME_CONTRACT.md",
+        "tools/res79_smoke_replay.py",
+        "AUTHORITY_LEDGER.json"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Entry-head/authority-ledger consistency is provenance scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Identity-consistency test over spec/contract/identity/tool.",
+      "REQUALIFICATION_SCOPE": "Successor provenance.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-016",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Production modules hardcode developer absolute paths and inject sys.path; evid_trace_v2 is imported under two module identities",
+      "TYPE": [
+        "PROVENANCE_DEFECT",
+        "SOFTWARE_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/balance_capture.py",
+        "src/loaded_cmj/v2/stable_recovery.py",
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "tools/res52/core52.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Absolute paths, sys.path injection and dual module identity are packaging/provenance scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Relocated-clone test with a different root and CWD.",
+      "REQUALIFICATION_SCOPE": "Successor release qualification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-017",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Production swallows diagnostics and reports sentinel values instead of failing closed",
+      "TYPE": [
+        "SOFTWARE_BUG",
+        "QUALIFICATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "src/loaded_cmj/v2/res72_integration.py",
+        "tools/res52/soft_contact.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-86",
+      "SECONDARY_ISSUES": [
+        "RES-88"
+      ],
+      "MILESTONE": "M7 \u2014 Launch, Flight, Landing & Recovery Control Rebuild",
+      "WHY_THIS_OWNER": "Fallback telemetry describing the executed action and truncated-interval validation are terminal/contact control validation scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Fault-injection test: forced adjudication exception must terminate or flag the run.",
+      "REQUALIFICATION_SCOPE": "Runtime/evidence requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-018",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Dwell/threshold literals are duplicated across runtime, mirror module and external JSON with no binding",
+      "TYPE": [
+        "SOFTWARE_BUG",
+        "PROVENANCE_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/canonical_runtime.py",
+        "src/loaded_cmj/v2/full_closure.py",
+        "src/loaded_cmj/v2/res72_integration.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-88",
+      "SECONDARY_ISSUES": [
+        "RES-82"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Duplicated literals/mirrors with no binding are provenance scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Authority-consistency test over all copies.",
+      "REQUALIFICATION_SCOPE": "Successor provenance.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-019",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "Multiple V2.1-named tests exercise the legacy controller, not the canonical composition",
+      "TYPE": [
+        "TEST_DEFECT",
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "tests/test_v2_1_res10_honest_full_jump.py",
+        "tests/test_v2_1_res16_true_standing.py",
+        "tests/test_v2_1_res5_honest_fall.py",
+        "tests/test_v2_1_res6_compliant_landing_contact.py",
+        "tests/test_v2_1_res8_captured_squat.py",
+        "tests/test_v2_1_res31_honest_planar_root.py",
+        "tests/test_v2_1_res42_zero_root_damping.py",
+        "tests/test_res10_controller_obs_sync.py",
+        "tests/test_res10_physics_sample_sync.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-89",
+      "SECONDARY_ISSUES": [
+        "RES-88"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Tests exercising the legacy controller are qualification-suite scope.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Coverage test: V2.1-named suites must import the canonical entrypoint.",
+      "REQUALIFICATION_SCOPE": "Test suite requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "MED-020",
+      "SEVERITY": "MEDIUM",
+      "TITLE": "E1 supported-start guard omits the fall flag (only the dead prohibited flag is checked)",
+      "TYPE": [
+        "SCORER_SPEC_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/events.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-82",
+      "SECONDARY_ISSUES": [
+        "RES-89"
+      ],
+      "MILESTONE": "M5 \u2014 Authority Reset & Scientific Contract Closure",
+      "WHY_THIS_OWNER": "E1 fall-flag predicate is event semantics.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Fall-at-start negative control must not latch E1.",
+      "REQUALIFICATION_SCOPE": "Event requalification.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "LOW-001",
+      "SEVERITY": "LOW",
+      "TITLE": "Plant XML header documents ngeom=14 while the model has 16",
+      "TYPE": [
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/assets/v2_plant.xml"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-94",
+      "SECONDARY_ISSUES": [
+        "RES-83"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Residual documentation drift on the historical Plant inventory; RES-94 owns LOW closure.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Header-vs-model assertion test.",
+      "REQUALIFICATION_SCOPE": "None.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "LOW-002",
+      "SEVERITY": "LOW",
+      "TITLE": "README describes 15 bounded anatomical channels while ACTION_DIM=7",
+      "TYPE": [
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "README.md"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-94",
+      "SECONDARY_ISSUES": [],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Residual README documentation drift; RES-94 owns LOW closure.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Docs consistency check.",
+      "REQUALIFICATION_SCOPE": "None.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "LOW-003",
+      "SEVERITY": "LOW",
+      "TITLE": "Stale/incorrect comments and dead branches in contact and support code",
+      "TYPE": [
+        "DOCUMENTATION_DEFECT",
+        "SOFTWARE_BUG"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/plant.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-94",
+      "SECONDARY_ISSUES": [
+        "RES-84"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Residual stale comments/dead branches in contact and support code; RES-94 owns LOW closure.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Comments-consistency review.",
+      "REQUALIFICATION_SCOPE": "None.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "LOW-004",
+      "SEVERITY": "LOW",
+      "TITLE": "IMPACT KD 'ramp' is an identity no-op presented as a ramp",
+      "TYPE": [
+        "SOFTWARE_BUG",
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/res72_integration.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-94",
+      "SECONDARY_ISSUES": [
+        "RES-85"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "No-op IMPACT KD ramp in the historical launch module; residual cleanup.",
+      "EXPECTED_CLOSURE_EVIDENCE": "None required (or implement a real ramp).",
+      "REQUALIFICATION_SCOPE": "None.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "LOW-005",
+      "SEVERITY": "LOW",
+      "TITLE": "Dead code: unused y_of branch, unused unilateral_dropout_samples with misleading return, dead conditional expression",
+      "TYPE": [
+        "SOFTWARE_BUG",
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/balance_capture.py",
+        "src/loaded_cmj/v2/support_continuity.py",
+        "tools/res52/soft_contact.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-94",
+      "SECONDARY_ISSUES": [],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Residual dead code across controller/support modules.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Dead-code check.",
+      "REQUALIFICATION_SCOPE": "None.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "LOW-006",
+      "SEVERITY": "LOW",
+      "TITLE": "WALL_S makes the canonical result JSON non-byte-deterministic",
+      "TYPE": [
+        "SOFTWARE_BUG",
+        "PROVENANCE_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/canonical_runtime.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-94",
+      "SECONDARY_ISSUES": [
+        "RES-88"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Wall-clock field in deterministic result artifacts; residual determinism cleanup.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Determinism test on the scientific subset.",
+      "REQUALIFICATION_SCOPE": "None.",
+      "STATUS": "PLANNED"
+    },
+    {
+      "DEFECT_ID": "LOW-007",
+      "SEVERITY": "LOW",
+      "TITLE": "Ankle sign comment is unresolved and geometrically inverted",
+      "TYPE": [
+        "DOCUMENTATION_DEFECT"
+      ],
+      "SOURCE_FILES": [
+        "src/loaded_cmj/v2/constants.py"
+      ],
+      "PRIMARY_MITIGATION_ISSUE": "RES-94",
+      "SECONDARY_ISSUES": [
+        "RES-83"
+      ],
+      "MILESTONE": "M8 \u2014 Runtime, Provenance & Qualification Infrastructure Closure",
+      "WHY_THIS_OWNER": "Ankle sign comment/closure; Plant sign documentation.",
+      "EXPECTED_CLOSURE_EVIDENCE": "Sign test for the ankle axis.",
+      "REQUALIFICATION_SCOPE": "None.",
+      "STATUS": "PLANNED"
+    }
+  ]
+}

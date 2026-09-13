@@ -1,0 +1,269 @@
+{
+  "MISSION": "LCMJ_POST_RES80_REMEDIATION_PROGRAM_001",
+  "LINEAR_ISSUE": "RES-81",
+  "PHASE": "J \u2014 CODE/ARTIFACT REVIEW",
+  "GATES": [
+    "CODE_REVIEW",
+    "BUG_HUNT",
+    "ERRATA_REVIEW",
+    "ROADMAP_COVERAGE_REVIEW",
+    "PROVENANCE_REVIEW"
+  ],
+  "TOTAL_CHECKS": 42,
+  "FAILED_CHECKS": 0,
+  "STATUS": "PASS",
+  "FINDINGS": [
+    {
+      "gate": "CODE_REVIEW",
+      "check": "tracked_worktree_unmodified",
+      "status": "PASS",
+      "detail": "tracked porcelain=''"
+    },
+    {
+      "gate": "CODE_REVIEW",
+      "check": "only_new_authority_dir_untracked",
+      "status": "PASS",
+      "detail": "delta=['audit/EXP-RES81-POST-RES80-AUTHORITY-RESET-001/']"
+    },
+    {
+      "gate": "CODE_REVIEW",
+      "check": "entry_untracked_preserved",
+      "status": "PASS",
+      "detail": "removed_or_renamed=[]"
+    },
+    {
+      "gate": "CODE_REVIEW",
+      "check": "no_tracked_diff",
+      "status": "PASS",
+      "detail": "diff=[]"
+    },
+    {
+      "gate": "CODE_REVIEW",
+      "check": "no_plant_controller_scorer_changes",
+      "status": "PASS",
+      "detail": "[]"
+    },
+    {
+      "gate": "CODE_REVIEW",
+      "check": "nothing_staged_pretamper",
+      "status": "PASS",
+      "detail": "staged=[]"
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "json_valid:RES80_ERRATA_001.json",
+      "status": "PASS",
+      "detail": "parsed"
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "json_valid:POST_RES80_AUTHORITY_BASELINE.json",
+      "status": "PASS",
+      "detail": "parsed"
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "json_valid:RES80_DEFECT_TO_ROADMAP_MATRIX.json",
+      "status": "PASS",
+      "detail": "parsed"
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "json_valid:ROADMAP_REQUIREMENT_COVERAGE.json",
+      "status": "PASS",
+      "detail": "parsed"
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "json_valid:ROADMAP_DEPENDENCY_VALIDATION.json",
+      "status": "PASS",
+      "detail": "parsed"
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "json_valid:RES81_RECOMPUTE.json",
+      "status": "PASS",
+      "detail": "parsed"
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "matrix_total_53",
+      "status": "PASS",
+      "detail": "53"
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "matrix_ids_unique",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "matrix_severity_counts",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "matrix_every_primary_assigned",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "matrix_no_self_secondary",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "err001_numbers_match_recompute",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "err003_numbers_match_recompute",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "requirements_total_50",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "BUG_HUNT",
+      "check": "requirements_unique",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ERRATA_REVIEW",
+      "check": "errata_ids_exact",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ERRATA_REVIEW",
+      "check": "no_severity_weakened",
+      "status": "PASS",
+      "detail": "ERR-001:N/A (terminology, no defect severity attached)->N/A; ERR-002:N/A (definition ambiguity; CRIT-007 severity is separate)->N/A; ERR-003:CRITICAL (CRIT-007)->CRITICAL (CRIT-007); ERR-004:N/A (wording/measurement of lead time)->N/A; ERR-005:HIGH (HIGH-003)->HIGH (HIGH-003)"
+    },
+    {
+      "gate": "ERRATA_REVIEW",
+      "check": "high003_unchanged",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ERRATA_REVIEW",
+      "check": "crit007_unchanged",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ERRATA_REVIEW",
+      "check": "r001_disposition_not_rescued",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ERRATA_REVIEW",
+      "check": "immutability_statement_present",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ERRATA_REVIEW",
+      "check": "baseline_r001_blocked",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ERRATA_REVIEW",
+      "check": "no_successor_authorized",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ERRATA_REVIEW",
+      "check": "old_path_canceled",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ROADMAP_COVERAGE_REVIEW",
+      "check": "defect_orphans_zero",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ROADMAP_COVERAGE_REVIEW",
+      "check": "duplicate_primary_zero",
+      "status": "PASS",
+      "detail": "ownership is per-defect unique; multiple defects may share an issue by design"
+    },
+    {
+      "gate": "ROADMAP_COVERAGE_REVIEW",
+      "check": "all_primaries_allowed",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ROADMAP_COVERAGE_REVIEW",
+      "check": "all_requirement_primaries_allowed",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "ROADMAP_COVERAGE_REVIEW",
+      "check": "dependency_graph_pass",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "PROVENANCE_REVIEW",
+      "check": "res80_bundle_intact",
+      "status": "PASS",
+      "detail": "mismatches=[]"
+    },
+    {
+      "gate": "PROVENANCE_REVIEW",
+      "check": "res80_seal_match",
+      "status": "PASS",
+      "detail": "c921e6de29a263be1bdcee78c9fa62c22b968388991cda50afa34bf3260a9341"
+    },
+    {
+      "gate": "PROVENANCE_REVIEW",
+      "check": "repo_res80_matches_sealed_bundle",
+      "status": "PASS",
+      "detail": "mismatch=[]"
+    },
+    {
+      "gate": "PROVENANCE_REVIEW",
+      "check": "remote_main_audit_commit",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "PROVENANCE_REVIEW",
+      "check": "local_head_audit_commit",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "PROVENANCE_REVIEW",
+      "check": "res81_bundle_checksums",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "gate": "PROVENANCE_REVIEW",
+      "check": "res81_seal_recorded",
+      "status": "PASS",
+      "detail": "final bundle seal recorded in SEAL.json (self-referential inclusion excluded by contract)"
+    }
+  ]
+}
