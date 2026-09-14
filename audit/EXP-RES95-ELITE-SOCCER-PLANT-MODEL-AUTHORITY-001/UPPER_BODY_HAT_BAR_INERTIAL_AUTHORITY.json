@@ -1,0 +1,223 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen reduced HAT decomposition, fixed bar-hold representation, and the resulting numeric HAT and HAT+bar inertial properties.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "ANTHROPOMETRY_BSIP_AUTHORITY",
+    "LOAD_BAR_AUTHORITY",
+    "COLLISION_CONTACT_POLICY",
+    "DERIVED_QUANTITIES.json"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "UB-01",
+      "statement": "Frozen reduced HAT decomposition.",
+      "value": "head + upper trunk + middle trunk + 2x upper arm + 2x forearm + 2x hand (pelvis excluded and carried by the root pelvis body)",
+      "units": "\u2014",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "S01 Table 4 component rows",
+      "sensitivity": "\u2014",
+      "notes": "HAT mass 38.7969 kg equals the Linear authority value 38.7969 kg."
+    },
+    {
+      "id": "UB-02",
+      "statement": "Fixed bar-hold posture parameterization (inertia aggregation reference posture).",
+      "value": {
+        "trunk": "MPT+UPT collinear on +z",
+        "head_pitch_deg": 0.0,
+        "shoulder_joint_x_m": 0.0,
+        "shoulder_joint_y_m": 0.16,
+        "shoulder_joint_z_m": 0.5433328546812176,
+        "wrist_dz_m": -0.035,
+        "hand_grip_half_width_y_m": 0.24,
+        "elbow_rule": "two-link IK in the vertical plane through shoulder and wrist; select the solution with the lower elbow z"
+      },
+      "units": "m / deg",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S01;S04",
+      "locator": "de Leva component geometry; frozen engineering bar-hold pose",
+      "sensitivity": "declared perturbations: {'bar_placement_m': [0.025, 0.025], 'head_pitch_deg': [-10.0, 0.0, 10.0], 'shoulder_joint_x_m': [-0.03, 0.03], 'shoulder_joint_y_m': [0.14, 0.18], 'wrist_dz_m': [-0.055, -0.015], 'hand_grip_half_width_y_m': [0.18, 0.3]}",
+      "notes": "Every unmeasured posture parameter is engineering nominal with mandatory sensitivity; none is anthropometric truth."
+    },
+    {
+      "id": "UB-03",
+      "statement": "Aggregated HAT mass.",
+      "value": 38.7969,
+      "units": "kg",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "sum of de Leva mass fractions",
+      "sensitivity": "\u2014",
+      "notes": "Machine-recomputed."
+    },
+    {
+      "id": "UB-04",
+      "statement": "Aggregated HAT COM in the HAT frame (origin MIDH).",
+      "value": [
+        -0.01596456566162191,
+        -2.8616281832444254e-18,
+        0.4496738763907584
+      ],
+      "units": "m",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S01",
+      "locator": "de Leva component masses (LITERATURE_DIRECT) aggregated under the frozen engineering bar-hold posture UB-02",
+      "sensitivity": "covered by UB-02 perturbations",
+      "notes": "The component masses are literature-direct; the aggregate COM inherits the engineering posture classification and is not an anthropometric measurement."
+    },
+    {
+      "id": "UB-05",
+      "statement": "Aggregated HAT inertia tensor about its COM (full 3x3, HAT frame).",
+      "value": [
+        [
+          1.692352492111382,
+          3.469446951953614e-18,
+          -0.02077944879714553
+        ],
+        [
+          3.469446951953614e-18,
+          1.4753589080582343,
+          3.469446951953614e-18
+        ],
+        [
+          -0.02077944879714553,
+          3.469446951953614e-18,
+          0.8504250560234003
+        ]
+      ],
+      "units": "kg m^2",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S01",
+      "locator": "de Leva component tensors (LITERATURE_DIRECT) rotated into the HAT frame and translated under the frozen engineering bar-hold posture UB-02",
+      "sensitivity": "covered by UB-02 perturbations; system Iyy range [1.73167341, 2.02437733] kg m^2 over the declared set",
+      "notes": "Ixy=Iyz=0 by left-right symmetry; Ixz is non-zero and must not be silently dropped."
+    },
+    {
+      "id": "UB-06",
+      "statement": "HAT principal moments and principal rotation.",
+      "value": {
+        "principal_moments_kg_m2": [
+          1.6928650336618478,
+          1.475358908058234,
+          0.8499125144729343
+        ],
+        "principal_rotation_about_y_deg": -1.4129592461485285
+      },
+      "units": "kg m^2 / deg",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "\u2014",
+      "locator": "eigendecomposition of UB-05 (which inherits the engineering posture classification)",
+      "sensitivity": "\u2014",
+      "notes": "The principal rotation is small (~1.4 deg); a diagonal implementation is permitted only with this declared rotation or with the full tensor."
+    },
+    {
+      "id": "UB-07",
+      "statement": "Bar local placement relative to the HAT frame.",
+      "value": {
+        "center_m": [
+          -0.095,
+          0.0,
+          0.6
+        ],
+        "orientation": "identity (bar axis along +y)"
+      },
+      "units": "m",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S04",
+      "locator": "upper-back/shoulder-girdle placement, posterior of the trunk axis",
+      "sensitivity": "placement sensitivity +/- [0.025, 0.025] m in x and z",
+      "notes": "RES-83 must not silently move the nominal; any change is an authority amendment."
+    },
+    {
+      "id": "UB-08",
+      "statement": "Combined HAT+bar mass, COM and inertia about the combined COM.",
+      "value": {
+        "mass_kg": 58.7969,
+        "com_m": [
+          -0.04284878382223176,
+          -1.888233945369835e-18,
+          0.5008079067934639
+        ],
+        "inertia_about_com_kg_m2": [
+          [
+            13.746432717170366,
+            6.454194752049098e-18,
+            0.1360143545930838
+          ],
+          [
+            6.454194752049098e-18,
+            1.8608048237640293,
+            -2.2075708375430198e-18
+          ],
+          [
+            0.1360143545930838,
+            -2.2075708375430198e-18,
+            12.688717904231572
+          ]
+        ]
+      },
+      "units": "kg / m / kg m^2",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S01;S04",
+      "locator": "rigid HAT (engineering posture) and rigid bar at the engineering placement UB-07; combination uses exact parallel-axis identity",
+      "sensitivity": "covered by placement sensitivity",
+      "notes": "The sagittal-plane relevant inertia is Iyy = 1.86080482 kg m^2; transverse (pitch-axis) values are larger because of the 2.2 m bar."
+    },
+    {
+      "id": "UB-09",
+      "statement": "Arm-fold disclosure.",
+      "value": {
+        "elbow_flexion_deg": 155.04504872475866,
+        "elbow_interior_angle_deg": 24.954951275241342
+      },
+      "units": "deg",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S01",
+      "locator": "geometric consequence of frozen hand placement and published arm lengths",
+      "sensitivity": "covered by grip-width and wrist-offset sensitivity",
+      "notes": "The reduced HAT inertially represents a fixed bar-hold; it is not a claim about achievable articulated elbow angles."
+    },
+    {
+      "id": "UB-10",
+      "statement": "No arm swing, no bar roll, no bar compliance.",
+      "value": "arms/hands rigidly attach to the bar; bar is rigidly attached to HAT in V1; sleeve rotation, bar flex and hand compliance are outside V1",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S04;S16",
+      "locator": "task definition; system authority section 8",
+      "sensitivity": "\u2014",
+      "notes": "Any future arm-swing or bar-compliance variant is a new model revision."
+    },
+    {
+      "id": "UB-11",
+      "statement": "System COM versus athlete COM.",
+      "value": "SYSTEM_COM (athlete + rigid bar, 99 kg) is the primary mechanics authority; ATHLETE_COM is secondary/report-only",
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "carried-bar closure of the airborne system",
+      "sensitivity": "\u2014",
+      "notes": "Force-impulse and ballistic identities use SYSTEM_COM and 99 kg."
+    }
+  ]
+}

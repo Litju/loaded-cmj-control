@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "PERFORMANCE_AUTHORITY_BOUNDARY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen performance boundary: anti-triviality floor only, withdrawn elite targets, and the mandatory method-matched mapping.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "EVENT_MEASUREMENT_BOUNDARY",
+    "DEFERRED_NUMERICAL_CALIBRATIONS",
+    "SPORT_CONTEXT_AUTHORITY"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "PA-01",
+      "statement": "Anti-triviality floor.",
+      "value": {
+        "H_ANTI_TRIVIALITY_FLOOR_M": 0.15,
+        "meaning": "negative-control / trivial-hop rejection only; necessary but NOT sufficient for elite-context qualification"
+      },
+      "units": "m",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S13",
+      "locator": "RES-82 PF-1 candidate; mixed-athlete +20 kg evidence",
+      "sensitivity": "\u2014",
+      "notes": "Retained as the only frozen numeric height gate."
+    },
+    {
+      "id": "PA-02",
+      "statement": "Elite +20 kg direct H2 target.",
+      "value": {
+        "ELITE_SOCCER_PLUS20_DIRECT_H2_TARGET": "NOT_FROZEN",
+        "ELITE_SOCCER_PLUS20_DIRECT_H2_HARD_GATE": "DEFERRED_PENDING_METHOD_MATCHED_MAPPING",
+        "H_ANTI_TRIVIALITY_FLOOR_M": 0.15
+      },
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S07;S11;S12;S13",
+      "locator": "method heterogeneity across unloaded impulse-momentum, +20 kg flight-time and +20 kg LVT studies",
+      "sensitivity": "RES-85/91 must produce the mapping before any hard gate",
+      "notes": "No fabricated conversion when uncertainty cannot be bounded."
+    },
+    {
+      "id": "PA-03",
+      "statement": "Withdrawn performance authority (superseded, not current).",
+      "value": {
+        "0.200 m elite-context target": "WITHDRAWN as qualification authority; remains at most a non-authoritative historical notation",
+        "0.280-0.400 m expected band": "WITHDRAWN",
+        "0.350 m nominal target": "WITHDRAWN"
+      },
+      "units": "m",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S07;S11;S12;S13;S14",
+      "locator": "adversarial correction recorded in the Linear system authority",
+      "sensitivity": "\u2014",
+      "notes": "These values must not reappear as current authority in any downstream artifact."
+    },
+    {
+      "id": "PA-04",
+      "statement": "Mandatory method-matched comparator analysis.",
+      "value": {
+        "methods_to_compare": [
+          "direct SYSTEM_COM takeoff->apex",
+          "impulse-momentum",
+          "takeoff-velocity",
+          "flight-time",
+          "bar/LVT displacement"
+        ],
+        "requirement": "RES-85/91 predeclare the mapping before any elite-performance hard gate is created"
+      },
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S07;S11;S12",
+      "locator": "system authority section 13",
+      "sensitivity": "owned by RES-85/RES-91",
+      "notes": "Results far below comparator evidence trigger scientific review, not automatic failure."
+    },
+    {
+      "id": "PA-05",
+      "statement": "Controller objective.",
+      "value": "maximize physically valid direct SYSTEM_COM takeoff->apex H2 subject to the frozen human actuation, energy/work, joint-limit, contact, landing and recovery constraints",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S16;S22",
+      "locator": "system authority section 13",
+      "sensitivity": "\u2014",
+      "notes": "Not tune to a fabricated height target."
+    },
+    {
+      "id": "PA-06",
+      "statement": "Report-only comparators.",
+      "value": [
+        "countermovement depth",
+        "knee/hip/ankle/MTP ROM",
+        "eccentric/braking/propulsive durations",
+        "peak and mean GRF normalized to athlete and system mass",
+        "joint moments/powers/work",
+        "total and joint impulse/work contributions",
+        "peak landing force (method-matched pending)"
+      ],
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S06;S07;S15;S16",
+      "locator": "system authority sections 13-16",
+      "sensitivity": "report-only until method-matched data exist",
+      "notes": ""
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "MODEL_AUTHORITY_HASH_MANIFEST",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "entry_head": "4ce32eef873c5b07d9130663865528932ce4e3b9",
+  "entry_tree": "e81027a4c6cd23ff263b5a104f4e8310de2ed327",
+  "hash_algorithm": "sha256",
+  "excluded_from_manifest": [
+    "AUTHORITY_VALIDATION_REPORT.json",
+    "MODEL_AUTHORITY_HASH_MANIFEST.json",
+    "SEAL.json",
+    "checksums.sha256"
+  ],
+  "files": [
+    {
+      "path": "ANTHROPOMETRY_BSIP_AUTHORITY.json",
+      "sha256": "2eab8d8b51f31dd95322fdddf2ddfdbcf0fa04495b3a363e49fb8768e8569e57",
+      "bytes": 12341
+    },
+    {
+      "path": "ANTHROPOMETRY_BSIP_AUTHORITY.md",
+      "sha256": "455565e1e25d667343b7284c91c9fabf4fc24a6b58fa86c10dd1e1abf0491c07",
+      "bytes": 9419
+    },
+    {
+      "path": "AUTHORITY_INPUTS.json",
+      "sha256": "5138090877fa3368a41d4407bdc50b8e81d11fcbbe41cc72fc001daf716c2e40",
+      "bytes": 9275
+    },
+    {
+      "path": "COLLISION_CONTACT_POLICY.json",
+      "sha256": "70c9fa8466f41016bf410f6e7091ec5b4288b897f4531c6d9116e3b47f51bda2",
+      "bytes": 10271
+    },
+    {
+      "path": "COLLISION_CONTACT_POLICY.md",
+      "sha256": "3ff6fa60a666102b71fa8d4e9055f57477f74873a4e6b008063c5bfc1be4fc23",
+      "bytes": 8103
+    },
+    {
+      "path": "DEFERRED_NUMERICAL_CALIBRATIONS.json",
+      "sha256": "c78f4ea2551269d6225290466018c5ac40585688080c28e91f2ff3ae9e334d74",
+      "bytes": 7118
+    },
+    {
+      "path": "DEFERRED_NUMERICAL_CALIBRATIONS.md",
+      "sha256": "05577b9d32c366d5ca0da83e7460602b0782518e30061d9a260c40b57628c1b8",
+      "bytes": 5592
+    },
+    {
+      "path": "DERIVED_QUANTITIES.json",
+      "sha256": "641fa39839e5b60189007f47dc8e6ae20116393f79f8bcdee04107bff1ffc2ff",
+      "bytes": 25686
+    },
+    {
+      "path": "EVENT_MEASUREMENT_BOUNDARY.json",
+      "sha256": "487152c90eb0d0cccb5a8f39e86f24786b0a0f44fe146cfcffb4be17d7766e24",
+      "bytes": 9063
+    },
+    {
+      "path": "EVENT_MEASUREMENT_BOUNDARY.md",
+      "sha256": "0b73d77b85599966fd6c33df7ea433e86ac622e98d30b8584286771e4f9a2858",
+      "bytes": 7073
+    },
+    {
+      "path": "FOOT_MTP_MODEL_AUTHORITY.json",
+      "sha256": "8d65c4daf270bd06c3a8d85427989ed79cb34e3d8327c014b7ace43af53404f4",
+      "bytes": 11155
+    },
+    {
+      "path": "FOOT_MTP_MODEL_AUTHORITY.md",
+      "sha256": "e84ec8e08c04d8c082dd9fe1d52c6062b462bcb779d769115934cb96efb4b1a0",
+      "bytes": 8611
+    },
+    {
+      "path": "JOINT_COORDINATE_ROM_AUTHORITY.json",
+      "sha256": "19ca2d9e6cd9b94fd5970e03dfa32424f591473f4116fbc4f31991052170649d",
+      "bytes": 7895
+    },
+    {
+      "path": "JOINT_COORDINATE_ROM_AUTHORITY.md",
+      "sha256": "ba53f7d56cf4872c40a6cb4e9b90c80215feec418fc979d454b63a5b62582a05",
+      "bytes": 5345
+    },
+    {
+      "path": "LOAD_BAR_AUTHORITY.json",
+      "sha256": "687ddd84e5fdf5892af7098ebee12c514a6e102f636657b4c7c29a74aae90c43",
+      "bytes": 5405
+    },
+    {
+      "path": "LOAD_BAR_AUTHORITY.md",
+      "sha256": "5f39d88debf85afb037bc5e6969d649a6d6c2b6a178f923a1f27bb2147703b64",
+      "bytes": 3727
+    },
+    {
+      "path": "MODEL_AUTHORITY_EVIDENCE_TABLE.csv",
+      "sha256": "6f7905967556cc7911b5ccfcb353ccdda97ccc6417c6c38cc3f9f5bf601ca2b3",
+      "bytes": 71185
+    },
+    {
+      "path": "MODEL_AUTHORITY_EVIDENCE_TABLE.md",
+      "sha256": "be804a9a66703f0bf1f0077f9073cf72843e736ea0bead9ae31851d1ed56422c",
+      "bytes": 43823
+    },
+    {
+      "path": "MODEL_AUTHORITY_REVIEW.md",
+      "sha256": "500c7fdd6a71400412b42ffaf46db6204608cacf94b54c52ebfb33ae16af521d",
+      "bytes": 12970
+    },
+    {
+      "path": "PERFORMANCE_AUTHORITY_BOUNDARY.json",
+      "sha256": "396c7b3804f4b874a867ef6cbe32295fda64f15948a3a70bc85df018e1332ef5",
+      "bytes": 5123
+    },
+    {
+      "path": "PERFORMANCE_AUTHORITY_BOUNDARY.md",
+      "sha256": "e81032440c54d0219ef43d0c0d432f9e0532f04b59de78477b98b7ba8a4a59a9",
+      "bytes": 4347
+    },
+    {
+      "path": "PLANT_TOPOLOGY_AUTHORITY.json",
+      "sha256": "b6039ba7d86d0aa81d12e5d7b96cd012a9f13f5707f17d5e41ebdcdfa8d284da",
+      "bytes": 6710
+    },
+    {
+      "path": "PLANT_TOPOLOGY_AUTHORITY.md",
+      "sha256": "71f7495094090ff626d76ff20982a59b198c52a780980b54c4514e2f4ac41d24",
+      "bytes": 5236
+    },
+    {
+      "path": "REFERENCE_ATHLETE_SPEC.json",
+      "sha256": "d5aaafd0bb3e333fabaf449e31246958a3de3a4cf7a6d1cd2770cebb0f238c7c",
+      "bytes": 5232
+    },
+    {
+      "path": "REFERENCE_ATHLETE_SPEC.md",
+      "sha256": "3171d3388ead3582145b046cf1891c2e908141a140c00068110978728741164f",
+      "bytes": 4113
+    },
+    {
+      "path": "RES95_RECEIPT.md",
+      "sha256": "d76cce458945330870839d24fb2c02d5f5081b708c00b95d83d08fbbca9dd51b",
+      "bytes": 8437
+    },
+    {
+      "path": "SPORT_CONTEXT_AUTHORITY.json",
+      "sha256": "b938a950fedb92f166adb7e239c65bd7531aefd8d916b77fd1853d1461db5444",
+      "bytes": 5547
+    },
+    {
+      "path": "SPORT_CONTEXT_AUTHORITY.md",
+      "sha256": "24b9ca2a58797a69e3c93d7b2755464468312acbc48b347866bf960c590bf8d4",
+      "bytes": 4721
+    },
+    {
+      "path": "STANCE_LAB_CONTEXT_AUTHORITY.json",
+      "sha256": "63dbbc387ba2e3045dfc34c80a0b76fd448059668cbed896e93b00ae11fb6cf5",
+      "bytes": 4392
+    },
+    {
+      "path": "STANCE_LAB_CONTEXT_AUTHORITY.md",
+      "sha256": "7756ff0398977fd901b84862538619e1dbd97ed682df259d3f1b2e02fd33b758",
+      "bytes": 3552
+    },
+    {
+      "path": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY.json",
+      "sha256": "b91ccce57444f9de0243d6ee1ec13929f4e2669bf4761dd8fccc70cf189025a2",
+      "bytes": 9123
+    },
+    {
+      "path": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY.md",
+      "sha256": "0aa1aca4e5a2bcedd12e4ea09df9158cdd66d0a64e4c9f624b6fdebcb90cfc1a",
+      "bytes": 7328
+    },
+    {
+      "path": "build_authority_numbers.py",
+      "sha256": "df12908135a48be41b542371d589c3bd8650e99ad36fac52ded1e07800c09e74",
+      "bytes": 21457
+    },
+    {
+      "path": "render_authority_bundle.py",
+      "sha256": "5f467ff29e4c317c92f07b2114f2e53727d5e433b08b7c3159757530a99de3d9",
+      "bytes": 92943
+    },
+    {
+      "path": "seal_bundle.py",
+      "sha256": "a1b96a3dbe08ce562c482d5cfbe4e3501f1cd21c7836ffa9f799470f4b1066d6",
+      "bytes": 4673
+    },
+    {
+      "path": "validate_authority.py",
+      "sha256": "7db9b7828ada0029336723d6d00e10e7b977488ad91bd4a21d6fd59bf1e2babe",
+      "bytes": 31988
+    }
+  ],
+  "sealed_at_utc": "2026-09-14T06:15:23.648689+00:00"
+}

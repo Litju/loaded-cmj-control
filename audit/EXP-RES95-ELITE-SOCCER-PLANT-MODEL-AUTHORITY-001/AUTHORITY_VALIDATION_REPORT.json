@@ -1,0 +1,1769 @@
+{
+  "schema_version": "1.0.0",
+  "gates": {
+    "G1_inputs": {
+      "total": 4,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "G2_numeric": {
+      "total": 45,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "G3_schema": {
+      "total": 100,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "G4_md_json": {
+      "total": 63,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "G5_evidence": {
+      "total": 5,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "G6_redteam": {
+      "total": 2,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "G7_topology": {
+      "total": 15,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "G8_manifest": {
+      "total": 2,
+      "failed": 0,
+      "status": "PASS"
+    },
+    "G9_production": {
+      "total": 3,
+      "failed": 0,
+      "status": "PASS"
+    }
+  },
+  "checks": [
+    {
+      "gate": "G1",
+      "check": "stature_m",
+      "ok": true,
+      "detail": "1.835"
+    },
+    {
+      "gate": "G1",
+      "check": "athlete_mass_kg",
+      "ok": true,
+      "detail": "79.0"
+    },
+    {
+      "gate": "G1",
+      "check": "bar_mass_kg",
+      "ok": true,
+      "detail": "20.0"
+    },
+    {
+      "gate": "G1",
+      "check": "system_mass_kg",
+      "ok": true,
+      "detail": "99.0"
+    },
+    {
+      "gate": "G2",
+      "check": "segment_mass_fractions_sum_to_athlete_mass",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "HAT_mass",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "athlete_plus_bar_mass",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "thigh_length_ratio_form",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "shank_length_ratio_form",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "closure_delta",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "thigh_normative_ratio",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "shank_normative_ratio",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "HAT_inertia_symmetric",
+      "ok": true,
+      "detail": "0.0"
+    },
+    {
+      "gate": "G2",
+      "check": "HAT_inertia_positive_definite",
+      "ok": true,
+      "detail": "[0.8499125144729343, 1.475358908058234, 1.6928650336618478]"
+    },
+    {
+      "gate": "G2",
+      "check": "foot COM x from heel (assembled)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "foot de Leva COM x from heel (position, not mass moment)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "foot COM delta vs de Leva",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "foot hindfoot inertia Iyy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "foot forefoot inertia Izz",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "foot toe inertia Ixx",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "system_inertia_positive_definite",
+      "ok": true,
+      "detail": "[1.8608048237640293, 12.671507493453962, 13.763643127947976]"
+    },
+    {
+      "gate": "G2",
+      "check": "bar_mass_closure",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "foot_mass_closure",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "IK |SE|=upper_arm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "IK |EW|=forearm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON UB-03 HAT mass",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON UB-04 HAT COM",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON UB-05 HAT inertia",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON UB-08 system mass",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON UB-08 system COM",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON UB-08 system inertia",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON LB-07 rho",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON LB-07 shaft mass",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON LB-08 transverse inertia",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON LB-08 axial inertia",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON FM-04 foot masses",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON AB-13 closure sum",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON AB-13 closure delta",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON RA-07 system weight",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON AB-15 de Leva foot COM x",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON AB-15 assembled foot COM x",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON AB-15 com delta",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON FM-07 segment lengths",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON FM-08 foot inertias",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "JSON UB-06 principal moments",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "sensitivity system Iyy min",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "sensitivity system Iyy max",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "bar sleeve span",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G2",
+      "check": "bar uniform-rod surrogate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "SPORT_CONTEXT_AUTHORITY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "SPORT_CONTEXT_AUTHORITY.json artifact name",
+      "ok": true,
+      "detail": "SPORT_CONTEXT_AUTHORITY"
+    },
+    {
+      "gate": "G3",
+      "check": "SPORT_CONTEXT_AUTHORITY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "SPORT_CONTEXT_AUTHORITY decision ids unique",
+      "ok": true,
+      "detail": "7"
+    },
+    {
+      "gate": "G3",
+      "check": "SPORT_CONTEXT_AUTHORITY ref REFERENCE_ATHLETE_SPEC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "SPORT_CONTEXT_AUTHORITY ref PLANT_TOPOLOGY_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "SPORT_CONTEXT_AUTHORITY ref PERFORMANCE_AUTHORITY_BOUNDARY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "SPORT_CONTEXT_AUTHORITY external ref RES-82 SCIENTIFIC_CLAIM_CEILING.md",
+      "ok": true,
+      "detail": "declared external authority"
+    },
+    {
+      "gate": "G3",
+      "check": "REFERENCE_ATHLETE_SPEC.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "REFERENCE_ATHLETE_SPEC.json artifact name",
+      "ok": true,
+      "detail": "REFERENCE_ATHLETE_SPEC"
+    },
+    {
+      "gate": "G3",
+      "check": "REFERENCE_ATHLETE_SPEC.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "REFERENCE_ATHLETE_SPEC decision ids unique",
+      "ok": true,
+      "detail": "9"
+    },
+    {
+      "gate": "G3",
+      "check": "REFERENCE_ATHLETE_SPEC ref SPORT_CONTEXT_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "REFERENCE_ATHLETE_SPEC ref ANTHROPOMETRY_BSIP_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "REFERENCE_ATHLETE_SPEC ref LOAD_BAR_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY.json artifact name",
+      "ok": true,
+      "detail": "ANTHROPOMETRY_BSIP_AUTHORITY"
+    },
+    {
+      "gate": "G3",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY decision ids unique",
+      "ok": true,
+      "detail": "17"
+    },
+    {
+      "gate": "G3",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY ref REFERENCE_ATHLETE_SPEC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY ref FOOT_MTP_MODEL_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY ref UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY ref DERIVED_QUANTITIES.json",
+      "ok": true,
+      "detail": "missing reference target"
+    },
+    {
+      "gate": "G3",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY.json artifact name",
+      "ok": true,
+      "detail": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY"
+    },
+    {
+      "gate": "G3",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY decision ids unique",
+      "ok": true,
+      "detail": "11"
+    },
+    {
+      "gate": "G3",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY ref ANTHROPOMETRY_BSIP_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY ref LOAD_BAR_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY ref COLLISION_CONTACT_POLICY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY ref DERIVED_QUANTITIES.json",
+      "ok": true,
+      "detail": "missing reference target"
+    },
+    {
+      "gate": "G3",
+      "check": "LOAD_BAR_AUTHORITY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "LOAD_BAR_AUTHORITY.json artifact name",
+      "ok": true,
+      "detail": "LOAD_BAR_AUTHORITY"
+    },
+    {
+      "gate": "G3",
+      "check": "LOAD_BAR_AUTHORITY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "LOAD_BAR_AUTHORITY decision ids unique",
+      "ok": true,
+      "detail": "10"
+    },
+    {
+      "gate": "G3",
+      "check": "LOAD_BAR_AUTHORITY ref REFERENCE_ATHLETE_SPEC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "LOAD_BAR_AUTHORITY ref UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "LOAD_BAR_AUTHORITY ref COLLISION_CONTACT_POLICY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "JOINT_COORDINATE_ROM_AUTHORITY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "JOINT_COORDINATE_ROM_AUTHORITY.json artifact name",
+      "ok": true,
+      "detail": "JOINT_COORDINATE_ROM_AUTHORITY"
+    },
+    {
+      "gate": "G3",
+      "check": "JOINT_COORDINATE_ROM_AUTHORITY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "JOINT_COORDINATE_ROM_AUTHORITY decision ids unique",
+      "ok": true,
+      "detail": "10"
+    },
+    {
+      "gate": "G3",
+      "check": "JOINT_COORDINATE_ROM_AUTHORITY ref PLANT_TOPOLOGY_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "JOINT_COORDINATE_ROM_AUTHORITY ref FOOT_MTP_MODEL_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "JOINT_COORDINATE_ROM_AUTHORITY ref COLLISION_CONTACT_POLICY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.json artifact name",
+      "ok": true,
+      "detail": "FOOT_MTP_MODEL_AUTHORITY"
+    },
+    {
+      "gate": "G3",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "FOOT_MTP_MODEL_AUTHORITY decision ids unique",
+      "ok": true,
+      "detail": "13"
+    },
+    {
+      "gate": "G3",
+      "check": "FOOT_MTP_MODEL_AUTHORITY ref ANTHROPOMETRY_BSIP_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "FOOT_MTP_MODEL_AUTHORITY ref JOINT_COORDINATE_ROM_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "FOOT_MTP_MODEL_AUTHORITY ref COLLISION_CONTACT_POLICY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "FOOT_MTP_MODEL_AUTHORITY ref DEFERRED_NUMERICAL_CALIBRATIONS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "STANCE_LAB_CONTEXT_AUTHORITY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "STANCE_LAB_CONTEXT_AUTHORITY.json artifact name",
+      "ok": true,
+      "detail": "STANCE_LAB_CONTEXT_AUTHORITY"
+    },
+    {
+      "gate": "G3",
+      "check": "STANCE_LAB_CONTEXT_AUTHORITY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "STANCE_LAB_CONTEXT_AUTHORITY decision ids unique",
+      "ok": true,
+      "detail": "6"
+    },
+    {
+      "gate": "G3",
+      "check": "STANCE_LAB_CONTEXT_AUTHORITY ref PLANT_TOPOLOGY_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "STANCE_LAB_CONTEXT_AUTHORITY ref EVENT_MEASUREMENT_BOUNDARY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "STANCE_LAB_CONTEXT_AUTHORITY ref SPORT_CONTEXT_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "COLLISION_CONTACT_POLICY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "COLLISION_CONTACT_POLICY.json artifact name",
+      "ok": true,
+      "detail": "COLLISION_CONTACT_POLICY"
+    },
+    {
+      "gate": "G3",
+      "check": "COLLISION_CONTACT_POLICY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "COLLISION_CONTACT_POLICY decision ids unique",
+      "ok": true,
+      "detail": "13"
+    },
+    {
+      "gate": "G3",
+      "check": "COLLISION_CONTACT_POLICY ref FOOT_MTP_MODEL_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "COLLISION_CONTACT_POLICY ref PLANT_TOPOLOGY_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "COLLISION_CONTACT_POLICY ref DEFERRED_NUMERICAL_CALIBRATIONS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "COLLISION_CONTACT_POLICY ref EVENT_MEASUREMENT_BOUNDARY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "PLANT_TOPOLOGY_AUTHORITY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "PLANT_TOPOLOGY_AUTHORITY.json artifact name",
+      "ok": true,
+      "detail": "PLANT_TOPOLOGY_AUTHORITY"
+    },
+    {
+      "gate": "G3",
+      "check": "PLANT_TOPOLOGY_AUTHORITY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "PLANT_TOPOLOGY_AUTHORITY decision ids unique",
+      "ok": true,
+      "detail": "9"
+    },
+    {
+      "gate": "G3",
+      "check": "PLANT_TOPOLOGY_AUTHORITY ref JOINT_COORDINATE_ROM_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "PLANT_TOPOLOGY_AUTHORITY ref COLLISION_CONTACT_POLICY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "PLANT_TOPOLOGY_AUTHORITY ref UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "PLANT_TOPOLOGY_AUTHORITY ref LOAD_BAR_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "EVENT_MEASUREMENT_BOUNDARY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "EVENT_MEASUREMENT_BOUNDARY.json artifact name",
+      "ok": true,
+      "detail": "EVENT_MEASUREMENT_BOUNDARY"
+    },
+    {
+      "gate": "G3",
+      "check": "EVENT_MEASUREMENT_BOUNDARY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "EVENT_MEASUREMENT_BOUNDARY decision ids unique",
+      "ok": true,
+      "detail": "13"
+    },
+    {
+      "gate": "G3",
+      "check": "EVENT_MEASUREMENT_BOUNDARY ref PERFORMANCE_AUTHORITY_BOUNDARY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "EVENT_MEASUREMENT_BOUNDARY ref COLLISION_CONTACT_POLICY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "EVENT_MEASUREMENT_BOUNDARY ref PLANT_TOPOLOGY_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "EVENT_MEASUREMENT_BOUNDARY external ref RES-82 EVENT_CONTRACT_E1_E12.json",
+      "ok": true,
+      "detail": "declared external authority"
+    },
+    {
+      "gate": "G3",
+      "check": "EVENT_MEASUREMENT_BOUNDARY external ref RES-82 DWELL_SEMANTICS.json",
+      "ok": true,
+      "detail": "declared external authority"
+    },
+    {
+      "gate": "G3",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY.json artifact name",
+      "ok": true,
+      "detail": "PERFORMANCE_AUTHORITY_BOUNDARY"
+    },
+    {
+      "gate": "G3",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY decision ids unique",
+      "ok": true,
+      "detail": "6"
+    },
+    {
+      "gate": "G3",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY ref EVENT_MEASUREMENT_BOUNDARY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY ref DEFERRED_NUMERICAL_CALIBRATIONS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY ref SPORT_CONTEXT_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS.json top-level keys",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G3",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS.json artifact name",
+      "ok": true,
+      "detail": "DEFERRED_NUMERICAL_CALIBRATIONS"
+    },
+    {
+      "gate": "G3",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS.json status",
+      "ok": true,
+      "detail": "FROZEN_FOR_RES83_IMPLEMENTATION"
+    },
+    {
+      "gate": "G3",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS decision ids unique",
+      "ok": true,
+      "detail": "12"
+    },
+    {
+      "gate": "G3",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS ref COLLISION_CONTACT_POLICY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS ref FOOT_MTP_MODEL_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS ref PLANT_TOPOLOGY_AUTHORITY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G3",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS ref PERFORMANCE_AUTHORITY_BOUNDARY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "SPORT_CONTEXT_AUTHORITY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "SPORT_CONTEXT_AUTHORITY MD title",
+      "ok": true,
+      "detail": "# SPORT_CONTEXT_AUTHORITY \u2014 Sport Context Authority"
+    },
+    {
+      "gate": "G4",
+      "check": "REFERENCE_ATHLETE_SPEC MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "REFERENCE_ATHLETE_SPEC MD title",
+      "ok": true,
+      "detail": "# REFERENCE_ATHLETE_SPEC \u2014 Reference Athlete Specification"
+    },
+    {
+      "gate": "G4",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY MD title",
+      "ok": true,
+      "detail": "# ANTHROPOMETRY_BSIP_AUTHORITY \u2014 Anthropometry and BSIP Auth"
+    },
+    {
+      "gate": "G4",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY MD title",
+      "ok": true,
+      "detail": "# UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY \u2014 Reduced Upper-Body"
+    },
+    {
+      "gate": "G4",
+      "check": "LOAD_BAR_AUTHORITY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "LOAD_BAR_AUTHORITY MD title",
+      "ok": true,
+      "detail": "# LOAD_BAR_AUTHORITY \u2014 External Load (Barbell) Authority"
+    },
+    {
+      "gate": "G4",
+      "check": "JOINT_COORDINATE_ROM_AUTHORITY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "JOINT_COORDINATE_ROM_AUTHORITY MD title",
+      "ok": true,
+      "detail": "# JOINT_COORDINATE_ROM_AUTHORITY \u2014 Joint Coordinate and ROM "
+    },
+    {
+      "gate": "G4",
+      "check": "FOOT_MTP_MODEL_AUTHORITY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "FOOT_MTP_MODEL_AUTHORITY MD title",
+      "ok": true,
+      "detail": "# FOOT_MTP_MODEL_AUTHORITY \u2014 Foot and MTP Model Authority"
+    },
+    {
+      "gate": "G4",
+      "check": "STANCE_LAB_CONTEXT_AUTHORITY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "STANCE_LAB_CONTEXT_AUTHORITY MD title",
+      "ok": true,
+      "detail": "# STANCE_LAB_CONTEXT_AUTHORITY \u2014 Stance and Laboratory Conte"
+    },
+    {
+      "gate": "G4",
+      "check": "COLLISION_CONTACT_POLICY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "COLLISION_CONTACT_POLICY MD title",
+      "ok": true,
+      "detail": "# COLLISION_CONTACT_POLICY \u2014 Collision and Contact Policy"
+    },
+    {
+      "gate": "G4",
+      "check": "PLANT_TOPOLOGY_AUTHORITY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "PLANT_TOPOLOGY_AUTHORITY MD title",
+      "ok": true,
+      "detail": "# PLANT_TOPOLOGY_AUTHORITY \u2014 Plant Topology Authority"
+    },
+    {
+      "gate": "G4",
+      "check": "EVENT_MEASUREMENT_BOUNDARY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "EVENT_MEASUREMENT_BOUNDARY MD title",
+      "ok": true,
+      "detail": "# EVENT_MEASUREMENT_BOUNDARY \u2014 Event and Measurement Boundar"
+    },
+    {
+      "gate": "G4",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY MD title",
+      "ok": true,
+      "detail": "# PERFORMANCE_AUTHORITY_BOUNDARY \u2014 Performance Authority Bou"
+    },
+    {
+      "gate": "G4",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS MD contains all decision ids",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G4",
+      "check": "DEFERRED_NUMERICAL_CALIBRATIONS MD title",
+      "ok": true,
+      "detail": "# DEFERRED_NUMERICAL_CALIBRATIONS \u2014 Deferred Numerical Calib"
+    },
+    {
+      "gate": "G4",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY.md contains 38.7969",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY.md contains 1.475358908",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY.md contains -0.095",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY.md contains 155.045",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "LOAD_BAR_AUTHORITY.md contains 11.75585696777048",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "LOAD_BAR_AUTHORITY.md contains 0.004786777979600392",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "LOAD_BAR_AUTHORITY.md contains 6.821547880650857",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "LOAD_BAR_AUTHORITY.md contains 6.589226059674571",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "LOAD_BAR_AUTHORITY.md contains 8.06764667",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY.md contains 0.2425",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY.md contains 0.2493",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY.md contains 0.030905995",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY.md contains 0.275",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "ANTHROPOMETRY_BSIP_AUTHORITY.md contains 0.105",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.md contains 0.20625",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.md contains 0.06875",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.md contains 0.4675536",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.md contains 0.4588952",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.md contains 0.1558512",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.md contains 25",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "FOOT_MTP_MODEL_AUTHORITY.md contains -0.071565",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "EVENT_MEASUREMENT_BOUNDARY.md contains 0.050 s",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "EVENT_MEASUREMENT_BOUNDARY.md contains TAKEOFF_OCCURRENCE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "EVENT_MEASUREMENT_BOUNDARY.md contains TAKEOFF_CONFIRMATION",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "EVENT_MEASUREMENT_BOUNDARY.md contains max(2 mm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY.md contains NOT_FROZEN",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY.md contains DEFERRED_PENDING_METHOD_MATCHED_MAPPING",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "PERFORMANCE_AUTHORITY_BOUNDARY.md contains 0.15",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "PLANT_TOPOLOGY_AUTHORITY.md contains 12",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "PLANT_TOPOLOGY_AUTHORITY.md contains 9",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "PLANT_TOPOLOGY_AUTHORITY.md contains 14",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "REFERENCE_ATHLETE_SPEC.md contains 1.835",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "REFERENCE_ATHLETE_SPEC.md contains 79",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "REFERENCE_ATHLETE_SPEC.md contains 20",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "REFERENCE_ATHLETE_SPEC.md contains 99",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "REFERENCE_ATHLETE_SPEC.md contains 971.19",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G4",
+      "check": "REFERENCE_ATHLETE_SPEC.md contains 24",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G5",
+      "check": "source rows present",
+      "ok": true,
+      "detail": "22"
+    },
+    {
+      "gate": "G5",
+      "check": "decision rows present",
+      "ok": true,
+      "detail": "136"
+    },
+    {
+      "gate": "G5",
+      "check": "all decision classifications in taxonomy",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G5",
+      "check": "all source references resolve",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G5",
+      "check": "evidence MD present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G6",
+      "check": "stale-pattern hits all supersession-marked",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G6",
+      "check": "red-team scan executed",
+      "ok": true,
+      "detail": "46 marked hits"
+    },
+    {
+      "gate": "G7",
+      "check": "NBODY",
+      "ok": true,
+      "detail": "14"
+    },
+    {
+      "gate": "G7",
+      "check": "body list length",
+      "ok": true,
+      "detail": "14"
+    },
+    {
+      "gate": "G7",
+      "check": "NQ=NV=12",
+      "ok": true,
+      "detail": "(12, 12)"
+    },
+    {
+      "gate": "G7",
+      "check": "NU=9",
+      "ok": true,
+      "detail": "9"
+    },
+    {
+      "gate": "G7",
+      "check": "joint count sums to NQ",
+      "ok": true,
+      "detail": "12"
+    },
+    {
+      "gate": "G7",
+      "check": "ROM trunk_pelvis_hinge deg",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G7",
+      "check": "ROM hip deg",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G7",
+      "check": "ROM knee deg",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G7",
+      "check": "ROM ankle deg",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G7",
+      "check": "ROM mtp deg",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G7",
+      "check": "root root_tx unrestricted",
+      "ok": true,
+      "detail": "unrestricted_no_catch"
+    },
+    {
+      "gate": "G7",
+      "check": "root root_tz unrestricted",
+      "ok": true,
+      "detail": "unrestricted_no_catch"
+    },
+    {
+      "gate": "G7",
+      "check": "root root_ry unrestricted",
+      "ok": true,
+      "detail": "unrestricted_no_catch"
+    },
+    {
+      "gate": "G7",
+      "check": "ankle span correct",
+      "ok": true,
+      "detail": "[-0.959931, 0.785398]"
+    },
+    {
+      "gate": "G7",
+      "check": "MTP span correct",
+      "ok": true,
+      "detail": "[-0.523599, 1.570796]"
+    },
+    {
+      "gate": "G8",
+      "check": "manifest entries verified",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G8",
+      "check": "manifest covers authority artifacts",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "gate": "G9",
+      "check": "no modified tracked files",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G9",
+      "check": "git diff HEAD empty",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "gate": "G9",
+      "check": "no production/controller/test/experiment paths touched",
+      "ok": true,
+      "detail": "[]"
+    }
+  ],
+  "failures": [],
+  "redteam_hits": [
+    {
+      "file": "LOAD_BAR_AUTHORITY.md",
+      "line": 17,
+      "pattern": "uniform_iwf_bar",
+      "marked": true
+    },
+    {
+      "file": "LOAD_BAR_AUTHORITY.md",
+      "line": 36,
+      "pattern": "uniform_iwf_bar",
+      "marked": true
+    },
+    {
+      "file": "LOAD_BAR_AUTHORITY.md",
+      "line": 41,
+      "pattern": "uniform_iwf_bar",
+      "marked": true
+    },
+    {
+      "file": "JOINT_COORDINATE_ROM_AUTHORITY.md",
+      "line": 26,
+      "pattern": "free_root_claim",
+      "marked": true
+    },
+    {
+      "file": "FOOT_MTP_MODEL_AUTHORITY.md",
+      "line": 65,
+      "pattern": "passive_only_mtp",
+      "marked": true
+    },
+    {
+      "file": "STANCE_LAB_CONTEXT_AUTHORITY.md",
+      "line": 17,
+      "pattern": "biological_170_stance",
+      "marked": true
+    },
+    {
+      "file": "STANCE_LAB_CONTEXT_AUTHORITY.md",
+      "line": 37,
+      "pattern": "biological_170_stance",
+      "marked": true
+    },
+    {
+      "file": "COLLISION_CONTACT_POLICY.md",
+      "line": 17,
+      "pattern": "scalar_friction_only",
+      "marked": true
+    },
+    {
+      "file": "PLANT_TOPOLOGY_AUTHORITY.md",
+      "line": 17,
+      "pattern": "free_root_claim",
+      "marked": true
+    },
+    {
+      "file": "EVENT_MEASUREMENT_BOUNDARY.md",
+      "line": 37,
+      "pattern": "clearance_defined_delayed_h2",
+      "marked": true
+    },
+    {
+      "file": "EVENT_MEASUREMENT_BOUNDARY.md",
+      "line": 53,
+      "pattern": "clearance_defined_delayed_h2",
+      "marked": true
+    },
+    {
+      "file": "PERFORMANCE_AUTHORITY_BOUNDARY.md",
+      "line": 27,
+      "pattern": "withdrawn_elite_targets",
+      "marked": true
+    },
+    {
+      "file": "LOAD_BAR_AUTHORITY.json",
+      "line": 114,
+      "pattern": "uniform_iwf_bar",
+      "marked": true
+    },
+    {
+      "file": "LOAD_BAR_AUTHORITY.json",
+      "line": 115,
+      "pattern": "uniform_iwf_bar",
+      "marked": true
+    },
+    {
+      "file": "JOINT_COORDINATE_ROM_AUTHORITY.json",
+      "line": 48,
+      "pattern": "free_root_claim",
+      "marked": true
+    },
+    {
+      "file": "FOOT_MTP_MODEL_AUTHORITY.json",
+      "line": 227,
+      "pattern": "passive_only_mtp",
+      "marked": true
+    },
+    {
+      "file": "STANCE_LAB_CONTEXT_AUTHORITY.json",
+      "line": 45,
+      "pattern": "biological_170_stance",
+      "marked": true
+    },
+    {
+      "file": "EVENT_MEASUREMENT_BOUNDARY.json",
+      "line": 74,
+      "pattern": "clearance_defined_delayed_h2",
+      "marked": true
+    },
+    {
+      "file": "EVENT_MEASUREMENT_BOUNDARY.json",
+      "line": 170,
+      "pattern": "clearance_defined_delayed_h2",
+      "marked": true
+    },
+    {
+      "file": "EVENT_MEASUREMENT_BOUNDARY.json",
+      "line": 171,
+      "pattern": "clearance_defined_delayed_h2",
+      "marked": true
+    },
+    {
+      "file": "PERFORMANCE_AUTHORITY_BOUNDARY.json",
+      "line": 63,
+      "pattern": "withdrawn_elite_targets",
+      "marked": true
+    },
+    {
+      "file": "PERFORMANCE_AUTHORITY_BOUNDARY.json",
+      "line": 64,
+      "pattern": "withdrawn_elite_targets",
+      "marked": true
+    },
+    {
+      "file": "PERFORMANCE_AUTHORITY_BOUNDARY.json",
+      "line": 65,
+      "pattern": "withdrawn_elite_targets",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.csv",
+      "line": 10,
+      "pattern": "passive_only_mtp",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.csv",
+      "line": 74,
+      "pattern": "uniform_iwf_bar",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.csv",
+      "line": 79,
+      "pattern": "free_root_claim",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.csv",
+      "line": 97,
+      "pattern": "passive_only_mtp",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.csv",
+      "line": 101,
+      "pattern": "biological_170_stance",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.csv",
+      "line": 132,
+      "pattern": "clearance_defined_delayed_h2",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.csv",
+      "line": 141,
+      "pattern": "clearance_defined_delayed_h2",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.csv",
+      "line": 144,
+      "pattern": "withdrawn_elite_targets",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.md",
+      "line": 26,
+      "pattern": "passive_only_mtp",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.md",
+      "line": 95,
+      "pattern": "uniform_iwf_bar",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.md",
+      "line": 100,
+      "pattern": "free_root_claim",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.md",
+      "line": 162,
+      "pattern": "clearance_defined_delayed_h2",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_EVIDENCE_TABLE.md",
+      "line": 165,
+      "pattern": "withdrawn_elite_targets",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 75,
+      "pattern": "stale_thigh_shank_ratio",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 76,
+      "pattern": "stale_ankle_plus20_cap",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 77,
+      "pattern": "stale_nu7",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 78,
+      "pattern": "passive_only_mtp",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 79,
+      "pattern": "biological_170_stance",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 80,
+      "pattern": "free_root_claim",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 82,
+      "pattern": "uniform_iwf_bar",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 83,
+      "pattern": "withdrawn_elite_targets",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 84,
+      "pattern": "clearance_defined_delayed_h2",
+      "marked": true
+    },
+    {
+      "file": "MODEL_AUTHORITY_REVIEW.md",
+      "line": 88,
+      "pattern": "stale_nu7",
+      "marked": true
+    }
+  ],
+  "redteam_unmarked": [],
+  "validation_status": "PASS",
+  "failed_checks": 0,
+  "total_checks": 239
+}

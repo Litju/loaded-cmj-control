@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "SPORT_CONTEXT_AUTHORITY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen context of use for the elite-soccer successor Loaded-CMJ Plant: reference population, task, evidence hierarchy and claim boundary.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "REFERENCE_ATHLETE_SPEC",
+    "PLANT_TOPOLOGY_AUTHORITY",
+    "PERFORMANCE_AUTHORITY_BOUNDARY",
+    "RES-82 SCIENTIFIC_CLAIM_CEILING.md"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "SC-01",
+      "statement": "Sport-context identifier for the successor Plant reference population.",
+      "value": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S05;S06;S07",
+      "locator": "Linear Elite Soccer System Authority V1 section 1; Bongiovanni 2023 cohort",
+      "sensitivity": "\u2014",
+      "notes": "Synthetic population identifier; not a claim about any individual."
+    },
+    {
+      "id": "SC-02",
+      "statement": "Reference population definition.",
+      "value": "healthy senior adult male first-team professional outfield soccer player, top-tier European domestic league / UEFA-caliber environment; goalkeepers excluded; field position not frozen",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S05;S06;S07",
+      "locator": "System authority section 1; S05 positional differences",
+      "sensitivity": "\u2014",
+      "notes": "Position-specific variants are future calibrations."
+    },
+    {
+      "id": "SC-03",
+      "statement": "Task definition.",
+      "value": "maximal voluntary bilateral +20.0 kg back-loaded countermovement jump, hands fixed to the bar, no arm swing, dual-force-plate laboratory setting, full standing-countermovement-flight-landing-recovery sequence",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S13;S14;S16",
+      "locator": "System authority section 1; loaded-CMJ task evidence",
+      "sensitivity": "\u2014",
+      "notes": "Sagittal-dominant reduced rigid-body model."
+    },
+    {
+      "id": "SC-04",
+      "statement": "Claim boundary of the V1 reduction.",
+      "value": "sagittal-plane mechanics only; lateral translation, roll and yaw are structurally removed; no 3-D cutting/lateral/asymmetric validity claim",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S22",
+      "locator": "System authority sections 7 and 20; PLAN_TOPOLOGY_AUTHORITY",
+      "sensitivity": "\u2014",
+      "notes": "Any materially asymmetric control claim requires a future true 3-D/6-DOF Plant."
+    },
+    {
+      "id": "SC-05",
+      "statement": "Evidence hierarchy for authority decisions.",
+      "value": "1 human anatomy/joint mechanics/BSIP; 2 elite senior male first-division soccer anthropometry; 3 elite/professional soccer CMJ testing evidence; 4 soccer +20 kg loaded-jump evidence supplemented by broader loaded-CMJ work; 5 NBA elite CMJ data as secondary strategy comparator; 6 engineering choices only where literature does not determine a unique value, always tagged and sensitivity-tested",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S01;S05;S06;S07;S13;S14",
+      "locator": "Linear RES-95 description; System authority section 2",
+      "sensitivity": "\u2014",
+      "notes": "No engineering value may be relabeled as an elite-soccer measurement."
+    },
+    {
+      "id": "SC-06",
+      "statement": "Use of NBA CMJ cohort data.",
+      "value": "secondary elite movement-strategy comparator only; it sets neither soccer anthropometry nor +20 kg performance thresholds",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S07",
+      "locator": "System authority sections 1 and 14",
+      "sensitivity": "\u2014",
+      "notes": "Recorded to prevent strategy-template drift."
+    },
+    {
+      "id": "SC-07",
+      "statement": "Claim ceiling after the Plant rebuild (M6).",
+      "value": "the Plant may be called a sagittal-dominant rigid-body model parameterized to a nominal elite senior male professional outfield soccer athlete and configured for a maximal 20 kg loaded countermovement jump; no subject-specific, population-norm, injury-risk, optimality, midfoot-fidelity or field/turf claim",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S22",
+      "locator": "System authority section 20; RES-82 SCIENTIFIC_CLAIM_CEILING.md",
+      "sensitivity": "\u2014",
+      "notes": "verification != validation; determinism != biomechanical validity."
+    }
+  ]
+}

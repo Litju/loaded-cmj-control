@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "EVENT_MEASUREMENT_BOUNDARY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen event-time semantics, primary COM authority, H2 anchoring and measurement-comparator boundaries.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "PERFORMANCE_AUTHORITY_BOUNDARY",
+    "COLLISION_CONTACT_POLICY",
+    "PLANT_TOPOLOGY_AUTHORITY",
+    "RES-82 EVENT_CONTRACT_E1_E12.json",
+    "RES-82 DWELL_SEMANTICS.json"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "EM-01",
+      "statement": "Primary COM signal.",
+      "value": "SYSTEM_COM (athlete + rigid 20 kg bar) = primary mechanics authority; ATHLETE_COM = secondary report/comparability signal",
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "carried-bar closure",
+      "sensitivity": "\u2014",
+      "notes": "All event predicates use SYSTEM_COM."
+    },
+    {
+      "id": "EM-02",
+      "statement": "Primary takeoff time.",
+      "value": "TAKEOFF_OCCURRENCE = the final transition from at least one active legal plantar support contact to zero active legal plantar support contacts, with interpolated/contact-event time if available",
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "S17",
+      "locator": "Linear system authority section 12, physical takeoff (no RES-82 E-number label)",
+      "sensitivity": "\u2014",
+      "notes": "This is the physical takeoff time used for H2 and takeoff velocity."
+    },
+    {
+      "id": "EM-03",
+      "statement": "Takeoff confirmation.",
+      "value": "TAKEOFF_CONFIRMATION = a later fail-closed confirmation that bilateral geometric clearance exceeds the numerical guard, SYSTEM_COM_vz(TAKEOFF_OCCURRENCE) > 0, no prohibited contact exists, and no legal plantar recontact occurs throughout the genuine-flight dwell",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S17",
+      "locator": "Linear system authority section 12, takeoff occurrence/confirmation split",
+      "sensitivity": "dwell and clearance guard sensitivity required downstream",
+      "notes": "If confirmation fails the candidate takeoff occurrence is rejected, never shifted."
+    },
+    {
+      "id": "EM-04",
+      "statement": "Confirmation must not shift the takeoff timestamp.",
+      "value": "TAKEOFF_CONFIRMATION must never replace TAKEOFF_OCCURRENCE as the H2 time origin",
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "mission freeze item 10; system authority section 13",
+      "sensitivity": "\u2014",
+      "notes": "Prevents a delayed-clearance threshold from artificially lowering H2."
+    },
+    {
+      "id": "EM-05",
+      "statement": "Primary jump-height metric.",
+      "value": "H2 = SYSTEM_COM_z(apex) - SYSTEM_COM_z(TAKEOFF_OCCURRENCE)",
+      "units": "m",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "direct last-legal-contact-loss to apex displacement",
+      "sensitivity": "\u2014",
+      "notes": "Mandatory cross-checks: H_ballistic = vz_takeoff^2 / (2g); H_impulse from total vertical impulse / 99 kg."
+    },
+    {
+      "id": "EM-06",
+      "statement": "Genuine flight dwell.",
+      "value": "starting from the candidate TAKEOFF_OCCURRENCE, zero legal plantar contacts must persist for at least 0.050 s; within the confirmation window both feet establish positive clearance above the numerical guard and no prohibited contact occurs",
+      "units": "s",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S17",
+      "locator": "Linear system authority section 12, genuine flight",
+      "sensitivity": "dwell sensitivity (e.g. 0.030/0.050/0.080 s) required downstream",
+      "notes": "The 50 ms dwell is an engineering debounce, not a measured human constant."
+    },
+    {
+      "id": "EM-07",
+      "statement": "Clearance guard.",
+      "value": "clearance guard = max(2 mm, contact_margin + verified numerical penetration/error allowance); exact evaluated value sealed by RES-84",
+      "units": "m",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S22",
+      "locator": "system authority section 12",
+      "sensitivity": "RES-84 seals exact value; guard participates in confirmation only",
+      "notes": "The clearance guard is a confirmation tolerance, not the definition of the takeoff instant."
+    },
+    {
+      "id": "EM-08",
+      "statement": "Apex definition.",
+      "value": "inside genuine flight, SYSTEM_COM_vz crosses positive -> nonpositive; compute the zero crossing by interpolation; no arbitrary apex dwell",
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "Linear system authority section 12, apex",
+      "sensitivity": "\u2014",
+      "notes": ""
+    },
+    {
+      "id": "EM-09",
+      "statement": "Touchdown definition.",
+      "value": "first renewed valid plantar-floor contact after genuine flight; toe/forefoot-first is valid; body/bar-floor contact is not",
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "S15",
+      "locator": "Linear system authority section 12, physical touchdown",
+      "sensitivity": "\u2014",
+      "notes": "Landing absorption must be realized by the calibrated contact model and human joint motion, not a hidden vertical clamp."
+    },
+    {
+      "id": "EM-10",
+      "statement": "Measurement takeoff comparator.",
+      "value": "bilateral per-foot vertical GRF threshold 10 N with 0.010 s persistence (the RES-82 F_thr convention; an equivalent total-GRF display may be reported) is comparator/diagnostic only and never defines the simulated physical event",
+      "units": "N / s",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S17",
+      "locator": "takeoff-threshold comparison study; RES-82 EVENT_CONTRACT F_thr",
+      "sensitivity": "comparator threshold sensitivity is a reporting obligation",
+      "notes": ""
+    },
+    {
+      "id": "EM-11",
+      "statement": "Force-plate comparison export.",
+      "value": "resampled at >=1000 Hz (1000 Hz canonical) with a documented anti-aliasing/filter path; raw native signals retained for independent recomputation",
+      "units": "Hz",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S11",
+      "locator": "force-platform processing literature",
+      "sensitivity": "processing sensitivity is a reporting obligation",
+      "notes": "Native simulator states/contacts remain event authority."
+    },
+    {
+      "id": "EM-12",
+      "statement": "Event chain and dwell semantics (with explicit takeoff supersession).",
+      "value": {
+        "retained_from_RES82": "E1-E12 chain, PHYSICAL_TIME dwell convention, negative controls, cross-event independence",
+        "superseded_for_successor": "the clearance-gated historical takeoff anchor; for the successor the H2 time origin is TAKEOFF_OCCURRENCE (final legal plantar contact loss), and clearance/dwell survive only as TAKEOFF_CONFIRMATION",
+        "label_rule": "RES-95 does not use RES-82 E-number labels for takeoff/flight/apex/touchdown so downstream readers cannot collide the two numbering systems"
+      },
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S22",
+      "locator": "RES-82 EVENT_CONTRACT_E1_E12.json; DWELL_SEMANTICS.json; Linear system authority section 12",
+      "sensitivity": "downstream sensitivity execution owned by later RES",
+      "notes": "This supersession is explicit so zero unresolved conflict remains between RES-82 labels and the controlling Linear takeoff semantics."
+    },
+    {
+      "id": "EM-13",
+      "statement": "No clearance-defined delayed H2 takeoff.",
+      "value": "the H2 time origin is the last legal plantar contact loss; a later clearance-defined sample must never become the H2 origin",
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "mission freeze item 10",
+      "sensitivity": "\u2014",
+      "notes": "This closes the historical delayed-takeoff defect class."
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "PLANT_TOPOLOGY_AUTHORITY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen successor Plant topology: bodies, joints, generalized dimensions, actuation channels and planar-root obligations.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "JOINT_COORDINATE_ROM_AUTHORITY",
+    "COLLISION_CONTACT_POLICY",
+    "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY",
+    "LOAD_BAR_AUTHORITY"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "PT-01",
+      "statement": "Model revision identity.",
+      "value": {
+        "MODEL_REVISION": "loaded-cmj-model-3",
+        "MODEL_ID": "loaded-cmj-20kg-elite-soccer-v3"
+      },
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "\u2014",
+      "locator": "successor Plant identity",
+      "sensitivity": "\u2014",
+      "notes": ""
+    },
+    {
+      "id": "PT-02",
+      "statement": "Body list including world.",
+      "value": [
+        "world",
+        "pelvis",
+        "HAT",
+        "bar",
+        "left_thigh",
+        "right_thigh",
+        "left_shank",
+        "right_shank",
+        "left_hindfoot",
+        "right_hindfoot",
+        "left_forefoot",
+        "right_forefoot",
+        "left_toe",
+        "right_toe"
+      ],
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S01;S04",
+      "locator": "world, pelvis, HAT, bar, bilateral thigh/shank/hindfoot/forefoot/toe",
+      "sensitivity": "\u2014",
+      "notes": "Expected NBODY including world = 14."
+    },
+    {
+      "id": "PT-03",
+      "statement": "Joint topology and generalized dimensions.",
+      "value": {
+        "joints": {
+          "root_tx": 1,
+          "root_tz": 1,
+          "root_ry": 1,
+          "trunk_pelvis_sagittal_hinge": 1,
+          "hips": 2,
+          "knees": 2,
+          "ankles": 2,
+          "mtp": 2
+        },
+        "NQ": 12,
+        "NV": 12
+      },
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "\u2014",
+      "locator": "planar root + trunk-pelvis hinge + bilateral lower limb chain",
+      "sensitivity": "\u2014",
+      "notes": "3 root + 1 trunk + 2*4 limb DOF = 12."
+    },
+    {
+      "id": "PT-04",
+      "statement": "Actuator channel topology.",
+      "value": {
+        "channels": [
+          "trunk_pelvis_hinge",
+          "left_hip",
+          "right_hip",
+          "left_knee",
+          "right_knee",
+          "left_ankle",
+          "right_ankle",
+          "left_mtp",
+          "right_mtp"
+        ],
+        "NU": 9
+      },
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S08;S09",
+      "locator": "9 physical net-moment channels incl. bilateral MTP",
+      "sensitivity": "final torque/rate/power limits owned by RES-85",
+      "notes": "The superseded 7-channel V2 topology is not successor authority."
+    },
+    {
+      "id": "PT-05",
+      "statement": "Planar-root consequence and nominal symmetry.",
+      "value": "because lateral translation, roll and yaw are absent, V1 nominal sagittal actions must be bilaterally symmetric to numerical tolerance",
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "system authority section 7",
+      "sensitivity": "bilateral tolerance declared and audited",
+      "notes": "Materially asymmetric corrective control requires a future true 3-D/6-DOF Plant."
+    },
+    {
+      "id": "PT-06",
+      "statement": "Out-of-plane reaction audit (V1 fail-closed rule).",
+      "value": "qualification must audit out-of-plane contact/reaction quantities (Fy, roll/yaw moments where available) and demonstrate they are negligible; if omitted DOFs materially support the trajectory, V1 fails",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "\u2014",
+      "locator": "mission freeze item 7; system authority section 7",
+      "sensitivity": "mandatory audit in every qualification report",
+      "notes": "External reaction quantities are evidence, never a control channel."
+    },
+    {
+      "id": "PT-07",
+      "statement": "Passive mechanics defaults.",
+      "value": "hip/knee/ankle/trunk-pelvis passive stiffness and damping default to 0 at Plant authority level; root passives exactly 0; any numerical damping needed for stability is declared, justified, sensitivity-tested and classified as numerical regularization",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S22",
+      "locator": "system authority section 15",
+      "sensitivity": "any non-zero value requires a declared justification",
+      "notes": "R001 major-joint passive stiffness/damping may not be carried forward as human physiology."
+    },
+    {
+      "id": "PT-08",
+      "statement": "Body inertial provenance (summary table).",
+      "value": {
+        "pelvis": "AB-08",
+        "HAT": "UB-03..UB-06",
+        "bar": "LB-07..LB-08",
+        "thigh": "AB-14",
+        "shank": "AB-14",
+        "hindfoot/forefoot/toe": "FM-04, FM-07, FM-08"
+      },
+      "units": "\u2014",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01;S02;S04",
+      "locator": "per-body authority mapping",
+      "sensitivity": "\u2014",
+      "notes": "No body inertia value may live only in implementation code."
+    },
+    {
+      "id": "PT-09",
+      "statement": "No candidate creation in RES-95.",
+      "value": "RES-95 freezes model authority only; candidate authorization remains RES-90",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "\u2014",
+      "locator": "mission freeze item; Linear RES-90 boundary",
+      "sensitivity": "\u2014",
+      "notes": "No successor candidate ID is created here."
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "DEFERRED_NUMERICAL_CALIBRATIONS",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Explicit isolation of every numerical/calibration decision that RES-95 must not freeze, with its owner and qualification domain.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "COLLISION_CONTACT_POLICY",
+    "FOOT_MTP_MODEL_AUTHORITY",
+    "PLANT_TOPOLOGY_AUTHORITY",
+    "PERFORMANCE_AUTHORITY_BOUNDARY"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "DF-01",
+      "statement": "Contact numerical calibration.",
+      "value": "solref, solimp, margin, gap, torsional-friction and rolling-friction numeric values, penetration tolerance",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S22",
+      "locator": "RES-84 / RES-86",
+      "sensitivity": "classification and qualification domain frozen in COLLISION_CONTACT_POLICY CC-07..CC-12",
+      "notes": "Provisional settings must be labeled PROVISIONAL_NUMERICAL."
+    },
+    {
+      "id": "DF-02",
+      "statement": "Takeoff clearance guard exact value.",
+      "value": "max(2 mm, contact_margin + verified numerical/penetration allowance) evaluated and sealed",
+      "units": "m",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S22",
+      "locator": "RES-84",
+      "sensitivity": "sealed in candidate identity",
+      "notes": "Confirmation-only semantics frozen here."
+    },
+    {
+      "id": "DF-03",
+      "statement": "MTP active moment limits.",
+      "value": "torque cap, rate limit, power limit and allowed stance-phase action for the reduced net MTP moment",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S08;S09",
+      "locator": "RES-85",
+      "sensitivity": "must be validated against jump/foot mechanics; saturation telemetry mandatory",
+      "notes": "Must not become a hidden high-power toe motor."
+    },
+    {
+      "id": "DF-04",
+      "statement": "Major-joint actuator limits.",
+      "value": "hip/knee/ankle/trunk torque caps, torque-rate limits and activation/smoothing constants",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S16;S22",
+      "locator": "RES-85",
+      "sensitivity": "elite isokinetic data are plausibility bounds only; not direct motor constants",
+      "notes": ""
+    },
+    {
+      "id": "DF-05",
+      "statement": "Balance capture and recovery envelopes.",
+      "value": "E11 capture envelope, E12 robust standing envelope and post-E12 observation window",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S22",
+      "locator": "RES-87 / RES-91",
+      "sensitivity": "physical and robustness-calibrated; one-trace/ULP envelopes prohibited",
+      "notes": ""
+    },
+    {
+      "id": "DF-06",
+      "statement": "Landing force gate.",
+      "value": "peak landing force as a hard +20 kg elite scalar gate",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S15",
+      "locator": "later method-matched authority",
+      "sensitivity": "report/validation comparator until method-matched +20 kg data exist",
+      "notes": "No numeric transfer from drop-landing or unloaded studies."
+    },
+    {
+      "id": "DF-07",
+      "statement": "Elite +20 kg H2 mapping.",
+      "value": "method-matched comparator/mapping analysis before any elite hard gate",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S07;S11;S12",
+      "locator": "RES-85 / RES-91",
+      "sensitivity": "required before gate authorization",
+      "notes": "See PA-02/PA-04."
+    },
+    {
+      "id": "DF-08",
+      "statement": "Solver and timestep verification.",
+      "value": "timestep refinement, solver iteration/tolerance sensitivity, contact compliance sweep, friction sweep, MTP passive sweep, midfoot alternative, placement/pose/anthropometry/initial-pose perturbations, deterministic repeatability",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S22",
+      "locator": "RES-86 / RES-89 / RES-91",
+      "sensitivity": "each sensitivity run records event ordering, H2, takeoff velocity, GRF, joint-limit margins, prohibited contacts, saturation, landing capture, final standing",
+      "notes": "Execution of the frozen sensitivity sets is a downstream obligation; omission is a qualification defect."
+    },
+    {
+      "id": "DF-09",
+      "statement": "Controller phase machine and calibration.",
+      "value": "state-causal hybrid phase machine, transition hysteresis/persistence and command continuity",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S22",
+      "locator": "RES-85",
+      "sensitivity": "no wall-clock-only transitions; no instantaneous torque cliffs",
+      "notes": ""
+    },
+    {
+      "id": "DF-10",
+      "statement": "Bar placement versus RES-83 collision shells.",
+      "value": "post-implementation non-penetration confirmation in standing and all representative poses; any nominal placement change requires an authority amendment",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S04;S22",
+      "locator": "RES-83 + this authority",
+      "sensitivity": "report-level confirmation; nominal frozen in UB-07",
+      "notes": "No silent nominal movement."
+    },
+    {
+      "id": "DF-11",
+      "statement": "Stance/lateral validation.",
+      "value": "true stance width and lateral balance authority",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S22",
+      "locator": "future 3-D/6-DOF Plant program",
+      "sensitivity": "outside V1 claim",
+      "notes": "0.170 m remains a model geometry nominal only."
+    },
+    {
+      "id": "DF-12",
+      "statement": "Candidate authorization and qualification.",
+      "value": "successor candidate creation, provenance/determinism/test/visual qualification",
+      "units": "\u2014",
+      "classification": "DEFERRED_TO_LATER_AUTHORITY",
+      "sources": "S22",
+      "locator": "RES-90 / RES-91 / RES-92 / RES-93",
+      "sensitivity": "RES-95 creates no candidate",
+      "notes": ""
+    }
+  ]
+}

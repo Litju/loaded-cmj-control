@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "STANCE_LAB_CONTEXT_AUTHORITY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen stance/laboratory context: leg-plane geometry, force-plate chain and reporting conventions.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "PLANT_TOPOLOGY_AUTHORITY",
+    "EVENT_MEASUREMENT_BOUNDARY",
+    "SPORT_CONTEXT_AUTHORITY"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "SL-01",
+      "statement": "Model leg-plane separation.",
+      "value": {
+        "leg_plane_centerlines_y_m": [
+          -0.085,
+          0.085
+        ],
+        "separation_m": 0.17
+      },
+      "units": "m",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "\u2014",
+      "locator": "sagittal reduction geometry",
+      "sensitivity": "plane-separation sensitivity only as engineering geometry (+/- 0.010 m)",
+      "notes": "0.170 m is NOT an elite-soccer CMJ stance-width claim; true stance width and lateral balance are outside V1."
+    },
+    {
+      "id": "SL-02",
+      "statement": "Foot orientation in the reduced model.",
+      "value": "feet parallel (yaw removed); no toe-out angle is modeled",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "\u2014",
+      "locator": "yaw structurally removed",
+      "sensitivity": "\u2014",
+      "notes": "Do not run a biological stance-width sensitivity by sliding feet laterally without a coherent 3-D pelvis/hip model."
+    },
+    {
+      "id": "SL-03",
+      "statement": "Laboratory context.",
+      "value": "indoor force-plate setting with training shoes; not cleat-on-turf",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S22",
+      "locator": "task context of use",
+      "sensitivity": "\u2014",
+      "notes": "Field/turf/cleat validity is outside the claim."
+    },
+    {
+      "id": "SL-04",
+      "statement": "Force-plate measurement chain.",
+      "value": {
+        "plates": "dual force plates",
+        "export_rate_hz": 1000,
+        "rule": ">=1000 Hz canonical comparison export with documented anti-aliasing/filter path; raw native signals retained"
+      },
+      "units": "Hz",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S11;S12;S22",
+      "locator": "force-platform sampling literature recorded in the system authority",
+      "sensitivity": "\u2014",
+      "notes": "Native simulator state/contact resolution remains event authority."
+    },
+    {
+      "id": "SL-05",
+      "statement": "Countermovement depth and stance are self-selected.",
+      "value": "no single ideal knee/hip depth is frozen; professional protocols commonly yield ~60-90 deg knee flexion while elite data show legitimate strategy variability",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S06;S07;S16",
+      "locator": "system authority sections 12 and 14",
+      "sensitivity": "strategy-envelope study required",
+      "notes": "Microscopic/noise-only dips must be rejected, but no elite squat depth may be hard-coded as optimal."
+    },
+    {
+      "id": "SL-06",
+      "statement": "Relative-to-quiet-stance reporting.",
+      "value": "all performance and force metrics are reported relative to the quiet-standing reference, with raw and filtered traces retained",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S11;S12",
+      "locator": "processing-sensitivity literature",
+      "sensitivity": "\u2014",
+      "notes": ""
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "LOAD_BAR_AUTHORITY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen IWF-style 20 kg composite bar geometry, inertial surrogate, collision embodiment and placement.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "REFERENCE_ATHLETE_SPEC",
+    "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY",
+    "COLLISION_CONTACT_POLICY"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "LB-01",
+      "statement": "Bar mass.",
+      "value": 20.0,
+      "units": "kg",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S04",
+      "locator": "IWF men's bar standard",
+      "sensitivity": "\u2014",
+      "notes": ""
+    },
+    {
+      "id": "LB-02",
+      "statement": "Bar total length.",
+      "value": 2.2,
+      "units": "m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S04",
+      "locator": "IWF men's bar standard",
+      "sensitivity": "\u2014",
+      "notes": ""
+    },
+    {
+      "id": "LB-03",
+      "statement": "Bar grip-section diameter.",
+      "value": 0.028,
+      "units": "m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S04",
+      "locator": "IWF men's bar standard",
+      "sensitivity": "\u2014",
+      "notes": ""
+    },
+    {
+      "id": "LB-04",
+      "statement": "Grip section length.",
+      "value": 1.31,
+      "units": "m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S04",
+      "locator": "IWF men's bar standard",
+      "sensitivity": "\u2014",
+      "notes": ""
+    },
+    {
+      "id": "LB-05",
+      "statement": "Sleeve diameter.",
+      "value": 0.05,
+      "units": "m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S04",
+      "locator": "IWF men's bar standard",
+      "sensitivity": "\u2014",
+      "notes": ""
+    },
+    {
+      "id": "LB-06",
+      "statement": "Sleeve length (each).",
+      "value": 0.415,
+      "units": "m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S04",
+      "locator": "IWF men's bar standard",
+      "sensitivity": "\u2014",
+      "notes": ""
+    },
+    {
+      "id": "LB-07",
+      "statement": "Composite inertial surrogate construction.",
+      "value": {
+        "shaft_length_m": 1.37,
+        "shaft_diameter_m": 0.028,
+        "sleeves": [
+          0.415,
+          0.05
+        ],
+        "rho_eff_kg_m3": 8086.422350243007,
+        "m_shaft_kg": 6.821547880650857,
+        "m_sleeve_each_kg": 6.589226059674571
+      },
+      "units": "m / kg/m^3 / kg",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S04",
+      "locator": "coaxial stepped-cylinder surrogate; rho_eff chosen so total mass equals exactly 20 kg",
+      "sensitivity": "declared alternative surrogate: uniform 2.200 m x 0.028 m rod (non-IWF) with I_transverse 8.06764667 kg m^2",
+      "notes": "A uniform 2.2 m x 28 mm rod must never be presented as the IWF bar geometry."
+    },
+    {
+      "id": "LB-08",
+      "statement": "Composite bar inertia about its COM (bar axis along y).",
+      "value": {
+        "I_transverse_kg_m2": 11.75585696777048,
+        "I_axis_kg_m2": 0.004786777979600392
+      },
+      "units": "kg m^2",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "S04",
+      "locator": "analytic stepped-cylinder inertia",
+      "sensitivity": "surrogate-shape sensitivity: uniform-rod case; sleeve/shaft mass redistribution +/-10%",
+      "notes": "Bar pitch inertia materially exceeds a uniform-rod estimate (mass concentration in the sleeves)."
+    },
+    {
+      "id": "LB-09",
+      "statement": "Bar collision geometry.",
+      "value": "composite collision representation matching LB-07 dimensions (grip/shaft segment plus two sleeves); exact MuJoCo primitive choice is a RES-83 implementation detail; bar-floor collision physically enabled and its contact is a task failure",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S04",
+      "locator": "system authority section 8; COLLISION_CONTACT_POLICY",
+      "sensitivity": "\u2014",
+      "notes": "No disabled bar shell may simultaneously serve as evidence for a prohibited-contact claim."
+    },
+    {
+      "id": "LB-10",
+      "statement": "Attachment semantics.",
+      "value": "rigid attachment to HAT in V1; no bar roll/compliance; intentional bar/HAT/hand attachment contacts excluded from the fall/prohibited-contact register",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S04;S16",
+      "locator": "task definition",
+      "sensitivity": "\u2014",
+      "notes": ""
+    }
+  ]
+}

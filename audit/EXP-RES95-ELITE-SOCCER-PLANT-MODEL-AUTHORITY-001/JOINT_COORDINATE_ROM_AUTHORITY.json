@@ -1,0 +1,207 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "JOINT_COORDINATE_ROM_AUTHORITY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen world/joint coordinate conventions, structural ROM envelope and analytic forward-kinematics sign probes.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "PLANT_TOPOLOGY_AUTHORITY",
+    "FOOT_MTP_MODEL_AUTHORITY",
+    "COLLISION_CONTACT_POLICY"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "JC-01",
+      "statement": "World axis convention.",
+      "value": {
+        "+x": "anterior/forward",
+        "+y": "athlete left",
+        "+z": "up"
+      },
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "system authority section 5",
+      "sensitivity": "\u2014",
+      "notes": "Right-handed frame."
+    },
+    {
+      "id": "JC-02",
+      "statement": "Root joint semantics.",
+      "value": "unconstrained planar base: root_tx, root_tz, root_ry with zero stiffness, zero damping, zero armature and no positional catch; NOT a 6-DOF free root",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "\u2014",
+      "locator": "system authority section 7",
+      "sensitivity": "\u2014",
+      "notes": "Lateral translation, roll and yaw are structurally removed; removed DOFs must never be called 'free'."
+    },
+    {
+      "id": "JC-03",
+      "statement": "Trunk-pelvis sagittal hinge.",
+      "value": {
+        "semantic": "TRUNK_PELVIS_SAGITTAL_HINGE (legacy code name 'lumbar' permitted only with this semantic exposed)",
+        "range_rad": [
+          -0.610865,
+          0.610865
+        ],
+        "range_deg": [
+          -35.0,
+          35.0
+        ]
+      },
+      "units": "rad / deg",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S19",
+      "locator": "aggregate reduced-model trunk-pelvis flexion-extension; not a literal lumbar-spine joint",
+      "sensitivity": "sensitivity on the reduced bound is part of the strategy-envelope study, not a calibration to exceed",
+      "notes": "Explicit reduced-model engineering bound; must not be presented as measured lumbar ROM."
+    },
+    {
+      "id": "JC-04",
+      "statement": "Hip structural ROM.",
+      "value": {
+        "range_rad": [
+          -0.349066,
+          2.268928
+        ],
+        "range_deg": [
+          -20.0,
+          130.0
+        ]
+      },
+      "units": "rad / deg",
+      "classification": "HUMAN_ANATOMY_REFERENCE",
+      "sources": "S19",
+      "locator": "general-human hip flexion/extension capacity",
+      "sensitivity": "\u2014",
+      "notes": "Structural capability bound, not a technique target."
+    },
+    {
+      "id": "JC-05",
+      "statement": "Knee structural ROM.",
+      "value": {
+        "range_rad": [
+          0.0,
+          2.443461
+        ],
+        "range_deg": [
+          0.0,
+          140.0
+        ]
+      },
+      "units": "rad / deg",
+      "classification": "HUMAN_ANATOMY_REFERENCE",
+      "sources": "S19",
+      "locator": "general-human knee flexion capacity",
+      "sensitivity": "\u2014",
+      "notes": "No nominal hyperextension; reverse-knee geometry is structurally impossible under the V3 coordinate authority."
+    },
+    {
+      "id": "JC-06",
+      "statement": "Ankle structural ROM.",
+      "value": {
+        "range_rad": [
+          -0.959931,
+          0.785398
+        ],
+        "range_deg": [
+          -55.0,
+          45.0
+        ]
+      },
+      "units": "rad / deg",
+      "classification": "HUMAN_ANATOMY_REFERENCE",
+      "sources": "S19",
+      "locator": "weight-bearing dorsiflexion ~39-45 deg; soccer jump-landing peaks ~32-38 deg",
+      "sensitivity": "\u2014",
+      "notes": "The former +20 deg dorsiflexion cap is withdrawn as too restrictive for a structural human envelope."
+    },
+    {
+      "id": "JC-07",
+      "statement": "MTP structural ROM.",
+      "value": {
+        "range_rad": [
+          -0.523599,
+          1.570796
+        ],
+        "range_deg": [
+          -30.0,
+          90.0
+        ]
+      },
+      "units": "rad / deg",
+      "classification": "HUMAN_ANATOMY_REFERENCE",
+      "sources": "S19",
+      "locator": "general-human first-MTP dorsiflexion capacity",
+      "sensitivity": "\u2014",
+      "notes": "Negative is plantarflexion; positive is toe dorsiflexion."
+    },
+    {
+      "id": "JC-08",
+      "statement": "Sagittal joint sign conventions.",
+      "value": {
+        "root_ry": "+ about +y = forward whole-body pitch",
+        "trunk_pelvis": "+ about +y = forward trunk flexion relative to pelvis",
+        "hip": "axis -y, +q = hip flexion (knee moves anteriorly)",
+        "knee": "axis +y, +q = knee flexion (ankle moves posteriorly relative to knee)",
+        "ankle": "axis -y, +q = dorsiflexion, -q = plantarflexion",
+        "mtp": "axis -y, +q = toe dorsiflexion/extension"
+      },
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "system authority section 5; deterministic FK derivation",
+      "sensitivity": "\u2014",
+      "notes": "Propulsion must reduce hip/knee flexion, drive ankle negative (plantarflexion) and permit positive MTP dorsiflexion in the forefoot/toe rocker."
+    },
+    {
+      "id": "JC-09",
+      "statement": "Analytic FK sign probes (mandatory deterministic validation).",
+      "value": {
+        "root_ry_probe": "root_ry = +10 deg with all joints zero: a point initially on +z above the root moves to +x by L*sin(10 deg); COM x increases",
+        "hip_probe": "hip = +10 deg (axis -y): knee joint x increases by L_thigh*sin(10 deg) (anterior)",
+        "knee_probe": "knee = +10 deg (axis +y): ankle joint x decreases by L_shank*sin(10 deg) (posterior)",
+        "ankle_probe": "ankle = +10 deg (axis -y): toe-tip z increases by L_foot*cos(ankle_rest)*sin(10 deg) (dorsiflexion)",
+        "mtp_probe": "mtp = +10 deg (axis -y): toe-tip z increases relative to the forefoot (dorsiflexion)",
+        "trunk_probe": "trunk_pelvis hinge = +10 deg about +y: head/vertex x increases by L_MIDH_vertex*sin(10 deg) (forward flexion)",
+        "root_tx_probe": "root_tx = +0.01 m: all body x coordinates increase by 0.01 m exactly",
+        "root_tz_probe": "root_tz = +0.01 m: all body z coordinates increase by 0.01 m exactly"
+      },
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "analytic forward kinematics of the frozen topology",
+      "sensitivity": "\u2014",
+      "notes": "RES-83 must implement these probes as tests; any sign disagreement is a build failure, not a tuning problem."
+    },
+    {
+      "id": "JC-10",
+      "statement": "ROM values are capability bounds, not targets.",
+      "value": "no controller may chase a structural limit; joint-limit hits and saturated-limit dwell are telemetry warnings",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S19",
+      "locator": "system authority section 14",
+      "sensitivity": "\u2014",
+      "notes": ""
+    }
+  ]
+}

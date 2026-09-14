@@ -1,0 +1,266 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "FOOT_MTP_MODEL_AUTHORITY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen multi-segment foot abstraction, plantar contact geometry, foot-segment inertia and the passive/active MTP contract.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "ANTHROPOMETRY_BSIP_AUTHORITY",
+    "JOINT_COORDINATE_ROM_AUTHORITY",
+    "COLLISION_CONTACT_POLICY",
+    "DEFERRED_NUMERICAL_CALIBRATIONS"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "FM-01",
+      "statement": "Frozen foot abstraction.",
+      "value": "per foot: hindfoot body, forefoot body welded/fixed to the hindfoot in V1 (separate geometry/inertia, no midtarsal DOF), toe/phalanx body, one sagittal MTP hinge; ankle hinge connects shank -> hindfoot",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S02",
+      "locator": "system authority section 6; S02 three-segment model",
+      "sensitivity": "locked-midfoot alternative required (FM-03)",
+      "notes": "The old single rigid box foot is rejected."
+    },
+    {
+      "id": "FM-02",
+      "statement": "Locked midfoot classification.",
+      "value": "a rigid arch / locked midfoot is a MATERIAL MODEL-FORM UNCERTAINTY, not harmless omission",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S02",
+      "locator": "multi-segment foot literature",
+      "sensitivity": "mandatory compliant/articulated-midfoot alternative",
+      "notes": "Rigid-foot assumptions can materially distort ankle ROM and quasi-stiffness."
+    },
+    {
+      "id": "FM-03",
+      "statement": "Required midfoot alternative sensitivity.",
+      "value": {
+        "requirement": "final qualification must compare the locked-midfoot Plant against a plausible compliant/articulated-midfoot alternative (at least one bounded sagittal midtarsal DOF or equivalent compliant coupling with documented range/stiffness)",
+        "change_triggers_reopening_RES83": [
+          "H2",
+          "ankle/MTP work and power",
+          "CoP migration",
+          "toe-off timing",
+          "landing absorption",
+          "control feasibility"
+        ]
+      },
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S02",
+      "locator": "system authority section 6",
+      "sensitivity": "required",
+      "notes": "If locking the midfoot materially changes these outputs, the V1 locked-midfoot Plant is not qualified."
+    },
+    {
+      "id": "FM-04",
+      "statement": "Foot segment masses.",
+      "value": {
+        "hindfoot": 0.4675536,
+        "forefoot": 0.4588952,
+        "phalanx": 0.1558512
+      },
+      "units": "kg",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01;S02",
+      "locator": "de Leva whole-foot mass fraction 0.0137 x 79 kg, split 43.2/42.4/14.4 % per S02",
+      "sensitivity": "foot-inertia sensitivity 0.5x/1.5x",
+      "notes": "Sum equals the de Leva whole-foot mass."
+    },
+    {
+      "id": "FM-05",
+      "statement": "MTP nominal axis location and toe length.",
+      "value": {
+        "MTP_X_FROM_HEEL_M": 0.20625,
+        "TOE_LENGTH_M": 0.06875,
+        "ratio_of_foot_length": 0.75
+      },
+      "units": "m / \u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S02;S20",
+      "locator": "first-MTP fulcrum locations span ~70-79% of foot length in published data",
+      "sensitivity": "MTP location sensitivity [0.70, 0.79] x foot length",
+      "notes": "0.75 is a reduced-axis nominal, not subject-specific anatomy."
+    },
+    {
+      "id": "FM-06",
+      "statement": "Plantar contact regions and dimensions (heel / forefoot / toe).",
+      "value": {
+        "heel": {
+          "x_from_heel_start_m": 0.0,
+          "x_from_heel_end_m": 0.07,
+          "width_m": 0.07
+        },
+        "forefoot": {
+          "x_from_heel_start_m": 0.07,
+          "x_from_heel_end_m": 0.20625,
+          "width_m": 0.105
+        },
+        "toe": {
+          "x_from_heel_start_m": 0.20625,
+          "x_from_heel_end_m": 0.275,
+          "width_m": 0.09
+        }
+      },
+      "units": "m",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S02;S18",
+      "locator": "reduced contact patches matching the frozen foot partition; heel breadth is materially below ball breadth (S18)",
+      "sensitivity": "patch dimension sensitivity +/- 0.010 m; only these regions may create valid support",
+      "notes": "The three regions are independently observable; RES-84 builds the support hull/CoP authority from their active contacts."
+    },
+    {
+      "id": "FM-07",
+      "statement": "Foot frame, joint centers and segment partition.",
+      "value": {
+        "ankle_joint_center": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mid_tarsal_x_from_heel_m": 0.07,
+        "mtp_x_from_heel_m": 0.20625,
+        "toe_tip_x_from_heel_m": 0.275,
+        "segment_lengths_m": {
+          "hindfoot": 0.07,
+          "forefoot": 0.13624999999999998,
+          "phalanx": 0.06875000000000003
+        },
+        "segment_com_ankle_frame_m": {
+          "hindfoot": [
+            0.008310000000000005,
+            0.0,
+            -0.027700000000000002
+          ],
+          "forefoot": [
+            0.07208875000000001,
+            0.0,
+            -0.045810000000000003
+          ],
+          "phalanx": [
+            0.18122500000000002,
+            0.0,
+            -0.04
+          ]
+        }
+      },
+      "units": "m",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S02",
+      "locator": "S02 joint-chain proximal conventions applied to the frozen reduced geometry",
+      "sensitivity": "midtarsal placement sensitivity +/- 0.010 m; segment-inertia sensitivity 0.5x/1.5x",
+      "notes": "Assembled foot COM cross-check against the de Leva whole-foot COM is declared in AB-15."
+    },
+    {
+      "id": "FM-08",
+      "statement": "Foot segment inertia rule.",
+      "value": {
+        "rule": "I_segment_about_com_diagonal = I_rel_diagonal * m_segment^(5/3)",
+        "segment_inertia_about_com_kg_m2": {
+          "hindfoot": [
+            0.0004337502415040432,
+            0.0005182470417970387,
+            0.0004168508814454441
+          ],
+          "forefoot": [
+            0.0003822233613175279,
+            0.0004723188679138023,
+            0.0006006367106418295
+          ],
+          "phalanx": [
+            0.0001150951698085389,
+            6.454356581420024e-05,
+            0.00015255751919720058
+          ]
+        }
+      },
+      "units": "kg m^2",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S02",
+      "locator": "S02 Table 3 relative tensors scaled by m^(5/3)",
+      "sensitivity": "foot-inertia sensitivity 0.5x/1.5x; midfoot alternative",
+      "notes": "Diagonal terms used with a declared axis mapping; off-diagonal products are not silently imported into the sagittal model."
+    },
+    {
+      "id": "FM-09",
+      "statement": "Passive MTP baseline mechanics.",
+      "value": {
+        "neutral_rad": 0.0,
+        "k_nominal_Nm_per_rad": 25.0,
+        "c_nominal_Nms_per_rad": 2.0
+      },
+      "units": "N m/rad / N m s/rad",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S10",
+      "locator": "predictive gait-model prior; not a CMJ measurement",
+      "sensitivity": "k set [0, 12.5, 25, 40]; c set [0, 0.4, 2]; zero-passive case (k=0,c=0)",
+      "notes": "Passive values are engineering priors only; material dependence reopens authority."
+    },
+    {
+      "id": "FM-10",
+      "statement": "Active MTP channel.",
+      "value": "one bounded net plantarflexor/resistive moment per foot in parallel with the passive baseline; reduced net moment, not a literal single-muscle actuator; no hidden high-power toe motor or arbitrary flight-energy injection",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S08;S09",
+      "locator": "MTP restriction reduces CMJ height/impulse; intrinsic foot muscle activity drives MTP stiffness; the actuator channel is a reduced design decision informed by that evidence",
+      "sensitivity": "final torque/rate/power caps owned by RES-85; supported-phase saturation telemetry mandatory",
+      "notes": "A passive-only MTP is NOT sufficient as the sole mechanism for a human-valid maximal-CMJ claim."
+    },
+    {
+      "id": "FM-11",
+      "statement": "MTP work accounting.",
+      "value": "qualification must report passive MTP work, active MTP work, total MTP work/power and an active-vs-passive sensitivity, proving no double-counting of distal power and no hidden toe-energy source",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S08;S09;S10",
+      "locator": "S09/S10 mechanism and double-count risk",
+      "sensitivity": "active-vs-passive separation required in every qualification report",
+      "notes": "Separation must be demonstrated, not asserted."
+    },
+    {
+      "id": "FM-13",
+      "statement": "Sole plane and no-subsole-geometry rule.",
+      "value": {
+        "sole_plane_z_in_foot_frame_m": -0.071565,
+        "rule": "no collision geom may extend below the sole plane, and all three contact patches are planar on the sole plane"
+      },
+      "units": "m",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S02",
+      "locator": "locked-midfoot reduced geometry; all three contact patches are planar on the sole plane",
+      "sensitivity": "\u2014",
+      "notes": "The foot's visual/collision body above the sole is a RES-83 implementation detail, but no collision geom may protrude below the sole plane, and only the frozen patches may create valid support."
+    },
+    {
+      "id": "FM-12",
+      "statement": "Foot geometry sensitivity.",
+      "value": "ankle x +/- 0.010 m; MTP location span 0.70-0.79 L; foot length +/- 0.010 m; midfoot alternative; segment inertia 0.5x/1.5x",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S02;S18;S20;S21",
+      "locator": "frozen foot geometry",
+      "sensitivity": "declared",
+      "notes": "No sensitivity may be silently omitted from the qualification manifest."
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0.0",
+  "file_role": "machine_readable_authority_inputs",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model": {
+    "MODEL_REVISION": "loaded-cmj-model-3",
+    "MODEL_ID": "loaded-cmj-20kg-elite-soccer-v3"
+  },
+  "constants": {
+    "g_m_s2": 9.81,
+    "mu_slide_nominal": 0.9,
+    "mu_slide_sensitivity": [0.5, 1.5]
+  },
+  "reference_athlete": {
+    "ATHLETE_SEX": "male",
+    "ATHLETE_AGE_CLASS": "senior_adult",
+    "REFERENCE_AGE_Y": 24.0,
+    "ATHLETE_STATURE_M": 1.835,
+    "ATHLETE_MASS_KG": 79.0,
+    "EXTERNAL_LOAD_MASS_KG": 20.0,
+    "TOTAL_SYSTEM_MASS_KG": 99.0,
+    "stature_sensitivity_m": [1.835, 1.7764, 1.8936],
+    "mass_sensitivity_kg": [79.0, 72.69, 85.31]
+  },
+  "de_leva_1996_male": {
+    "source": "de Leva P. Adjustments to Zatsiorsky-Seluyanov's segment inertia parameters. J Biomech 1996;29(9):1223-1230.",
+    "doi": "10.1016/0021-9290(95)00178-6",
+    "sample_stature_m": 1.741,
+    "sample_mass_kg": 73.0,
+    "mass_normalization": "fraction_of_reference_athlete_mass",
+    "length_scaling_rule": "segment_lengths_scale_linearly_with_stature_factor_s_equals_H_over_sample_stature",
+    "table4_male_rows": {
+      "head": {"origin": "VERT", "other": "CERV", "L_mm": 242.9, "mass_frac": 0.0694, "com_frac_from_origin": 0.5002, "rg_sagittal": 0.303, "rg_transverse": 0.315, "rg_longitudinal": 0.261, "source_row": "Table 4, alternative endpoints: Head VERT->CERV (males)"},
+      "upt": {"origin": "CERV", "other": "XYPH", "L_mm": 242.1, "mass_frac": 0.1596, "com_frac_from_origin": 0.5066, "rg_sagittal": 0.505, "rg_transverse": 0.320, "rg_longitudinal": 0.465, "source_row": "Table 4, alternative endpoints: UPT CERV->XYPH (males)"},
+      "mpt": {"origin": "XYPH", "other": "OMPH", "L_mm": 215.5, "mass_frac": 0.1633, "com_frac_from_origin": 0.4502, "rg_sagittal": 0.482, "rg_transverse": 0.383, "rg_longitudinal": 0.468, "source_row": "Table 4, easy endpoints: MPT XYPH->OMPH (males, not adjusted)"},
+      "lpt": {"origin": "OMPH", "other": "MIDH", "L_mm": 145.7, "mass_frac": 0.1117, "com_frac_from_origin": 0.6115, "rg_sagittal": 0.615, "rg_transverse": 0.551, "rg_longitudinal": 0.587, "source_row": "Table 4, easy endpoints: LPT OMPH->MIDH (males)"},
+      "upper_arm": {"origin": "SJCS", "other": "E-G", "L_mm": 281.7, "mass_frac": 0.0271, "com_frac_from_origin": 0.5772, "rg_sagittal": 0.285, "rg_transverse": 0.269, "rg_longitudinal": 0.158, "source_row": "Table 4, easy endpoints: Upper arm SK->E-G (males)"},
+      "forearm": {"origin": "EJCS", "other": "WJCS", "L_mm": 268.9, "mass_frac": 0.0162, "com_frac_from_origin": 0.4574, "rg_sagittal": 0.276, "rg_transverse": 0.265, "rg_longitudinal": 0.121, "source_row": "Table 4, easy endpoints: Forearm EJC->WJC (males)"},
+      "hand": {"origin": "WJCS", "other": "MET3", "L_mm": 86.2, "mass_frac": 0.0061, "com_frac_from_origin": 0.7900, "rg_sagittal": 0.628, "rg_transverse": 0.513, "rg_longitudinal": 0.401, "source_row": "Table 4, easy endpoints: Hand WJC->MET3 (males)"},
+      "mid_shoulder": {"origin": "MIDS", "other": "MIDH", "L_mm": 515.5, "source_row": "Table 4, alternative endpoints: Trunk MIDS->MIDH (males); shoulder-joint midline height reference only"},
+      "thigh": {"origin": "HJC", "other": "KJCS", "L_mm": 422.2, "mass_frac": 0.1416, "com_frac_from_origin": 0.4095, "rg_sagittal": 0.329, "rg_transverse": 0.329, "rg_longitudinal": 0.149, "source_row": "Table 4, easy endpoints: Thigh HJC->KJC (males)"},
+      "shank": {"origin": "KJCS", "other": "LMAL", "L_mm": 434.0, "mass_frac": 0.0433, "com_frac_from_origin": 0.4459, "rg_sagittal": 0.255, "rg_transverse": 0.249, "rg_longitudinal": 0.103, "source_row": "Table 4, easy endpoints: Shank KJC->LMAL (males)"},
+      "whole_foot": {"origin": "HEEL", "other": "TTIP", "L_mm": 258.1, "mass_frac": 0.0137, "com_frac_from_origin": 0.4415, "rg_sagittal": 0.257, "rg_transverse": 0.245, "rg_longitudinal": 0.124, "source_row": "Table 4, easy endpoints: Foot HEEL->TTIP (males, not adjusted)"}
+    }
+  },
+  "frozen_geometry": {
+    "THIGH_LENGTH_RATIO_OF_STATURE": 0.2425,
+    "SHANK_LENGTH_RATIO_OF_STATURE": 0.2493,
+    "FOOT_LENGTH_M": 0.275,
+    "FOOT_WIDTH_M": 0.105,
+    "ANKLE_JOINT_HEIGHT_RATIO_OF_STATURE": 0.039,
+    "ANKLE_X_FROM_HEEL_M": 0.055,
+    "MTP_X_FROM_HEEL_RATIO_OF_FOOT_LENGTH": 0.75,
+    "MTP_X_FROM_HEEL_M": 0.20625,
+    "TOE_LENGTH_M": 0.06875,
+    "MIDTARSAL_X_FROM_HEEL_M": 0.07,
+    "contact_regions": {
+      "heel": {"x_from_heel_start_m": 0.0, "x_from_heel_end_m": 0.07, "width_m": 0.07},
+      "forefoot": {"x_from_heel_start_m": 0.07, "x_from_heel_end_m": 0.20625, "width_m": 0.105},
+      "toe": {"x_from_heel_start_m": 0.20625, "x_from_heel_end_m": 0.275, "width_m": 0.09}
+    }
+  },
+  "foot_segments": {
+    "source": "Matsumoto Y, Ogihara N, Hanawa H, Kokubun T, Kanemura N. Novel Multi-Segment Foot Model Incorporating Plantar Aponeurosis for Detailed Kinematic and Kinetic Analyses of the Foot With Application to Gait Studies. Front Bioeng Biotechnol 2022;10:894731.",
+    "doi": "10.3389/fbioe.2022.894731",
+    "relative_mass": {"hindfoot": 0.432, "forefoot": 0.424, "phalanx": 0.144},
+    "relative_com_from_segment_proximal_joint_center": {"hindfoot": 0.554, "forefoot": 0.419, "phalanx": 0.436},
+    "relative_inertia_tensor_around_com": {
+      "hindfoot": {"Ixx": 1.54e-3, "Iyy": 1.84e-3, "Izz": 1.48e-3},
+      "forefoot": {"Ixx": 1.40e-3, "Iyy": 1.73e-3, "Izz": 2.20e-3},
+      "phalanx": {"Ixx": 2.55e-3, "Iyy": 1.43e-3, "Izz": 3.38e-3}
+    },
+    "inertia_scaling_rule": "I_segment_about_com_diagonal = I_rel_diagonal * m_segment^(5/3)"
+  },
+  "hat_posture": {
+    "frame": "HAT body frame origin at MIDH (mid-hip = trunk-pelvis hinge center); axes equal model axes at the reference trunk-upright posture",
+    "trunk_semantics": "MPT and UPT are collinear along +z in the reduced rigid HAT; trunk straightness is a model-form property, not a posture choice",
+    "head_pitch_deg": 0.0,
+    "head_pitch_sensitivity_deg": [-10.0, 0.0, 10.0],
+    "shoulder_joint_x_m": 0.0,
+    "shoulder_joint_x_sensitivity_m": [-0.03, 0.03],
+    "shoulder_joint_y_m": 0.16,
+    "shoulder_joint_y_sensitivity_m": [0.14, 0.18],
+    "shoulder_joint_z_rule": "de Leva male MIDS->MIDH distance scaled by stature factor",
+    "wrist_target_rule": "wrist joint center at bar center + (0, 0, WRIST_DZ_M) with y = +/- HAND_GRIP_HALF_WIDTH_Y_M",
+    "wrist_dz_m": -0.035,
+    "wrist_dz_sensitivity_m": [-0.055, -0.015],
+    "hand_grip_half_width_y_m": 0.24,
+    "hand_grip_half_width_y_sensitivity_m": [0.18, 0.30],
+    "elbow_solution_rule": "two-link IK in the vertical plane through shoulder and wrist; select the solution with the lower elbow z",
+    "arm_fold_note": "The resulting elbow interior angle is a geometric consequence of the frozen hand placement and published arm lengths; it is a posture reduction, not an anatomical claim."
+  },
+  "bar": {
+    "BAR_MASS_KG": 20.0,
+    "BAR_LENGTH_M": 2.2,
+    "BAR_GRIP_DIAMETER_M": 0.028,
+    "BAR_GRIP_SECTION_LENGTH_M": 1.31,
+    "BAR_SLEEVE_DIAMETER_M": 0.05,
+    "BAR_SLEEVE_LENGTH_M": 0.415,
+    "BAR_SHAFT_LENGTH_M": 1.37,
+    "composite_rule": "coaxial stepped cylinder: central shaft 1.370 m x 0.028 m plus two sleeves 0.415 m x 0.050 m at the ends; uniform effective density rho_eff = BAR_MASS_KG / total_composite_volume so that total mass equals BAR_MASS_KG exactly",
+    "BAR_CENTER_X_IN_HAT_FRAME_M": -0.095,
+    "BAR_CENTER_Z_IN_HAT_FRAME_M": 0.6,
+    "placement_sensitivity_m": [0.025, 0.025],
+    "orientation": "bar axis along model +y (mediolateral); identity rotation relative to HAT frame"
+  },
+  "materials": {
+    "MTP_NEUTRAL_RAD": 0.0,
+    "MTP_K_NOMINAL_NM_PER_RAD": 25.0,
+    "MTP_C_NOMINAL_NMS_PER_RAD": 2.0,
+    "MTP_K_SENSITIVITY_NM_PER_RAD": [0.0, 12.5, 25.0, 40.0],
+    "MTP_C_SENSITIVITY_NMS_PER_RAD": [0.0, 0.4, 2.0],
+    "zero_passive_case_required": "k=0 and c=0 with active channel both present and zeroed",
+    "major_joint_passive_defaults": {"stiffness": 0.0, "damping": 0.0, "armature": 0.0}
+  },
+  "topology": {
+    "NBODY_including_world": 14,
+    "bodies": ["world", "pelvis", "HAT", "bar", "left_thigh", "right_thigh", "left_shank", "right_shank", "left_hindfoot", "right_hindfoot", "left_forefoot", "right_forefoot", "left_toe", "right_toe"],
+    "joints": {"root_tx": 1, "root_tz": 1, "root_ry": 1, "trunk_pelvis_sagittal_hinge": 1, "hips": 2, "knees": 2, "ankles": 2, "mtp": 2},
+    "NQ": 12,
+    "NV": 12,
+    "NU": 9,
+    "actuator_channels": ["trunk_pelvis_hinge", "left_hip", "right_hip", "left_knee", "right_knee", "left_ankle", "right_ankle", "left_mtp", "right_mtp"],
+    "leg_plane_centerlines_y_m": [-0.085, 0.085],
+    "leg_plane_separation_m": 0.17
+  },
+  "rom_rad": {
+    "root_tx": "unrestricted_no_catch",
+    "root_tz": "unrestricted_no_catch",
+    "root_ry": "unrestricted_no_catch",
+    "trunk_pelvis_hinge": [-0.610865, 0.610865],
+    "hip": [-0.349066, 2.268928],
+    "knee": [0.0, 2.443461],
+    "ankle": [-0.959931, 0.785398],
+    "mtp": [-0.523599, 1.570796]
+  }
+}

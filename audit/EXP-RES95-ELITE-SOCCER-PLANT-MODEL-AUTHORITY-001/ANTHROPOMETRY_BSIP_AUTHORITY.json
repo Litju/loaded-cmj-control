@@ -1,0 +1,329 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "ANTHROPOMETRY_BSIP_AUTHORITY",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen body-segment inertial authority (de Leva-adjusted Zatsiorsky-Seluyanov), geometry, foot partition and reproducibility rules.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "REFERENCE_ATHLETE_SPEC",
+    "FOOT_MTP_MODEL_AUTHORITY",
+    "UPPER_BODY_HAT_BAR_INERTIAL_AUTHORITY",
+    "DERIVED_QUANTITIES.json"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "AB-01",
+      "statement": "Primary BSIP authority.",
+      "value": "de Leva (1996) adjustment of Zatsiorsky-Seluyanov parameters, joint-center referenced",
+      "units": "\u2014",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "S01 Tables 1-4",
+      "sensitivity": "\u2014",
+      "notes": "Machine-readable coefficients in AUTHORITY_INPUTS.json; no uniform-density torso shortcut may be called anthropometric authority."
+    },
+    {
+      "id": "AB-02",
+      "statement": "Male segment mass fractions (head 0.0694; upper trunk 0.1596; middle trunk 0.1633; pelvis/lower trunk 0.1117; upper arm 0.0271 each; forearm 0.0162 each; hand 0.0061 each; thigh 0.1416 each; shank 0.0433 each; whole foot 0.0137 each).",
+      "value": [
+        0.0694,
+        0.1596,
+        0.1633,
+        0.1117,
+        0.0271,
+        0.0162,
+        0.0061,
+        0.1416,
+        0.0433,
+        0.0137
+      ],
+      "units": "fraction of athlete mass",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "S01 Table 4, male column",
+      "sensitivity": "\u2014",
+      "notes": "Fractions sum to 1.0000 across all segments."
+    },
+    {
+      "id": "AB-03",
+      "statement": "Segment masses at the reference athlete mass.",
+      "value": {
+        "head": 5.482600000000001,
+        "upt": 12.6084,
+        "mpt": 12.9007,
+        "pelvis": 8.8243,
+        "upper_arm": 2.1409,
+        "forearm": 1.2797999999999998,
+        "hand": 0.48190000000000005,
+        "thigh": 11.1864,
+        "shank": 3.4207,
+        "whole_foot": 1.0823
+      },
+      "units": "kg",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "S01 Table 4 mass fractions * 79.0 kg",
+      "sensitivity": "\u2014",
+      "notes": "Recomputed deterministically by build_authority_numbers.py."
+    },
+    {
+      "id": "AB-04",
+      "statement": "Athlete and system mass closure.",
+      "value": {
+        "hat": 38.7969,
+        "pelvis": 8.8243,
+        "two_thighs": 22.3728,
+        "two_shanks": 6.8414,
+        "two_feet": 2.1646,
+        "athlete_total": 79.0,
+        "bar": 20.0,
+        "system_total": 99.0
+      },
+      "units": "kg",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "S01",
+      "locator": "sum of body segments; plus bar mass",
+      "sensitivity": "\u2014",
+      "notes": "Machine test: athlete total = 79.0 kg and system total = 99.0 kg within numerical tolerance."
+    },
+    {
+      "id": "AB-05",
+      "statement": "Thigh segment length (normative form).",
+      "value": 0.4449875,
+      "units": "m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "frozen stature ratio 0.2425 * H; de Leva Table 4 male thigh (HJC-KJC) 422.2 mm x stature scale as cross-check",
+      "sensitivity": "\u2014",
+      "notes": "Normative 0.2425 * H = 0.4449875 m; de Leva-scaled cross-check 0.444995405 m (delta 7.90493969e-06 m)."
+    },
+    {
+      "id": "AB-06",
+      "statement": "Shank segment length (normative form).",
+      "value": 0.45746549999999997,
+      "units": "m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "frozen stature ratio 0.2493 * H; de Leva Table 4 male shank (KJC-LMAL) 434.0 mm x stature scale as cross-check",
+      "sensitivity": "\u2014",
+      "notes": "Normative 0.2493 * H = 0.4574655 m; de Leva-scaled cross-check 0.45743251 m (delta -3.29899483e-05 m)."
+    },
+    {
+      "id": "AB-07",
+      "statement": "HAT component segment lengths (head VERT-CERV; upper trunk CERV-XYPH; middle trunk XYPH-OMPH).",
+      "value": {
+        "head": 0.2560146467547386,
+        "upt": 0.255171453187823,
+        "mpt": 0.22713526708788048
+      },
+      "units": "m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "S01 Table 4 male alternative-endpoint rows x stature scale",
+      "sensitivity": "\u2014",
+      "notes": "Stature scaling rule: lengths scale linearly with H / 1.741 m."
+    },
+    {
+      "id": "AB-08",
+      "statement": "Pelvis body parameterization.",
+      "value": {
+        "mass_kg": 8.8243,
+        "com_z_above_midh_m": 0.05966063512349223,
+        "length_m": 0.1535666283744974
+      },
+      "units": "kg / m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "S01 Table 4 male lower trunk OMPH-MIDH",
+      "sensitivity": "\u2014",
+      "notes": "The pelvis body carries the de Leva lower-trunk (LPT) parameters; MIDH is the trunk-pelvis hinge center."
+    },
+    {
+      "id": "AB-09",
+      "statement": "Foot length and width nominal.",
+      "value": {
+        "FOOT_LENGTH_M": 0.275,
+        "FOOT_WIDTH_M": 0.105
+      },
+      "units": "m",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S03;S20;S21",
+      "locator": "S03 D-C foot length 0.152H = 0.279 m at H; S20/S21 elite and adolescent soccer feet",
+      "sensitivity": "foot geometry sensitivity: FOOT_LENGTH +/- 0.010 m; FOOT_WIDTH +/- 0.007 m",
+      "notes": "0.275 x 0.105 m is a literature-informed synthetic nominal, not one-paper direct."
+    },
+    {
+      "id": "AB-10",
+      "statement": "Ankle joint center height above the sole.",
+      "value": 0.071565,
+      "units": "m",
+      "classification": "HUMAN_ANATOMY_REFERENCE",
+      "sources": "S03",
+      "locator": "Drillis-Contini Fig. 4.1: ankle height = 0.039 H",
+      "sensitivity": "ankle-height sensitivity +/- 0.010 m",
+      "notes": "Used for standing geometry and contact placement."
+    },
+    {
+      "id": "AB-11",
+      "statement": "Ankle joint center horizontal position from the heel.",
+      "value": 0.055,
+      "units": "m",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S01;S03",
+      "locator": "no joint-center-resolved public value located; 0.20 * foot length",
+      "sensitivity": "sensitivity [0.045, 0.065] m",
+      "notes": "Explicit engineering reduction; must not be presented as measured anatomy."
+    },
+    {
+      "id": "AB-12",
+      "statement": "de Leva radius-of-gyration axis interpretation.",
+      "value": {
+        "sagittal": "about the model medio-lateral axis (sagittal-plane rotation)",
+        "transverse": "about the in-plane axis perpendicular to the segment long axis",
+        "longitudinal": "about the segment long axis"
+      },
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S01",
+      "locator": "S01 Table 4 column semantics (sagittal / transverse / longitudinal r)",
+      "sensitivity": "segment-inertia sensitivity 0.9x/1.1x on all segment inertia terms",
+      "notes": "Axis-to-model mapping is an engineering reduction of the published axes; it is applied identically to every segment."
+    },
+    {
+      "id": "AB-13",
+      "statement": "Segment-chain closure check against reference stature.",
+      "value": {
+        "hip_height_m": 0.9740179999999999,
+        "midh_to_vertex_m": 0.8918879954049395,
+        "sum_m": 1.8659059954049395,
+        "stature_m": 1.835,
+        "delta_m": 0.030905995404939546,
+        "delta_fraction_of_stature": 0.016842504307868964
+      },
+      "units": "m",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "S01;S03",
+      "locator": "ankle height + shank + thigh + (MIDH to vertex chain)",
+      "sensitivity": "\u2014",
+      "notes": "The joint-center-resolved chain overshoots stature by ~3.1 cm (~1.7%); the causes are mixed landmark systems between sources. RES-83 must absorb this in the standing pose and must not rescale the frozen segment lengths to force closure."
+    },
+    {
+      "id": "AB-14",
+      "statement": "Lower-limb segment inertias about their own COMs (thigh Ixx=Iyy/Izz; shank Ixx/Iyy/Izz).",
+      "value": {
+        "thigh_kg_m2": [
+          [
+            0.23976057065071502,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.23976057065071502,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.04917660063207587
+          ]
+        ],
+        "shank_kg_m2": [
+          [
+            0.04438440231686326,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.04654918083021296,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.007594621444486416
+          ]
+        ],
+        "pelvis_kg_m2": [
+          [
+            0.06317964198451871,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.07870896370431779,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.07170511974256877
+          ]
+        ]
+      },
+      "units": "kg m^2",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01",
+      "locator": "S01 Table 4 radii of gyration * segment lengths",
+      "sensitivity": "segment-inertia sensitivity 0.9x/1.1x",
+      "notes": "Body-frame origins: pelvis at MIDH, thigh at HJC, shank at KJC; z is proximal-to-distal."
+    },
+    {
+      "id": "AB-15",
+      "statement": "Whole-foot de Leva cross-check versus the multi-segment foot construction.",
+      "value": {
+        "whole_foot_sagittal_I_about_com_kg_m2": 0.005406040472937501,
+        "assembled_segment_com_x_from_heel_m": 0.11525194999999999,
+        "deleva_com_x_from_heel_m": 0.1214125,
+        "com_x_delta_m": -0.006160550000000015
+      },
+      "units": "kg m^2 / m",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S01;S02",
+      "locator": "S01 whole-foot row vs S02 three-segment construction",
+      "sensitivity": "foot-inertia sensitivity 0.5x/1.5x (Matsumoto practice) plus the compliant-midfoot alternative",
+      "notes": "Cross-check deltas are declared, not hidden; the three-segment construction controls because it is what the Plant implements."
+    },
+    {
+      "id": "AB-16",
+      "statement": "Stature scaling rule for de Leva component lengths.",
+      "value": "linear scaling factor s = H / 1.741 = 1.05399196",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S01",
+      "locator": "S01 male sample stature 1.741 m",
+      "sensitivity": "anthropometry sensitivity: stature set [1.835, 1.7764, 1.8936] m and mass set [79, 72.69, 85.31] kg (approximately +/-1 SD of the S05 cohort: 5.86 cm, 6.31 kg)",
+      "notes": "Applies to HAT components, pelvis and whole-foot reference length; thigh/shank are frozen by their stature ratios."
+    },
+    {
+      "id": "AB-17",
+      "statement": "No silent anthropometric reinterpretation.",
+      "value": "any change to a frozen ratio, mass fraction or length is an explicit authority amendment with downstream requalification",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S22",
+      "locator": "System authority section 22",
+      "sensitivity": "\u2014",
+      "notes": "Silent tuning is prohibited."
+    }
+  ]
+}

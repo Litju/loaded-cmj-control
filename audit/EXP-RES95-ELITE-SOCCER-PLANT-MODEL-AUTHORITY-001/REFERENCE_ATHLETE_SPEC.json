@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "REFERENCE_ATHLETE_SPEC",
+  "artifact_role": "res95_model_authority",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "mission": "RES95_CLOSE_CORRECTED_MODEL_AUTHORITY_AND_SEAL_REPOSITORY_BUNDLE_001",
+  "linear_issue": "RES-95",
+  "sport_context_id": "ELITE_MALE_PRO_SOCCER_OUTFIELD_TOP_TIER_EUROPE_V1",
+  "system_authority_id": "LCMJ_ELITE_SOCCER_SYSTEM_AUTHORITY_V1",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "status": "FROZEN_FOR_RES83_IMPLEMENTATION",
+  "purpose": "Frozen synthetic nominal reference athlete, external load and total mechanical system quantities.",
+  "machine_readable_inputs": "AUTHORITY_INPUTS.json",
+  "derived_quantities": "DERIVED_QUANTITIES.json",
+  "cross_references": [
+    "SPORT_CONTEXT_AUTHORITY",
+    "ANTHROPOMETRY_BSIP_AUTHORITY",
+    "LOAD_BAR_AUTHORITY"
+  ],
+  "classification_taxonomy": [
+    "LITERATURE_DIRECT",
+    "HUMAN_ANATOMY_REFERENCE",
+    "LITERATURE_INFORMED_SYNTHETIC",
+    "PHYSICS_IDENTITY",
+    "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+    "DEFERRED_TO_LATER_AUTHORITY"
+  ],
+  "decisions": [
+    {
+      "id": "RA-01",
+      "statement": "Synthetic nominal athlete sex and age class.",
+      "value": "male; senior_adult; reference age 24 y (nominal)",
+      "units": "\u2014",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S05;S06",
+      "locator": "System authority section 3",
+      "sensitivity": "\u2014",
+      "notes": "Not a real person and not the exact population mean."
+    },
+    {
+      "id": "RA-02",
+      "statement": "Reference stature.",
+      "value": 1.835,
+      "units": "m",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S05;S06",
+      "locator": "S05 183.72 +/- 5.86 cm; S06 184 +/- 7 cm; rounded synthetic consensus",
+      "sensitivity": "sensitivity set [1.835, 1.7764, 1.8936] m",
+      "notes": "Inside contemporary first-team professional distributions."
+    },
+    {
+      "id": "RA-03",
+      "statement": "Reference athlete mass.",
+      "value": 79.0,
+      "units": "kg",
+      "classification": "LITERATURE_INFORMED_SYNTHETIC",
+      "sources": "S05;S06",
+      "locator": "S05 79.91 +/- 6.31 kg; S06 81 +/- 9 kg",
+      "sensitivity": "sensitivity set [79, 72.69, 85.31] kg",
+      "notes": "Rounded synthetic consensus; not a population mean claim."
+    },
+    {
+      "id": "RA-04",
+      "statement": "External load mass.",
+      "value": 20.0,
+      "units": "kg",
+      "classification": "LITERATURE_DIRECT",
+      "sources": "S04;S13;S14",
+      "locator": "IWF men's bar standard; loaded-CMJ task",
+      "sensitivity": "\u2014",
+      "notes": "Rigid 20 kg composite bar surrogate; see LOAD_BAR_AUTHORITY."
+    },
+    {
+      "id": "RA-05",
+      "statement": "Total mechanical system mass.",
+      "value": 99.0,
+      "units": "kg",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "athlete + rigid bar mass sum",
+      "sensitivity": "\u2014",
+      "notes": "Force/impulse and ballistic identities use this mass; machine check in ANTHROPOMETRY_BSIP_AUTHORITY."
+    },
+    {
+      "id": "RA-06",
+      "statement": "Load-to-athlete mass ratio.",
+      "value": 0.25316455696202533,
+      "units": "\u2014",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "20.0 / 79.0",
+      "sensitivity": "\u2014",
+      "notes": "Derived identity."
+    },
+    {
+      "id": "RA-07",
+      "statement": "Nominal system weight at the project gravity constant.",
+      "value": 971.19,
+      "units": "N",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "\u2014",
+      "locator": "99.0 kg * 9.81 m/s^2",
+      "sensitivity": "\u2014",
+      "notes": "Athlete-only weight is 774.99 N; system authority uses the full carried system."
+    },
+    {
+      "id": "RA-09",
+      "statement": "Reconciliation of the historical RES-82 body-weight constant.",
+      "value": {
+        "RES82_BW": "95.0 kg * 9.81 = 931.95 N (historical V2 75 kg athlete + 20 kg load)",
+        "SUCCESSOR_SYSTEM_WEIGHT": "99.0 kg * 9.81 = 971.19 N",
+        "rule": "RES-82 thresholds expressed in units of BW are recomputed on the 99.0 kg successor base; no downstream artifact may inherit the 95 kg BW silently"
+      },
+      "units": "N",
+      "classification": "PHYSICS_IDENTITY",
+      "sources": "S22",
+      "locator": "RES-82 EVENT_CONTRACT term BW versus the controlling Linear system authority section 3",
+      "sensitivity": "\u2014",
+      "notes": "Historical RES-82 BW remains in RES-82's sealed artifacts; this decision is the successor reconciliation so force thresholds are computed on one base."
+    },
+    {
+      "id": "RA-08",
+      "statement": "Reference athlete is a synthetic nominal, not a measured subject.",
+      "value": "no individual prediction or exact-mean claim is permitted from this nominal",
+      "units": "\u2014",
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
+      "sources": "S05;S06",
+      "locator": "System authority section 3",
+      "sensitivity": "\u2014",
+      "notes": "All downstream claims inherit this ceiling."
+    }
+  ]
+}
