@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "APEX_H2_MEASUREMENT_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "apex_definition": "inside confirmed genuine flight, interpolated SYSTEM_COM_vz positive -> non-positive crossing",
+  "h2_primary": "SYSTEM_COM_z(apex) - SYSTEM_COM_z(TAKEOFF_OCCURRENCE)",
+  "hop_result": {
+    "apex_time_s": 0.11280265884537924,
+    "apex_com_z_m": 1.1768342016680728,
+    "takeoff_com_z_m": 1.1423907927161994,
+    "h2_m": 0.03444340895187348,
+    "takeoff_vz_m_s": 0.8319125967617166,
+    "ballistic_height_m": 0.03527413703622948,
+    "ballistic_cross_check_delta_m": -0.0008307280843560041,
+    "impulse_momentum_dv_m_s": 0.832051011761096,
+    "measured_dv_m_s": 0.8319125967617166
+  },
+  "cross_check_data_exposed": [
+    "total vertical GRF native series (V3NativeFrame.total_floor_force_world_n)",
+    "vertical impulse between native samples (vertical_impulse_between)",
+    "SYSTEM_COM position/velocity native series"
+  ],
+  "no_elite_h2_target_created": true,
+  "checks": [
+    {
+      "check": "apex_evaluable",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "h2_result_lands_flight",
+      "pass": true,
+      "detail": 0.03444340895187348
+    },
+    {
+      "check": "h2_time_origin_is_occurrence",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "ballistic_cross_check_close",
+      "pass": true,
+      "detail": {
+        "h2": 0.03444340895187348,
+        "ballistic": 0.03527413703622948,
+        "delta": -0.0008307280843560041
+      }
+    },
+    {
+      "check": "apex_z_is_maximum",
+      "pass": true,
+      "detail": {
+        "apex_z": 1.1768342016680728,
+        "max_frame_z": 1.1768435748334936
+      }
+    },
+    {
+      "check": "impulse_momentum_takeoff_velocity",
+      "pass": true,
+      "detail": {
+        "impulse_dv": 0.832051011761096,
+        "measured_dv": 0.8319125967617166,
+        "rule": "LEFT_RECTANGLE_INTEGRATOR_CONSISTENT"
+      }
+    },
+    {
+      "check": "trapezoid_rule_is_inferior_at_launch",
+      "pass": true,
+      "detail": {
+        "trapezoid_error": -0.1312286589423025,
+        "left_rectangle_error": 0.00013841499937938817
+      }
+    },
+    {
+      "check": "flight_impulse_identity",
+      "pass": true,
+      "detail": {
+        "impulse_dv": -0.39239999999999986,
+        "measured_dv": -0.39239953945746714
+      }
+    },
+    {
+      "check": "no_elite_h2_target",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "status": "PASS"
+}

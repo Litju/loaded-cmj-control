@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "OUT_OF_PLANE_REACTION_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "artifact_status": "OBSERVABLES_ONLY_NO_PASS_THRESHOLD",
+  "structural_context": "V3 Plant suppresses root y translation, roll and yaw; out-of-plane reaction may exist only as contact wrench information",
+  "quantities": [
+    "Fy",
+    "Mx",
+    "Mz",
+    "left/right contributions",
+    "ratios to Fz"
+  ],
+  "observables": {
+    "flat": {
+      "total_fy_n": 0.0,
+      "total_mx_nm": 8.163608677946854e-15,
+      "total_mz_nm": 1.0564465968698755e-15,
+      "left_mx_nm": 38.36061712756384,
+      "right_mx_nm": -38.36061712756383,
+      "fy_over_fz": 0.0
+    },
+    "left_support": {
+      "total_fy_n": 0.0,
+      "total_mx_nm": 73.88187274268883,
+      "total_mz_nm": 0.11842609401013902,
+      "left_mx_nm": 73.88187274268883,
+      "right_mx_nm": 0.0,
+      "fy_over_fz": 0.0
+    },
+    "right_support": {
+      "total_fy_n": 0.0,
+      "total_mx_nm": -73.88187274268884,
+      "total_mz_nm": -0.11842609401013879,
+      "left_mx_nm": 0.0,
+      "right_mx_nm": -73.88187274268884,
+      "fy_over_fz": 0.0
+    },
+    "toe_first_landing": {
+      "total_fy_n": 0.0,
+      "total_mx_nm": -8.659739592076221e-14,
+      "total_mz_nm": 2.9896224384984293e-13,
+      "left_mx_nm": 12.21009246363796,
+      "right_mx_nm": -12.210092463638047,
+      "fy_over_fz": 0.0
+    },
+    "root_pitch": {
+      "total_fy_n": 0.0,
+      "total_mx_nm": -5.079270337660091e-15,
+      "total_mz_nm": -4.621303340002214e-15,
+      "left_mx_nm": 0.2722645138307932,
+      "right_mx_nm": -0.2722645138307983,
+      "fy_over_fz": 0.0
+    }
+  },
+  "checks": [
+    {
+      "check": "observables_present:flat",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "observables_present:left_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "observables_present:right_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "observables_present:toe_first_landing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "observables_present:root_pitch",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "left_right_sum_mx",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "left_right_sum_mz",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "left_right_sum_fy",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "sagittal_symmetry_zero_fy",
+      "pass": true,
+      "detail": 0.0
+    },
+    {
+      "check": "structural_note_present",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "status": "PASS"
+}

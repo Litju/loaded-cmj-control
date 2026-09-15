@@ -1,0 +1,330 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "CONTACT_FORCE_FRAME_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "convention": {
+    "contact_frame": "row 0 = contact normal; world = frame.reshape(3,3).T @ vector",
+    "force_owner": "mj_contactForce returns the force on mjContact.geom2's body; sign is resolved by body identity",
+    "published_sign": "GROUND_ON_ATHLETE",
+    "independent_validation": [
+      "per-body equivalence with data.cfrc_ext after mj_rnePostConstraint",
+      "two-box synthetic probe with both geom orderings",
+      "static load probe sum(Fz) = 99 g"
+    ]
+  },
+  "details": {
+    "transform_agreement": {
+      "max_force_error_n": 0.0,
+      "max_torque_error_nm": 0.0
+    },
+    "two_box_probe": {
+      "A_first": {
+        "B_force": [
+          0.0,
+          0.0,
+          48.22298910374752
+        ],
+        "A_force_from_floor": [
+          0.0,
+          0.0,
+          242.7465575456125
+        ],
+        "geom_order": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      "B_first": {
+        "B_force": [
+          0.0,
+          0.0,
+          48.22298910374753
+        ],
+        "A_force_from_floor": [
+          0.0,
+          0.0,
+          242.74655754561257
+        ],
+        "geom_order": [
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      }
+    },
+    "ordering_invariance": {
+      "original": [
+        0.19246847558895014,
+        0.0,
+        100.17829833515536
+      ],
+      "swapped": [
+        0.19246847558895014,
+        -0.0,
+        100.17829833515536
+      ]
+    }
+  },
+  "checks": [
+    {
+      "check": "independent_transform_force_match",
+      "pass": true,
+      "detail": 0.0
+    },
+    {
+      "check": "independent_transform_torque_match",
+      "pass": true,
+      "detail": 0.0
+    },
+    {
+      "check": "frame_row0_is_normal@0",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "check": "frame_orthonormal@0",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "frame_row0_is_normal@1",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "check": "frame_orthonormal@1",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "frame_row0_is_normal@2",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "check": "frame_orthonormal@2",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "frame_row0_is_normal@3",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "check": "frame_orthonormal@3",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "frame_row0_is_normal@4",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "check": "frame_orthonormal@4",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "frame_row0_is_normal@5",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "check": "frame_orthonormal@5",
+      "pass": true,
+      "detail": [
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "two_box_B_weight_supported:A_first",
+      "pass": true,
+      "detail": 48.22298910374752
+    },
+    {
+      "check": "two_box_A_weight_supported:A_first",
+      "pass": true,
+      "detail": 242.7465575456125
+    },
+    {
+      "check": "two_box_B_weight_supported:B_first",
+      "pass": true,
+      "detail": 48.22298910374753
+    },
+    {
+      "check": "two_box_A_weight_supported:B_first",
+      "pass": true,
+      "detail": 242.74655754561257
+    },
+    {
+      "check": "geom_ordering_invariant_force",
+      "pass": true,
+      "detail": {
+        "original": [
+          0.19246847558895014,
+          0.0,
+          100.17829833515536
+        ],
+        "swapped": [
+          0.19246847558895014,
+          -0.0,
+          100.17829833515536
+        ]
+      }
+    },
+    {
+      "check": "body_pair_force_antisymmetry",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "rest_normal_force_is_weight",
+      "pass": true,
+      "detail": 971.1900000000236
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "SYSTEM_COM_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "primary": "SYSTEM_COM = mass-weighted compiled body COMs of all 79 kg human segments + rigid 20 kg bar",
+  "system_mass_kg": 99.00000000000001,
+  "athlete_mass_kg": 79.00000000000001,
+  "com_world_m": [
+    0.08296875,
+    -1.7172010166235057e-18,
+    1.169842557230165
+  ],
+  "com_velocity_world_m_s": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "independent_paths": {
+    "mass_weighted_xipos": [
+      0.08296875,
+      -1.7172010166235057e-18,
+      1.169842557230165
+    ],
+    "subtree_com_pelvis": [
+      0.08296875000000002,
+      0.0,
+      1.1698425572301656
+    ],
+    "manual_fk_chain": [
+      0.08296875000000001,
+      -1.717201016623506e-18,
+      1.1698425572301652
+    ]
+  },
+  "checks": [
+    {
+      "check": "system_mass_99",
+      "pass": true,
+      "detail": 99.00000000000001
+    },
+    {
+      "check": "athlete_mass_79",
+      "pass": true,
+      "detail": 79.00000000000001
+    },
+    {
+      "check": "com_matches_independent_xipos",
+      "pass": true,
+      "detail": {
+        "module": [
+          0.08296875,
+          -1.7172010166235057e-18,
+          1.169842557230165
+        ],
+        "independent": [
+          0.08296875,
+          -1.7172010166235057e-18,
+          1.169842557230165
+        ]
+      }
+    },
+    {
+      "check": "com_matches_subtree_com",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "com_matches_manual_fk_chain",
+      "pass": true,
+      "detail": {
+        "module": [
+          0.08296875,
+          -1.7172010166235057e-18,
+          1.169842557230165
+        ],
+        "manual_fk": [
+          0.08296875000000001,
+          -1.717201016623506e-18,
+          1.1698425572301652
+        ]
+      }
+    },
+    {
+      "check": "athlete_com_is_human_only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "system_minus_athlete_is_bar_closure",
+      "pass": true,
+      "detail": {
+        "delta": [
+          -0.017941556612843926,
+          4.347344345882292e-19,
+          0.10223282482460094
+        ],
+        "predicted": [
+          -0.017941556612843926,
+          4.347344345882292e-19,
+          0.102232824824601
+        ]
+      }
+    },
+    {
+      "check": "velocity_consistent_with_momentum",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "dynamic_com_velocity_matches_fd",
+      "pass": true,
+      "detail": {
+        "cvel": 0.5179934188143037,
+        "fd": 0.5180621307389055
+      }
+    },
+    {
+      "check": "dynamic_com_velocity_matches_jacobian",
+      "pass": true,
+      "detail": {
+        "cvel": 0.5179934188143037,
+        "jacobian": 0.517993418814304
+      }
+    },
+    {
+      "check": "material_point_velocity_zero_at_rest",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ],
+  "status": "PASS"
+}

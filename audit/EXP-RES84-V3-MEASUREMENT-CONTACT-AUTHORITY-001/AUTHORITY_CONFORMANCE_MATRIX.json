@@ -1,0 +1,323 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "AUTHORITY_CONFORMANCE_MATRIX",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "conformance": [
+    {
+      "requirement": "distinct V3 measurement surface",
+      "evidence": "src/loaded_cmj/v3/measurement.py",
+      "status": "PASS"
+    },
+    {
+      "requirement": "SYSTEM_COM = 79 kg athlete + 20 kg bar = 99 kg",
+      "evidence": "SYSTEM_COM_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "detected vs active contact semantics",
+      "evidence": "CONTACT_SEMANTICS_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "contact frame -> world transform validated",
+      "evidence": "CONTACT_FORCE_FRAME_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "GROUND_ON_ATHLETE wrench + aggregation",
+      "evidence": "GROUND_WRENCH_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "CoP from aggregate wrench with explicit validity",
+      "evidence": "COP_AUTHORITY_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "active support hull from active support only",
+      "evidence": "ACTIVE_SUPPORT_HULL_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "true foot clearance after body transforms",
+      "evidence": "FOOT_CLEARANCE_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "takeoff occurrence + fail-closed confirmation",
+      "evidence": "TAKEOFF_OCCURRENCE_CONFIRMATION_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "clearance guard max(2 mm, margin + allowance)",
+      "evidence": "CLEARANCE_GUARD_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "10 N comparator diagnostic only",
+      "evidence": "FORCE_THRESHOLD_COMPARATOR_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "apex/H2 support in confirmed flight",
+      "evidence": "APEX_H2_MEASUREMENT_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "native 500 Hz vs canonical 1000 Hz separation",
+      "evidence": "SAMPLING_RESAMPLING_AUTHORITY",
+      "status": "PASS"
+    },
+    {
+      "requirement": "no hidden filtering/smoothing",
+      "evidence": "SIGNAL_PROCESSING_AUTHORITY",
+      "status": "PASS"
+    },
+    {
+      "requirement": "actual orientation, never identity quaternion",
+      "evidence": "ORIENTATION_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "prohibited/penetration from full contact buffer",
+      "evidence": "PROHIBITED_CONTACT_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "contact parameter authority incl. mu sensitivity",
+      "evidence": "CONTACT_PARAMETER_AUTHORITY",
+      "status": "PASS"
+    },
+    {
+      "requirement": "out-of-plane reaction observables",
+      "evidence": "OUT_OF_PLANE_REACTION_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "force <-> COM consistency",
+      "evidence": "FORCE_COM_CONSISTENCY_AUDIT",
+      "status": "PASS"
+    }
+  ],
+  "red_team_scan": {
+    "ncon_as_active_support": {
+      "pattern": "active = data.ncon",
+      "present": false,
+      "resolved": true
+    },
+    "ncon_as_support_count": {
+      "pattern": "support = data.ncon",
+      "present": false,
+      "resolved": true
+    },
+    "contact_frame_summed_as_world": {
+      "pattern": "force_contact_frame_n[0] + record.force_contact_frame_n",
+      "present": false,
+      "resolved": true
+    },
+    "cop_is_contact_centroid": {
+      "pattern": "cop = np.mean",
+      "present": false,
+      "resolved": true
+    },
+    "cop_divide_by_near_zero_fz": {
+      "pattern": "if fz != 0.0:",
+      "present": false,
+      "resolved": true
+    },
+    "full_foot_aabb_in_single_support": {
+      "pattern": "static_support_aabb",
+      "present": false,
+      "resolved": true
+    },
+    "positive_margin_in_flight": {
+      "pattern": "return 0.0  # flight margin",
+      "present": false,
+      "resolved": true
+    },
+    "fixed_unrotated_clearance": {
+      "pattern": "clearance_m = sole_z",
+      "present": false,
+      "resolved": true
+    },
+    "clearance_shifts_takeoff": {
+      "pattern": "t_star = clearance",
+      "present": false,
+      "resolved": true
+    },
+    "ten_newton_defines_takeoff": {
+      "pattern": "occurrence_time_s = comparator",
+      "present": false,
+      "resolved": true
+    },
+    "500hz_mislabeled_native_1000hz": {
+      "pattern": "NATIVE_FREQUENCY_HZ = 1000",
+      "present": false,
+      "resolved": true
+    },
+    "hidden_filtering": {
+      "pattern": "scipy.signal",
+      "present": false,
+      "resolved": true
+    },
+    "identity_pelvis_quaternion": {
+      "pattern": "quat = (1.0, 0.0, 0.0, 0.0)  # root",
+      "present": false,
+      "resolved": true
+    },
+    "79kg_system_dynamics": {
+      "pattern": "SYSTEM_MASS_KG = C.V3_ATHLETE_MASS_KG",
+      "present": false,
+      "resolved": true
+    },
+    "v2_import": {
+      "pattern": "loaded_cmj.v2",
+      "present": false,
+      "resolved": true
+    },
+    "v1_import": {
+      "pattern": "loaded_cmj.simulation",
+      "present": false,
+      "resolved": true
+    },
+    "controller_import": {
+      "pattern": "loaded_cmj.control",
+      "present": false,
+      "resolved": true
+    },
+    "trajectory_import": {
+      "pattern": "loaded_cmj.oracle",
+      "present": false,
+      "resolved": true
+    },
+    "elite_h2_target": {
+      "pattern": "H2_TARGET",
+      "present": false,
+      "resolved": true
+    }
+  },
+  "zero_unresolved_current_patterns": true,
+  "checks": [
+    {
+      "check": "red_team_absent:ncon_as_active_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:ncon_as_support_count",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:contact_frame_summed_as_world",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:cop_is_contact_centroid",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:cop_divide_by_near_zero_fz",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:full_foot_aabb_in_single_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:positive_margin_in_flight",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:fixed_unrotated_clearance",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:clearance_shifts_takeoff",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:ten_newton_defines_takeoff",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:500hz_mislabeled_native_1000hz",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:hidden_filtering",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:identity_pelvis_quaternion",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:79kg_system_dynamics",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:v2_import",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:v1_import",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:controller_import",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:trajectory_import",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:elite_h2_target",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_semantic_grf_sign",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_semantic_system_mass",
+      "pass": true,
+      "detail": 971.1900000000236
+    },
+    {
+      "check": "red_team_semantic_flight_margin_none",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_semantic_inactive_not_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "conformance_rows_complete",
+      "pass": true,
+      "detail": 19
+    }
+  ],
+  "status": "PASS"
+}

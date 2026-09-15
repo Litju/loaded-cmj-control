@@ -1,0 +1,242 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "COP_AUTHORITY_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "policy": {
+    "validity_enum": [
+      "VALID",
+      "NOT_EVALUABLE_LOW_FZ",
+      "NOT_EVALUABLE_NO_SUPPORT",
+      "NOT_EVALUABLE_FLIGHT",
+      "NOT_EVALUABLE_PROHIBITED_CONTACT",
+      "NOT_EVALUABLE_NUMERICAL"
+    ],
+    "low_fz_tolerance_n": 0.001,
+    "derivation": {
+      "measured_no_contact_force_floor_n": 0.0,
+      "declared_force_resolution_n": 2.1564749985714117e-13,
+      "moment_scale_bound_nm": 267.07725000000005,
+      "cop_error_budget_m": 0.001,
+      "derived_conditioning_floor_n": 5.759454123122067e-05,
+      "sealed_value_n": 0.001,
+      "note": "10 N is the force-plate comparator convention and is not the CoP denominator threshold"
+    },
+    "equations": [
+      "cop_x = -(Moy + (z_o - z_plane) * Fx) / Fz",
+      "cop_y = (Mox - (z_o - z_plane) * Fy) / Fz",
+      "free_vertical_moment = Moz - (cop_x * Fy - cop_y * Fx)"
+    ],
+    "forbidden": [
+      "contact centroid",
+      "force-weighted contact centroid alone",
+      "static plantar patch center"
+    ]
+  },
+  "flat_stance_cop": {
+    "x_m": 0.10855595069964266,
+    "y_m": -5.104912215263331e-18,
+    "free_vertical_moment_nm": -1.1665905485396506e-15,
+    "normal_force_n": 971.1900000000236
+  },
+  "synthetic_wrenches": {
+    "single_point": {
+      "force_n": [
+        0.0,
+        0.0,
+        800.0
+      ],
+      "moment_nm": [
+        -40.0,
+        -200.0,
+        0.0
+      ],
+      "cop": [
+        0.25,
+        -0.05
+      ]
+    },
+    "single_point_shift": {
+      "force_n": [
+        0.0,
+        0.0,
+        400.0
+      ],
+      "moment_nm": [
+        40.0,
+        -20.0,
+        0.0
+      ],
+      "cop": [
+        0.05,
+        0.1
+      ]
+    },
+    "inclined_force": {
+      "force_n": [
+        120.0,
+        0.0,
+        900.0
+      ],
+      "moment_nm": [
+        0.0,
+        -135.0,
+        0.0
+      ],
+      "cop": [
+        0.15,
+        0.0
+      ]
+    }
+  },
+  "checks": [
+    {
+      "check": "flat_stance_cop_valid",
+      "pass": true,
+      "detail": "VALID"
+    },
+    {
+      "check": "cop_formula_independent",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "synthetic_cop_single_point",
+      "pass": true,
+      "detail": {
+        "validity": "VALID",
+        "cop": [
+          0.25,
+          -0.05
+        ],
+        "expected": [
+          0.25,
+          -0.05
+        ]
+      }
+    },
+    {
+      "check": "synthetic_cop_single_point_shift",
+      "pass": true,
+      "detail": {
+        "validity": "VALID",
+        "cop": [
+          0.05,
+          0.1
+        ],
+        "expected": [
+          0.05,
+          0.1
+        ]
+      }
+    },
+    {
+      "check": "synthetic_cop_inclined_force",
+      "pass": true,
+      "detail": {
+        "validity": "VALID",
+        "cop": [
+          0.15,
+          0.0
+        ],
+        "expected": [
+          0.15,
+          0.0
+        ]
+      }
+    },
+    {
+      "check": "cop_invariant_under_reference_origin",
+      "pass": true,
+      "detail": {
+        "base": [
+          0.10855595069964266,
+          -5.104912215263331e-18
+        ],
+        "shifted": [
+          0.10855595069964265,
+          -5.104912215263331e-18
+        ]
+      }
+    },
+    {
+      "check": "single_region_cop_matches_force_weighted_contact_point",
+      "pass": true,
+      "detail": {
+        "cop": [
+          0.2652069814024764,
+          2.021765391602299e-15
+        ],
+        "weighted_contact_point": [
+          0.2649819814024763,
+          2.021765391602299e-15,
+          -0.0002500000000000488
+        ],
+        "note": "residual is the per-contact torsional/tangential moment contribution, not a centroid"
+      }
+    },
+    {
+      "check": "cop_is_not_contact_centroid",
+      "pass": true,
+      "detail": {
+        "cop_x": 0.08145634930455664,
+        "centroid_x": 0.1629166666666667
+      }
+    },
+    {
+      "check": "low_fz_validity_fz=0.0",
+      "pass": true,
+      "detail": "NOT_EVALUABLE_LOW_FZ"
+    },
+    {
+      "check": "low_fz_validity_fz=1e-06",
+      "pass": true,
+      "detail": "NOT_EVALUABLE_LOW_FZ"
+    },
+    {
+      "check": "low_fz_validity_fz=-5.0",
+      "pass": true,
+      "detail": "NOT_EVALUABLE_LOW_FZ"
+    },
+    {
+      "check": "low_fz_validity_fz=0.002",
+      "pass": true,
+      "detail": "VALID"
+    },
+    {
+      "check": "no_support_invalid",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "flight_invalid",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prohibited_invalid",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "flight_pose_cop_not_evaluable",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prohibited_probe_cop_invalid",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "nan_wrench_numerical_invalid",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "unbounded_cop_numerical_invalid",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "status": "PASS"
+}

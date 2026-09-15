@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "ORIENTATION_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "quantities": [
+    "root pitch",
+    "root pitch rate",
+    "trunk-pelvis relative pitch",
+    "trunk absolute pitch",
+    "pelvis/HAT quaternions",
+    "HAT angular velocity"
+  ],
+  "tests": [
+    "identity-configuration edge case",
+    "non-zero root pitch",
+    "non-zero trunk pitch",
+    "quaternion consistency"
+  ],
+  "details": {
+    "root_pitch_probe": {
+      "root_pitch_rad": 0.2,
+      "root_pitch_from_quaternion_rad": 0.2,
+      "trunk_pelvis_relative_pitch_rad": 0.15,
+      "trunk_absolute_pitch_rad": 0.35,
+      "pelvis_quaternion_wxyz": [
+        0.9950041652780258,
+        0.0,
+        0.09983341664682815,
+        0.0
+      ],
+      "hat_quaternion_wxyz": [
+        0.9847265389049336,
+        0.0,
+        0.17410813759359595,
+        0.0
+      ]
+    }
+  },
+  "checks": [
+    {
+      "check": "flat_pitch_zero",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "flat_pitch_from_quaternion",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "root_pitch_nonzero",
+      "pass": true,
+      "detail": 0.2
+    },
+    {
+      "check": "root_pitch_reported",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "trunk_relative_reported",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "trunk_absolute_equals_sum",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "root_pitch_matches_quaternion",
+      "pass": true,
+      "detail": {
+        "quat_pitch": 0.2,
+        "qpos": 0.2
+      }
+    },
+    {
+      "check": "hat_pitch_matches_quaternion",
+      "pass": true,
+      "detail": {
+        "hat_quat_pitch": 0.3499999999999999
+      }
+    },
+    {
+      "check": "pelvis_quaternion_not_identity",
+      "pass": true,
+      "detail": [
+        0.9950041652780258,
+        0.0,
+        0.09983341664682815,
+        0.0
+      ]
+    },
+    {
+      "check": "hat_quaternion_not_identity",
+      "pass": true,
+      "detail": [
+        0.9847265389049336,
+        0.0,
+        0.17410813759359595,
+        0.0
+      ]
+    },
+    {
+      "check": "pitch_rate_reported",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "angular_velocity_vector_reported",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "hop_frame_has_full_state",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "status": "PASS"
+}

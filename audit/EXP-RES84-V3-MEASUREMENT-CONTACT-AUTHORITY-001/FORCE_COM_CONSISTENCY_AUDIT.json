@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "FORCE_COM_CONSISTENCY_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "identity": "dP_system/dt = sum external forces; vertical: 99 * a_COM_z = Fz_ground - 99 g",
+  "identity_rule": "LEFT_RECTANGLE_INTEGRATOR_CONSISTENT",
+  "independent_paths": {
+    "com": "mass-weighted compiled body COMs (xipos) recomputed in the builder",
+    "velocity": "central finite difference of the independent COM series (interior samples)",
+    "force": "independent raw-contact world-force aggregation (builder implementation)"
+  },
+  "results": {
+    "max_module_vs_independent_fd_error_m_s": 6.904172208188619e-05,
+    "raw_position_fd_offset_m_s": 0.00974132953525314,
+    "quiet_window_max_residual_n": 1.0717165289634067,
+    "launch_window_max_residual_n": 1.0717165289634067,
+    "flight_window_max_residual_n": 0.005497757124430791,
+    "landing_window_max_residual_n": 3.3466323826169173,
+    "trapezoid_form_max_residual_n": 890.2419954829838,
+    "impulse_launch_dv_m_s": 0.832051011761096,
+    "measured_launch_dv_m_s": 0.8319125967617166,
+    "occurrence_index": 14,
+    "landing_index": 79
+  },
+  "checks": [
+    {
+      "check": "module_com_velocity_matches_jacobian_all_samples",
+      "pass": true,
+      "detail": 2.6645352591003757e-15
+    },
+    {
+      "check": "position_fd_matches_velocity_with_half_step_offset",
+      "pass": true,
+      "detail": 6.904172208188619e-05
+    },
+    {
+      "check": "raw_position_fd_offset_is_half_step_a_dt_over_2",
+      "pass": true,
+      "detail": {
+        "raw_offset": 0.00974132953525314,
+        "expected": 0.009810000000000001
+      }
+    },
+    {
+      "check": "quiet_window_step_identity",
+      "pass": true,
+      "detail": {
+        "max_residual_n": 1.0717165289634067
+      }
+    },
+    {
+      "check": "launch_window_step_identity",
+      "pass": true,
+      "detail": {
+        "max_residual_n": 1.0717165289634067
+      }
+    },
+    {
+      "check": "flight_window_step_identity",
+      "pass": true,
+      "detail": {
+        "max_residual_n": 0.005497757124430791
+      }
+    },
+    {
+      "check": "landing_window_step_identity",
+      "pass": true,
+      "detail": {
+        "max_residual_n": 3.3466323826169173
+      }
+    },
+    {
+      "check": "trapezoid_form_inferior_in_launch",
+      "pass": true,
+      "detail": {
+        "trapezoid_max_residual_n": 890.2419954829838,
+        "left_rectangle_max_residual_n": 1.0717165289634067
+      }
+    },
+    {
+      "check": "impulse_launch_identity",
+      "pass": true,
+      "detail": {
+        "impulse_dv": 0.832051011761096,
+        "measured_dv": 0.8319125967617166
+      }
+    },
+    {
+      "check": "impulse_flight_identity",
+      "pass": true,
+      "detail": {
+        "impulse_dv": -0.35316,
+        "measured_dv": -0.3531594033206635
+      }
+    },
+    {
+      "check": "impulse_landing_identity",
+      "pass": true,
+      "detail": {
+        "impulse_dv": 0.3965456358148212,
+        "measured_dv": 0.39565029933382256
+      }
+    },
+    {
+      "check": "module_plate_force_matches_independent",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "status": "PASS"
+}

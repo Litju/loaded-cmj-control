@@ -1,0 +1,171 @@
+# RES84_RECEIPT — V3 Measurement / Contact Authority (RES-84)
+
+MISSION: `RES84_REBUILD_V3_MEASUREMENT_CONTACT_AUTHORITY_001`
+LINEAR_ISSUE: `RES-84`
+AUTHORITY: `LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1`
+STATUS: **COMPLETE — V3 MEASUREMENT/CONTACT AUTHORITY BUILT, ALL DETERMINISTIC GATES PASS**
+
+---
+
+## 1. Entry reconciliation (before any change)
+
+| Item | Value |
+|---|---|
+| ENTRY_HEAD | `7f1917164d137a9d3852acfbf9ee045972871285` |
+| ENTRY_TREE | `84d5f14b5ecd6d08aaa307ecb05b75c4ab0937fb` |
+| BRANCH | `main` |
+| ORIGIN/MAIN at entry | `7f1917164d137a9d3852acfbf9ee045972871285` (verified equal) |
+| TRACKED WORKTREE at entry | clean (0 modified tracked files) |
+| Pre-existing untracked paths | 25 entries preserved untouched (no `git add .`, no unrelated stage) |
+| RES-83 Plant | sealed, unmodified; XML SHA-256 `eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d` (matches the RES-83 `HASH_MANIFEST.json` before and after) |
+| RES-83 plant evidence seal (mission input) | `11d58a25c4be996fe0c2d434dde5118786335cd8eb2fd9a5818ffef7d2f1ea09` |
+| MuJoCo | 3.8.0 (compiled Plant defaults: solver 2 / Newton, integrator 0 / Euler, timestep 0.002 s, cone 0 / pyramidal, 100 iterations, tol 1e-8) |
+
+No controller science, trajectory, scorer, phase machine, actuator limit or
+candidate was created or modified. `loaded_cmj.v2` / `loaded_cmj.simulation` /
+`loaded_cmj.control` / `loaded_cmj.oracle` are never imported by the RES-84
+surface (AST/text scan enforced in `AUTHORITY_CONFORMANCE_MATRIX.json`).
+
+## 2. Deliverables (tracked)
+
+### Implementation surface (new, V3-local)
+
+| Path | Content |
+|---|---|
+| `src/loaded_cmj/v3/measurement.py` | RES-84 measurement/contact authority: contact semantics, contact-frame → world transform, wrench aggregation, CoP + validity policy, active support hull, true foot clearance, orientation, prohibited/penetration state, SYSTEM_COM/ATHLETE_COM, native/canonical streams and signal-processing authority, takeoff occurrence/confirmation, 10 N comparator, apex/H2 support quantities |
+
+### Tests (new)
+
+`tests/test_res84_v3_measurement_contact.py` — the mandatory adversarial set
+(mission section 21) plus authority-surface gates; every test asserts the same
+computation archived in the evidence bundle.
+
+### Evidence (new)
+
+`audit/EXP-RES84-V3-MEASUREMENT-CONTACT-AUTHORITY-001/` — 20 audit artifacts,
+the aggregate validation report (402 checks, 0 failed), `HASH_MANIFEST.json`,
+`build_evidence.py`, `seal_evidence.py` and this receipt.
+
+## 3. Frozen authority facts (measured, not assumed)
+
+Every fact below is re-executed by the tests and archived with its probe.
+
+| Fact | Measured value |
+|---|---|
+| Contact frame | row 0 is the contact normal; `world = frame.reshape(3,3).T @ contact_frame_vector` |
+| Force owner | `mj_contactForce` returns the force on the **second** contact geom's body; sign is resolved by body identity (never by geom indexing). Verified bit-exactly against `data.cfrc_ext` per body and with a two-box probe in both geom orderings |
+| Published wrench sign | `GROUND_ON_ATHLETE`; static load returns `Fz = +971.190 N = 99 g` |
+| Detected ≠ active | `data.ncon > 0` does not imply force-generating contact. The sealed Plant produces penetrating forefoot contacts with `efc_address >= 0`, state SATISFIED, `normal_force = 0.0` at 2 mm depth. ACTIVE requires `efc_address >= 0` **and** `normal force > 0.0` (inactive contacts return a bit-exact zero force vector) |
+| margin / gap semantics | probe overlay (margin 5 mm, gap 2 mm): detection for `dist < margin`, activation for `dist < margin - gap`; detected-but-gapped contacts carry `efc_address = -1`. Sealed Plant: margin = gap = 0.0 |
+| `cvel` convention | MuJoCo's com-based velocity is anchored at `data.subtree_com[0]` (whole-model COM): `v_com,i = cvel_lin + omega x (xipos_i - subtree_com[0])`. Validated against `mj_jacSubtreeCom` (1e-12) and finite differences |
+| Native state consistency | `mj_step` advances qpos/qvel but leaves derived arrays at the pre-integration state; RES-84 streams use sample-then-step so every frame is internally consistent |
+| Integrator impulse rule | `v_{k+1} = v_k + dt (F_k - M g)/M` (left rectangle). Launch-interval identity: left rectangle 1.4e-4 m/s vs trapezoid 0.13 m/s (890 N residual) |
+| Position/velocity half-step | `central_difference(position)[i] = v(t_i + dt/2) = v_i + a dt/2`; measured raw offset 9.741e-3 m/s vs `g dt / 2 = 9.81e-3 m/s` |
+| SYSTEM_COM | 99.0 kg = 79.0 kg athlete + 20.0 kg bar; mass-weighted compiled body COMs; independent paths agree to 1e-12 (mass-weighted `xipos`, `subtree_com`, manual FK chain, CoM Jacobian) |
+
+## 4. Frozen policies
+
+| Policy | Sealed value |
+|---|---|
+| Clearance guard | `max(0.002, effective margin + verified allowance)` = **0.002 m** (margin 0.0; allowance 7.1157e-4 = 2 x measured max penetration 3.55785e-4 m at static equilibrium of the 99 kg system) |
+| CoP validity | `VALID` / `NOT_EVALUABLE_LOW_FZ` / `NOT_EVALUABLE_NO_SUPPORT` / `NOT_EVALUABLE_FLIGHT` / `NOT_EVALUABLE_PROHIBITED_CONTACT` / `NOT_EVALUABLE_NUMERICAL` |
+| CoP low-Fz tolerance | **1.0e-3 N**, derived from the measured bit-exact zero inactive-force floor, the declared force resolution `99 g eps = 2.16e-13 N`, the moment scale bound `99 g L_foot = 267.1 N*m` and a 1 mm CoP error budget → derived conditioning floor 5.76e-5 N, sealed at 1e-3 N. The 10 N comparator convention is **not** used |
+| CoP equations | `cop_x = -(Moy + (z_o - z_plane) Fx)/Fz`, `cop_y = (Mox - (z_o - z_plane) Fy)/Fz`, `M_free_z = Moz - (cop_x Fy - cop_y Fx)`; reference origin (0,0,0), plate frame = world frame, support plane z = 0 |
+| Takeoff occurrence | final ACTIVE legal plantar support → zero ACTIVE legal plantar support; primary timestamp is the declared linear contact-**force** extrapolation clamped to the native interval (never later than the first zero-support sample); clearance never participates |
+| Takeoff confirmation | fail-closed: zero legal support ≥ 0.050 s, bilateral clearance reaches the 0.002 m guard, `SYSTEM_COM_vz > 0` at occurrence, no prohibited contact, no legal recontact. Failure rejects, never shifts |
+| 10 N comparator | `|Fz| < 10 N` for ≥ 0.010 s; diagnostic/comparability only; measured offset −4 ms relative to the occurrence (contact force decays below 10 N while still force-generating) |
+| Sampling | RAW_NATIVE 0.002 s / 500 Hz = event truth; canonical 1000 Hz = `DERIVED_UPSAMPLED_NOT_EVENT_TRUTH` with per-sample native provenance (index bracket + weight); downsampling not authorized; candidate claim of ≥ 1000 Hz requires dt ≤ 0.001 s |
+| Signal processing | no filter, no hidden smoothing before contact detection / peak force / landing rate / impulse; interpolation linear; differentiation central on native samples; impulse left-rectangle |
+| Contact parameters | plantar condim 4 (sliding + torsional), other contacts condim 3; sliding friction 0.9 nominal with executed sensitivity {0.5, 0.9, 1.5}; torsional 0.0 and rolling 0.0 sealed as RES-84 numerics for box plantar patches; solref 0.02/1.0, solimp 0.9/0.95/0.001/0.5/2.0 sealed as `PROVISIONAL_NUMERICAL_BASELINE` with RES-86 solution verification (CC-10/CC-11/DF-08). No scalar-mu collapse: condim + friction vector + per-contact solved parameters are exposed |
+| Out-of-plane | observables only (Fy, Mx, Mz, left/right contributions, ratios); no PASS threshold invented; lateral support margin labelled geometry-nominal, not balance authority |
+| H2 support | `SYSTEM_COM_z(apex) - SYSTEM_COM_z(TAKEOFF_OCCURRENCE)` inside confirmed genuine flight; no elite H2 target created |
+
+## 5. Executed adversarial/measurement probes
+
+* **Poses**: flat bilateral, left-only, right-only, heel-only, forefoot-only
+  (FM-09 zero-passive overlay), toe-only, heel rise, toe off, rotated ankle,
+  rotated MTP (both signs), toe/forefoot-first landing, nonzero root pitch,
+  nonzero trunk pitch, true flight.
+* **Contacts**: exact touch (0 contacts), penetrating inactive (2 mm, zero
+  force), margin/gap detection vs activation bands, prohibited pelvis / HAT /
+  bar-floor falls, self-contact classification, two-box geom-ordering
+  convention.
+* **Wrench/CoP**: known static load (`+99 g`), independent per-body
+  `cfrc_ext` equivalence, moment transport to a shifted origin, synthetic
+  single-point/known-point/inclined wrenches, CoP ≠ contact centroid,
+  reference-origin invariance, low-Fz / no-support / flight / prohibited /
+  numerical invalidation.
+* **Clearance**: corner-exact vs brute-force surface sampling for 10 poses and
+  4 ROM extremes, governing material point and its normal velocity vs finite
+  differences.
+* **Events (real physical probe)**: declared 49.0 mm compression-release
+  launch → occurrence at t = 0.028 s, `vz = 0.832 m/s`, confirmation PASS
+  (bilateral clearance 2.11 mm ≥ 2 mm guard, 50 ms dwell, no prohibited
+  contact); apex at t = 0.1128 s, H2 = 0.03444 m vs ballistic 0.03527 m
+  (cross-check Δ = −0.83 mm); impulse-momentum takeoff velocity
+  0.83205 m/s vs measured 0.83191 m/s.
+* **Event negative controls**: 48.5 mm shallower launch (real, no prohibited
+  contact) → occurrence detected but confirmation REJECTED on the clearance
+  guard; synthetic transient dropout → rejected on recontact; recontact in
+  dwell → rejected; falling COM → rejected; prohibited contact in window →
+  rejected; 10 N comparator with sub-persistence dip → not triggered.
+* **Force/COM consistency**: per-sample integrator-consistent identity (quiet
+  1.07 N, launch 1.07 N, flight 5.5e-3 N, landing 3.35 N residual; trapezoid
+  form 890 N in the launch window), impulse-momentum launch/flight/landing
+  identities, independent force aggregation (builder implementation) and
+  independent COM/velocity/acceleration paths.
+
+## 6. Verification executed before commit
+
+| Gate | Result |
+|---|---|
+| `pytest tests/test_res84_v3_measurement_contact.py` | all tests pass |
+| `pytest tests/` (full suite regression) | no RES-84 regression across the repository |
+| `ruff check` on the new/modified Python files | clean |
+| `MEASUREMENT_VALIDATION_REPORT.json` | 20 artifacts, 402 checks, 0 failed, status PASS |
+| RES-83 Plant hash | unchanged (`eca5760f...`) |
+| Red-team scan | 20 pattern classes absent, semantic negatives re-executed, zero unresolved current false-authority patterns |
+| Tracked worktree | only the RES-84 additions staged/committed |
+
+## 7. Independent verification (validator independence)
+
+The implementation unit executed the deterministic gates above. An independent
+read-only verification pass (no implementation edit rights) is recorded in the
+RES-84 Linear closure comment and in the external `POSTCOMMIT_SIDECAR.json`;
+it is not embedded here so that the in-repo manifest cannot be silently
+rewritten by the implementer after verification.
+
+## 8. Evidence bundle and seal convention
+
+* Repository bundle: `audit/EXP-RES84-V3-MEASUREMENT-CONTACT-AUTHORITY-001/`
+* External evidence root: `/home/litju/Projects/loaded-cmj-control-evidence/EXP-RES84-V3-MEASUREMENT-CONTACT-AUTHORITY-001/`
+  * `checksums.sha256` excludes `checksums.sha256`, `SEAL.json`, `POSTCOMMIT_SIDECAR*`;
+  * `EVIDENCE_SEAL_SHA256 = sha256(checksums.sha256 bytes)` recorded in `SEAL.json`;
+  * `POSTCOMMIT_SIDECAR.json` records `FINAL_HEAD`, `FINAL_TREE`, remote sync and worktree state after the commit.
+* `HASH_MANIFEST.json` covers every evidence artifact plus the V3 measurement,
+  plant, constants and `__init__` sources, the XML and the RES-84 test module;
+  it is regenerated by `python3 build_evidence.py`.
+
+## 9. Commit
+
+Commit message: `V3: rebuild loaded-CMJ measurement and contact authority`
+
+`FINAL_HEAD`, `FINAL_TREE`, `REMOTE_SYNC`, `TRACKED_WORKTREE_CLEAN` and the
+preserved pre-existing untracked count are recorded in the external
+`POSTCOMMIT_SIDECAR.json`, per the RES-82/RES-83/RES-95 convention (the
+in-repo receipt cannot contain post-commit hashes without invalidating its own
+manifest entry).
+
+## 10. Claim ceiling
+
+This receipt establishes the RES-84 V3 measurement and contact authority on
+the sealed RES-83 Plant: contact semantics, world-frame wrench/CoP, active
+support geometry, true clearance, orientation, prohibited-contact visibility,
+SYSTEM_COM dynamics, sampling/signal-processing authority and the
+occurrence/confirmation event split. It establishes **no** controller science,
+**no** actuator limits (RES-85), **no** timestep/solver selection
+(RES-86/89/91), **no** elite H2 target or mapping, **no** candidate and **no**
+human predictive validity. The compression-release launch probe is a declared
+deterministic measurement probe, not a countermovement-jump result.
+
+`NEXT_AUTHORIZED_ACTION=RES85_COUNTERMOVEMENT_PROPULSION_TAKEOFF_FLIGHT_CONTROL`

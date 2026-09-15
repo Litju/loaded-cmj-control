@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "MEASUREMENT_VALIDATION_REPORT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "artifacts": [
+    {
+      "artifact": "MEASUREMENT_IMPLEMENTATION_SPEC.json",
+      "status": "PASS",
+      "checks": 3,
+      "failed": []
+    },
+    {
+      "artifact": "CONTACT_SEMANTICS_AUDIT.json",
+      "status": "PASS",
+      "checks": 64,
+      "failed": []
+    },
+    {
+      "artifact": "CONTACT_FORCE_FRAME_AUDIT.json",
+      "status": "PASS",
+      "checks": 21,
+      "failed": []
+    },
+    {
+      "artifact": "GROUND_WRENCH_AUDIT.json",
+      "status": "PASS",
+      "checks": 10,
+      "failed": []
+    },
+    {
+      "artifact": "SYSTEM_COM_AUDIT.json",
+      "status": "PASS",
+      "checks": 11,
+      "failed": []
+    },
+    {
+      "artifact": "COP_AUTHORITY_AUDIT.json",
+      "status": "PASS",
+      "checks": 19,
+      "failed": []
+    },
+    {
+      "artifact": "ACTIVE_SUPPORT_HULL_AUDIT.json",
+      "status": "PASS",
+      "checks": 40,
+      "failed": []
+    },
+    {
+      "artifact": "FOOT_CLEARANCE_AUDIT.json",
+      "status": "PASS",
+      "checks": 67,
+      "failed": []
+    },
+    {
+      "artifact": "TAKEOFF_OCCURRENCE_CONFIRMATION_AUDIT.json",
+      "status": "PASS",
+      "checks": 21,
+      "failed": []
+    },
+    {
+      "artifact": "CLEARANCE_GUARD_AUDIT.json",
+      "status": "PASS",
+      "checks": 7,
+      "failed": []
+    },
+    {
+      "artifact": "FORCE_THRESHOLD_COMPARATOR_AUDIT.json",
+      "status": "PASS",
+      "checks": 7,
+      "failed": []
+    },
+    {
+      "artifact": "APEX_H2_MEASUREMENT_AUDIT.json",
+      "status": "PASS",
+      "checks": 9,
+      "failed": []
+    },
+    {
+      "artifact": "SAMPLING_RESAMPLING_AUTHORITY.json",
+      "status": "PASS",
+      "checks": 14,
+      "failed": []
+    },
+    {
+      "artifact": "SIGNAL_PROCESSING_AUTHORITY.json",
+      "status": "PASS",
+      "checks": 16,
+      "failed": []
+    },
+    {
+      "artifact": "ORIENTATION_AUDIT.json",
+      "status": "PASS",
+      "checks": 13,
+      "failed": []
+    },
+    {
+      "artifact": "PROHIBITED_CONTACT_AUDIT.json",
+      "status": "PASS",
+      "checks": 20,
+      "failed": []
+    },
+    {
+      "artifact": "CONTACT_PARAMETER_AUTHORITY.json",
+      "status": "PASS",
+      "checks": 15,
+      "failed": []
+    },
+    {
+      "artifact": "OUT_OF_PLANE_REACTION_AUDIT.json",
+      "status": "PASS",
+      "checks": 10,
+      "failed": []
+    },
+    {
+      "artifact": "FORCE_COM_CONSISTENCY_AUDIT.json",
+      "status": "PASS",
+      "checks": 12,
+      "failed": []
+    },
+    {
+      "artifact": "AUTHORITY_CONFORMANCE_MATRIX.json",
+      "status": "PASS",
+      "checks": 24,
+      "failed": []
+    }
+  ],
+  "artifact_count": 20,
+  "total_checks": 403,
+  "failed_checks": [],
+  "status": "PASS"
+}

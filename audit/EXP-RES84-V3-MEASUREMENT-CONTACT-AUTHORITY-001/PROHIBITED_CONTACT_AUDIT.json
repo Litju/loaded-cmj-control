@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "PROHIBITED_CONTACT_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "prohibited_geoms": [
+    "pelvis_collision",
+    "hat_torso_collision",
+    "hat_head_collision",
+    "left_thigh_collision",
+    "right_thigh_collision",
+    "left_shank_collision",
+    "right_shank_collision",
+    "bar_shaft",
+    "bar_sleeve_left",
+    "bar_sleeve_right"
+  ],
+  "semantics": {
+    "source": "actual runtime contact buffer; no disabled shell is used",
+    "coverage": "all detected contacts; penetration metrics cover the same set they claim",
+    "fall_visibility": "a body-floor fall contact is always visible; the decoder never loops over plantar-only contacts"
+  },
+  "probes": {
+    "pelvis_floor": {
+      "detected": 10,
+      "active": 4,
+      "max_penetration_m": 0.39689093629586225,
+      "geoms": [
+        "left_shank_collision",
+        "left_thigh_collision",
+        "pelvis_collision",
+        "right_shank_collision",
+        "right_thigh_collision"
+      ]
+    },
+    "hat_floor": {
+      "detected": 13,
+      "active": 5,
+      "max_penetration_m": 0.17871912544842472,
+      "geoms": [
+        "hat_torso_collision",
+        "left_shank_collision",
+        "left_thigh_collision",
+        "pelvis_collision",
+        "right_shank_collision",
+        "right_thigh_collision"
+      ]
+    },
+    "bar_floor": {
+      "detected": 27,
+      "active": 5,
+      "max_penetration_m": 0.41167526668950666,
+      "geoms": [
+        "bar_shaft",
+        "bar_sleeve_left",
+        "bar_sleeve_right",
+        "hat_head_collision",
+        "hat_torso_collision",
+        "left_shank_collision",
+        "left_thigh_collision",
+        "pelvis_collision",
+        "right_shank_collision",
+        "right_thigh_collision"
+      ]
+    }
+  },
+  "checks": [
+    {
+      "check": "prohibited_detected:pelvis_floor",
+      "pass": true,
+      "detail": 10
+    },
+    {
+      "check": "prohibited_expected_geom:pelvis_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prohibited_penetration_reported:pelvis_floor",
+      "pass": true,
+      "detail": 0.39689093629586225
+    },
+    {
+      "check": "penetration_metric_covers_all_detected:pelvis_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "fall_visible:pelvis_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "cop_prohibited_invalid:pelvis_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prohibited_detected:hat_floor",
+      "pass": true,
+      "detail": 13
+    },
+    {
+      "check": "prohibited_expected_geom:hat_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prohibited_penetration_reported:hat_floor",
+      "pass": true,
+      "detail": 0.17871912544842472
+    },
+    {
+      "check": "penetration_metric_covers_all_detected:hat_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "fall_visible:hat_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "cop_prohibited_invalid:hat_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prohibited_detected:bar_floor",
+      "pass": true,
+      "detail": 27
+    },
+    {
+      "check": "prohibited_expected_geom:bar_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prohibited_penetration_reported:bar_floor",
+      "pass": true,
+      "detail": 0.41167526668950666
+    },
+    {
+      "check": "penetration_metric_covers_all_detected:bar_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "fall_visible:bar_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "cop_prohibited_invalid:bar_floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "fall_visible_in_plate_channel",
+      "pass": true,
+      "detail": {
+        "plate_fz": 25343.588595936217,
+        "legal_fz": 11396.171075761878,
+        "prohibited_detected": 10
+      }
+    },
+    {
+      "check": "penetration_max_matches_manual",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "status": "PASS"
+}

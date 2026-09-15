@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "CLEARANCE_GUARD_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "formula": "max(0.002, effective_contact_margin + verified_penetration_allowance)",
+  "terms": {
+    "effective_contact_margin_m": {
+      "value": 0.0,
+      "owner": "RES-84 (sealed compiled value; MuJoCo geom margin = 0.0)"
+    },
+    "verified_penetration_allowance_m": {
+      "value": 0.00071157,
+      "owner": "RES-84 (2x measured maximum); RES-86 owns refinement",
+      "basis": "flat bilateral stance static equilibrium at system weight"
+    },
+    "measured_max_penetration_m": {
+      "value": 0.000355785,
+      "owner": "RES-84 measurement"
+    },
+    "two_mm_floor_m": {
+      "value": 0.002,
+      "owner": "EM-07 / RES-95 authority"
+    }
+  },
+  "sealed_clearance_guard_m": 0.002,
+  "uncertainty": {
+    "max_penetration_m": 0.0003557847126610244,
+    "landing_probe_max_penetration_m": 0.00030000000000006584,
+    "clearance_numerical_floor_m": 1e-15
+  },
+  "checks": [
+    {
+      "check": "measured_max_penetration_matches_sealed",
+      "pass": true,
+      "detail": {
+        "measured": 0.0003557847126610244,
+        "sealed": 0.000355785
+      }
+    },
+    {
+      "check": "allowance_is_2x_measured",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "guard_formula",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "guard_dominated_by_2mm_floor",
+      "pass": true,
+      "detail": 0.002
+    },
+    {
+      "check": "effective_margin_zero",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "landing_penetration_below_allowance",
+      "pass": true,
+      "detail": 0.00030000000000006584
+    },
+    {
+      "check": "flight_clearance_above_guard",
+      "pass": true,
+      "detail": 0.1032492383195717
+    }
+  ],
+  "status": "PASS"
+}

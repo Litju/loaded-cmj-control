@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "MEASUREMENT_IMPLEMENTATION_SPEC",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "mission": "RES84_REBUILD_V3_MEASUREMENT_CONTACT_AUTHORITY_001",
+  "linear_issue": "RES-84",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "entry_head": "7f1917164d137a9d3852acfbf9ee045972871285",
+  "entry_tree": "84d5f14b5ecd6d08aaa307ecb05b75c4ab0937fb",
+  "module": "src/loaded_cmj/v3/measurement.py",
+  "module_sha256": "df5eba99ace8bf04b3a8c62ea3561c5d09f33911d7cfc93600cb26c2fb623b28",
+  "plant_xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+  "surface": {
+    "contact_semantics": [
+      "contact_records",
+      "contact_state",
+      "V3ContactRecord",
+      "V3ContactClass"
+    ],
+    "force_frame": [
+      "contact-frame -> world transform (row-0 normal, frame.T @ v)",
+      "body-identity sign resolution"
+    ],
+    "wrench": [
+      "total_ground_wrench",
+      "foot_wrench",
+      "ground_reaction_wrench",
+      "V3Wrench"
+    ],
+    "cop": [
+      "cop_from_wrench",
+      "cop_from_plant",
+      "V3CopValidity"
+    ],
+    "support": [
+      "active_support_hull",
+      "support_margin_from_point",
+      "V3SupportHull"
+    ],
+    "clearance": [
+      "foot_clearance",
+      "V3FootClearance"
+    ],
+    "com": [
+      "system_com_state",
+      "athlete_com_state"
+    ],
+    "orientation": [
+      "orientation_state"
+    ],
+    "prohibited": [
+      "contact_state.max_penetration_prohibited_m",
+      "contact_state.body_floor_fall_visible"
+    ],
+    "parameters": [
+      "contact_parameter_inventory",
+      "contact_parameter_authority"
+    ],
+    "out_of_plane": [
+      "out_of_plane_observables"
+    ],
+    "sampling": [
+      "native_frame",
+      "canonical_1000hz_stream",
+      "sampling_authority",
+      "signal_processing_authority"
+    ],
+    "events": [
+      "detect_takeoff_occurrence",
+      "scan_takeoff_candidates",
+      "confirm_takeoff",
+      "force_takeoff_comparator",
+      "detect_apex",
+      "vertical_impulse_between"
+    ]
+  },
+  "frozen_constants": {
+    "system_mass_kg": 99.0,
+    "athlete_mass_kg": 79.0,
+    "plate_frame_id": "WORLD_FRAME",
+    "support_plane_z_m": 0.0,
+    "wrench_reference_origin_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "wrench_sign_convention": "GROUND_ON_ATHLETE",
+    "clearance_guard_m": 0.002,
+    "clearance_guard_effective_margin_m": 0.0,
+    "clearance_guard_penetration_allowance_m": 0.00071157,
+    "clearance_guard_measured_max_penetration_m": 0.000355785,
+    "cop_low_fz_tolerance_n": 0.001,
+    "cop_reporting_resolution_m": 0.001,
+    "takeoff_dwell_s": 0.05,
+    "comparator_force_n": 10.0,
+    "comparator_dwell_s": 0.01,
+    "native_dt_s": 0.002,
+    "native_frequency_hz": 500.0,
+    "canonical_frequency_hz": 1000.0,
+    "canonical_stream_status": "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH",
+    "required_candidate_max_dt_s": 0.001,
+    "support_footprint_tolerance_m": 0.0005
+  },
+  "explicit_omissions": [
+    "no controller, trajectory, scorer or phase machine",
+    "no V1/V2 module import (V1/V2 read for forensic comparison only)",
+    "no elite H2 target",
+    "no candidate creation",
+    "no final timestep selection (RES-86/89/91)",
+    "no final actuator limits (RES-85)"
+  ],
+  "checks": [
+    {
+      "check": "module_exists",
+      "pass": true,
+      "detail": "/home/litju/Projects/loaded-cmj-control/src/loaded_cmj/v3/measurement.py"
+    },
+    {
+      "check": "plant_xml_unchanged_hash_recorded",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "spec_records_all_mandatory_families",
+      "pass": true,
+      "detail": 13
+    }
+  ],
+  "status": "PASS"
+}

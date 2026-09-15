@@ -1,0 +1,758 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "ACTIVE_SUPPORT_HULL_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "semantics": {
+    "geometry_source": "currently ACTIVE legal plantar support patches only; no static AABB of both feet",
+    "footprint_rule": "corners within SUPPORT_FOOTPRINT_TOLERANCE_M of the patch minimum are the support face",
+    "hull": "2-D convex hull (bilateral stance -> convex hull of both foot hulls)",
+    "sagittal_claim": "1-D sagittal margin from the SYSTEM_COM ground projection to the support x-interval",
+    "lateral_caveat": "lateral margin is model geometry only; root y translation, roll and yaw are structurally absent",
+    "flight": "SUPPORT_HULL / SUPPORT_MARGIN = NOT_EVALUABLE; a positive flight margin is structurally impossible"
+  },
+  "cases": {
+    "flat": {
+      "mode": "BILATERAL",
+      "regions": [
+        [
+          "left",
+          "forefoot"
+        ],
+        [
+          "left",
+          "heel"
+        ],
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "forefoot"
+        ],
+        [
+          "right",
+          "heel"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ],
+      "area_m2": 0.073884375,
+      "vertices": [
+        [
+          0.05209960137926646,
+          -0.12000000000000001
+        ],
+        [
+          0.12209960137926647,
+          -0.1375
+        ],
+        [
+          0.2583496013792665,
+          -0.1375
+        ],
+        [
+          0.32709960137926647,
+          -0.13
+        ],
+        [
+          0.32709960137926647,
+          0.13
+        ],
+        [
+          0.2583496013792665,
+          0.1375
+        ],
+        [
+          0.12209960137926647,
+          0.1375
+        ],
+        [
+          0.05209960137926646,
+          0.12000000000000001
+        ]
+      ],
+      "centroid_xy": [
+        0.19069282488446182,
+        1.956574575676304e-18
+      ],
+      "com_projection_xy": [
+        0.08296875,
+        -1.7172010166235057e-18
+      ],
+      "sagittal_margin_m": 0.030869148620733533,
+      "planar_margin_m": 0.030869148620733533,
+      "lateral_margin_m": 0.1375
+    },
+    "left_support": {
+      "mode": "LEFT_ONLY",
+      "regions": [
+        [
+          "left",
+          "forefoot"
+        ],
+        [
+          "left",
+          "heel"
+        ],
+        [
+          "left",
+          "toe"
+        ]
+      ],
+      "area_m2": 0.027134375000000002,
+      "vertices": [
+        [
+          0.05424389246798754,
+          0.05
+        ],
+        [
+          0.12424389246798755,
+          0.03250000000000001
+        ],
+        [
+          0.26049389246798754,
+          0.03250000000000001
+        ],
+        [
+          0.3292438924679875,
+          0.04000000000000001
+        ],
+        [
+          0.3292438924679875,
+          0.13
+        ],
+        [
+          0.26049389246798754,
+          0.1375
+        ],
+        [
+          0.12424389246798755,
+          0.1375
+        ],
+        [
+          0.05424389246798754,
+          0.12000000000000001
+        ]
+      ],
+      "centroid_xy": [
+        0.19472063821638474,
+        0.085
+      ],
+      "com_projection_xy": [
+        0.10426846051698306,
+        -1.7172010166235057e-18
+      ],
+      "sagittal_margin_m": 0.05002456804899552,
+      "planar_margin_m": -0.036374385128330904,
+      "lateral_margin_m": -0.03250000000000001
+    },
+    "right_support": {
+      "mode": "RIGHT_ONLY",
+      "regions": [
+        [
+          "right",
+          "forefoot"
+        ],
+        [
+          "right",
+          "heel"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ],
+      "area_m2": 0.027134375,
+      "vertices": [
+        [
+          0.05424389246798754,
+          -0.12000000000000001
+        ],
+        [
+          0.12424389246798755,
+          -0.1375
+        ],
+        [
+          0.26049389246798754,
+          -0.1375
+        ],
+        [
+          0.3292438924679875,
+          -0.13
+        ],
+        [
+          0.3292438924679875,
+          -0.04000000000000001
+        ],
+        [
+          0.26049389246798754,
+          -0.03250000000000001
+        ],
+        [
+          0.12424389246798755,
+          -0.03250000000000001
+        ],
+        [
+          0.05424389246798754,
+          -0.05
+        ]
+      ],
+      "centroid_xy": [
+        0.19472063821638483,
+        -0.08500000000000002
+      ],
+      "com_projection_xy": [
+        0.10426846051698306,
+        -1.7172010166235057e-18
+      ],
+      "sagittal_margin_m": 0.05002456804899552,
+      "planar_margin_m": -0.03637438512833091,
+      "lateral_margin_m": -0.03250000000000001
+    },
+    "heel_only": {
+      "mode": "BILATERAL",
+      "regions": [
+        [
+          "left",
+          "heel"
+        ],
+        [
+          "right",
+          "heel"
+        ]
+      ],
+      "area_m2": 0.0,
+      "vertices": [
+        [
+          -0.032034328211348786,
+          -0.12
+        ],
+        [
+          -0.032034328211348786,
+          0.12
+        ]
+      ],
+      "centroid_xy": [
+        -0.032034328211348786,
+        1.734723475976807e-18
+      ],
+      "com_projection_xy": [
+        -0.028840506653333722,
+        -1.7172010166235057e-18
+      ],
+      "sagittal_margin_m": -0.003193821558015064,
+      "planar_margin_m": -0.003193821558015064,
+      "lateral_margin_m": 0.12
+    },
+    "toe_only": {
+      "mode": "BILATERAL",
+      "regions": [
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ],
+      "area_m2": 0.0,
+      "vertices": [
+        [
+          0.26498198140247636,
+          -0.13
+        ],
+        [
+          0.26498198140247636,
+          0.13
+        ]
+      ],
+      "centroid_xy": [
+        0.26498198140247636,
+        1.734723475976807e-18
+      ],
+      "com_projection_xy": [
+        0.11686398983109363,
+        -1.7172010166235057e-18
+      ],
+      "sagittal_margin_m": -0.14811799157138272,
+      "planar_margin_m": -0.14811799157138272,
+      "lateral_margin_m": 0.13
+    },
+    "heel_rise": {
+      "mode": "BILATERAL",
+      "regions": [
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ],
+      "area_m2": 0.017875000000000002,
+      "vertices": [
+        [
+          0.2532311466311406,
+          -0.13
+        ],
+        [
+          0.3219811466311406,
+          -0.13
+        ],
+        [
+          0.3219811466311406,
+          0.13
+        ],
+        [
+          0.2532311466311406,
+          0.13
+        ]
+      ],
+      "centroid_xy": [
+        0.28760614663114054,
+        0.0
+      ],
+      "com_projection_xy": [
+        0.12618172488474455,
+        -1.7172010166235057e-18
+      ],
+      "sagittal_margin_m": -0.12704942174639605,
+      "planar_margin_m": -0.12704942174639605,
+      "lateral_margin_m": 0.13
+    },
+    "toe_off": {
+      "mode": "BILATERAL",
+      "regions": [
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ],
+      "area_m2": 0.01787499999999998,
+      "vertices": [
+        [
+          0.19347478803310825,
+          -0.13
+        ],
+        [
+          0.2622247880331082,
+          -0.13
+        ],
+        [
+          0.2622247880331082,
+          0.13
+        ],
+        [
+          0.19347478803310825,
+          0.13
+        ]
+      ],
+      "centroid_xy": [
+        0.2278497880331083,
+        0.0
+      ],
+      "com_projection_xy": [
+        0.10133185778902998,
+        -1.7172010166235057e-18
+      ],
+      "sagittal_margin_m": -0.09214293024407827,
+      "planar_margin_m": -0.09214293024407827,
+      "lateral_margin_m": 0.13
+    },
+    "toe_first_landing": {
+      "mode": "BILATERAL",
+      "regions": [
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ],
+      "area_m2": 0.01787499999999998,
+      "vertices": [
+        [
+          0.3065472313579992,
+          -0.13
+        ],
+        [
+          0.3752972313579992,
+          -0.13
+        ],
+        [
+          0.3752972313579992,
+          0.13
+        ],
+        [
+          0.3065472313579992,
+          0.13
+        ]
+      ],
+      "centroid_xy": [
+        0.3409222313579995,
+        0.0
+      ],
+      "com_projection_xy": [
+        0.15369949666148183,
+        -1.7172010166235057e-18
+      ],
+      "sagittal_margin_m": -0.15284773469651738,
+      "planar_margin_m": -0.15284773469651738,
+      "lateral_margin_m": 0.13
+    },
+    "forefoot_only": {
+      "mode": "BILATERAL",
+      "regions": [
+        [
+          "left",
+          "forefoot"
+        ],
+        [
+          "right",
+          "forefoot"
+        ]
+      ],
+      "area_m2": 0.0,
+      "sagittal_margin_m": -0.14204064962800544
+    },
+    "flight": {
+      "mode": "NOT_EVALUABLE",
+      "evaluable": false,
+      "sagittal_margin_m": null
+    }
+  },
+  "checks": [
+    {
+      "check": "support_mode:flat",
+      "pass": true,
+      "detail": "BILATERAL"
+    },
+    {
+      "check": "support_regions:flat",
+      "pass": true,
+      "detail": [
+        [
+          "left",
+          "forefoot"
+        ],
+        [
+          "left",
+          "heel"
+        ],
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "forefoot"
+        ],
+        [
+          "right",
+          "heel"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ]
+    },
+    {
+      "check": "support_evaluable:flat",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_reported:flat",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "support_mode:left_support",
+      "pass": true,
+      "detail": "LEFT_ONLY"
+    },
+    {
+      "check": "support_regions:left_support",
+      "pass": true,
+      "detail": [
+        [
+          "left",
+          "forefoot"
+        ],
+        [
+          "left",
+          "heel"
+        ],
+        [
+          "left",
+          "toe"
+        ]
+      ]
+    },
+    {
+      "check": "support_evaluable:left_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_reported:left_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "support_mode:right_support",
+      "pass": true,
+      "detail": "RIGHT_ONLY"
+    },
+    {
+      "check": "support_regions:right_support",
+      "pass": true,
+      "detail": [
+        [
+          "right",
+          "forefoot"
+        ],
+        [
+          "right",
+          "heel"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ]
+    },
+    {
+      "check": "support_evaluable:right_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_reported:right_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "support_mode:heel_only",
+      "pass": true,
+      "detail": "BILATERAL"
+    },
+    {
+      "check": "support_regions:heel_only",
+      "pass": true,
+      "detail": [
+        [
+          "left",
+          "heel"
+        ],
+        [
+          "right",
+          "heel"
+        ]
+      ]
+    },
+    {
+      "check": "support_evaluable:heel_only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_reported:heel_only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "support_mode:toe_only",
+      "pass": true,
+      "detail": "BILATERAL"
+    },
+    {
+      "check": "support_regions:toe_only",
+      "pass": true,
+      "detail": [
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ]
+    },
+    {
+      "check": "support_evaluable:toe_only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_reported:toe_only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "support_mode:heel_rise",
+      "pass": true,
+      "detail": "BILATERAL"
+    },
+    {
+      "check": "support_regions:heel_rise",
+      "pass": true,
+      "detail": [
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ]
+    },
+    {
+      "check": "support_evaluable:heel_rise",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_reported:heel_rise",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "support_mode:toe_off",
+      "pass": true,
+      "detail": "BILATERAL"
+    },
+    {
+      "check": "support_regions:toe_off",
+      "pass": true,
+      "detail": [
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ]
+    },
+    {
+      "check": "support_evaluable:toe_off",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_reported:toe_off",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "support_mode:toe_first_landing",
+      "pass": true,
+      "detail": "BILATERAL"
+    },
+    {
+      "check": "support_regions:toe_first_landing",
+      "pass": true,
+      "detail": [
+        [
+          "left",
+          "toe"
+        ],
+        [
+          "right",
+          "toe"
+        ]
+      ]
+    },
+    {
+      "check": "support_evaluable:toe_first_landing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_reported:toe_first_landing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "support_regions:forefoot_only",
+      "pass": true,
+      "detail": [
+        [
+          "left",
+          "forefoot"
+        ],
+        [
+          "right",
+          "forefoot"
+        ]
+      ]
+    },
+    {
+      "check": "flight_hull_not_evaluable",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "flight_mode_not_evaluable",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "flight_margins_none",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "flight_margin_never_positive",
+      "pass": true,
+      "detail": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "check": "heel_only_area_smaller_than_flat",
+      "pass": true,
+      "detail": {
+        "heel_only": 0.0,
+        "flat": 0.073884375
+      }
+    },
+    {
+      "check": "flat_com_projection_inside",
+      "pass": true,
+      "detail": [
+        0.030869148620733533,
+        0.030869148620733533,
+        0.1375
+      ]
+    },
+    {
+      "check": "outside_point_negative_margin",
+      "pass": true,
+      "detail": [
+        -1.0520996013792665,
+        -1.0520996013792665,
+        0.1375
+      ]
+    }
+  ],
+  "status": "PASS"
+}

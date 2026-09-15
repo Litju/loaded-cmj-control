@@ -1,0 +1,438 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "CONTACT_SEMANTICS_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "summary": {
+    "detected_implies_active": false,
+    "active_requires": "efc_address >= 0 AND normal force > 0.0",
+    "inactive_force_floor_n": 0.0,
+    "margin_gap_probe": "overlay model margin = 5 mm, gap = 2 mm; detection < margin, activation < margin - gap"
+  },
+  "probes": {
+    "flat_stance": {
+      "detected": 24,
+      "active": 24,
+      "sample": {
+        "geom0": "floor",
+        "geom1": "left_heel_support",
+        "body0": "world",
+        "body1": "left_hindfoot",
+        "dist_m": -0.00035578471266102096,
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "includemargin_m": 0.0,
+        "dim": 4,
+        "friction": [
+          0.9,
+          0.9,
+          1e-05,
+          1e-05,
+          1e-05
+        ],
+        "mu_slide": 0.9,
+        "efc_address": 0,
+        "efc_state": 1,
+        "normal_force_n": 100.17829833515536
+      }
+    },
+    "exact_touch_ncon": 0,
+    "sealed_penetrating_inactive": {
+      "ncon": 4,
+      "efc_addresses": [
+        0,
+        6,
+        12,
+        18
+      ],
+      "efc_states": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "penetrations_m": [
+        0.002000000000000047,
+        0.002000000000000047,
+        0.002000000000000047,
+        0.002000000000000047
+      ],
+      "normal_forces_n": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "margin_gap_bands": {
+      "0.006": {
+        "detected": false,
+        "active": false,
+        "first_efc": null,
+        "first_force": null
+      },
+      "0.0045": {
+        "detected": true,
+        "active": false,
+        "first_efc": -1,
+        "first_force": 0.0
+      },
+      "0.0035": {
+        "detected": true,
+        "active": false,
+        "first_efc": -1,
+        "first_force": 0.0
+      },
+      "0.003": {
+        "detected": true,
+        "active": false,
+        "first_efc": -1,
+        "first_force": 0.0
+      },
+      "0.0028": {
+        "detected": true,
+        "active": true,
+        "first_efc": 0,
+        "first_force": 95.70610829855511
+      },
+      "0.002": {
+        "detected": true,
+        "active": true,
+        "first_efc": 0,
+        "first_force": 120.34027051792027
+      }
+    },
+    "prohibited_pelvis": {
+      "detected": 10,
+      "active": 4,
+      "max_penetration_m": 0.39689093629586225
+    }
+  },
+  "checks": [
+    {
+      "check": "flat_stance_detected",
+      "pass": true,
+      "detail": 24
+    },
+    {
+      "check": "flat_stance_all_active",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:contact_id",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:geom0",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:geom1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:body0",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:body1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:position_world_m",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:frame",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:dist_m",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:margin_m",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:gap_m",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:includemargin_m",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:dim",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:friction",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:mu_slide",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:efc_address",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:efc_state",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:detected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:constraint_row_included",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:active_constraint",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:active_legal_plantar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:prohibited",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "field:penetration_m",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "flat_stance_margin_zero",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "flat_stance_condim4_plantar",
+      "pass": true,
+      "detail": 4
+    },
+    {
+      "check": "flat_stance_class",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "exact_touch_no_detected_contact",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "check": "penetrating_inactive_detected",
+      "pass": true,
+      "detail": 4
+    },
+    {
+      "check": "penetrating_inactive_penetration",
+      "pass": true,
+      "detail": [
+        0.002000000000000047,
+        0.002000000000000047,
+        0.002000000000000047,
+        0.002000000000000047
+      ]
+    },
+    {
+      "check": "penetrating_inactive_rows_included",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "penetrating_inactive_zero_force",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "penetrating_inactive_not_active",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "penetrating_inactive_not_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "penetrating_inactive_cop_no_support",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_gap_detected@0.006",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "check": "margin_gap_active@0.006",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "check": "margin_gap_detected@0.0045",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "check": "margin_gap_active@0.0045",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "check": "margin_gap_includemargin@0.0045",
+      "pass": true,
+      "detail": 0.003
+    },
+    {
+      "check": "margin_gap_inactive_efc@0.0045",
+      "pass": true,
+      "detail": -1
+    },
+    {
+      "check": "margin_gap_detected@0.0035",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "check": "margin_gap_active@0.0035",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "check": "margin_gap_includemargin@0.0035",
+      "pass": true,
+      "detail": 0.003
+    },
+    {
+      "check": "margin_gap_inactive_efc@0.0035",
+      "pass": true,
+      "detail": -1
+    },
+    {
+      "check": "margin_gap_detected@0.003",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "check": "margin_gap_active@0.003",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "check": "margin_gap_includemargin@0.003",
+      "pass": true,
+      "detail": 0.003
+    },
+    {
+      "check": "margin_gap_inactive_efc@0.003",
+      "pass": true,
+      "detail": -1
+    },
+    {
+      "check": "margin_gap_detected@0.0028",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "check": "margin_gap_active@0.0028",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "check": "margin_gap_includemargin@0.0028",
+      "pass": true,
+      "detail": 0.003
+    },
+    {
+      "check": "margin_gap_detected@0.002",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "check": "margin_gap_active@0.002",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "check": "margin_gap_includemargin@0.002",
+      "pass": true,
+      "detail": 0.003
+    },
+    {
+      "check": "prohibited_pelvis_detected",
+      "pass": true,
+      "detail": 10
+    },
+    {
+      "check": "prohibited_visible_from_full_buffer",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prohibited_class",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "classification_closure:flat",
+      "pass": true,
+      "detail": 24
+    },
+    {
+      "check": "classification_closure:left_support",
+      "pass": true,
+      "detail": 12
+    },
+    {
+      "check": "classification_closure:right_support",
+      "pass": true,
+      "detail": 12
+    },
+    {
+      "check": "classification_closure:heel_only",
+      "pass": true,
+      "detail": 4
+    },
+    {
+      "check": "classification_closure:toe_only",
+      "pass": true,
+      "detail": 4
+    },
+    {
+      "check": "classification_closure:flight",
+      "pass": true,
+      "detail": 0
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "GROUND_WRENCH_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "reference_origin_m": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "sign_convention": "GROUND_ON_ATHLETE",
+  "flat_stance": {
+    "total_force_n": [
+      -1.1915035879529157,
+      0.0,
+      971.1900000000236
+    ],
+    "total_moment_nm": [
+      -4.957839694341715e-15,
+      -105.42845375998851,
+      -1.1726730697603216e-15
+    ],
+    "left_force_n": [
+      -0.5957517939764508,
+      0.0,
+      485.59500000001174
+    ],
+    "right_force_n": [
+      -0.5957517939764648,
+      0.0,
+      485.59500000001174
+    ],
+    "contact_count": 24,
+    "expected_static_fz_n": 971.19
+  },
+  "independent_path": {
+    "force_n": [
+      -1.1915035879529157,
+      0.0,
+      971.1900000000236
+    ],
+    "moment_nm": [
+      -4.957839694341715e-15,
+      -105.42845375998851,
+      -1.1726730697603216e-15
+    ],
+    "contact_count": 24
+  },
+  "max_per_body_cfrc_ext_error_n": 0.0,
+  "checks": [
+    {
+      "check": "total_force_matches_independent",
+      "pass": true,
+      "detail": {
+        "module": [
+          -1.1915035879529157,
+          0.0,
+          971.1900000000236
+        ],
+        "independent": [
+          -1.1915035879529157,
+          0.0,
+          971.1900000000236
+        ]
+      }
+    },
+    {
+      "check": "total_moment_matches_independent",
+      "pass": true,
+      "detail": {
+        "module": [
+          -4.957839694341715e-15,
+          -105.42845375998851,
+          -1.1726730697603216e-15
+        ],
+        "independent": [
+          -4.957839694341715e-15,
+          -105.42845375998851,
+          -1.1726730697603216e-15
+        ]
+      }
+    },
+    {
+      "check": "contact_count_matches",
+      "pass": true,
+      "detail": [
+        24,
+        24
+      ]
+    },
+    {
+      "check": "left_plus_right_equals_total",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "left_plus_right_moment_equals_total",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "static_vertical_is_system_weight",
+      "pass": true,
+      "detail": 971.1900000000236
+    },
+    {
+      "check": "moment_transport_matches_independent",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "force_invariant_under_origin_shift",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "moment_transport_formula",
+      "pass": true,
+      "detail": {
+        "shifted": [
+          48.55950000000117,
+          -7.952002683600249,
+          0.05957517939764462
+        ],
+        "predicted": [
+          48.55950000000117,
+          -7.952002683600284,
+          0.05957517939764461
+        ]
+      }
+    },
+    {
+      "check": "per_body_cfrc_ext_equivalence",
+      "pass": true,
+      "detail": 0.0
+    }
+  ],
+  "status": "PASS"
+}

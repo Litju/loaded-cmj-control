@@ -1,0 +1,958 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "FOOT_CLEARANCE_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "semantics": {
+    "definition": "true minimum signed floor gap over all plantar material geometry after actual body transforms",
+    "method": "exact vertex scan for convex box patches vs the z=0 plane; brute-force surface sampling cross-check",
+    "chain_covered": [
+      "root pose",
+      "hip/knee chain",
+      "ankle rotation",
+      "MTP rotation",
+      "hindfoot",
+      "forefoot",
+      "toe"
+    ],
+    "no_fixed_local_z_shortcut": true,
+    "normal_velocity": "velocity of the exact governing material point via cvel; validated against central finite differences"
+  },
+  "cases": {
+    "flat:left": {
+      "min_gap_m": -9.999999999994649e-05,
+      "governing_body": "left_forefoot",
+      "governing_geom": "left_forefoot_support",
+      "governing_region": "forefoot",
+      "governing_material_point_world_m": [
+        0.12209960137926647,
+        0.03250000000000001,
+        -9.999999999994649e-05
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.068125,
+        -0.0525,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": -9.999999999994302e-05,
+        "forefoot": -9.999999999994649e-05,
+        "toe": -9.999999999994302e-05
+      }
+    },
+    "flat:right": {
+      "min_gap_m": -9.999999999994649e-05,
+      "governing_body": "right_forefoot",
+      "governing_geom": "right_forefoot_support",
+      "governing_region": "forefoot",
+      "governing_material_point_world_m": [
+        0.12209960137926647,
+        -0.1375,
+        -9.999999999994649e-05
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.068125,
+        -0.0525,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": -9.999999999994302e-05,
+        "forefoot": -9.999999999994649e-05,
+        "toe": -9.999999999994302e-05
+      }
+    },
+    "heel_only:left": {
+      "min_gap_m": -9.99999999999994e-05,
+      "governing_body": "left_hindfoot",
+      "governing_geom": "left_heel_support",
+      "governing_region": "heel",
+      "governing_material_point_world_m": [
+        -0.032034328211348786,
+        0.05000000000000001,
+        -9.99999999999994e-05
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.035,
+        -0.035,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": -9.99999999999994e-05,
+        "forefoot": 0.023902846521881595,
+        "toe": 0.07062267278768686
+      }
+    },
+    "heel_only:right": {
+      "min_gap_m": -9.99999999999994e-05,
+      "governing_body": "right_hindfoot",
+      "governing_geom": "right_heel_support",
+      "governing_region": "heel",
+      "governing_material_point_world_m": [
+        -0.032034328211348786,
+        -0.12,
+        -9.99999999999994e-05
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.035,
+        -0.035,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": -9.99999999999994e-05,
+        "forefoot": 0.023902846521881595,
+        "toe": 0.07062267278768686
+      }
+    },
+    "toe_only:left": {
+      "min_gap_m": -0.0005000000000000976,
+      "governing_body": "left_toe",
+      "governing_geom": "left_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.26498198140247636,
+        0.04,
+        -0.0005000000000000976
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.061552000311943966,
+        "forefoot": 0.002287946289288835,
+        "toe": -0.0005000000000000976
+      }
+    },
+    "toe_only:right": {
+      "min_gap_m": -0.0005000000000000976,
+      "governing_body": "right_toe",
+      "governing_geom": "right_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.26498198140247636,
+        -0.13,
+        -0.0005000000000000976
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.061552000311943966,
+        "forefoot": 0.002287946289288835,
+        "toe": -0.0005000000000000976
+      }
+    },
+    "heel_rise:left": {
+      "min_gap_m": -0.0003000000000001361,
+      "governing_body": "left_toe",
+      "governing_geom": "left_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.2532311466311406,
+        0.04000000000000001,
+        -0.0003000000000001361
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.08214581831544945,
+        "forefoot": 0.005213281315375871,
+        "toe": -0.0003000000000001361
+      }
+    },
+    "heel_rise:right": {
+      "min_gap_m": -0.0003000000000001361,
+      "governing_body": "right_toe",
+      "governing_geom": "right_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.2532311466311406,
+        -0.13,
+        -0.0003000000000001361
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.08214581831544945,
+        "forefoot": 0.005213281315375871,
+        "toe": -0.0003000000000001361
+      }
+    },
+    "toe_off:left": {
+      "min_gap_m": -0.00030000000000028875,
+      "governing_body": "left_toe",
+      "governing_geom": "left_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.19347478803310825,
+        0.04000000000000001,
+        -0.00030000000000028875
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.11505086770609414,
+        "forefoot": 0.010911050036369066,
+        "toe": -0.00030000000000028875
+      }
+    },
+    "toe_off:right": {
+      "min_gap_m": -0.00030000000000028875,
+      "governing_body": "right_toe",
+      "governing_geom": "right_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.19347478803310825,
+        -0.13,
+        -0.00030000000000028875
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.11505086770609414,
+        "forefoot": 0.010911050036369066,
+        "toe": -0.00030000000000028875
+      }
+    },
+    "toe_first_landing:left": {
+      "min_gap_m": -0.00030000000000006584,
+      "governing_body": "left_toe",
+      "governing_geom": "left_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.3065472313579992,
+        0.040000000000000015,
+        -0.00030000000000006584
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.04833352658477767,
+        "forefoot": 0.0016137003189724101,
+        "toe": -0.00030000000000006584
+      }
+    },
+    "toe_first_landing:right": {
+      "min_gap_m": -0.00030000000000006584,
+      "governing_body": "right_toe",
+      "governing_geom": "right_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.3065472313579992,
+        -0.13,
+        -0.00030000000000006584
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.04833352658477767,
+        "forefoot": 0.0016137003189724101,
+        "toe": -0.00030000000000006584
+      }
+    },
+    "rotated_ankle_mtp:left": {
+      "min_gap_m": -0.0003000000000000988,
+      "governing_body": "left_hindfoot",
+      "governing_geom": "left_heel_support",
+      "governing_region": "heel",
+      "governing_material_point_world_m": [
+        -0.04030745572592963,
+        0.05000000000000001,
+        -0.0003000000000000988
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.035,
+        -0.035,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": -0.0003000000000000988,
+        "forefoot": 0.02038641446629367,
+        "toe": 0.06389630236434263
+      }
+    },
+    "rotated_ankle_mtp:right": {
+      "min_gap_m": -0.0003000000000000988,
+      "governing_body": "right_hindfoot",
+      "governing_geom": "right_heel_support",
+      "governing_region": "heel",
+      "governing_material_point_world_m": [
+        -0.04030745572592963,
+        -0.12,
+        -0.0003000000000000988
+      ],
+      "governing_material_point_body_frame_m": [
+        -0.035,
+        -0.035,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": -0.0003000000000000988,
+        "forefoot": 0.02038641446629367,
+        "toe": 0.06389630236434263
+      }
+    },
+    "rotated_mtp_negative:left": {
+      "min_gap_m": -0.00030000000000003635,
+      "governing_body": "left_toe",
+      "governing_geom": "left_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.37835098530115147,
+        0.040000000000000015,
+        -0.00030000000000003635
+      ],
+      "governing_material_point_body_frame_m": [
+        0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.06769595758766488,
+        "forefoot": 0.03398716813923612,
+        "toe": -0.00030000000000003635
+      }
+    },
+    "rotated_mtp_negative:right": {
+      "min_gap_m": -0.00030000000000003635,
+      "governing_body": "right_toe",
+      "governing_geom": "right_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.37835098530115147,
+        -0.13,
+        -0.00030000000000003635
+      ],
+      "governing_material_point_body_frame_m": [
+        0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.06769595758766488,
+        "forefoot": 0.03398716813923612,
+        "toe": -0.00030000000000003635
+      }
+    },
+    "root_pitch:left": {
+      "min_gap_m": -0.0001999999999999294,
+      "governing_body": "left_toe",
+      "governing_geom": "left_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        -0.014051564034160288,
+        0.04000000000000001,
+        -0.0001999999999999294
+      ],
+      "governing_material_point_body_frame_m": [
+        0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.040527212812987636,
+        "forefoot": 0.013458516492160535,
+        "toe": -0.0001999999999999294
+      }
+    },
+    "root_pitch:right": {
+      "min_gap_m": -0.0001999999999999294,
+      "governing_body": "right_toe",
+      "governing_geom": "right_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        -0.014051564034160288,
+        -0.13,
+        -0.0001999999999999294
+      ],
+      "governing_material_point_body_frame_m": [
+        0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.040527212812987636,
+        "forefoot": 0.013458516492160535,
+        "toe": -0.0001999999999999294
+      }
+    },
+    "flight:left": {
+      "min_gap_m": 0.1032492383195717,
+      "governing_body": "left_toe",
+      "governing_geom": "left_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.2140580126564724,
+        0.040000000000000015,
+        0.1032492383195717
+      ],
+      "governing_material_point_body_frame_m": [
+        0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.222727455873493,
+        "forefoot": 0.1349527959873576,
+        "toe": 0.1032492383195717
+      }
+    },
+    "flight:right": {
+      "min_gap_m": 0.08000000000000004,
+      "governing_body": "right_toe",
+      "governing_geom": "right_toe_support",
+      "governing_region": "toe",
+      "governing_material_point_world_m": [
+        0.17613754188623687,
+        -0.12999999999999998,
+        0.08000000000000004
+      ],
+      "governing_material_point_body_frame_m": [
+        0.034375,
+        -0.045,
+        -0.005
+      ],
+      "normal_velocity_m_s": 0.0,
+      "region_gaps_m": {
+        "heel": 0.1994782175539213,
+        "forefoot": 0.11170355766778593,
+        "toe": 0.08000000000000004
+      }
+    }
+  },
+  "rom_extremes": {
+    "ankle_min": {
+      "joint": "left_ankle",
+      "joint_value_rad": -0.959931,
+      "min_gap_m": -1.8041124150158794e-16,
+      "governing_region": "toe"
+    },
+    "ankle_max": {
+      "joint": "left_ankle",
+      "joint_value_rad": 0.785398,
+      "min_gap_m": 3.469446951953614e-18,
+      "governing_region": "heel"
+    },
+    "mtp_min": {
+      "joint": "left_mtp",
+      "joint_value_rad": -0.523599,
+      "min_gap_m": 3.469446951953614e-18,
+      "governing_region": "toe"
+    },
+    "mtp_max": {
+      "joint": "left_mtp",
+      "joint_value_rad": 1.570796,
+      "min_gap_m": 4.2500725161431774e-17,
+      "governing_region": "forefoot"
+    }
+  },
+  "checks": [
+    {
+      "check": "clearance_matches_bruteforce:flat:left",
+      "pass": true,
+      "detail": {
+        "module": -9.999999999994649e-05,
+        "bruteforce": -9.999999999994649e-05
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:flat:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:flat:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:flat:right",
+      "pass": true,
+      "detail": {
+        "module": -9.999999999994649e-05,
+        "bruteforce": -9.999999999994649e-05
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:flat:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:flat:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:heel_only:left",
+      "pass": true,
+      "detail": {
+        "module": -9.99999999999994e-05,
+        "bruteforce": -9.99999999999994e-05
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:heel_only:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:heel_only:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:heel_only:right",
+      "pass": true,
+      "detail": {
+        "module": -9.99999999999994e-05,
+        "bruteforce": -9.99999999999994e-05
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:heel_only:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:heel_only:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:toe_only:left",
+      "pass": true,
+      "detail": {
+        "module": -0.0005000000000000976,
+        "bruteforce": -0.0005000000000000976
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:toe_only:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:toe_only:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:toe_only:right",
+      "pass": true,
+      "detail": {
+        "module": -0.0005000000000000976,
+        "bruteforce": -0.0005000000000000976
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:toe_only:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:toe_only:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:heel_rise:left",
+      "pass": true,
+      "detail": {
+        "module": -0.0003000000000001361,
+        "bruteforce": -0.0003000000000001361
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:heel_rise:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:heel_rise:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:heel_rise:right",
+      "pass": true,
+      "detail": {
+        "module": -0.0003000000000001361,
+        "bruteforce": -0.0003000000000001361
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:heel_rise:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:heel_rise:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:toe_off:left",
+      "pass": true,
+      "detail": {
+        "module": -0.00030000000000028875,
+        "bruteforce": -0.00030000000000028875
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:toe_off:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:toe_off:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:toe_off:right",
+      "pass": true,
+      "detail": {
+        "module": -0.00030000000000028875,
+        "bruteforce": -0.00030000000000028875
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:toe_off:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:toe_off:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:toe_first_landing:left",
+      "pass": true,
+      "detail": {
+        "module": -0.00030000000000006584,
+        "bruteforce": -0.00030000000000006584
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:toe_first_landing:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:toe_first_landing:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:toe_first_landing:right",
+      "pass": true,
+      "detail": {
+        "module": -0.00030000000000006584,
+        "bruteforce": -0.00030000000000006584
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:toe_first_landing:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:toe_first_landing:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:rotated_ankle_mtp:left",
+      "pass": true,
+      "detail": {
+        "module": -0.0003000000000000988,
+        "bruteforce": -0.0003000000000000988
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:rotated_ankle_mtp:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:rotated_ankle_mtp:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:rotated_ankle_mtp:right",
+      "pass": true,
+      "detail": {
+        "module": -0.0003000000000000988,
+        "bruteforce": -0.0003000000000000988
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:rotated_ankle_mtp:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:rotated_ankle_mtp:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:rotated_mtp_negative:left",
+      "pass": true,
+      "detail": {
+        "module": -0.00030000000000003635,
+        "bruteforce": -0.00030000000000003635
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:rotated_mtp_negative:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:rotated_mtp_negative:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:rotated_mtp_negative:right",
+      "pass": true,
+      "detail": {
+        "module": -0.00030000000000003635,
+        "bruteforce": -0.00030000000000003635
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:rotated_mtp_negative:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:rotated_mtp_negative:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:root_pitch:left",
+      "pass": true,
+      "detail": {
+        "module": -0.0001999999999999294,
+        "bruteforce": -0.0001999999999999294
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:root_pitch:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:root_pitch:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:root_pitch:right",
+      "pass": true,
+      "detail": {
+        "module": -0.0001999999999999294,
+        "bruteforce": -0.0001999999999999294
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:root_pitch:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:root_pitch:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:flight:left",
+      "pass": true,
+      "detail": {
+        "module": 0.1032492383195717,
+        "bruteforce": 0.1032492383195717
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:flight:left",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:flight:left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_matches_bruteforce:flight:right",
+      "pass": true,
+      "detail": {
+        "module": 0.08000000000000004,
+        "bruteforce": 0.08000000000000004
+      }
+    },
+    {
+      "check": "clearance_point_velocity_matches_fd:flight:right",
+      "pass": true,
+      "detail": {
+        "module": 0.0,
+        "fd": 0.0
+      }
+    },
+    {
+      "check": "governing_point_is_min:flight:right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "rotated_ankle_actual",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "rotated_mtp_actual",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "negative_mtp_governing_is_toe",
+      "pass": true,
+      "detail": "toe"
+    },
+    {
+      "check": "rom_extreme_clearance:ankle_min",
+      "pass": true,
+      "detail": {
+        "module": -1.8041124150158794e-16,
+        "bruteforce": -1.8041124150158794e-16
+      }
+    },
+    {
+      "check": "rom_extreme_clearance:ankle_max",
+      "pass": true,
+      "detail": {
+        "module": 3.469446951953614e-18,
+        "bruteforce": 3.469446951953614e-18
+      }
+    },
+    {
+      "check": "rom_extreme_clearance:mtp_min",
+      "pass": true,
+      "detail": {
+        "module": 3.469446951953614e-18,
+        "bruteforce": 3.469446951953614e-18
+      }
+    },
+    {
+      "check": "rom_extreme_clearance:mtp_max",
+      "pass": true,
+      "detail": {
+        "module": 4.2500725161431774e-17,
+        "bruteforce": 4.2500725161431774e-17
+      }
+    }
+  ],
+  "status": "PASS"
+}

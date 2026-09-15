@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "SAMPLING_RESAMPLING_AUTHORITY",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "raw_native_stream": {
+    "status": "RAW_NATIVE_EVENT_TRUTH",
+    "dt_s": 0.002,
+    "frequency_hz": 500.0,
+    "retention": "every native sample retained and archived",
+    "provenance": "native contact set + active constraint state is event truth"
+  },
+  "canonical_1000hz_stream": {
+    "status": "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH",
+    "dt_s": 0.001,
+    "frequency_hz": 1000.0,
+    "interpolation": "LINEAR_BETWEEN_BRACKETING_NATIVE_SAMPLES",
+    "provenance": "native_index0 / native_index1 / weight recorded per canonical sample",
+    "filter_family": "NONE",
+    "anti_alias": "NONE_REQUIRED_FOR_UPSAMPLING",
+    "down_sampling_authorized": false
+  },
+  "requirement": {
+    "required_candidate_max_dt_s": 0.001,
+    "statement": "candidate qualification must use a native timestep compatible with the claimed temporal resolution: dt <= 0.001 s to claim >= 1000 Hz; RES-86/89/91 own the final selection"
+  },
+  "probe": {
+    "canonical_samples": 639,
+    "first_sample": {
+      "time_s": 0.0,
+      "native_index0": 0,
+      "weight": 0.0
+    },
+    "second_sample": {
+      "time_s": 0.001,
+      "native_index0": 0,
+      "native_index1": 1,
+      "weight": 0.5
+    }
+  },
+  "checks": [
+    {
+      "check": "native_dt_is_2ms",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "native_frequency_500",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "canonical_status_derived",
+      "pass": true,
+      "detail": "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH"
+    },
+    {
+      "check": "native_status_event_truth",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "canonical_1khz",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "canonical_sample_count",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "canonical_grid_inside_native_span",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "canonical_provenance",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "canonical_linear_midpoint",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_hidden_filter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "downsampling_not_authorized",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "candidate_dt_requirement_1ms",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "sampling_authority_status",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "sampling_authority_1khz_native_case",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "status": "PASS"
+}

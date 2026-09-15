@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "FORCE_THRESHOLD_COMPARATOR_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "definition": "total vertical GRF < 10 N continuously for >= 0.010 s",
+  "role": "diagnostic/comparability only",
+  "must_not": [
+    "define physical takeoff",
+    "define flight",
+    "replace contact truth",
+    "move the H2 timestamp"
+  ],
+  "hop_result": {
+    "triggered": true,
+    "comparator_time_s": 0.024,
+    "occurrence_time_s": 0.028,
+    "offset_s": -0.004
+  },
+  "checks": [
+    {
+      "check": "comparator_triggers_in_hop",
+      "pass": true,
+      "detail": {
+        "triggered": true,
+        "time_s": 0.024,
+        "offset_s": -0.004
+      }
+    },
+    {
+      "check": "comparator_threshold_10n",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "comparator_dwell_10ms",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "comparator_offset_finite",
+      "pass": true,
+      "detail": -0.004
+    },
+    {
+      "check": "comparator_offset_small",
+      "pass": true,
+      "detail": -0.004
+    },
+    {
+      "check": "comparator_does_not_shift_occurrence",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "comparator_requires_persistence",
+      "pass": true,
+      "detail": false
+    }
+  ],
+  "status": "PASS"
+}

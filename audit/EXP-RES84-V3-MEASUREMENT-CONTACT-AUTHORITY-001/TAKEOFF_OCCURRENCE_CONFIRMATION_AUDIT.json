@@ -1,0 +1,245 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "TAKEOFF_OCCURRENCE_CONFIRMATION_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "policy": {
+    "occurrence": "final ACTIVE LEGAL PLANTAR support -> zero ACTIVE LEGAL PLANTAR support transition; interpolated contact-force extrapolation clamped to the native interval; clearance is never used to move the timestamp",
+    "confirmation": [
+      "zero legal support persists >= 0.050 s",
+      "bilateral clearance reaches the clearance guard",
+      "SYSTEM_COM_vz at occurrence > 0",
+      "no prohibited contact in the window",
+      "no legal plantar recontact"
+    ],
+    "failure": "REJECTED, never shifted"
+  },
+  "ballistic_hop": {
+    "occurrence": {
+      "valid": true,
+      "time_s": 0.028,
+      "native_index": 14,
+      "last_support_index": 13,
+      "bracket_weight": 1.0,
+      "interpolated": false,
+      "com_z_m": 1.1423907927161994,
+      "com_vz_m_s": 0.8319125967617166,
+      "left_clearance_m": -0.02755271820463163,
+      "right_clearance_m": -0.027552718204631652,
+      "legal_plantar_normal_force_n": 0.0
+    },
+    "confirmation": {
+      "confirmed": true,
+      "checks": [
+        {
+          "check": "occurrence_valid",
+          "pass": true,
+          "detail": "candidate derived from a support-to-zero transition"
+        },
+        {
+          "check": "zero_support_at_native_index",
+          "pass": true,
+          "detail": "native index 14 has zero active legal plantar support"
+        },
+        {
+          "check": "dwell_coverage",
+          "pass": true,
+          "detail": "window covers >= 0.050 s of native samples"
+        },
+        {
+          "check": "no_legal_plantar_recontact",
+          "pass": true,
+          "detail": "zero active legal plantar contact throughout the window"
+        },
+        {
+          "check": "bilateral_clearance_reaches_guard",
+          "pass": true,
+          "detail": "max bilateral clearance 0.0021077406907115074 vs guard 0.002"
+        },
+        {
+          "check": "system_com_vz_positive",
+          "pass": true,
+          "detail": "SYSTEM_COM vertical velocity at the occurrence is positive"
+        },
+        {
+          "check": "no_prohibited_contact",
+          "pass": true,
+          "detail": "no prohibited floor contact inside the window"
+        }
+      ],
+      "bilateral_clearance_max_m": 0.0021077406907115074
+    }
+  },
+  "negative_controls": {
+    "transient_dropout": {
+      "occurrence": true,
+      "confirmed": false,
+      "failed": [
+        "no_legal_plantar_recontact"
+      ]
+    },
+    "recontact_in_dwell": {
+      "confirmed": false,
+      "failed": [
+        "no_legal_plantar_recontact"
+      ]
+    },
+    "clearance_below_guard": {
+      "confirmed": false,
+      "failed": [
+        "bilateral_clearance_reaches_guard"
+      ]
+    },
+    "falling_com": {
+      "confirmed": false,
+      "failed": [
+        "system_com_vz_positive"
+      ]
+    },
+    "prohibited_contact": {
+      "confirmed": false,
+      "failed": [
+        "no_prohibited_contact"
+      ]
+    }
+  },
+  "checks": [
+    {
+      "check": "occurrence_valid",
+      "pass": true,
+      "detail": "SUPPORT_TO_ZERO_TRANSITION"
+    },
+    {
+      "check": "confirmation_confirmed",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "confirmation_checks_all_pass",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "check": "occurrence_not_shifted_by_confirmation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "occurrence_within_bracket",
+      "pass": true,
+      "detail": {
+        "last": 0.026000000000000002,
+        "t_star": 0.028,
+        "first_zero": 0.028
+      }
+    },
+    {
+      "check": "occurrence_support_before",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "occurrence_zero_at_index",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "occurrence_vz_positive",
+      "pass": true,
+      "detail": 0.8319125967617166
+    },
+    {
+      "check": "dwell_50ms",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "clearance_guard_reached",
+      "pass": true,
+      "detail": 0.0021077406907115074
+    },
+    {
+      "check": "dropout_occurrence_detected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "dropout_confirmation_rejected",
+      "pass": true,
+      "detail": [
+        "no_legal_plantar_recontact"
+      ]
+    },
+    {
+      "check": "dropout_recontact_check_failed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "recontact_confirmation_rejected",
+      "pass": true,
+      "detail": [
+        "no_legal_plantar_recontact"
+      ]
+    },
+    {
+      "check": "low_clearance_confirmation_rejected",
+      "pass": true,
+      "detail": [
+        "bilateral_clearance_reaches_guard"
+      ]
+    },
+    {
+      "check": "falling_vz_confirmation_rejected",
+      "pass": true,
+      "detail": [
+        "system_com_vz_positive"
+      ]
+    },
+    {
+      "check": "prohibited_confirmation_rejected",
+      "pass": true,
+      "detail": [
+        "no_prohibited_contact"
+      ]
+    },
+    {
+      "check": "occurrence_state_from_declared_interpolation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "occurrence_inside_native_transition_interval",
+      "pass": true,
+      "detail": {
+        "t_last": 0.026000000000000002,
+        "t_star": 0.028,
+        "t_zero": 0.028
+      }
+    },
+    {
+      "check": "occurrence_never_later_than_zero_sample",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "candidate_scan_matches_first_candidate",
+      "pass": true,
+      "detail": {
+        "candidates": [
+          14,
+          158,
+          189,
+          205,
+          214,
+          221,
+          229,
+          237,
+          246,
+          252,
+          259
+        ]
+      }
+    }
+  ],
+  "status": "PASS"
+}

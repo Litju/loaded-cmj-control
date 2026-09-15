@@ -1,0 +1,619 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "CONTACT_PARAMETER_AUTHORITY",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "sealed_decisions": {
+    "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+    "condim": {
+      "nominal_plantar_floor": 4,
+      "nominal_other_contacts": 3,
+      "sensitivity_domain": [
+        3,
+        4,
+        6
+      ],
+      "semantics": "condim 3 = normal + sliding; 4 adds torsional; 6 adds rolling",
+      "note": "contact authority is never collapsed to one scalar friction coefficient"
+    },
+    "sliding_friction": {
+      "nominal": 0.9,
+      "sensitivity_domain": [
+        0.5,
+        1.5
+      ],
+      "classification": "ENGINEERING_NOMINAL_WITH_SENSITIVITY (CC-06); not a measured universal athletic-surface truth"
+    },
+    "torsional_friction": {
+      "declared": 0.0,
+      "classification": "RES84_SEALED_NUMERICAL; friction-cone term off for the box-like plantar patches; sensitivity obligation recorded"
+    },
+    "rolling_friction": {
+      "declared": 0.0,
+      "classification": "ENGINEERING_NOMINAL (CC-08) for box-like planar patches"
+    },
+    "margin_gap": {
+      "margin_m": 0.0,
+      "gap_m": 0.0,
+      "provenance": "as-compiled sealed Plant values (MuJoCo 3.8.0 defaults); RES-84 seals the effective numeric values used by the clearance guard"
+    },
+    "solref_solimp": {
+      "solref": [
+        0.02,
+        1.0
+      ],
+      "solimp": [
+        0.9,
+        0.95,
+        0.001,
+        0.5,
+        2.0
+      ],
+      "classification": "PROVISIONAL_NUMERICAL_BASELINE_SEALED_BY_RES84; final solution verification belongs to RES-86 (CC-10/CC-11/DF-08)"
+    },
+    "solver": {
+      "solver": 2,
+      "integrator": 0,
+      "cone": 0,
+      "timestep_s": 0.002,
+      "iterations": 100,
+      "tolerance": 1e-08,
+      "provenance": "compiled MuJoCo 3.8.0 defaults; timestep/solver verification is RES-86 (DF-08)"
+    },
+    "penetration": {
+      "measured_max_penetration_m": 0.000355785,
+      "verified_allowance_m": 0.00071157,
+      "clearance_guard_m": 0.002,
+      "owner": "RES-84 (numeric); RES-86 solution verification"
+    },
+    "inventory": [
+      {
+        "geom": "floor",
+        "body": "world",
+        "class": "floor",
+        "contype": 1,
+        "conaffinity": 6,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "pelvis_collision",
+        "body": "pelvis",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "hat_torso_collision",
+        "body": "HAT",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "hat_head_collision",
+        "body": "HAT",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "bar_shaft",
+        "body": "bar",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "bar_sleeve_left",
+        "body": "bar",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "bar_sleeve_right",
+        "body": "bar",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "left_thigh_collision",
+        "body": "left_thigh",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "left_shank_collision",
+        "body": "left_shank",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "left_heel_support",
+        "body": "left_hindfoot",
+        "class": "support",
+        "contype": 2,
+        "conaffinity": 7,
+        "condim": 4,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "left_forefoot_support",
+        "body": "left_forefoot",
+        "class": "support",
+        "contype": 2,
+        "conaffinity": 7,
+        "condim": 4,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "left_toe_support",
+        "body": "left_toe",
+        "class": "support",
+        "contype": 2,
+        "conaffinity": 7,
+        "condim": 4,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "right_thigh_collision",
+        "body": "right_thigh",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "right_shank_collision",
+        "body": "right_shank",
+        "class": "prohibited",
+        "contype": 4,
+        "conaffinity": 7,
+        "condim": 3,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "right_heel_support",
+        "body": "right_hindfoot",
+        "class": "support",
+        "contype": 2,
+        "conaffinity": 7,
+        "condim": 4,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "right_forefoot_support",
+        "body": "right_forefoot",
+        "class": "support",
+        "contype": 2,
+        "conaffinity": 7,
+        "condim": 4,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      },
+      {
+        "geom": "right_toe_support",
+        "body": "right_toe",
+        "class": "support",
+        "contype": 2,
+        "conaffinity": 7,
+        "condim": 4,
+        "friction_3": [
+          0.9,
+          0.0,
+          0.0
+        ],
+        "margin_m": 0.0,
+        "gap_m": 0.0,
+        "solref": [
+          0.02,
+          1.0
+        ],
+        "solimp": [
+          0.9,
+          0.95,
+          0.001,
+          0.5,
+          2.0
+        ]
+      }
+    ]
+  },
+  "sensitivity_execution": {
+    "0.5": {
+      "max_friction_utilization": 1.0,
+      "max_contact_normal_force_n": 125.97331385840718,
+      "final_root_vx_m_s": 0.5685770229329258,
+      "contact_count": 24
+    },
+    "0.9": {
+      "max_friction_utilization": 1.0,
+      "max_contact_normal_force_n": 109.656752581712,
+      "final_root_vx_m_s": 0.5668303204890447,
+      "contact_count": 24
+    },
+    "1.5": {
+      "max_friction_utilization": 0.5141731371081011,
+      "max_contact_normal_force_n": 99.97137084871704,
+      "final_root_vx_m_s": 0.5631690686272746,
+      "contact_count": 20
+    }
+  },
+  "classification": "current RES-83 values/defaults are provisional engineering numerics; RES-84 seals the numeric baseline used by measurement; RES-86 owns final solution verification",
+  "checks": [
+    {
+      "check": "inventory_covers_all_geoms",
+      "pass": true,
+      "detail": 17
+    },
+    {
+      "check": "plantar_condim4",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "other_condim3",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "friction_components_exposed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "sliding_friction_nominal",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "torsional_rolling_declared",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "margin_gap_zero",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "solref_defaults",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "solimp_defaults",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "solver_defaults",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_physiology_claim",
+      "pass": true,
+      "detail": "contact numerics are classified as engineering numerics"
+    },
+    {
+      "check": "friction_sensitivity_separates_mu",
+      "pass": true,
+      "detail": {
+        "mu_0.5_utilization": 1.0,
+        "mu_1.5_utilization": 0.5141731371081011
+      }
+    },
+    {
+      "check": "friction_cone_respected",
+      "pass": true,
+      "detail": {
+        "0.5": 1.0,
+        "0.9": 1.0,
+        "1.5": 0.5141731371081011
+      }
+    },
+    {
+      "check": "cone_saturates_at_low_mu",
+      "pass": true,
+      "detail": 1.0
+    },
+    {
+      "check": "contact_model_not_scalar_mu",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "SIGNAL_PROCESSING_AUTHORITY",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "policy": {
+    "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+    "raw_native_retention": "ALL_NATIVE_SAMPLES_RETAINED",
+    "interpolation": "LINEAR_BETWEEN_BRACKETING_NATIVE_SAMPLES",
+    "anti_alias": "NONE_REQUIRED_FOR_UPSAMPLING",
+    "filter_family": "NONE",
+    "filter_cutoff": null,
+    "filter_order": null,
+    "filter_phase": "NONE_NO_FILTER",
+    "boundary_handling": "NO_EXTRAPOLATION; CANONICAL_GRID_CLIPPED_TO_NATIVE_SPAN",
+    "differentiation": "CENTRAL_FINITE_DIFFERENCE_ON_NATIVE_SAMPLES",
+    "integration": "TRAPEZOIDAL_ON_NATIVE_SAMPLES",
+    "impulse_integration_rule": "LEFT_RECTANGLE_INTEGRATOR_CONSISTENT",
+    "position_velocity_relationship": "CENTRAL_DIFFERENCE(position)[i] = (v_i + v_i+1)/2 = v(t_i + dt/2); offset = +a dt/2",
+    "event_interpolation": "LINEAR_CONTACT_FORCE_EXTRAPOLATION_CLAMPED_TO_NATIVE_INTERVAL",
+    "hidden_smoothing_before": {
+      "contact_event_detection": "NONE",
+      "peak_force": "NONE",
+      "landing_rate": "NONE",
+      "impulse_integration": "NONE"
+    },
+    "note": "Primary native event truth does not depend on any reporting filter. Any future smoothing must be separately justified, named and declared before use."
+  },
+  "executed_checks": {
+    "central_difference_max_error": 0.00016535244671711524,
+    "trapezoidal_integral": 0.10807375892120044,
+    "trapezoidal_exact": 0.10807518113732147
+  },
+  "checks": [
+    {
+      "check": "no_filter_family",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_smoothing_stages",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_filter_token:scipy",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_filter_token:butter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_filter_token:filtfilt",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_filter_token:savgol",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_filter_token:moving_average",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_filter_token:convolve",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no_filter_token:lowpass",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "differentiation_declared",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "position_velocity_relationship_declared",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "integration_declared",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "event_interpolation_declared",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "raw_native_retention",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "central_difference_accuracy",
+      "pass": true,
+      "detail": 0.00016535244671711524
+    },
+    {
+      "check": "trapezoidal_accuracy",
+      "pass": true,
+      "detail": {
+        "integral": 0.10807375892120044,
+        "exact": 0.10807518113732147
+      }
+    }
+  ],
+  "status": "PASS"
+}
