@@ -1,0 +1,258 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "PLANTAR_REGION_IDENTITY_AUDIT",
+  "authority": "FOOT_MTP_MODEL_AUTHORITY FM-01..FM-13; COLLISION_CONTACT_POLICY CC-01/CC-05",
+  "regions": [
+    {
+      "side": "left",
+      "region": "heel",
+      "geom": "left_heel_support",
+      "condim": 4,
+      "box_half_extent_m": [
+        0.035,
+        0.035,
+        0.005
+      ],
+      "width_m": 0.07,
+      "patch_x_span_in_ankle_frame_m": [
+        -0.055,
+        0.015000000000000006
+      ]
+    },
+    {
+      "side": "left",
+      "region": "forefoot",
+      "geom": "left_forefoot_support",
+      "condim": 4,
+      "box_half_extent_m": [
+        0.068125,
+        0.0525,
+        0.005
+      ],
+      "width_m": 0.105,
+      "patch_x_span_in_ankle_frame_m": [
+        0.015000000000000006,
+        0.15125
+      ]
+    },
+    {
+      "side": "left",
+      "region": "toe",
+      "geom": "left_toe_support",
+      "condim": 4,
+      "box_half_extent_m": [
+        0.034375,
+        0.045,
+        0.005
+      ],
+      "width_m": 0.09,
+      "patch_x_span_in_ankle_frame_m": [
+        0.15125,
+        0.22000000000000003
+      ]
+    },
+    {
+      "side": "right",
+      "region": "heel",
+      "geom": "right_heel_support",
+      "condim": 4,
+      "box_half_extent_m": [
+        0.035,
+        0.035,
+        0.005
+      ],
+      "width_m": 0.07,
+      "patch_x_span_in_ankle_frame_m": [
+        -0.055,
+        0.015000000000000006
+      ]
+    },
+    {
+      "side": "right",
+      "region": "forefoot",
+      "geom": "right_forefoot_support",
+      "condim": 4,
+      "box_half_extent_m": [
+        0.068125,
+        0.0525,
+        0.005
+      ],
+      "width_m": 0.105,
+      "patch_x_span_in_ankle_frame_m": [
+        0.015000000000000006,
+        0.15125
+      ]
+    },
+    {
+      "side": "right",
+      "region": "toe",
+      "geom": "right_toe_support",
+      "condim": 4,
+      "box_half_extent_m": [
+        0.034375,
+        0.045,
+        0.005
+      ],
+      "width_m": 0.09,
+      "patch_x_span_in_ankle_frame_m": [
+        0.15125,
+        0.22000000000000003
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "dims:left:heel",
+      "pass": true
+    },
+    {
+      "check": "distinct_geom:left:heel",
+      "pass": true
+    },
+    {
+      "check": "dims:left:forefoot",
+      "pass": true
+    },
+    {
+      "check": "distinct_geom:left:forefoot",
+      "pass": true
+    },
+    {
+      "check": "dims:left:toe",
+      "pass": true
+    },
+    {
+      "check": "distinct_geom:left:toe",
+      "pass": true
+    },
+    {
+      "check": "dims:right:heel",
+      "pass": true
+    },
+    {
+      "check": "distinct_geom:right:heel",
+      "pass": true
+    },
+    {
+      "check": "dims:right:forefoot",
+      "pass": true
+    },
+    {
+      "check": "distinct_geom:right:forefoot",
+      "pass": true
+    },
+    {
+      "check": "dims:right:toe",
+      "pass": true
+    },
+    {
+      "check": "distinct_geom:right:toe",
+      "pass": true
+    },
+    {
+      "check": "sole_plane:left:heel",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.07156499999999999
+    },
+    {
+      "check": "sole_plane:left:forefoot",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.0715650000000001
+    },
+    {
+      "check": "sole_plane:left:toe",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.07156499999999999
+    },
+    {
+      "check": "sole_plane:right:heel",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.07156499999999999
+    },
+    {
+      "check": "sole_plane:right:forefoot",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.0715650000000001
+    },
+    {
+      "check": "sole_plane:right:toe",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.07156499999999999
+    },
+    {
+      "check": "no_subsole_geom:left_thigh_collision",
+      "pass": true,
+      "min_z_in_ankle_frame": 0.677453
+    },
+    {
+      "check": "no_subsole_geom:left_shank_collision",
+      "pass": true,
+      "min_z_in_ankle_frame": 0.2274655
+    },
+    {
+      "check": "no_subsole_geom:left_heel_support",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.07156499999999999
+    },
+    {
+      "check": "no_subsole_geom:left_forefoot_support",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.0715650000000001
+    },
+    {
+      "check": "no_subsole_geom:left_toe_support",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.07156499999999999
+    },
+    {
+      "check": "no_subsole_geom:right_thigh_collision",
+      "pass": true,
+      "min_z_in_ankle_frame": 0.677453
+    },
+    {
+      "check": "no_subsole_geom:right_shank_collision",
+      "pass": true,
+      "min_z_in_ankle_frame": 0.2274655
+    },
+    {
+      "check": "no_subsole_geom:right_heel_support",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.07156499999999999
+    },
+    {
+      "check": "no_subsole_geom:right_forefoot_support",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.0715650000000001
+    },
+    {
+      "check": "no_subsole_geom:right_toe_support",
+      "pass": true,
+      "min_z_in_ankle_frame": -0.07156499999999999
+    },
+    {
+      "check": "contact_registration:left:heel",
+      "pass": true
+    },
+    {
+      "check": "contact_registration:left:forefoot",
+      "pass": true
+    },
+    {
+      "check": "contact_registration:left:toe",
+      "pass": true
+    },
+    {
+      "check": "contact_registration:right:heel",
+      "pass": true
+    },
+    {
+      "check": "contact_registration:right:forefoot",
+      "pass": true
+    },
+    {
+      "check": "contact_registration:right:toe",
+      "pass": true
+    }
+  ],
+  "status": "PASS"
+}

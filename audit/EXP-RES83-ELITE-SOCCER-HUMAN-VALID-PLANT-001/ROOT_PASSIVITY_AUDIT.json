@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "ROOT_PASSIVITY_AUDIT",
+  "authority": "PLANT_TOPOLOGY_AUTHORITY PT-07; JOINT_COORDINATE_ROM_AUTHORITY JC-02; COLLISION_CONTACT_POLICY CC-04",
+  "root_joint_attributes": {
+    "root_tx": {
+      "limited": false,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0,
+      "range": [
+        0.0,
+        0.0
+      ]
+    },
+    "root_tz": {
+      "limited": false,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0,
+      "range": [
+        0.0,
+        0.0
+      ]
+    },
+    "root_ry": {
+      "limited": false,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0,
+      "range": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "flight_probe": {
+    "qacc_at_rest": [
+      6.410970388907681e-16,
+      -9.810000000000004,
+      -8.218943386949588e-14,
+      8.215650382226158e-14,
+      -8.22675261247241e-14,
+      6.217248937900877e-15,
+      1.1368683772161603e-13,
+      -6.252776074688882e-13,
+      -8.22675261247241e-14,
+      6.217248937900877e-15,
+      1.1368683772161603e-13,
+      -6.252776074688882e-13
+    ],
+    "steps": 50,
+    "timestep_s": 0.002,
+    "z_predicted_m": 4.949969,
+    "z_actual_m": 5.0
+  },
+  "checks": [
+    {
+      "check": "root_limited_false:root_tx",
+      "pass": true
+    },
+    {
+      "check": "root_stiffness_zero:root_tx",
+      "pass": true
+    },
+    {
+      "check": "root_damping_zero:root_tx",
+      "pass": true
+    },
+    {
+      "check": "root_armature_zero:root_tx",
+      "pass": true
+    },
+    {
+      "check": "root_limited_false:root_tz",
+      "pass": true
+    },
+    {
+      "check": "root_stiffness_zero:root_tz",
+      "pass": true
+    },
+    {
+      "check": "root_damping_zero:root_tz",
+      "pass": true
+    },
+    {
+      "check": "root_armature_zero:root_tz",
+      "pass": true
+    },
+    {
+      "check": "root_limited_false:root_ry",
+      "pass": true
+    },
+    {
+      "check": "root_stiffness_zero:root_ry",
+      "pass": true
+    },
+    {
+      "check": "root_damping_zero:root_ry",
+      "pass": true
+    },
+    {
+      "check": "root_armature_zero:root_ry",
+      "pass": true
+    },
+    {
+      "check": "no_equality_constraints",
+      "pass": true
+    },
+    {
+      "check": "no_tendons",
+      "pass": true
+    },
+    {
+      "check": "no_mocap_bodies",
+      "pass": true
+    },
+    {
+      "check": "flight_qacc_tx_zero",
+      "pass": true,
+      "value": 6.410970388907681e-16
+    },
+    {
+      "check": "flight_qacc_ry_zero",
+      "pass": true,
+      "value": -8.218943386949588e-14
+    },
+    {
+      "check": "flight_qacc_tz_gravity",
+      "pass": true,
+      "value": -9.810000000000004
+    },
+    {
+      "check": "ballistic_z",
+      "pass": true,
+      "predicted_m": 4.949969,
+      "actual_m": 4.949968999999994
+    },
+    {
+      "check": "ballistic_tx_constant",
+      "pass": true
+    },
+    {
+      "check": "ballistic_ry_constant",
+      "pass": true
+    },
+    {
+      "check": "ballistic_joints_quiet",
+      "pass": true
+    },
+    {
+      "check": "flight_constraint_forces_zero",
+      "pass": true
+    },
+    {
+      "check": "pitched_flight_qacc_ry_zero",
+      "pass": true,
+      "value": 6.394884621840902e-14
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "FINAL_CONSTANT_AUDIT",
+  "authority": "DEFERRED_NUMERICAL_CALIBRATIONS DF-01..DF-04, DF-08, DF-10; COLLISION_CONTACT_POLICY CC-07..CC-12",
+  "provisional_numerical_registry": {
+    "contact.solref": "not set at V3; MuJoCo 3.8.0 compiler default applies. PROVISIONAL_NUMERICAL; final values owned by RES-84/RES-86 (CC-10).",
+    "contact.solimp": "not set at V3; MuJoCo 3.8.0 compiler default applies. PROVISIONAL_NUMERICAL; final values owned by RES-84/RES-86 (CC-11).",
+    "contact.margin": "not set at V3; MuJoCo 3.8.0 default 0.0. PROVISIONAL_NUMERICAL; exact clearance guard is RES-84 (CC-09/DF-02).",
+    "contact.gap": "not set at V3; MuJoCo 3.8.0 default 0.0. PROVISIONAL_NUMERICAL; declared by RES-84 (CC-09).",
+    "contact.torsional_friction": "0.0 placeholder (friction cone term off). PROVISIONAL_NUMERICAL; numeric value owned by RES-84 (CC-07).",
+    "contact.rolling_friction": "0.0 placeholder (box-like plantar contacts, CC-08 nominal). PROVISIONAL_NUMERICAL; numeric value owned by RES-84 (CC-08).",
+    "contact.penetration_tolerance": "not frozen at V3; RES-84/RES-86 solution verification (CC-12).",
+    "solver.timestep": "not set at V3; MuJoCo 3.8.0 default 0.002 s. PROVISIONAL_NUMERICAL; timestep verification owned by RES-86 (DF-08).",
+    "solver.integrator": "not set at V3; MuJoCo 3.8.0 default 'Euler'. PROVISIONAL_NUMERICAL; solver verification owned by RES-86 (DF-08).",
+    "solver.solver": "not set at V3; MuJoCo 3.8.0 defaults (Newton/dense). PROVISIONAL_NUMERICAL; owned by RES-86 (DF-08).",
+    "actuator.limits": "no torque/rate/power limit frozen; gear=1 net-moment topology only. RES-85 authority (DF-03/DF-04).",
+    "friction.sliding": "0.9 is the RES-95 nominal (CC-06), not a final calibration; mandatory sensitivity sweep [0.5, 1.5] owned downstream."
+  },
+  "forbidden_final_ownership": {
+    "final_contact_solref_solimp_margin_gap": "RES-84/RES-86",
+    "final_torsional_rolling_friction": "RES-84",
+    "final_takeoff_clearance_guard": "RES-84",
+    "final_actuator_torque_rate_power_limits": "RES-85",
+    "elite_H2_target": "RES-85/RES-91"
+  },
+  "checks": [
+    {
+      "check": "xml_no_attribute:solref",
+      "pass": true,
+      "hits": []
+    },
+    {
+      "check": "xml_no_attribute:solimp",
+      "pass": true,
+      "hits": []
+    },
+    {
+      "check": "xml_no_attribute:margin",
+      "pass": true,
+      "hits": []
+    },
+    {
+      "check": "xml_no_attribute:gap",
+      "pass": true,
+      "hits": []
+    },
+    {
+      "check": "xml_no_attribute:forcerange",
+      "pass": true,
+      "hits": []
+    },
+    {
+      "check": "xml_no_attribute:ctrlrange",
+      "pass": true,
+      "hits": []
+    },
+    {
+      "check": "xml_no_attribute:springref",
+      "pass": true,
+      "hits": []
+    },
+    {
+      "check": "xml_no_attribute:fullinertia_final",
+      "pass": true,
+      "hits": []
+    },
+    {
+      "check": "xml_all_limits_disabled",
+      "pass": true,
+      "hits": []
+    },
+    {
+      "check": "xml_only_mtp_nonzero_passive",
+      "pass": true,
+      "nonzero": [
+        [
+          "joint",
+          "stiffness",
+          "25.0"
+        ],
+        [
+          "joint",
+          "damping",
+          "2.0"
+        ],
+        [
+          "joint",
+          "stiffness",
+          "25.0"
+        ],
+        [
+          "joint",
+          "damping",
+          "2.0"
+        ]
+      ]
+    },
+    {
+      "check": "xml_no_equality",
+      "pass": true
+    },
+    {
+      "check": "xml_no_tendon",
+      "pass": true
+    },
+    {
+      "check": "no_final_constant:ELITE_H2",
+      "pass": true
+    },
+    {
+      "check": "no_final_constant:H2_TARGET",
+      "pass": true
+    },
+    {
+      "check": "no_final_constant:SUCCESS_THRESHOLD",
+      "pass": true
+    },
+    {
+      "check": "no_final_constant:TORQUE_LIMIT",
+      "pass": true
+    },
+    {
+      "check": "no_final_constant:POWER_LIMIT",
+      "pass": true
+    },
+    {
+      "check": "no_final_constant:RATE_LIMIT",
+      "pass": true
+    },
+    {
+      "check": "no_final_constant:SOLREF_FINAL",
+      "pass": true
+    },
+    {
+      "check": "no_final_constant:SOLIMP_FINAL",
+      "pass": true
+    },
+    {
+      "check": "provisional_registry_present",
+      "pass": true
+    },
+    {
+      "check": "zero_passive_model_representable",
+      "pass": true
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,320 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "ROM_REACHABILITY_AUDIT",
+  "authority": "JOINT_COORDINATE_ROM_AUTHORITY JC-03..JC-10; AUTHORITY_INPUTS.rom_rad",
+  "joint_rows": [
+    {
+      "joint": "root_tx",
+      "range_rad": null,
+      "reachable_lower": true,
+      "reachable_upper": true
+    },
+    {
+      "joint": "root_tz",
+      "range_rad": null,
+      "reachable_lower": true,
+      "reachable_upper": true
+    },
+    {
+      "joint": "root_ry",
+      "range_rad": null,
+      "reachable_lower": true,
+      "reachable_upper": true
+    },
+    {
+      "joint": "trunk_pelvis",
+      "range_rad": [
+        -0.610865,
+        0.610865
+      ],
+      "reachable_lower": true,
+      "reachable_upper": true,
+      "outside_lower_limit_force": true,
+      "outside_upper_limit_force": true
+    },
+    {
+      "joint": "left_hip",
+      "range_rad": [
+        -0.349066,
+        2.268928
+      ],
+      "reachable_lower": true,
+      "reachable_upper": true,
+      "outside_lower_limit_force": true,
+      "outside_upper_limit_force": true
+    },
+    {
+      "joint": "left_knee",
+      "range_rad": [
+        0.0,
+        2.443461
+      ],
+      "reachable_lower": true,
+      "reachable_upper": true,
+      "outside_lower_limit_force": true,
+      "outside_upper_limit_force": true
+    },
+    {
+      "joint": "left_ankle",
+      "range_rad": [
+        -0.959931,
+        0.785398
+      ],
+      "reachable_lower": true,
+      "reachable_upper": true,
+      "outside_lower_limit_force": true,
+      "outside_upper_limit_force": true
+    },
+    {
+      "joint": "left_mtp",
+      "range_rad": [
+        -0.523599,
+        1.570796
+      ],
+      "reachable_lower": true,
+      "reachable_upper": true,
+      "outside_lower_limit_force": true,
+      "outside_upper_limit_force": true
+    },
+    {
+      "joint": "right_hip",
+      "range_rad": [
+        -0.349066,
+        2.268928
+      ],
+      "reachable_lower": true,
+      "reachable_upper": true,
+      "outside_lower_limit_force": true,
+      "outside_upper_limit_force": true
+    },
+    {
+      "joint": "right_knee",
+      "range_rad": [
+        0.0,
+        2.443461
+      ],
+      "reachable_lower": true,
+      "reachable_upper": true,
+      "outside_lower_limit_force": true,
+      "outside_upper_limit_force": true
+    },
+    {
+      "joint": "right_ankle",
+      "range_rad": [
+        -0.959931,
+        0.785398
+      ],
+      "reachable_lower": true,
+      "reachable_upper": true,
+      "outside_lower_limit_force": true,
+      "outside_upper_limit_force": true
+    },
+    {
+      "joint": "right_mtp",
+      "range_rad": [
+        -0.523599,
+        1.570796
+      ],
+      "reachable_lower": true,
+      "reachable_upper": true,
+      "outside_lower_limit_force": true,
+      "outside_upper_limit_force": true
+    }
+  ],
+  "reverse_knee": {
+    "statement": "knee axis +y, range [0, 2.443461] rad; ankle moves posteriorly under +q; negative (hyperextension) knee requires q<0 which activates the hard joint limit -> reverse-knee geometry is structurally impossible",
+    "active_limit_constraints": 1
+  },
+  "checks": [
+    {
+      "check": "reachable:trunk_pelvis:lower",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "reachable:trunk_pelvis:upper",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "hard_bound:trunk_pelvis:lower",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "hard_bound:trunk_pelvis:upper",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "reachable:left_hip:lower",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "reachable:left_hip:upper",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "hard_bound:left_hip:lower",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "hard_bound:left_hip:upper",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "reachable:left_knee:lower",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "reachable:left_knee:upper",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "hard_bound:left_knee:lower",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "hard_bound:left_knee:upper",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "reachable:left_ankle:lower",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "reachable:left_ankle:upper",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "hard_bound:left_ankle:lower",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "hard_bound:left_ankle:upper",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "reachable:left_mtp:lower",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "reachable:left_mtp:upper",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "hard_bound:left_mtp:lower",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "hard_bound:left_mtp:upper",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "reachable:right_hip:lower",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "reachable:right_hip:upper",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "hard_bound:right_hip:lower",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "hard_bound:right_hip:upper",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "reachable:right_knee:lower",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "reachable:right_knee:upper",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "hard_bound:right_knee:lower",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "hard_bound:right_knee:upper",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "reachable:right_ankle:lower",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "reachable:right_ankle:upper",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "hard_bound:right_ankle:lower",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "hard_bound:right_ankle:upper",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "reachable:right_mtp:lower",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "reachable:right_mtp:upper",
+      "pass": true,
+      "active_limits": 0
+    },
+    {
+      "check": "hard_bound:right_mtp:lower",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "hard_bound:right_mtp:upper",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "reverse_knee_limit_active",
+      "pass": true,
+      "active_limits": 1
+    },
+    {
+      "check": "knee_no_hyperextension_range",
+      "pass": true
+    }
+  ],
+  "status": "PASS"
+}

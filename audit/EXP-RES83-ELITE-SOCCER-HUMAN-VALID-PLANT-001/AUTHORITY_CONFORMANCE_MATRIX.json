@@ -1,0 +1,660 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "AUTHORITY_CONFORMANCE_MATRIX",
+  "authority": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "rows": [
+    {
+      "decision": "PT-01",
+      "subject": "identity",
+      "implementation": "constants.V3_MODEL_REVISION/V3_MODEL_ID + XML model attribute",
+      "evidence": "MODEL_INTROSPECTION"
+    },
+    {
+      "decision": "PT-02",
+      "subject": "bodies",
+      "implementation": "V3_BODY_NAMES / XML body tree",
+      "evidence": "MODEL_INTROSPECTION"
+    },
+    {
+      "decision": "PT-03",
+      "subject": "joints+qdim",
+      "implementation": "NQ=12/NV=12, joint order",
+      "evidence": "MODEL_INTROSPECTION, JOINT_FK_SIGN_AUDIT"
+    },
+    {
+      "decision": "PT-04",
+      "subject": "actuator channels",
+      "implementation": "9 motors, gear=1, no limits",
+      "evidence": "MODEL_INTROSPECTION, FINAL_CONSTANT_AUDIT"
+    },
+    {
+      "decision": "PT-05",
+      "subject": "symmetry prerequisite",
+      "implementation": "identical left/right geometry and gains",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "PT-06",
+      "subject": "out-of-plane audit prerequisite",
+      "implementation": "planar root only; no y/roll/yaw DOF",
+      "evidence": "ROOT_PASSIVITY_AUDIT, MODEL_INTROSPECTION"
+    },
+    {
+      "decision": "PT-07",
+      "subject": "passive defaults zero",
+      "implementation": "major joints stiffness/damping/armature=0; root zero",
+      "evidence": "JOINT_FK_SIGN_AUDIT, ROOT_PASSIVITY_AUDIT"
+    },
+    {
+      "decision": "PT-08",
+      "subject": "inertial provenance",
+      "implementation": "constants + XML <inertial> per body",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "AB-04",
+      "subject": "mass closure",
+      "implementation": "athlete 79 kg, system 99 kg",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "AB-05",
+      "subject": "thigh length",
+      "implementation": "0.2425*H = 0.4449875 body offset",
+      "evidence": "MASS_INERTIA_AUDIT, PLANT_IMPLEMENTATION_SPEC"
+    },
+    {
+      "decision": "AB-06",
+      "subject": "shank length",
+      "implementation": "0.2493*H = 0.4574655 body offset",
+      "evidence": "MASS_INERTIA_AUDIT, PLANT_IMPLEMENTATION_SPEC"
+    },
+    {
+      "decision": "AB-08",
+      "subject": "pelvis inertial",
+      "implementation": "pelvis mass/COM/diaginertia",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "AB-09",
+      "subject": "foot length/width",
+      "implementation": "0.275 x 0.105 patches",
+      "evidence": "PLANTAR_REGION_IDENTITY_AUDIT"
+    },
+    {
+      "decision": "AB-10",
+      "subject": "ankle height",
+      "implementation": "sole plane -0.071565",
+      "evidence": "PLANTAR_REGION_IDENTITY_AUDIT"
+    },
+    {
+      "decision": "AB-11",
+      "subject": "ankle x from heel",
+      "implementation": "0.055 m ankle offset",
+      "evidence": "PLANTAR_REGION_IDENTITY_AUDIT"
+    },
+    {
+      "decision": "AB-13",
+      "subject": "closure delta absorbed",
+      "implementation": "standing root_tz = 0.974018; no rescaling",
+      "evidence": "REPRESENTATIVE_POSE_AUDIT"
+    },
+    {
+      "decision": "AB-14",
+      "subject": "thigh/shank inertias",
+      "implementation": "diaginertia realized",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "UB-02",
+      "subject": "fixed bar-hold HAT",
+      "implementation": "reduced rigid HAT; no arm DOF",
+      "evidence": "MODEL_INTROSPECTION"
+    },
+    {
+      "decision": "UB-03",
+      "subject": "HAT mass",
+      "implementation": "38.7969 kg",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "UB-04",
+      "subject": "HAT COM",
+      "implementation": "authority COM realized",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "UB-05",
+      "subject": "HAT full inertia",
+      "implementation": "Ixz preserved full tensor",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT"
+    },
+    {
+      "decision": "UB-06",
+      "subject": "HAT principal moments",
+      "implementation": "eigendecomposition match",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT"
+    },
+    {
+      "decision": "UB-07",
+      "subject": "bar placement",
+      "implementation": "(-0.095, 0, 0.6) in HAT frame",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT"
+    },
+    {
+      "decision": "UB-08",
+      "subject": "HAT+bar combination",
+      "implementation": "58.7969 kg / COM / inertia",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT"
+    },
+    {
+      "decision": "UB-10",
+      "subject": "no arm swing/bar roll",
+      "implementation": "welded bar body, no bar DOF",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT"
+    },
+    {
+      "decision": "UB-11",
+      "subject": "system COM authority",
+      "implementation": "subtree COM of pelvis carries 99 kg",
+      "evidence": "ROOT_PASSIVITY_AUDIT, MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "LB-01..06",
+      "subject": "bar standards",
+      "implementation": "mass 20 kg, 2.2 m, composite dims",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT"
+    },
+    {
+      "decision": "LB-07",
+      "subject": "composite surrogate",
+      "implementation": "rho_eff/shaft/sleeves",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT"
+    },
+    {
+      "decision": "LB-08",
+      "subject": "bar inertia",
+      "implementation": "I_transverse 11.755857, I_axis 0.004787",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT"
+    },
+    {
+      "decision": "LB-09",
+      "subject": "bar collision",
+      "implementation": "stepped-cylinder collision geoms; floor enabled",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT, COLLISION_MATRIX"
+    },
+    {
+      "decision": "LB-10",
+      "subject": "attachment",
+      "implementation": "rigid HAT weld; attachment excluded",
+      "evidence": "HAT_BAR_REALIZATION_AUDIT, COLLISION_MATRIX"
+    },
+    {
+      "decision": "FM-01",
+      "subject": "foot abstraction",
+      "implementation": "hindfoot/forefoot(welded)/toe + MTP",
+      "evidence": "MODEL_INTROSPECTION"
+    },
+    {
+      "decision": "FM-02/03",
+      "subject": "locked midfoot nominal",
+      "implementation": "no midtarsal DOF; zero arch DOF",
+      "evidence": "MODEL_INTROSPECTION"
+    },
+    {
+      "decision": "FM-04",
+      "subject": "foot segment masses",
+      "implementation": "0.4675536/0.4588952/0.1558512",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "FM-05",
+      "subject": "MTP axis/toe length",
+      "implementation": "0.20625 / 0.06875",
+      "evidence": "PLANTAR_REGION_IDENTITY_AUDIT"
+    },
+    {
+      "decision": "FM-06",
+      "subject": "contact regions",
+      "implementation": "heel/forefoot/toe dims",
+      "evidence": "PLANTAR_REGION_IDENTITY_AUDIT"
+    },
+    {
+      "decision": "FM-07",
+      "subject": "foot frame/joints",
+      "implementation": "segment COM positions realized",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "FM-08",
+      "subject": "foot segment inertia",
+      "implementation": "diagonal tensors realized",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "FM-09",
+      "subject": "MTP passive prior",
+      "implementation": "k=25, c=2, neutral 0; zero-passive representable",
+      "evidence": "JOINT_FK_SIGN_AUDIT, FINAL_CONSTANT_AUDIT"
+    },
+    {
+      "decision": "FM-10",
+      "subject": "active MTP channel",
+      "implementation": "one net-moment motor per foot",
+      "evidence": "MODEL_INTROSPECTION"
+    },
+    {
+      "decision": "FM-13",
+      "subject": "sole plane/no subsole geom",
+      "implementation": "patch bottoms on plane; nothing below",
+      "evidence": "PLANTAR_REGION_IDENTITY_AUDIT"
+    },
+    {
+      "decision": "JC-01",
+      "subject": "world axes",
+      "implementation": "+x forward, +y left, +z up",
+      "evidence": "JOINT_FK_SIGN_AUDIT"
+    },
+    {
+      "decision": "JC-02",
+      "subject": "planar root",
+      "implementation": "tx/tz/ry, zero passive, no catch",
+      "evidence": "ROOT_PASSIVITY_AUDIT"
+    },
+    {
+      "decision": "JC-03",
+      "subject": "trunk-pelvis ROM",
+      "implementation": "+-0.610865 rad",
+      "evidence": "ROM_REACHABILITY_AUDIT"
+    },
+    {
+      "decision": "JC-04",
+      "subject": "hip ROM",
+      "implementation": "[-0.349066, 2.268928]",
+      "evidence": "ROM_REACHABILITY_AUDIT"
+    },
+    {
+      "decision": "JC-05",
+      "subject": "knee ROM",
+      "implementation": "[0, 2.443461]",
+      "evidence": "ROM_REACHABILITY_AUDIT"
+    },
+    {
+      "decision": "JC-06",
+      "subject": "ankle ROM",
+      "implementation": "[-0.959931, 0.785398]",
+      "evidence": "ROM_REACHABILITY_AUDIT"
+    },
+    {
+      "decision": "JC-07",
+      "subject": "MTP ROM",
+      "implementation": "[-0.523599, 1.570796]",
+      "evidence": "ROM_REACHABILITY_AUDIT"
+    },
+    {
+      "decision": "JC-08",
+      "subject": "sign conventions",
+      "implementation": "axis/sign table realized",
+      "evidence": "JOINT_FK_SIGN_AUDIT"
+    },
+    {
+      "decision": "JC-09",
+      "subject": "FK sign probes",
+      "implementation": "all 8 deterministic probes",
+      "evidence": "JOINT_FK_SIGN_AUDIT"
+    },
+    {
+      "decision": "JC-10",
+      "subject": "ROM bounds not targets",
+      "implementation": "no controller; limits are structural",
+      "evidence": "ROM_REACHABILITY_AUDIT, IMPORT_BOUNDARY_AUDIT"
+    },
+    {
+      "decision": "CC-01",
+      "subject": "legal support",
+      "implementation": "only heel/forefoot/toe support bits",
+      "evidence": "PLANTAR_REGION_IDENTITY_AUDIT, COLLISION_MATRIX"
+    },
+    {
+      "decision": "CC-02",
+      "subject": "prohibited floor contact",
+      "implementation": "pelvis/HAT/thigh/shank/bar reachable floor probes",
+      "evidence": "COLLISION_MATRIX"
+    },
+    {
+      "decision": "CC-03",
+      "subject": "collision enablement",
+      "implementation": "enabled classes + exact exclusions",
+      "evidence": "COLLISION_MATRIX"
+    },
+    {
+      "decision": "CC-04",
+      "subject": "no artificial support",
+      "implementation": "zero root passives; ballistic flight probe",
+      "evidence": "ROOT_PASSIVITY_AUDIT"
+    },
+    {
+      "decision": "CC-05",
+      "subject": "condim",
+      "implementation": "plantar 4, other 3",
+      "evidence": "PLANTAR_REGION_IDENTITY_AUDIT, MODEL_INTROSPECTION"
+    },
+    {
+      "decision": "CC-06",
+      "subject": "sliding friction nominal",
+      "implementation": "0.9 marked nominal with sensitivity",
+      "evidence": "FINAL_CONSTANT_AUDIT"
+    },
+    {
+      "decision": "CC-07..CC-12",
+      "subject": "deferred contact numerics",
+      "implementation": "provisional registry; no final values",
+      "evidence": "FINAL_CONSTANT_AUDIT"
+    },
+    {
+      "decision": "CC-13",
+      "subject": "engineered contact realism",
+      "implementation": "owned downstream; no calibration here",
+      "evidence": "FINAL_CONSTANT_AUDIT"
+    },
+    {
+      "decision": "SL-01",
+      "subject": "leg plane geometry",
+      "implementation": "y=+-0.085 nominal (not a stance claim)",
+      "evidence": "MODEL_INTROSPECTION, PLANT_IMPLEMENTATION_SPEC"
+    },
+    {
+      "decision": "RA-02..RA-07",
+      "subject": "reference athlete",
+      "implementation": "1.835 m / 79 kg / 20 kg / 99 kg",
+      "evidence": "MASS_INERTIA_AUDIT"
+    },
+    {
+      "decision": "DF-01..DF-04",
+      "subject": "deferred numerics",
+      "implementation": "actuator limits and contact calibration not frozen",
+      "evidence": "FINAL_CONSTANT_AUDIT"
+    },
+    {
+      "decision": "DF-08",
+      "subject": "solver/timestep deferral",
+      "implementation": "defaults used, registered provisional",
+      "evidence": "FINAL_CONSTANT_AUDIT"
+    },
+    {
+      "decision": "DF-10",
+      "subject": "bar placement non-penetration",
+      "implementation": "representative poses report no penetration",
+      "evidence": "REPRESENTATIVE_POSE_AUDIT"
+    },
+    {
+      "decision": "DF-11",
+      "subject": "stance/lateral validation",
+      "implementation": "planar model; stance width not claimed",
+      "evidence": "MODEL_INTROSPECTION"
+    }
+  ],
+  "checks": [
+    {
+      "check": "conformance:PT-01",
+      "pass": true
+    },
+    {
+      "check": "conformance:PT-02",
+      "pass": true
+    },
+    {
+      "check": "conformance:PT-03",
+      "pass": true
+    },
+    {
+      "check": "conformance:PT-04",
+      "pass": true
+    },
+    {
+      "check": "conformance:PT-05",
+      "pass": true
+    },
+    {
+      "check": "conformance:PT-06",
+      "pass": true
+    },
+    {
+      "check": "conformance:PT-07",
+      "pass": true
+    },
+    {
+      "check": "conformance:PT-08",
+      "pass": true
+    },
+    {
+      "check": "conformance:AB-04",
+      "pass": true
+    },
+    {
+      "check": "conformance:AB-05",
+      "pass": true
+    },
+    {
+      "check": "conformance:AB-06",
+      "pass": true
+    },
+    {
+      "check": "conformance:AB-08",
+      "pass": true
+    },
+    {
+      "check": "conformance:AB-09",
+      "pass": true
+    },
+    {
+      "check": "conformance:AB-10",
+      "pass": true
+    },
+    {
+      "check": "conformance:AB-11",
+      "pass": true
+    },
+    {
+      "check": "conformance:AB-13",
+      "pass": true
+    },
+    {
+      "check": "conformance:AB-14",
+      "pass": true
+    },
+    {
+      "check": "conformance:UB-02",
+      "pass": true
+    },
+    {
+      "check": "conformance:UB-03",
+      "pass": true
+    },
+    {
+      "check": "conformance:UB-04",
+      "pass": true
+    },
+    {
+      "check": "conformance:UB-05",
+      "pass": true
+    },
+    {
+      "check": "conformance:UB-06",
+      "pass": true
+    },
+    {
+      "check": "conformance:UB-07",
+      "pass": true
+    },
+    {
+      "check": "conformance:UB-08",
+      "pass": true
+    },
+    {
+      "check": "conformance:UB-10",
+      "pass": true
+    },
+    {
+      "check": "conformance:UB-11",
+      "pass": true
+    },
+    {
+      "check": "conformance:LB-01..06",
+      "pass": true
+    },
+    {
+      "check": "conformance:LB-07",
+      "pass": true
+    },
+    {
+      "check": "conformance:LB-08",
+      "pass": true
+    },
+    {
+      "check": "conformance:LB-09",
+      "pass": true
+    },
+    {
+      "check": "conformance:LB-10",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-01",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-02/03",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-04",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-05",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-06",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-07",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-08",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-09",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-10",
+      "pass": true
+    },
+    {
+      "check": "conformance:FM-13",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-01",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-02",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-03",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-04",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-05",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-06",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-07",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-08",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-09",
+      "pass": true
+    },
+    {
+      "check": "conformance:JC-10",
+      "pass": true
+    },
+    {
+      "check": "conformance:CC-01",
+      "pass": true
+    },
+    {
+      "check": "conformance:CC-02",
+      "pass": true
+    },
+    {
+      "check": "conformance:CC-03",
+      "pass": true
+    },
+    {
+      "check": "conformance:CC-04",
+      "pass": true
+    },
+    {
+      "check": "conformance:CC-05",
+      "pass": true
+    },
+    {
+      "check": "conformance:CC-06",
+      "pass": true
+    },
+    {
+      "check": "conformance:CC-07..CC-12",
+      "pass": true
+    },
+    {
+      "check": "conformance:CC-13",
+      "pass": true
+    },
+    {
+      "check": "conformance:SL-01",
+      "pass": true
+    },
+    {
+      "check": "conformance:RA-02..RA-07",
+      "pass": true
+    },
+    {
+      "check": "conformance:DF-01..DF-04",
+      "pass": true
+    },
+    {
+      "check": "conformance:DF-08",
+      "pass": true
+    },
+    {
+      "check": "conformance:DF-10",
+      "pass": true
+    },
+    {
+      "check": "conformance:DF-11",
+      "pass": true
+    }
+  ],
+  "status": "PASS"
+}

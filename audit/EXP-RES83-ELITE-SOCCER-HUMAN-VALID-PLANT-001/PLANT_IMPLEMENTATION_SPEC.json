@@ -1,0 +1,397 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "PLANT_IMPLEMENTATION_SPEC",
+  "mission": "RES83_IMPLEMENT_ELITE_SOCCER_HUMAN_VALID_PLANT_001",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "authority_bundle": "audit/EXP-RES95-ELITE-SOCCER-PLANT-MODEL-AUTHORITY-001",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "entry_head": "3e5e1e4075c469e7eb1164090c8df55f2a5cc598",
+  "entry_tree": "75352cfedfa130718719cf1b686d59cde6fadfb8",
+  "implementation_surface": {
+    "package": "src/loaded_cmj/v3",
+    "files": [
+      "__init__.py",
+      "constants.py",
+      "plant.py",
+      "assets/v3_plant.xml"
+    ],
+    "history_preserved": [
+      "src/loaded_cmj/assets/loaded_jump_athlete.xml (V1)",
+      "src/loaded_cmj/v2/** (V2)"
+    ]
+  },
+  "frames": {
+    "world": {
+      "+x": "anterior/forward",
+      "+y": "athlete left",
+      "+z": "up"
+    },
+    "pelvis": "origin at MIDH; root_tx/root_tz/root_ry planar floating base",
+    "HAT": "origin at MIDH; axes equal model axes at reference trunk-upright posture",
+    "bar": "rigidly welded child of HAT at (-0.095, 0, 0.6), identity orientation",
+    "thigh": "origin at HJC, +z proximal (knee at -0.4449875)",
+    "shank": "origin at KJC, +z proximal (ankle at -0.4574655)",
+    "hindfoot": "origin at ankle joint center; +x anterior; sole plane z=-0.071565",
+    "forefoot": "welded child of hindfoot at (0.015, 0, -0.05)",
+    "toe": "child of forefoot at (0.13625, 0, 0.01); MTP hinge axis -y"
+  },
+  "joint_order_and_axes": {
+    "root_tx": {
+      "qpos_adr": 0,
+      "axis": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "range_rad": null
+    },
+    "root_tz": {
+      "qpos_adr": 1,
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "range_rad": null
+    },
+    "root_ry": {
+      "qpos_adr": 2,
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "range_rad": null
+    },
+    "trunk_pelvis": {
+      "qpos_adr": 3,
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.610865,
+        0.610865
+      ]
+    },
+    "left_hip": {
+      "qpos_adr": 4,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.349066,
+        2.268928
+      ]
+    },
+    "left_knee": {
+      "qpos_adr": 5,
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "range_rad": [
+        0.0,
+        2.443461
+      ]
+    },
+    "left_ankle": {
+      "qpos_adr": 6,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.959931,
+        0.785398
+      ]
+    },
+    "left_mtp": {
+      "qpos_adr": 7,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.523599,
+        1.570796
+      ]
+    },
+    "right_hip": {
+      "qpos_adr": 8,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.349066,
+        2.268928
+      ]
+    },
+    "right_knee": {
+      "qpos_adr": 9,
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "range_rad": [
+        0.0,
+        2.443461
+      ]
+    },
+    "right_ankle": {
+      "qpos_adr": 10,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.959931,
+        0.785398
+      ]
+    },
+    "right_mtp": {
+      "qpos_adr": 11,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.523599,
+        1.570796
+      ]
+    }
+  },
+  "actuator_topology": {
+    "channels": [
+      "m_trunk_pelvis",
+      "m_left_hip",
+      "m_right_hip",
+      "m_left_knee",
+      "m_right_knee",
+      "m_left_ankle",
+      "m_right_ankle",
+      "m_left_mtp",
+      "m_right_mtp"
+    ],
+    "semantics": "ctrl equals physical net joint moment in N*m (gear=1)",
+    "limits": "none frozen at RES-83 (DF-03/DF-04, RES-85 ownership)"
+  },
+  "collision_classes": {
+    "floor": {
+      "contype": 1,
+      "conaffinity": 6
+    },
+    "plantar_support": {
+      "contype": 2,
+      "conaffinity": 7
+    },
+    "prohibited": {
+      "contype": 4,
+      "conaffinity": 7
+    },
+    "explicit_exclusions": [
+      [
+        "pelvis",
+        "HAT"
+      ],
+      [
+        "pelvis",
+        "left_thigh"
+      ],
+      [
+        "pelvis",
+        "right_thigh"
+      ],
+      [
+        "left_thigh",
+        "left_shank"
+      ],
+      [
+        "right_thigh",
+        "right_shank"
+      ],
+      [
+        "left_shank",
+        "left_hindfoot"
+      ],
+      [
+        "right_shank",
+        "right_hindfoot"
+      ],
+      [
+        "left_hindfoot",
+        "left_forefoot"
+      ],
+      [
+        "right_hindfoot",
+        "right_forefoot"
+      ],
+      [
+        "left_forefoot",
+        "left_toe"
+      ],
+      [
+        "right_forefoot",
+        "right_toe"
+      ],
+      [
+        "HAT",
+        "bar"
+      ]
+    ],
+    "mujoco_default_filtering": "filterparent enabled; weld-aware parent filtering additionally disables (pelvis,bar), (shank,forefoot) and (hindfoot,toe) per side (adjacent through the locked-midfoot weld / rigid attachment); documented in COLLISION_MATRIX.json"
+  },
+  "provisional_numerical": {
+    "contact.solref": "not set at V3; MuJoCo 3.8.0 compiler default applies. PROVISIONAL_NUMERICAL; final values owned by RES-84/RES-86 (CC-10).",
+    "contact.solimp": "not set at V3; MuJoCo 3.8.0 compiler default applies. PROVISIONAL_NUMERICAL; final values owned by RES-84/RES-86 (CC-11).",
+    "contact.margin": "not set at V3; MuJoCo 3.8.0 default 0.0. PROVISIONAL_NUMERICAL; exact clearance guard is RES-84 (CC-09/DF-02).",
+    "contact.gap": "not set at V3; MuJoCo 3.8.0 default 0.0. PROVISIONAL_NUMERICAL; declared by RES-84 (CC-09).",
+    "contact.torsional_friction": "0.0 placeholder (friction cone term off). PROVISIONAL_NUMERICAL; numeric value owned by RES-84 (CC-07).",
+    "contact.rolling_friction": "0.0 placeholder (box-like plantar contacts, CC-08 nominal). PROVISIONAL_NUMERICAL; numeric value owned by RES-84 (CC-08).",
+    "contact.penetration_tolerance": "not frozen at V3; RES-84/RES-86 solution verification (CC-12).",
+    "solver.timestep": "not set at V3; MuJoCo 3.8.0 default 0.002 s. PROVISIONAL_NUMERICAL; timestep verification owned by RES-86 (DF-08).",
+    "solver.integrator": "not set at V3; MuJoCo 3.8.0 default 'Euler'. PROVISIONAL_NUMERICAL; solver verification owned by RES-86 (DF-08).",
+    "solver.solver": "not set at V3; MuJoCo 3.8.0 defaults (Newton/dense). PROVISIONAL_NUMERICAL; owned by RES-86 (DF-08).",
+    "actuator.limits": "no torque/rate/power limit frozen; gear=1 net-moment topology only. RES-85 authority (DF-03/DF-04).",
+    "friction.sliding": "0.9 is the RES-95 nominal (CC-06), not a final calibration; mandatory sensitivity sweep [0.5, 1.5] owned downstream."
+  },
+  "pose_library": [
+    {
+      "name": "legal_standing",
+      "trunk_deg": 0.0,
+      "hip_deg": 0.0,
+      "knee_deg": 0.0,
+      "ankle_deg": null,
+      "foot_pitch_deg": 0.0,
+      "mtp_deg": null,
+      "clearance_m": 0.0,
+      "note": "flat-foot standing, both feet plantar support, zero penetration"
+    },
+    {
+      "name": "deep_legal_countermovement",
+      "trunk_deg": 25.0,
+      "hip_deg": 85.0,
+      "knee_deg": 105.0,
+      "ankle_deg": null,
+      "foot_pitch_deg": 0.0,
+      "mtp_deg": null,
+      "clearance_m": 0.0,
+      "note": "deep sagittal countermovement within structural ROM, feet flat"
+    },
+    {
+      "name": "braking",
+      "trunk_deg": 15.0,
+      "hip_deg": 45.0,
+      "knee_deg": 70.0,
+      "ankle_deg": null,
+      "foot_pitch_deg": 0.0,
+      "mtp_deg": null,
+      "clearance_m": 0.0,
+      "note": "braking configuration, heels down, knees over feet"
+    },
+    {
+      "name": "propulsion",
+      "trunk_deg": 10.0,
+      "hip_deg": 15.0,
+      "knee_deg": 25.0,
+      "ankle_deg": null,
+      "foot_pitch_deg": 25.0,
+      "mtp_deg": null,
+      "clearance_m": 0.0,
+      "note": "propulsion, ankle negative (plantarflexion), heel rising, MTP dorsiflexed"
+    },
+    {
+      "name": "heel_rise_toe_rocker",
+      "trunk_deg": 5.0,
+      "hip_deg": 5.0,
+      "knee_deg": 20.0,
+      "ankle_deg": null,
+      "foot_pitch_deg": 40.0,
+      "mtp_deg": null,
+      "clearance_m": 0.0,
+      "note": "heel-rise toe-rocker, forefoot/toe support only"
+    },
+    {
+      "name": "toe_off",
+      "trunk_deg": 0.0,
+      "hip_deg": 0.0,
+      "knee_deg": 10.0,
+      "ankle_deg": null,
+      "foot_pitch_deg": 50.0,
+      "mtp_deg": null,
+      "clearance_m": 0.0,
+      "note": "toe-off, strongly plantarflexed ankle and dorsiflexed MTP"
+    },
+    {
+      "name": "flight",
+      "trunk_deg": 5.0,
+      "hip_deg": 40.0,
+      "knee_deg": 60.0,
+      "ankle_deg": -25.0,
+      "foot_pitch_deg": null,
+      "mtp_deg": 10.0,
+      "clearance_m": 0.08,
+      "note": "flight, all plantar patches clear of the floor"
+    },
+    {
+      "name": "toe_forefoot_first_touchdown",
+      "trunk_deg": 10.0,
+      "hip_deg": 20.0,
+      "knee_deg": 30.0,
+      "ankle_deg": null,
+      "foot_pitch_deg": 25.0,
+      "mtp_deg": null,
+      "clearance_m": 0.0,
+      "note": "toe/forefoot-first touchdown, heel still above the floor"
+    },
+    {
+      "name": "landing_absorption",
+      "trunk_deg": 20.0,
+      "hip_deg": 60.0,
+      "knee_deg": 95.0,
+      "ankle_deg": null,
+      "foot_pitch_deg": 0.0,
+      "mtp_deg": null,
+      "clearance_m": 0.0,
+      "note": "landing absorption, feet flat, deep knee flexion"
+    },
+    {
+      "name": "recovered_standing",
+      "trunk_deg": 0.0,
+      "hip_deg": 0.0,
+      "knee_deg": 0.0,
+      "ankle_deg": null,
+      "foot_pitch_deg": 0.0,
+      "mtp_deg": null,
+      "clearance_m": 0.0,
+      "note": "recovered standing configuration"
+    }
+  ],
+  "pose_construction": {
+    "ankle_rule": "ankle = root_ry - hip + knee - foot_pitch (zero foot world pitch = flat)",
+    "toe_rule": "mtp = foot_pitch keeps the toe patch flat during heel rise",
+    "root_tz_rule": "translate root_tz so the lowest legal patch corner equals clearance",
+    "root_tx_rule": "translate root_tx so the 99 kg system COM is over the active support centre"
+  },
+  "omissions": {
+    "controller": "none (RES-85)",
+    "scorer": "none (RES-82/RES-91)",
+    "contact_calibration": "none (RES-84)",
+    "candidate": "none (RES-90)",
+    "arch_dof": "none (locked midfoot nominal, FM-01/FM-02/FM-03)"
+  },
+  "checks": [],
+  "status": "PASS"
+}

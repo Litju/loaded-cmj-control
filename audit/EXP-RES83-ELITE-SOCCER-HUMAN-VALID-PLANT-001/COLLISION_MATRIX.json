@@ -1,0 +1,1080 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "COLLISION_MATRIX",
+  "authority": "COLLISION_CONTACT_POLICY CC-01..CC-04; PLANT_TOPOLOGY_AUTHORITY PT-06",
+  "collision_bits": {
+    "floor": {
+      "contype": 1,
+      "conaffinity": 6
+    },
+    "plantar_support": {
+      "contype": 2,
+      "conaffinity": 7
+    },
+    "prohibited": {
+      "contype": 4,
+      "conaffinity": 7
+    }
+  },
+  "excluded_pairs": [
+    [
+      "pelvis",
+      "HAT"
+    ],
+    [
+      "pelvis",
+      "left_thigh"
+    ],
+    [
+      "pelvis",
+      "right_thigh"
+    ],
+    [
+      "left_thigh",
+      "left_shank"
+    ],
+    [
+      "right_thigh",
+      "right_shank"
+    ],
+    [
+      "left_shank",
+      "left_hindfoot"
+    ],
+    [
+      "right_shank",
+      "right_hindfoot"
+    ],
+    [
+      "left_hindfoot",
+      "left_forefoot"
+    ],
+    [
+      "right_hindfoot",
+      "right_forefoot"
+    ],
+    [
+      "left_forefoot",
+      "left_toe"
+    ],
+    [
+      "right_forefoot",
+      "right_toe"
+    ],
+    [
+      "HAT",
+      "bar"
+    ]
+  ],
+  "effective_disabled_pairs": [
+    {
+      "body1": "pelvis",
+      "body2": "HAT",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "bar",
+      "reason": "weld_aware_parent_filter"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "left_thigh",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "right_thigh",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "HAT",
+      "body2": "bar",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "left_shank",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "left_hindfoot",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "left_forefoot",
+      "reason": "weld_aware_parent_filter"
+    },
+    {
+      "body1": "left_hindfoot",
+      "body2": "left_forefoot",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "left_hindfoot",
+      "body2": "left_toe",
+      "reason": "weld_aware_parent_filter"
+    },
+    {
+      "body1": "left_forefoot",
+      "body2": "left_toe",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "right_thigh",
+      "body2": "right_shank",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "right_shank",
+      "body2": "right_hindfoot",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "right_shank",
+      "body2": "right_forefoot",
+      "reason": "weld_aware_parent_filter"
+    },
+    {
+      "body1": "right_hindfoot",
+      "body2": "right_forefoot",
+      "reason": "explicit_exclude"
+    },
+    {
+      "body1": "right_hindfoot",
+      "body2": "right_toe",
+      "reason": "weld_aware_parent_filter"
+    },
+    {
+      "body1": "right_forefoot",
+      "body2": "right_toe",
+      "reason": "explicit_exclude"
+    }
+  ],
+  "enabled_pair_count": 61,
+  "disabled_pair_count": 17,
+  "matrix": [
+    {
+      "body1": "pelvis",
+      "body2": "HAT",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "trunk-pelvis sagittal hinge: adjacent parent-child, self-contact impossible"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "bar",
+      "enabled": false,
+      "disabled_by": "weld_aware_parent_filter",
+      "authority_basis": "CC-03 adjacent-parent-child rule evaluated through the locked-midfoot weld / rigid attachment (MuJoCo filterparent is weld-aware): geometrically impossible self-contact"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "left_thigh",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "left hip joint: adjacent parent-child, self-contact impossible"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "right_thigh",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "right hip joint: adjacent parent-child, self-contact impossible"
+    },
+    {
+      "body1": "HAT",
+      "body2": "bar",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "intentional rigid bar/HAT attachment contact (UB-10/LB-10)"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "left_shank",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "left knee: adjacent parent-child, self-contact impossible"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "left_hindfoot",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "left ankle: adjacent parent-child, self-contact impossible"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "left_forefoot",
+      "enabled": false,
+      "disabled_by": "weld_aware_parent_filter",
+      "authority_basis": "CC-03 adjacent-parent-child rule evaluated through the locked-midfoot weld / rigid attachment (MuJoCo filterparent is weld-aware): geometrically impossible self-contact"
+    },
+    {
+      "body1": "left_hindfoot",
+      "body2": "left_forefoot",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "locked midfoot weld: rigidly fixed pair, self-contact impossible"
+    },
+    {
+      "body1": "left_hindfoot",
+      "body2": "left_toe",
+      "enabled": false,
+      "disabled_by": "weld_aware_parent_filter",
+      "authority_basis": "CC-03 adjacent-parent-child rule evaluated through the locked-midfoot weld / rigid attachment (MuJoCo filterparent is weld-aware): geometrically impossible self-contact"
+    },
+    {
+      "body1": "left_forefoot",
+      "body2": "left_toe",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "left MTP hinge: adjacent parent-child, self-contact impossible"
+    },
+    {
+      "body1": "right_thigh",
+      "body2": "right_shank",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "right knee: adjacent parent-child, self-contact impossible"
+    },
+    {
+      "body1": "right_shank",
+      "body2": "right_hindfoot",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "right ankle: adjacent parent-child, self-contact impossible"
+    },
+    {
+      "body1": "right_shank",
+      "body2": "right_forefoot",
+      "enabled": false,
+      "disabled_by": "weld_aware_parent_filter",
+      "authority_basis": "CC-03 adjacent-parent-child rule evaluated through the locked-midfoot weld / rigid attachment (MuJoCo filterparent is weld-aware): geometrically impossible self-contact"
+    },
+    {
+      "body1": "right_hindfoot",
+      "body2": "right_forefoot",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "locked midfoot weld: rigidly fixed pair, self-contact impossible"
+    },
+    {
+      "body1": "right_hindfoot",
+      "body2": "right_toe",
+      "enabled": false,
+      "disabled_by": "weld_aware_parent_filter",
+      "authority_basis": "CC-03 adjacent-parent-child rule evaluated through the locked-midfoot weld / rigid attachment (MuJoCo filterparent is weld-aware): geometrically impossible self-contact"
+    },
+    {
+      "body1": "right_forefoot",
+      "body2": "right_toe",
+      "enabled": false,
+      "disabled_by": "explicit_exclude",
+      "authority_basis": "right MTP hinge: adjacent parent-child, self-contact impossible"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "left_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "left_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "left_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "left_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "right_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "right_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "right_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "pelvis",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "left_thigh",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "left_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "left_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "left_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "left_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "right_thigh",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "right_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "right_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "right_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "HAT",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "left_thigh",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "left_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "left_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "left_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "left_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "right_thigh",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "right_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "right_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "right_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "bar",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "left_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "left_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "left_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "right_thigh",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "right_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "right_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "right_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_thigh",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "left_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "right_thigh",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "right_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "right_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "right_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_shank",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_hindfoot",
+      "body2": "right_thigh",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_hindfoot",
+      "body2": "right_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_hindfoot",
+      "body2": "right_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_hindfoot",
+      "body2": "right_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_hindfoot",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_forefoot",
+      "body2": "right_thigh",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_forefoot",
+      "body2": "right_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_forefoot",
+      "body2": "right_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_forefoot",
+      "body2": "right_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_forefoot",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_toe",
+      "body2": "right_thigh",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_toe",
+      "body2": "right_shank",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_toe",
+      "body2": "right_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_toe",
+      "body2": "right_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "left_toe",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "right_thigh",
+      "body2": "right_hindfoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "right_thigh",
+      "body2": "right_forefoot",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "right_thigh",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    },
+    {
+      "body1": "right_shank",
+      "body2": "right_toe",
+      "enabled": true,
+      "disabled_by": null,
+      "authority_basis": "CC-03 enabled class"
+    }
+  ],
+  "prohibited_floor_probes": [
+    {
+      "body": "pelvis",
+      "press_depth_m": 0.95,
+      "hit_geoms": [
+        "pelvis_collision"
+      ],
+      "contact": true
+    },
+    {
+      "body": "HAT",
+      "press_depth_m": 1.1,
+      "hit_geoms": [
+        "hat_torso_collision"
+      ],
+      "contact": true
+    },
+    {
+      "body": "left_thigh",
+      "press_depth_m": 0.5,
+      "hit_geoms": [
+        "left_thigh_collision"
+      ],
+      "contact": true
+    },
+    {
+      "body": "right_thigh",
+      "press_depth_m": 0.5,
+      "hit_geoms": [
+        "right_thigh_collision"
+      ],
+      "contact": true
+    },
+    {
+      "body": "left_shank",
+      "press_depth_m": 0.5,
+      "hit_geoms": [
+        "left_shank_collision"
+      ],
+      "contact": true
+    },
+    {
+      "body": "right_shank",
+      "press_depth_m": 0.5,
+      "hit_geoms": [
+        "right_shank_collision"
+      ],
+      "contact": true
+    },
+    {
+      "body": "bar",
+      "press_depth_m": 1.56,
+      "hit_geoms": [
+        "bar_sleeve_left",
+        "bar_sleeve_right"
+      ],
+      "contact": true
+    }
+  ],
+  "checks": [
+    {
+      "check": "declared_matches_empirical",
+      "pass": true,
+      "declared_only": [],
+      "empirical_only": []
+    },
+    {
+      "check": "bar_vs_lower_limb",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_thigh|right_thigh",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_thigh|right_shank",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_thigh|right_hindfoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_thigh|right_forefoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_thigh|right_toe",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_shank|right_thigh",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_shank|right_shank",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_shank|right_hindfoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_shank|right_forefoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_shank|right_toe",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_hindfoot|right_thigh",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_hindfoot|right_shank",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_hindfoot|right_hindfoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_hindfoot|right_forefoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_hindfoot|right_toe",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_forefoot|right_thigh",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_forefoot|right_shank",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_forefoot|right_hindfoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_forefoot|right_forefoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_forefoot|right_toe",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_toe|right_thigh",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_toe|right_shank",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_toe|right_hindfoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_toe|right_forefoot",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot:left_toe|right_toe",
+      "pass": true
+    },
+    {
+      "check": "nonadjacent:pelvis|left_shank",
+      "pass": true
+    },
+    {
+      "check": "nonadjacent:pelvis|left_toe",
+      "pass": true
+    },
+    {
+      "check": "nonadjacent:HAT|left_thigh",
+      "pass": true
+    },
+    {
+      "check": "nonadjacent:left_thigh|left_hindfoot",
+      "pass": true
+    },
+    {
+      "check": "nonadjacent:left_shank|left_toe",
+      "pass": true
+    },
+    {
+      "check": "nonadjacent:left_hindfoot|right_forefoot",
+      "pass": true
+    },
+    {
+      "check": "support_bits:left_heel_support",
+      "pass": true
+    },
+    {
+      "check": "support_bits:left_forefoot_support",
+      "pass": true
+    },
+    {
+      "check": "support_bits:left_toe_support",
+      "pass": true
+    },
+    {
+      "check": "support_bits:right_heel_support",
+      "pass": true
+    },
+    {
+      "check": "support_bits:right_forefoot_support",
+      "pass": true
+    },
+    {
+      "check": "support_bits:right_toe_support",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:pelvis_collision",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:hat_torso_collision",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:hat_head_collision",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:left_thigh_collision",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:right_thigh_collision",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:left_shank_collision",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:right_shank_collision",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:bar_shaft",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:bar_sleeve_left",
+      "pass": true
+    },
+    {
+      "check": "prohibited_bits:bar_sleeve_right",
+      "pass": true
+    },
+    {
+      "check": "floor_bits",
+      "pass": true
+    },
+    {
+      "check": "prohibited_floor_reachable:pelvis",
+      "pass": true,
+      "hit_geoms": [
+        "pelvis_collision"
+      ]
+    },
+    {
+      "check": "prohibited_floor_reachable:HAT",
+      "pass": true,
+      "hit_geoms": [
+        "hat_torso_collision"
+      ]
+    },
+    {
+      "check": "prohibited_floor_reachable:left_thigh",
+      "pass": true,
+      "hit_geoms": [
+        "left_thigh_collision"
+      ]
+    },
+    {
+      "check": "prohibited_floor_reachable:right_thigh",
+      "pass": true,
+      "hit_geoms": [
+        "right_thigh_collision"
+      ]
+    },
+    {
+      "check": "prohibited_floor_reachable:left_shank",
+      "pass": true,
+      "hit_geoms": [
+        "left_shank_collision"
+      ]
+    },
+    {
+      "check": "prohibited_floor_reachable:right_shank",
+      "pass": true,
+      "hit_geoms": [
+        "right_shank_collision"
+      ]
+    },
+    {
+      "check": "prohibited_floor_reachable:bar",
+      "pass": true,
+      "hit_geoms": [
+        "bar_sleeve_left",
+        "bar_sleeve_right"
+      ]
+    },
+    {
+      "check": "support_not_prohibited:left_forefoot",
+      "pass": true
+    },
+    {
+      "check": "support_not_prohibited:right_forefoot",
+      "pass": true
+    },
+    {
+      "check": "support_not_prohibited:left_toe",
+      "pass": true
+    },
+    {
+      "check": "support_not_prohibited:right_toe",
+      "pass": true
+    },
+    {
+      "check": "exclusion_count",
+      "pass": true
+    },
+    {
+      "check": "floor_enabled:bar_shaft",
+      "pass": true
+    },
+    {
+      "check": "floor_enabled:bar_sleeve_left",
+      "pass": true
+    },
+    {
+      "check": "floor_enabled:bar_sleeve_right",
+      "pass": true
+    },
+    {
+      "check": "floor_enabled:left_heel_support",
+      "pass": true
+    },
+    {
+      "check": "floor_enabled:left_forefoot_support",
+      "pass": true
+    },
+    {
+      "check": "floor_enabled:left_toe_support",
+      "pass": true
+    },
+    {
+      "check": "floor_enabled:right_heel_support",
+      "pass": true
+    },
+    {
+      "check": "floor_enabled:right_forefoot_support",
+      "pass": true
+    },
+    {
+      "check": "floor_enabled:right_toe_support",
+      "pass": true
+    },
+    {
+      "check": "opposite_foot_support_support",
+      "pass": true
+    }
+  ],
+  "status": "PASS"
+}

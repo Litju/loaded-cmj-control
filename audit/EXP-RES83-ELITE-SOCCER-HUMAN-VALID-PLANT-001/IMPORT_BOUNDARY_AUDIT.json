@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "IMPORT_BOUNDARY_AUDIT",
+  "authority": "RES-83 mission: no R001/V2 controller or trajectory assumptions imported",
+  "modules": [
+    {
+      "file": "src/loaded_cmj/v3/__init__.py",
+      "imports": [
+        "loaded_cmj.v3.constants",
+        "loaded_cmj.v3.plant"
+      ]
+    },
+    {
+      "file": "src/loaded_cmj/v3/constants.py",
+      "imports": [
+        "__future__",
+        "types"
+      ]
+    },
+    {
+      "file": "src/loaded_cmj/v3/plant.py",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "importlib",
+        "loaded_cmj.v3.constants",
+        "math",
+        "mujoco",
+        "numpy",
+        "typing"
+      ]
+    }
+  ],
+  "plant_code_level_independence": {
+    "pass": true,
+    "modules_loaded": [
+      "loaded_cmj",
+      "loaded_cmj.v3",
+      "loaded_cmj.v3.assets",
+      "loaded_cmj.v3.constants",
+      "loaded_cmj.v3.plant"
+    ],
+    "forbidden_loaded": [],
+    "subprocess_exit": 0
+  },
+  "package_init_disclosure": {
+    "property": "the tracked repository-root src/loaded_cmj/__init__.py eagerly imports loaded_cmj.runtime.engine, so a plain `import loaded_cmj.v3.plant` also loads the pre-existing V1/V2 runtime packages as a package-initialization side effect",
+    "scope": "pre-existing repository property, tracked before RES-83 and unmodified by RES-83; outside the RES-83 write scope",
+    "v3_dependency": false,
+    "evidence": "plant_code_level_independence check (stub root package)"
+  },
+  "checks": [
+    {
+      "check": "no_forbidden_imports:__init__.py",
+      "pass": true,
+      "offending": []
+    },
+    {
+      "check": "allowed_top_level:__init__.py",
+      "pass": true,
+      "unexpected": []
+    },
+    {
+      "check": "no_v2_r001_identifiers:__init__.py",
+      "pass": true,
+      "offending": []
+    },
+    {
+      "check": "no_forbidden_imports:constants.py",
+      "pass": true,
+      "offending": []
+    },
+    {
+      "check": "allowed_top_level:constants.py",
+      "pass": true,
+      "unexpected": []
+    },
+    {
+      "check": "no_v2_r001_identifiers:constants.py",
+      "pass": true,
+      "offending": []
+    },
+    {
+      "check": "no_forbidden_imports:plant.py",
+      "pass": true,
+      "offending": []
+    },
+    {
+      "check": "allowed_top_level:plant.py",
+      "pass": true,
+      "unexpected": []
+    },
+    {
+      "check": "no_v2_r001_identifiers:plant.py",
+      "pass": true,
+      "offending": []
+    },
+    {
+      "check": "plant_instantiates_without_controller_or_runtime_modules",
+      "pass": true,
+      "modules_loaded": [
+        "loaded_cmj",
+        "loaded_cmj.v3",
+        "loaded_cmj.v3.assets",
+        "loaded_cmj.v3.constants",
+        "loaded_cmj.v3.plant"
+      ],
+      "forbidden_loaded": []
+    }
+  ],
+  "status": "PASS"
+}

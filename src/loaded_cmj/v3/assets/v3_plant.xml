@@ -1,0 +1,298 @@
+<!--
+  LCMJ Plant V3 — elite-soccer human-valid 20 kg loaded CMJ Plant.
+
+  MODEL_REVISION = loaded-cmj-model-3
+  MODEL_ID       = loaded-cmj-20kg-elite-soccer-v3
+  AUTHORITY      = LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1
+                   (audit/EXP-RES95-ELITE-SOCCER-PLANT-MODEL-AUTHORITY-001/)
+
+  This file implements the sealed RES-95 model authority and nothing else.
+  V1 (assets/loaded_jump_athlete.xml) and V2 (v2/assets/v2_plant.xml) remain
+  untouched historical implementations; no V2 controller/trajectory
+  assumption is imported here.
+
+  Compiled identity asserted at construction by loaded_cmj.v3.plant.V3Plant:
+    nbody = 14 (world + pelvis + HAT + bar + 2x(thigh, shank, hindfoot, forefoot, toe))
+    njnt  = 12 (root_tx, root_tz, root_ry, trunk_pelvis, 2x(hip, knee, ankle, mtp))
+    nq    = 12, nv = 12, nu = 9, neq = 0, na = 0
+
+  Planar root: unconstrained tx/tz/ry floating base, exactly zero
+  stiffness/damping/armature and no positional catch. Lateral translation,
+  roll and yaw are structurally removed; this is NOT a 6-DOF free joint.
+
+  Units: SI (m, kg, s, rad, N, N*m). angle="radian".
+
+  PROVISIONAL_NUMERICAL (RES-83 instantiates topology only; NOT human
+  physiology, NOT final authority):
+    - solref / solimp: not specified here -> MuJoCo 3.8.0 compiler defaults
+      apply. RES-84/RES-86 own the final values (CC-10/CC-11).
+    - friction: sliding = 0.9 is the RES-95 nominal (CC-06); torsional and
+      rolling components are left at 0.0 as provisional placeholders; the
+      numeric values are owned by RES-84 (CC-07/CC-08).
+    - margin / gap: not specified here -> compiler defaults.
+    - timestep / integrator / solver: not specified here -> compiler
+      defaults; solver and timestep verification is owned by RES-86 (DF-08).
+    - actuator limits: topology only. gear = 1 so ctrl is the physical net
+      joint moment in N*m; ctrllimited/forcelimited are false: torque, rate
+      and power caps are RES-85 authority (DF-03/DF-04) and are NOT frozen
+      here.
+-->
+<mujoco model="loaded-cmj-20kg-elite-soccer-v3">
+  <compiler angle="radian" coordinate="local" inertiafromgeom="false"
+            eulerseq="xyz" autolimits="true"/>
+
+  <default>
+    <!-- Major joints: authority passive defaults are exactly zero
+         (PT-07). The MTP passive engineering prior (FM-09) is set on the
+         MTP joints themselves. -->
+    <joint type="hinge" limited="true" stiffness="0" damping="0" armature="0"/>
+    <geom condim="3" friction="0.9 0 0" rgba="0.55 0.60 0.68 1"/>
+    <motor gear="1" ctrllimited="false" forcelimited="false"/>
+  </default>
+
+  <worldbody>
+    <light name="key" pos="1.5 -1.5 3.0" dir="-0.4 0.4 -1" directional="true"/>
+
+    <!-- Floor. Legal support is created only by the plantar support regions
+         (heel / forefoot / toe) of either foot (CC-01). Pelvis, HAT, thigh,
+         shank and bar carry fail-register collision shells that CAN contact
+         the floor (CC-02); no disabled shell is used as prohibited-contact
+         evidence. -->
+    <geom name="floor" type="plane" pos="0 0 0" size="0 0 0.05"
+          contype="1" conaffinity="6" condim="3"
+          friction="0.9 0 0" rgba="0.35 0.37 0.40 1"/>
+
+    <!-- ================= planar root body ================= -->
+    <!-- Unconstrained planar floating base: root_tx, root_tz, root_ry.
+         No spring, no damping, no armature, no positional limit, no catch. -->
+    <body name="pelvis" pos="0 0 0" quat="1 0 0 0">
+      <joint name="root_tx" type="slide" axis="1 0 0" limited="false"
+             stiffness="0" damping="0" armature="0"/>
+      <joint name="root_tz" type="slide" axis="0 0 1" limited="false"
+             stiffness="0" damping="0" armature="0"/>
+      <joint name="root_ry" type="hinge" axis="0 1 0" limited="false"
+             stiffness="0" damping="0" armature="0"/>
+      <!-- de Leva lower trunk (LPT): pelvis at MIDH, COM +0.059660635 m above MIDH.
+           AB-08 / DERIVED_QUANTITIES.pelvis -->
+      <inertial pos="0 0 0.05966063512349223" quat="1 0 0 0" mass="8.8243"
+                diaginertia="0.06317964198451871 0.07870896370431779 0.07170511974256877"/>
+      <!-- fail-register shell (floor contact = task failure, CC-02) -->
+      <geom name="pelvis_collision" type="box" pos="0 0 0.03" size="0.09 0.12 0.07"
+            contype="4" conaffinity="7" rgba="0.55 0.60 0.68 1"/>
+
+      <!-- ================= reduced HAT ================= -->
+      <!-- HAT body frame origin at MIDH (trunk-pelvis hinge center);
+           axes equal model axes at the reference trunk-upright posture
+           (UB-02). Fixed bar-hold reduction: head + upper/middle trunk +
+           2x(upper arm, forearm, hand). Arms/hands are not articulated
+           (UB-10): no arm-swing DOF exists. -->
+      <body name="HAT" pos="0 0 0" quat="1 0 0 0">
+        <joint name="trunk_pelvis" type="hinge" axis="0 1 0"
+               range="-0.610865 0.610865" limited="true"
+               stiffness="0" damping="0" armature="0"/>
+        <!-- UB-03/UB-04/UB-05: mass 38.7969 kg, COM (-0.015964566, 0, 0.449673876),
+             full inertia about COM (Ixz = -0.020779449 preserved) -->
+        <inertial pos="-0.01596456566162191 0 0.4496738763907584"
+                  mass="38.7969"
+                  fullinertia="1.692352492111382 1.4753589080582343 0.8504250560234003 0.0 -0.02077944879714553 0.0"/>
+        <!-- RES-83 collision shell above the sole; fail register (CC-02). -->
+        <geom name="hat_torso_collision" type="capsule"
+              fromto="0 0 0.20 0 0 0.58" size="0.105"
+              contype="4" conaffinity="7" rgba="0.55 0.60 0.68 1"/>
+        <geom name="hat_head_collision" type="sphere" pos="0 0 0.785" size="0.105"
+              contype="4" conaffinity="7" rgba="0.55 0.60 0.68 1"/>
+
+        <!-- ================= composite IWF load bar ================= -->
+        <!-- Rigidly attached to the HAT (UB-07/UB-10): implied fixed joint,
+             no bar-roll / bar-flex / hand-compliance DOF.
+             Placement in HAT frame: (-0.095, 0, 0.600), identity orientation.
+             Inertia about COM: I_transverse 11.755856968, I_axis 0.004786778
+             (LB-08) — NOT a uniform 2.2 m x 28 mm rod surrogate.
+             Collision: coaxial stepped cylinder, central shaft
+             1.370 m x 0.028 m + two sleeves 0.415 m x 0.050 m (LB-07/LB-09). -->
+        <body name="bar" pos="-0.095 0 0.6" quat="1 0 0 0">
+          <inertial pos="0 0 0" quat="1 0 0 0" mass="20.0"
+                    diaginertia="11.75585696777048 0.004786777979600392 11.75585696777048"/>
+          <!-- shaft: half-length 0.685, radius 0.014, axis along +y -->
+          <geom name="bar_shaft" type="cylinder" size="0.014 0.685"
+                quat="0.7071067811865476 -0.7071067811865476 0 0"
+                contype="4" conaffinity="7" rgba="0.75 0.35 0.15 1"/>
+          <!-- sleeves: span |y| in [0.685, 1.100], half-length 0.2075, radius 0.025 -->
+          <geom name="bar_sleeve_left" type="cylinder" pos="0 0.8925 0" size="0.025 0.2075"
+                quat="0.7071067811865476 -0.7071067811865476 0 0"
+                contype="4" conaffinity="7" rgba="0.55 0.58 0.62 1"/>
+          <geom name="bar_sleeve_right" type="cylinder" pos="0 -0.8925 0" size="0.025 0.2075"
+                quat="0.7071067811865476 -0.7071067811865476 0 0"
+                contype="4" conaffinity="7" rgba="0.55 0.58 0.62 1"/>
+        </body>
+      </body>
+
+      <!-- ================= left lower limb ================= -->
+      <!-- Leg plane centerline y = +0.085 (SL-01; reduced-model geometry). -->
+      <body name="left_thigh" pos="0 0.085 0" quat="1 0 0 0">
+        <joint name="left_hip" type="hinge" axis="0 -1 0"
+               range="-0.349066 2.268928" limited="true"
+               stiffness="0" damping="0" armature="0"/>
+        <!-- AB-14: mass 11.1864 kg, COM 0.182222381 m below HJC -->
+        <inertial pos="0 0 -0.18222238125" quat="1 0 0 0" mass="11.1864"
+                  diaginertia="0.23976057065071502 0.23976057065071502 0.04917660063207587"/>
+        <geom name="left_thigh_collision" type="capsule"
+              fromto="0 0 -0.03 0 0 -0.42" size="0.065"
+              contype="4" conaffinity="7" rgba="0.20 0.45 0.30 1"/>
+
+        <body name="left_shank" pos="0 0 -0.4449875" quat="1 0 0 0">
+          <joint name="left_knee" type="hinge" axis="0 1 0"
+                 range="0 2.443461" limited="true"
+                 stiffness="0" damping="0" armature="0"/>
+          <!-- AB-14: mass 3.4207 kg, COM 0.203983866 m below KJC -->
+          <inertial pos="0 0 -0.20398386645" quat="1 0 0 0" mass="3.4207"
+                    diaginertia="0.04438440231686326 0.04654918083021296 0.007594621444486416"/>
+          <geom name="left_shank_collision" type="capsule"
+                fromto="0 0 -0.03 0 0 -0.43" size="0.05"
+                contype="4" conaffinity="7" rgba="0.20 0.45 0.30 1"/>
+
+          <!-- hindfoot body frame origin at the ankle joint center; +x
+               anterior, +z superior; sole plane z = -0.071565 (FM-07/FM-13).
+               Ankle joint center 0.055 m from the heel. -->
+          <body name="left_hindfoot" pos="0 0 -0.4574655" quat="1 0 0 0">
+            <joint name="left_ankle" type="hinge" axis="0 -1 0"
+                   range="-0.959931 0.785398" limited="true"
+                   stiffness="0" damping="0" armature="0"/>
+            <!-- FM-04/FM-07/FM-08: hindfoot mass 0.4675536 kg, COM (0.00831, 0, -0.0277) -->
+            <inertial pos="0.00831 0 -0.0277" quat="1 0 0 0" mass="0.4675536"
+                      diaginertia="0.0004337502415040432 0.0005182470417970387 0.0004168508814454441"/>
+            <!-- plantar support region HEEL (legal floor support, CC-01):
+                 x in [-0.055, 0.015] (0.000..0.070 from the heel), width 0.070.
+                 Bottom face exactly on the sole plane z = -0.071565. -->
+            <geom name="left_heel_support" type="box" pos="-0.02 0 -0.066565"
+                  size="0.035 0.035 0.005" contype="2" conaffinity="7" condim="4"
+                  friction="0.9 0 0" rgba="0.20 0.45 0.30 1"/>
+
+            <!-- forefoot body welded to hindfoot (FM-01/FM-02/FM-03 locked
+                 midfoot: no midtarsal DOF, no unapproved arch DOF). -->
+            <body name="left_forefoot" pos="0.015 0 -0.05" quat="1 0 0 0">
+              <!-- FM-07/FM-08: mass 0.4588952 kg, COM in ankle frame
+                   (0.07208875, 0, -0.04581) -->
+              <inertial pos="0.05708875 0 0.00419" quat="1 0 0 0" mass="0.4588952"
+                        diaginertia="0.0003822233613175279 0.0004723188679138023 0.0006006367106418295"/>
+              <!-- plantar support region FOREFOOT: x 0.070..0.20625 from the
+                   heel, width 0.105. Bottom face on the sole plane. -->
+              <geom name="left_forefoot_support" type="box" pos="0.068125 0 -0.016565"
+                    size="0.068125 0.0525 0.005" contype="2" conaffinity="7" condim="4"
+                    friction="0.9 0 0" rgba="0.20 0.45 0.30 1"/>
+
+              <body name="left_toe" pos="0.13625 0 0.01" quat="1 0 0 0">
+                <joint name="left_mtp" type="hinge" axis="0 -1 0"
+                       range="-0.523599 1.570796" limited="true"
+                       stiffness="25.0" damping="2.0" armature="0"/>
+                <!-- FM-09 passive engineering prior: neutral 0.0,
+                     k = 25.0 N*m/rad, c = 2.0 N*m*s/rad; active channel in
+                     parallel (FM-10). Not tuned for jump performance. -->
+                <!-- FM-04/FM-07/FM-08: phalanx mass 0.1558512 kg, COM
+                     (0.029975, 0, 0) in the MTP frame -->
+                <inertial pos="0.029975 0 0" quat="1 0 0 0" mass="0.1558512"
+                          diaginertia="0.0001150951698085389 6.454356581420024e-05 0.00015255751919720058"/>
+                <!-- plantar support region TOE: x 0.20625..0.275 from the
+                     heel, width 0.090. Bottom face on the sole plane at rest. -->
+                <geom name="left_toe_support" type="box" pos="0.034375 0 -0.026565"
+                      size="0.034375 0.045 0.005" contype="2" conaffinity="7" condim="4"
+                      friction="0.9 0 0" rgba="0.20 0.45 0.30 1"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <!-- ================= right lower limb ================= -->
+      <!-- Leg plane centerline y = -0.085 (SL-01). -->
+      <body name="right_thigh" pos="0 -0.085 0" quat="1 0 0 0">
+        <joint name="right_hip" type="hinge" axis="0 -1 0"
+               range="-0.349066 2.268928" limited="true"
+               stiffness="0" damping="0" armature="0"/>
+        <inertial pos="0 0 -0.18222238125" quat="1 0 0 0" mass="11.1864"
+                  diaginertia="0.23976057065071502 0.23976057065071502 0.04917660063207587"/>
+        <geom name="right_thigh_collision" type="capsule"
+              fromto="0 0 -0.03 0 0 -0.42" size="0.065"
+              contype="4" conaffinity="7" rgba="0.20 0.45 0.30 1"/>
+
+        <body name="right_shank" pos="0 0 -0.4449875" quat="1 0 0 0">
+          <joint name="right_knee" type="hinge" axis="0 1 0"
+                 range="0 2.443461" limited="true"
+                 stiffness="0" damping="0" armature="0"/>
+          <inertial pos="0 0 -0.20398386645" quat="1 0 0 0" mass="3.4207"
+                    diaginertia="0.04438440231686326 0.04654918083021296 0.007594621444486416"/>
+          <geom name="right_shank_collision" type="capsule"
+                fromto="0 0 -0.03 0 0 -0.43" size="0.05"
+                contype="4" conaffinity="7" rgba="0.20 0.45 0.30 1"/>
+
+          <body name="right_hindfoot" pos="0 0 -0.4574655" quat="1 0 0 0">
+            <joint name="right_ankle" type="hinge" axis="0 -1 0"
+                   range="-0.959931 0.785398" limited="true"
+                   stiffness="0" damping="0" armature="0"/>
+            <inertial pos="0.00831 0 -0.0277" quat="1 0 0 0" mass="0.4675536"
+                      diaginertia="0.0004337502415040432 0.0005182470417970387 0.0004168508814454441"/>
+            <geom name="right_heel_support" type="box" pos="-0.02 0 -0.066565"
+                  size="0.035 0.035 0.005" contype="2" conaffinity="7" condim="4"
+                  friction="0.9 0 0" rgba="0.20 0.45 0.30 1"/>
+
+            <body name="right_forefoot" pos="0.015 0 -0.05" quat="1 0 0 0">
+              <inertial pos="0.05708875 0 0.00419" quat="1 0 0 0" mass="0.4588952"
+                        diaginertia="0.0003822233613175279 0.0004723188679138023 0.0006006367106418295"/>
+              <geom name="right_forefoot_support" type="box" pos="0.068125 0 -0.016565"
+                    size="0.068125 0.0525 0.005" contype="2" conaffinity="7" condim="4"
+                    friction="0.9 0 0" rgba="0.20 0.45 0.30 1"/>
+
+              <body name="right_toe" pos="0.13625 0 0.01" quat="1 0 0 0">
+                <joint name="right_mtp" type="hinge" axis="0 -1 0"
+                       range="-0.523599 1.570796" limited="true"
+                       stiffness="25.0" damping="2.0" armature="0"/>
+                <inertial pos="0.029975 0 0" quat="1 0 0 0" mass="0.1558512"
+                          diaginertia="0.0001150951698085389 6.454356581420024e-05 0.00015255751919720058"/>
+                <geom name="right_toe_support" type="box" pos="0.034375 0 -0.026565"
+                      size="0.034375 0.045 0.005" contype="2" conaffinity="7" condim="4"
+                      friction="0.9 0 0" rgba="0.20 0.45 0.30 1"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- Collision exclusions with exact RES-95 rationale (CC-03).
+       Enabled by the contype/conaffinity matrix: plantar regions vs floor,
+       bar vs floor (fail register), bar vs non-attached lower limb,
+       opposite-foot collisions and non-adjacent self-collision where
+       physically possible. The exclusions below are the only ones. -->
+  <contact>
+    <!-- adjacent anatomical parent-child pairs where self-contact is impossible -->
+    <exclude body1="pelvis" body2="HAT"/>                 <!-- trunk-pelvis sagittal hinge -->
+    <exclude body1="pelvis" body2="left_thigh"/>          <!-- left hip -->
+    <exclude body1="pelvis" body2="right_thigh"/>         <!-- right hip -->
+    <exclude body1="left_thigh" body2="left_shank"/>      <!-- left knee -->
+    <exclude body1="right_thigh" body2="right_shank"/>    <!-- right knee -->
+    <exclude body1="left_shank" body2="left_hindfoot"/>   <!-- left ankle -->
+    <exclude body1="right_shank" body2="right_hindfoot"/> <!-- right ankle -->
+    <exclude body1="left_hindfoot" body2="left_forefoot"/><!-- locked midfoot weld -->
+    <exclude body1="right_hindfoot" body2="right_forefoot"/>
+    <exclude body1="left_forefoot" body2="left_toe"/>     <!-- left MTP -->
+    <exclude body1="right_forefoot" body2="right_toe"/>   <!-- right MTP -->
+    <!-- intentional rigid bar/HAT attachment contact -->
+    <exclude body1="HAT" body2="bar"/>
+  </contact>
+
+  <!-- 9 physical net-moment channels (PT-04), one per actuated joint.
+       Topology only: no torque/rate/power limit is frozen here (DF-03/DF-04
+       belong to RES-85). gear = 1 -> ctrl is the net joint moment in N*m. -->
+  <actuator>
+    <motor name="m_trunk_pelvis" joint="trunk_pelvis"/>
+    <motor name="m_left_hip" joint="left_hip"/>
+    <motor name="m_right_hip" joint="right_hip"/>
+    <motor name="m_left_knee" joint="left_knee"/>
+    <motor name="m_right_knee" joint="right_knee"/>
+    <motor name="m_left_ankle" joint="left_ankle"/>
+    <motor name="m_right_ankle" joint="right_ankle"/>
+    <motor name="m_left_mtp" joint="left_mtp"/>
+    <motor name="m_right_mtp" joint="right_mtp"/>
+  </actuator>
+</mujoco>

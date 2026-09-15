@@ -1,0 +1,1560 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "MODEL_INTROSPECTION",
+  "model_revision": "loaded-cmj-model-3",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+  "counts": {
+    "nbody": 14,
+    "njnt": 12,
+    "nq": 12,
+    "nv": 12,
+    "nu": 9,
+    "neq": 0,
+    "na": 0,
+    "ngeom": 17,
+    "ntendon": 0,
+    "nmocap": 0,
+    "nq_expected": 12
+  },
+  "options": {
+    "timestep_s": 0.002,
+    "integrator": 0,
+    "solver": 2,
+    "cone": 0,
+    "gravity": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "disableflags": 0,
+    "filterparent_enabled": true
+  },
+  "bodies": [
+    {
+      "id": 0,
+      "name": "world",
+      "parent": 0,
+      "mass_kg": 0.0,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "diaginertia_kg_m2": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 1,
+      "name": "pelvis",
+      "parent": 0,
+      "mass_kg": 8.8243,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        0.05966063512349223
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.0,
+        0.0,
+        0.05966063512349223
+      ],
+      "diaginertia_kg_m2": [
+        0.06317964198451871,
+        0.07870896370431779,
+        0.07170511974256877
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.06317964198451871,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.07870896370431779,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.07170511974256877
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 2,
+      "name": "HAT",
+      "parent": 1,
+      "mass_kg": 38.7969,
+      "com_pos_in_parent_frame_m": [
+        -0.01596456566162191,
+        0.0,
+        0.4496738763907584
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        -0.01596456566162191,
+        0.0,
+        0.4496738763907584
+      ],
+      "diaginertia_kg_m2": [
+        1.6928650336618474,
+        1.4753589080582343,
+        0.8499125144729344
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          1.6923524921113813,
+          0.0,
+          -0.02077944879714251
+        ],
+        [
+          0.0,
+          1.4753589080582343,
+          0.0
+        ],
+        [
+          -0.02077944879714251,
+          0.0,
+          0.8504250560233998
+        ]
+      ],
+      "geom_count": 2
+    },
+    {
+      "id": 3,
+      "name": "bar",
+      "parent": 2,
+      "mass_kg": 20.0,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        -0.095,
+        0.0,
+        0.6
+      ],
+      "diaginertia_kg_m2": [
+        11.75585696777048,
+        0.004786777979600392,
+        11.75585696777048
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          11.75585696777048,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.004786777979600392,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          11.75585696777048
+        ]
+      ],
+      "geom_count": 3
+    },
+    {
+      "id": 4,
+      "name": "left_thigh",
+      "parent": 1,
+      "mass_kg": 11.1864,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        -0.18222238125
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.0,
+        0.085,
+        -0.18222238125
+      ],
+      "diaginertia_kg_m2": [
+        0.23976057065071502,
+        0.23976057065071502,
+        0.04917660063207587
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.23976057065071502,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.23976057065071502,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.04917660063207587
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 5,
+      "name": "left_shank",
+      "parent": 4,
+      "mass_kg": 3.4207,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        -0.20398386645
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.0,
+        0.085,
+        -0.64897136645
+      ],
+      "diaginertia_kg_m2": [
+        0.04438440231686326,
+        0.04654918083021296,
+        0.007594621444486416
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.04438440231686326,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.04654918083021296,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.007594621444486416
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 6,
+      "name": "left_hindfoot",
+      "parent": 5,
+      "mass_kg": 0.4675536,
+      "com_pos_in_parent_frame_m": [
+        0.00831,
+        0.0,
+        -0.0277
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.00831,
+        0.085,
+        -0.9301529999999999
+      ],
+      "diaginertia_kg_m2": [
+        0.0004337502415040432,
+        0.0005182470417970387,
+        0.0004168508814454441
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.0004337502415040432,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0005182470417970387,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0004168508814454441
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 7,
+      "name": "left_forefoot",
+      "parent": 6,
+      "mass_kg": 0.4588952,
+      "com_pos_in_parent_frame_m": [
+        0.05708875,
+        0.0,
+        0.00419
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.07208875000000001,
+        0.085,
+        -0.948263
+      ],
+      "diaginertia_kg_m2": [
+        0.0003822233613175279,
+        0.0004723188679138023,
+        0.0006006367106418295
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.0003822233613175279,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0004723188679138023,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0006006367106418295
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 8,
+      "name": "left_toe",
+      "parent": 7,
+      "mass_kg": 0.1558512,
+      "com_pos_in_parent_frame_m": [
+        0.029975,
+        0.0,
+        0.0
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.181225,
+        0.085,
+        -0.942453
+      ],
+      "diaginertia_kg_m2": [
+        0.0001150951698085389,
+        6.454356581420024e-05,
+        0.00015255751919720058
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.0001150951698085389,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          6.454356581420024e-05,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.00015255751919720058
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 9,
+      "name": "right_thigh",
+      "parent": 1,
+      "mass_kg": 11.1864,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        -0.18222238125
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.0,
+        -0.085,
+        -0.18222238125
+      ],
+      "diaginertia_kg_m2": [
+        0.23976057065071502,
+        0.23976057065071502,
+        0.04917660063207587
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.23976057065071502,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.23976057065071502,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.04917660063207587
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 10,
+      "name": "right_shank",
+      "parent": 9,
+      "mass_kg": 3.4207,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        -0.20398386645
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.0,
+        -0.085,
+        -0.64897136645
+      ],
+      "diaginertia_kg_m2": [
+        0.04438440231686326,
+        0.04654918083021296,
+        0.007594621444486416
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.04438440231686326,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.04654918083021296,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.007594621444486416
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 11,
+      "name": "right_hindfoot",
+      "parent": 10,
+      "mass_kg": 0.4675536,
+      "com_pos_in_parent_frame_m": [
+        0.00831,
+        0.0,
+        -0.0277
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.00831,
+        -0.085,
+        -0.9301529999999999
+      ],
+      "diaginertia_kg_m2": [
+        0.0004337502415040432,
+        0.0005182470417970387,
+        0.0004168508814454441
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.0004337502415040432,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0005182470417970387,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0004168508814454441
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 12,
+      "name": "right_forefoot",
+      "parent": 11,
+      "mass_kg": 0.4588952,
+      "com_pos_in_parent_frame_m": [
+        0.05708875,
+        0.0,
+        0.00419
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.07208875000000001,
+        -0.085,
+        -0.948263
+      ],
+      "diaginertia_kg_m2": [
+        0.0003822233613175279,
+        0.0004723188679138023,
+        0.0006006367106418295
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.0003822233613175279,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0004723188679138023,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0006006367106418295
+        ]
+      ],
+      "geom_count": 1
+    },
+    {
+      "id": 13,
+      "name": "right_toe",
+      "parent": 12,
+      "mass_kg": 0.1558512,
+      "com_pos_in_parent_frame_m": [
+        0.029975,
+        0.0,
+        0.0
+      ],
+      "com_pos_world_at_zero_qpos_m": [
+        0.181225,
+        -0.085,
+        -0.942453
+      ],
+      "diaginertia_kg_m2": [
+        0.0001150951698085389,
+        6.454356581420024e-05,
+        0.00015255751919720058
+      ],
+      "full_inertia_about_com_kg_m2": [
+        [
+          0.0001150951698085389,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          6.454356581420024e-05,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.00015255751919720058
+        ]
+      ],
+      "geom_count": 1
+    }
+  ],
+  "joints": [
+    {
+      "id": 0,
+      "name": "root_tx",
+      "type": 2,
+      "qpos_adr": 0,
+      "dof_adr": 0,
+      "axis": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "range_rad": [
+        0.0,
+        0.0
+      ],
+      "limited": false,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 1,
+      "name": "root_tz",
+      "type": 2,
+      "qpos_adr": 1,
+      "dof_adr": 1,
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "range_rad": [
+        0.0,
+        0.0
+      ],
+      "limited": false,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 2,
+      "name": "root_ry",
+      "type": 3,
+      "qpos_adr": 2,
+      "dof_adr": 2,
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "range_rad": [
+        0.0,
+        0.0
+      ],
+      "limited": false,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 3,
+      "name": "trunk_pelvis",
+      "type": 3,
+      "qpos_adr": 3,
+      "dof_adr": 3,
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.610865,
+        0.610865
+      ],
+      "limited": true,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 4,
+      "name": "left_hip",
+      "type": 3,
+      "qpos_adr": 4,
+      "dof_adr": 4,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.349066,
+        2.268928
+      ],
+      "limited": true,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 5,
+      "name": "left_knee",
+      "type": 3,
+      "qpos_adr": 5,
+      "dof_adr": 5,
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "range_rad": [
+        0.0,
+        2.443461
+      ],
+      "limited": true,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 6,
+      "name": "left_ankle",
+      "type": 3,
+      "qpos_adr": 6,
+      "dof_adr": 6,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.959931,
+        0.785398
+      ],
+      "limited": true,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 7,
+      "name": "left_mtp",
+      "type": 3,
+      "qpos_adr": 7,
+      "dof_adr": 7,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.523599,
+        1.570796
+      ],
+      "limited": true,
+      "stiffness": 25.0,
+      "damping": 2.0,
+      "armature": 0.0
+    },
+    {
+      "id": 8,
+      "name": "right_hip",
+      "type": 3,
+      "qpos_adr": 8,
+      "dof_adr": 8,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.349066,
+        2.268928
+      ],
+      "limited": true,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 9,
+      "name": "right_knee",
+      "type": 3,
+      "qpos_adr": 9,
+      "dof_adr": 9,
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "range_rad": [
+        0.0,
+        2.443461
+      ],
+      "limited": true,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 10,
+      "name": "right_ankle",
+      "type": 3,
+      "qpos_adr": 10,
+      "dof_adr": 10,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.959931,
+        0.785398
+      ],
+      "limited": true,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "id": 11,
+      "name": "right_mtp",
+      "type": 3,
+      "qpos_adr": 11,
+      "dof_adr": 11,
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "range_rad": [
+        -0.523599,
+        1.570796
+      ],
+      "limited": true,
+      "stiffness": 25.0,
+      "damping": 2.0,
+      "armature": 0.0
+    }
+  ],
+  "geoms": [
+    {
+      "id": 0,
+      "name": "floor",
+      "type": 0,
+      "body": "world",
+      "contype": 1,
+      "conaffinity": 6,
+      "condim": 3,
+      "size": [
+        0.0,
+        0.0,
+        0.05
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "floor"
+    },
+    {
+      "id": 1,
+      "name": "pelvis_collision",
+      "type": 6,
+      "body": "pelvis",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.09,
+        0.12,
+        0.07
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.0,
+        0.03
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 2,
+      "name": "hat_torso_collision",
+      "type": 3,
+      "body": "HAT",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.105,
+        0.18999999999999997,
+        0.0
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.0,
+        0.39
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 3,
+      "name": "hat_head_collision",
+      "type": 2,
+      "body": "HAT",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.105,
+        0.0,
+        0.0
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.0,
+        0.785
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 4,
+      "name": "bar_shaft",
+      "type": 5,
+      "body": "bar",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.014,
+        0.685,
+        0.0
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 5,
+      "name": "bar_sleeve_left",
+      "type": 5,
+      "body": "bar",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.025,
+        0.2075,
+        0.0
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.8925,
+        0.0
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 6,
+      "name": "bar_sleeve_right",
+      "type": 5,
+      "body": "bar",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.025,
+        0.2075,
+        0.0
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        -0.8925,
+        0.0
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 7,
+      "name": "left_thigh_collision",
+      "type": 3,
+      "body": "left_thigh",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.065,
+        0.195,
+        0.0
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.0,
+        -0.22499999999999998
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 8,
+      "name": "left_shank_collision",
+      "type": 3,
+      "body": "left_shank",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.05,
+        0.2,
+        0.0
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.0,
+        -0.22999999999999998
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 9,
+      "name": "left_heel_support",
+      "type": 6,
+      "body": "left_hindfoot",
+      "contype": 2,
+      "conaffinity": 7,
+      "condim": 4,
+      "size": [
+        0.035,
+        0.035,
+        0.005
+      ],
+      "pos_in_body_frame_m": [
+        -0.02,
+        0.0,
+        -0.066565
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "support"
+    },
+    {
+      "id": 10,
+      "name": "left_forefoot_support",
+      "type": 6,
+      "body": "left_forefoot",
+      "contype": 2,
+      "conaffinity": 7,
+      "condim": 4,
+      "size": [
+        0.068125,
+        0.0525,
+        0.005
+      ],
+      "pos_in_body_frame_m": [
+        0.068125,
+        0.0,
+        -0.016565
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "support"
+    },
+    {
+      "id": 11,
+      "name": "left_toe_support",
+      "type": 6,
+      "body": "left_toe",
+      "contype": 2,
+      "conaffinity": 7,
+      "condim": 4,
+      "size": [
+        0.034375,
+        0.045,
+        0.005
+      ],
+      "pos_in_body_frame_m": [
+        0.034375,
+        0.0,
+        -0.026565
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "support"
+    },
+    {
+      "id": 12,
+      "name": "right_thigh_collision",
+      "type": 3,
+      "body": "right_thigh",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.065,
+        0.195,
+        0.0
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.0,
+        -0.22499999999999998
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 13,
+      "name": "right_shank_collision",
+      "type": 3,
+      "body": "right_shank",
+      "contype": 4,
+      "conaffinity": 7,
+      "condim": 3,
+      "size": [
+        0.05,
+        0.2,
+        0.0
+      ],
+      "pos_in_body_frame_m": [
+        0.0,
+        0.0,
+        -0.22999999999999998
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "prohibited"
+    },
+    {
+      "id": 14,
+      "name": "right_heel_support",
+      "type": 6,
+      "body": "right_hindfoot",
+      "contype": 2,
+      "conaffinity": 7,
+      "condim": 4,
+      "size": [
+        0.035,
+        0.035,
+        0.005
+      ],
+      "pos_in_body_frame_m": [
+        -0.02,
+        0.0,
+        -0.066565
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "support"
+    },
+    {
+      "id": 15,
+      "name": "right_forefoot_support",
+      "type": 6,
+      "body": "right_forefoot",
+      "contype": 2,
+      "conaffinity": 7,
+      "condim": 4,
+      "size": [
+        0.068125,
+        0.0525,
+        0.005
+      ],
+      "pos_in_body_frame_m": [
+        0.068125,
+        0.0,
+        -0.016565
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "support"
+    },
+    {
+      "id": 16,
+      "name": "right_toe_support",
+      "type": 6,
+      "body": "right_toe",
+      "contype": 2,
+      "conaffinity": 7,
+      "condim": 4,
+      "size": [
+        0.034375,
+        0.045,
+        0.005
+      ],
+      "pos_in_body_frame_m": [
+        0.034375,
+        0.0,
+        -0.026565
+      ],
+      "friction": [
+        0.9,
+        0.0,
+        0.0
+      ],
+      "collision_class": "support"
+    }
+  ],
+  "actuators": [
+    {
+      "id": 0,
+      "name": "m_trunk_pelvis",
+      "joint": "trunk_pelvis",
+      "gear": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ctrllimited": false,
+      "forcelimited": false,
+      "ctrlrange": [
+        0.0,
+        0.0
+      ],
+      "forcerange": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": 1,
+      "name": "m_left_hip",
+      "joint": "left_hip",
+      "gear": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ctrllimited": false,
+      "forcelimited": false,
+      "ctrlrange": [
+        0.0,
+        0.0
+      ],
+      "forcerange": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": 2,
+      "name": "m_right_hip",
+      "joint": "right_hip",
+      "gear": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ctrllimited": false,
+      "forcelimited": false,
+      "ctrlrange": [
+        0.0,
+        0.0
+      ],
+      "forcerange": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": 3,
+      "name": "m_left_knee",
+      "joint": "left_knee",
+      "gear": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ctrllimited": false,
+      "forcelimited": false,
+      "ctrlrange": [
+        0.0,
+        0.0
+      ],
+      "forcerange": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": 4,
+      "name": "m_right_knee",
+      "joint": "right_knee",
+      "gear": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ctrllimited": false,
+      "forcelimited": false,
+      "ctrlrange": [
+        0.0,
+        0.0
+      ],
+      "forcerange": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": 5,
+      "name": "m_left_ankle",
+      "joint": "left_ankle",
+      "gear": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ctrllimited": false,
+      "forcelimited": false,
+      "ctrlrange": [
+        0.0,
+        0.0
+      ],
+      "forcerange": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": 6,
+      "name": "m_right_ankle",
+      "joint": "right_ankle",
+      "gear": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ctrllimited": false,
+      "forcelimited": false,
+      "ctrlrange": [
+        0.0,
+        0.0
+      ],
+      "forcerange": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": 7,
+      "name": "m_left_mtp",
+      "joint": "left_mtp",
+      "gear": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ctrllimited": false,
+      "forcelimited": false,
+      "ctrlrange": [
+        0.0,
+        0.0
+      ],
+      "forcerange": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": 8,
+      "name": "m_right_mtp",
+      "joint": "right_mtp",
+      "gear": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ctrllimited": false,
+      "forcelimited": false,
+      "ctrlrange": [
+        0.0,
+        0.0
+      ],
+      "forcerange": [
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "nbody",
+      "pass": true,
+      "value": 14
+    },
+    {
+      "check": "njnt",
+      "pass": true,
+      "value": 12
+    },
+    {
+      "check": "nq",
+      "pass": true,
+      "value": 12
+    },
+    {
+      "check": "nv",
+      "pass": true,
+      "value": 12
+    },
+    {
+      "check": "nu",
+      "pass": true,
+      "value": 9
+    },
+    {
+      "check": "neq",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "check": "na",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "check": "ntendon",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "check": "ngeom",
+      "pass": true,
+      "value": 17
+    },
+    {
+      "check": "body_names",
+      "pass": true,
+      "value": [
+        "world",
+        "pelvis",
+        "HAT",
+        "bar",
+        "left_thigh",
+        "left_shank",
+        "left_hindfoot",
+        "left_forefoot",
+        "left_toe",
+        "right_thigh",
+        "right_shank",
+        "right_hindfoot",
+        "right_forefoot",
+        "right_toe"
+      ]
+    },
+    {
+      "check": "joint_names",
+      "pass": true,
+      "value": [
+        "root_tx",
+        "root_tz",
+        "root_ry",
+        "trunk_pelvis",
+        "left_hip",
+        "left_knee",
+        "left_ankle",
+        "left_mtp",
+        "right_hip",
+        "right_knee",
+        "right_ankle",
+        "right_mtp"
+      ]
+    },
+    {
+      "check": "actuator_names",
+      "pass": true,
+      "value": [
+        "m_trunk_pelvis",
+        "m_left_hip",
+        "m_right_hip",
+        "m_left_knee",
+        "m_right_knee",
+        "m_left_ankle",
+        "m_right_ankle",
+        "m_left_mtp",
+        "m_right_mtp"
+      ]
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,690 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "JOINT_FK_SIGN_AUDIT",
+  "authority": "JOINT_COORDINATE_ROM_AUTHORITY JC-02..JC-10; PLANT_TOPOLOGY_AUTHORITY PT-03/PT-07",
+  "joint_order": [
+    "root_tx",
+    "root_tz",
+    "root_ry",
+    "trunk_pelvis",
+    "left_hip",
+    "left_knee",
+    "left_ankle",
+    "left_mtp",
+    "right_hip",
+    "right_knee",
+    "right_ankle",
+    "right_mtp"
+  ],
+  "qpos_addresses": {
+    "root_tx": 0,
+    "root_tz": 1,
+    "root_ry": 2,
+    "trunk_pelvis": 3,
+    "left_hip": 4,
+    "left_knee": 5,
+    "left_ankle": 6,
+    "left_mtp": 7,
+    "right_hip": 8,
+    "right_knee": 9,
+    "right_ankle": 10,
+    "right_mtp": 11
+  },
+  "dof_addresses": {
+    "root_tx": 0,
+    "root_tz": 1,
+    "root_ry": 2,
+    "trunk_pelvis": 3,
+    "left_hip": 4,
+    "left_knee": 5,
+    "left_ankle": 6,
+    "left_mtp": 7,
+    "right_hip": 8,
+    "right_knee": 9,
+    "right_ankle": 10,
+    "right_mtp": 11
+  },
+  "fk_probes": [
+    {
+      "joint": "root_tx",
+      "q_rad": 0.01,
+      "kind": "translation",
+      "points": {
+        "all_bodies": {
+          "max_abs_error_m": 8.673617379884035e-18
+        }
+      },
+      "max_abs_error_m": 8.673617379884035e-18,
+      "sign_ok": true
+    },
+    {
+      "joint": "root_tz",
+      "q_rad": 0.01,
+      "kind": "translation",
+      "points": {
+        "all_bodies": {
+          "max_abs_error_m": 8.673617379884035e-18
+        }
+      },
+      "max_abs_error_m": 8.673617379884035e-18,
+      "sign_ok": true
+    },
+    {
+      "joint": "root_ry",
+      "q_rad": 0.17453292519943295,
+      "axis_sign": "axis +y",
+      "points": {
+        "bar_origin": {
+          "measured_delta_m": [
+            0.10563217006399843,
+            0.0,
+            0.00738122868568325
+          ],
+          "predicted_delta_m": [
+            0.10563217006399844,
+            0.0,
+            0.007381228685683139
+          ],
+          "max_abs_error_m": 1.1102230246251565e-16
+        }
+      },
+      "max_abs_error_m": 1.1102230246251565e-16,
+      "sign_ok": true
+    },
+    {
+      "joint": "trunk_pelvis",
+      "q_rad": 0.17453292519943295,
+      "axis_sign": "axis +y",
+      "points": {
+        "head": {
+          "measured_delta_m": [
+            0.13631381946854032,
+            0.0,
+            -0.011925913885416639
+          ],
+          "predicted_delta_m": [
+            0.13631381946854032,
+            0.0,
+            -0.01192591388541675
+          ],
+          "max_abs_error_m": 1.1102230246251565e-16
+        },
+        "bar_origin": {
+          "measured_delta_m": [
+            0.10563217006399843,
+            0.0,
+            0.00738122868568325
+          ],
+          "predicted_delta_m": [
+            0.10563217006399844,
+            0.0,
+            0.007381228685683139
+          ],
+          "max_abs_error_m": 1.1102230246251565e-16
+        }
+      },
+      "max_abs_error_m": 1.1102230246251565e-16,
+      "sign_ok": true
+    },
+    {
+      "joint": "left_hip",
+      "q_rad": 0.17453292519943295,
+      "axis_sign": "axis -y",
+      "points": {
+        "knee_origin": {
+          "measured_delta_m": [
+            0.07727126845956316,
+            0.0,
+            0.0067603600064800595
+          ],
+          "predicted_delta_m": [
+            0.07727126845956316,
+            0.0,
+            0.0067603600064800595
+          ],
+          "max_abs_error_m": 0.0
+        }
+      },
+      "max_abs_error_m": 0.0,
+      "sign_ok": true
+    },
+    {
+      "joint": "left_knee",
+      "q_rad": 0.17453292519943295,
+      "axis_sign": "axis +y",
+      "points": {
+        "ankle_origin": {
+          "measured_delta_m": [
+            -0.07943805042049112,
+            0.0,
+            0.006949928864393717
+          ],
+          "predicted_delta_m": [
+            -0.07943805042049111,
+            0.0,
+            0.006949928864393717
+          ],
+          "max_abs_error_m": 1.3877787807814457e-17
+        }
+      },
+      "max_abs_error_m": 1.3877787807814457e-17,
+      "sign_ok": true
+    },
+    {
+      "joint": "left_ankle",
+      "q_rad": 0.17453292519943295,
+      "axis_sign": "axis -y",
+      "points": {
+        "toe_patch": {
+          "measured_delta_m": [
+            0.008738830099290384,
+            0.0,
+            0.03324471490016623
+          ],
+          "predicted_delta_m": [
+            0.008738830099290329,
+            0.0,
+            0.03324471490016634
+          ],
+          "max_abs_error_m": 1.1102230246251565e-16
+        },
+        "forefoot_patch": {
+          "measured_delta_m": [
+            0.010296035415539015,
+            0.0,
+            0.015445776689306023
+          ],
+          "predicted_delta_m": [
+            0.010296035415539029,
+            0.0,
+            0.015445776689305912
+          ],
+          "max_abs_error_m": 1.1102230246251565e-16
+        }
+      },
+      "max_abs_error_m": 1.1102230246251565e-16,
+      "sign_ok": true
+    },
+    {
+      "joint": "left_mtp",
+      "q_rad": 0.17453292519943295,
+      "axis_sign": "axis -y",
+      "points": {
+        "toe_patch": {
+          "measured_delta_m": [
+            0.00409073034951668,
+            0.0,
+            0.006372738148531343
+          ],
+          "predicted_delta_m": [
+            0.0040907303495166525,
+            0.0,
+            0.006372738148531454
+          ],
+          "max_abs_error_m": 1.1102230246251565e-16
+        }
+      },
+      "max_abs_error_m": 1.1102230246251565e-16,
+      "sign_ok": true
+    }
+  ],
+  "checks": [
+    {
+      "check": "order:root_tx",
+      "pass": true,
+      "jid": 0
+    },
+    {
+      "check": "axis:root_tx",
+      "pass": true,
+      "expected": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "actual": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:root_tx",
+      "pass": true,
+      "limited": false,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "check": "passive_zero:root_tx",
+      "pass": true
+    },
+    {
+      "check": "order:root_tz",
+      "pass": true,
+      "jid": 1
+    },
+    {
+      "check": "axis:root_tz",
+      "pass": true,
+      "expected": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "actual": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "check": "range:root_tz",
+      "pass": true,
+      "limited": false,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "check": "passive_zero:root_tz",
+      "pass": true
+    },
+    {
+      "check": "order:root_ry",
+      "pass": true,
+      "jid": 2
+    },
+    {
+      "check": "axis:root_ry",
+      "pass": true,
+      "expected": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:root_ry",
+      "pass": true,
+      "limited": false,
+      "stiffness": 0.0,
+      "damping": 0.0,
+      "armature": 0.0
+    },
+    {
+      "check": "passive_zero:root_ry",
+      "pass": true
+    },
+    {
+      "check": "order:trunk_pelvis",
+      "pass": true,
+      "jid": 3
+    },
+    {
+      "check": "axis:trunk_pelvis",
+      "pass": true,
+      "expected": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:trunk_pelvis",
+      "pass": true,
+      "expected": [
+        -0.610865,
+        0.610865
+      ],
+      "actual": [
+        -0.610865,
+        0.610865
+      ]
+    },
+    {
+      "check": "order:left_hip",
+      "pass": true,
+      "jid": 4
+    },
+    {
+      "check": "axis:left_hip",
+      "pass": true,
+      "expected": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:left_hip",
+      "pass": true,
+      "expected": [
+        -0.349066,
+        2.268928
+      ],
+      "actual": [
+        -0.349066,
+        2.268928
+      ]
+    },
+    {
+      "check": "order:left_knee",
+      "pass": true,
+      "jid": 5
+    },
+    {
+      "check": "axis:left_knee",
+      "pass": true,
+      "expected": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:left_knee",
+      "pass": true,
+      "expected": [
+        0.0,
+        2.443461
+      ],
+      "actual": [
+        0.0,
+        2.443461
+      ]
+    },
+    {
+      "check": "order:left_ankle",
+      "pass": true,
+      "jid": 6
+    },
+    {
+      "check": "axis:left_ankle",
+      "pass": true,
+      "expected": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:left_ankle",
+      "pass": true,
+      "expected": [
+        -0.959931,
+        0.785398
+      ],
+      "actual": [
+        -0.959931,
+        0.785398
+      ]
+    },
+    {
+      "check": "order:left_mtp",
+      "pass": true,
+      "jid": 7
+    },
+    {
+      "check": "axis:left_mtp",
+      "pass": true,
+      "expected": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:left_mtp",
+      "pass": true,
+      "expected": [
+        -0.523599,
+        1.570796
+      ],
+      "actual": [
+        -0.523599,
+        1.570796
+      ]
+    },
+    {
+      "check": "order:right_hip",
+      "pass": true,
+      "jid": 8
+    },
+    {
+      "check": "axis:right_hip",
+      "pass": true,
+      "expected": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:right_hip",
+      "pass": true,
+      "expected": [
+        -0.349066,
+        2.268928
+      ],
+      "actual": [
+        -0.349066,
+        2.268928
+      ]
+    },
+    {
+      "check": "order:right_knee",
+      "pass": true,
+      "jid": 9
+    },
+    {
+      "check": "axis:right_knee",
+      "pass": true,
+      "expected": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:right_knee",
+      "pass": true,
+      "expected": [
+        0.0,
+        2.443461
+      ],
+      "actual": [
+        0.0,
+        2.443461
+      ]
+    },
+    {
+      "check": "order:right_ankle",
+      "pass": true,
+      "jid": 10
+    },
+    {
+      "check": "axis:right_ankle",
+      "pass": true,
+      "expected": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:right_ankle",
+      "pass": true,
+      "expected": [
+        -0.959931,
+        0.785398
+      ],
+      "actual": [
+        -0.959931,
+        0.785398
+      ]
+    },
+    {
+      "check": "order:right_mtp",
+      "pass": true,
+      "jid": 11
+    },
+    {
+      "check": "axis:right_mtp",
+      "pass": true,
+      "expected": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    {
+      "check": "range:right_mtp",
+      "pass": true,
+      "expected": [
+        -0.523599,
+        1.570796
+      ],
+      "actual": [
+        -0.523599,
+        1.570796
+      ]
+    },
+    {
+      "check": "passive_mtp:left_mtp",
+      "pass": true
+    },
+    {
+      "check": "passive_mtp:right_mtp",
+      "pass": true
+    },
+    {
+      "check": "passive_zero_major:trunk_pelvis",
+      "pass": true
+    },
+    {
+      "check": "passive_zero_major:left_hip",
+      "pass": true
+    },
+    {
+      "check": "passive_zero_major:right_hip",
+      "pass": true
+    },
+    {
+      "check": "passive_zero_major:left_knee",
+      "pass": true
+    },
+    {
+      "check": "passive_zero_major:right_knee",
+      "pass": true
+    },
+    {
+      "check": "passive_zero_major:left_ankle",
+      "pass": true
+    },
+    {
+      "check": "passive_zero_major:right_ankle",
+      "pass": true
+    },
+    {
+      "check": "fk:root_tx_translation",
+      "pass": true,
+      "sign_ok": true,
+      "max_abs_error_m": 8.673617379884035e-18
+    },
+    {
+      "check": "fk:root_tz_translation",
+      "pass": true,
+      "sign_ok": true,
+      "max_abs_error_m": 8.673617379884035e-18
+    },
+    {
+      "check": "fk:root_ry_forward_pitch",
+      "pass": true,
+      "sign_ok": true,
+      "max_abs_error_m": 1.1102230246251565e-16
+    },
+    {
+      "check": "fk:trunk_forward_flexion",
+      "pass": true,
+      "sign_ok": true,
+      "max_abs_error_m": 1.1102230246251565e-16
+    },
+    {
+      "check": "fk:hip_flexion",
+      "pass": true,
+      "sign_ok": true,
+      "max_abs_error_m": 0.0
+    },
+    {
+      "check": "fk:knee_flexion",
+      "pass": true,
+      "sign_ok": true,
+      "max_abs_error_m": 1.3877787807814457e-17
+    },
+    {
+      "check": "fk:ankle_dorsiflexion",
+      "pass": true,
+      "sign_ok": true,
+      "max_abs_error_m": 1.1102230246251565e-16
+    },
+    {
+      "check": "fk:mtp_dorsiflexion",
+      "pass": true,
+      "sign_ok": true,
+      "max_abs_error_m": 1.1102230246251565e-16
+    }
+  ],
+  "status": "PASS"
+}

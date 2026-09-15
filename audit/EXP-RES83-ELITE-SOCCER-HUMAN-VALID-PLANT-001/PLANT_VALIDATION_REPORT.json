@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "PLANT_VALIDATION_REPORT",
+  "mission": "RES83_IMPLEMENT_ELITE_SOCCER_HUMAN_VALID_PLANT_001",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "claims": [
+    {
+      "artifact": "PLANT_IMPLEMENTATION_SPEC.json",
+      "status": "PASS",
+      "checks_total": 0,
+      "checks_failed": []
+    },
+    {
+      "artifact": "MODEL_INTROSPECTION.json",
+      "status": "PASS",
+      "checks_total": 12,
+      "checks_failed": []
+    },
+    {
+      "artifact": "MASS_INERTIA_AUDIT.json",
+      "status": "PASS",
+      "checks_total": 43,
+      "checks_failed": []
+    },
+    {
+      "artifact": "HAT_BAR_REALIZATION_AUDIT.json",
+      "status": "PASS",
+      "checks_total": 20,
+      "checks_failed": []
+    },
+    {
+      "artifact": "JOINT_FK_SIGN_AUDIT.json",
+      "status": "PASS",
+      "checks_total": 56,
+      "checks_failed": []
+    },
+    {
+      "artifact": "ROM_REACHABILITY_AUDIT.json",
+      "status": "PASS",
+      "checks_total": 38,
+      "checks_failed": []
+    },
+    {
+      "artifact": "REPRESENTATIVE_POSE_AUDIT.json",
+      "status": "PASS",
+      "checks_total": 35,
+      "checks_failed": []
+    },
+    {
+      "artifact": "COLLISION_MATRIX.json",
+      "status": "PASS",
+      "checks_total": 72,
+      "checks_failed": []
+    },
+    {
+      "artifact": "ROOT_PASSIVITY_AUDIT.json",
+      "status": "PASS",
+      "checks_total": 24,
+      "checks_failed": []
+    },
+    {
+      "artifact": "PLANTAR_REGION_IDENTITY_AUDIT.json",
+      "status": "PASS",
+      "checks_total": 34,
+      "checks_failed": []
+    },
+    {
+      "artifact": "IMPORT_BOUNDARY_AUDIT.json",
+      "status": "PASS",
+      "checks_total": 10,
+      "checks_failed": []
+    },
+    {
+      "artifact": "FINAL_CONSTANT_AUDIT.json",
+      "status": "PASS",
+      "checks_total": 22,
+      "checks_failed": []
+    },
+    {
+      "artifact": "AUTHORITY_CONFORMANCE_MATRIX.json",
+      "status": "PASS",
+      "checks_total": 65,
+      "checks_failed": []
+    },
+    {
+      "artifact": "AUTHORITY_BUNDLE_INTEGRITY.json",
+      "status": "PASS",
+      "checks_total": 37,
+      "checks_failed": []
+    }
+  ],
+  "claims_total": 14,
+  "status": "PASS"
+}

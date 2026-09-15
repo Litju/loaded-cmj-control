@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "HASH_MANIFEST",
+  "mission": "RES83_IMPLEMENT_ELITE_SOCCER_HUMAN_VALID_PLANT_001",
+  "authority_id": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "model_id": "loaded-cmj-20kg-elite-soccer-v3",
+  "hash_algorithm": "sha256",
+  "excluded_from_manifest": [
+    "HASH_MANIFEST.json"
+  ],
+  "files": [
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/AUTHORITY_BUNDLE_INTEGRITY.json",
+      "sha256": "8ffd9366e73ed20d61e4c526af812eb7d8bdb4e62650cf4caf8fdd73445a981b",
+      "bytes": 10508
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/AUTHORITY_CONFORMANCE_MATRIX.json",
+      "sha256": "3617fac68d3c20e6ff973af67840a8aeb96ed2a2fac94caea9ab19a21e8b6e3f",
+      "bytes": 16611
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/COLLISION_MATRIX.json",
+      "sha256": "f775a8f26c6e7ed2aa1c344c22853c42e44a98e35d05c5149aaeea326a621104",
+      "bytes": 25308
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/FINAL_CONSTANT_AUDIT.json",
+      "sha256": "e08cb79a7d894edd99cffd392beba0c671ca570512ee184f90768f6997a50c1f",
+      "bytes": 4383
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/HAT_BAR_REALIZATION_AUDIT.json",
+      "sha256": "6ddc81fa9061c61d74477d4562cedcbf230756e3b664976cf06cadaa5caffd8f",
+      "bytes": 7845
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/IMPORT_BOUNDARY_AUDIT.json",
+      "sha256": "d573c7b3f2ef65038fd84cbf3226ef3302f8b6438937844a0d4a45269a130e55",
+      "bytes": 2807
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/JOINT_FK_SIGN_AUDIT.json",
+      "sha256": "5eee24e0aeeeae9c34fb38a1494b69a4436f6a8195f3cd34ee536cc3dd9ec7ca",
+      "bytes": 13070
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/MASS_INERTIA_AUDIT.json",
+      "sha256": "a89afeefc5746af3f1969175e0a6cc246a512c62c1165476b8e203979469f9ce",
+      "bytes": 13459
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/MODEL_INTROSPECTION.json",
+      "sha256": "1c25d2bf2e7e247905d4a9a81c102c80c12f880d30b9415c31b33c36c8bf15fc",
+      "bytes": 27185
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/PLANTAR_REGION_IDENTITY_AUDIT.json",
+      "sha256": "af56ed55fe105547a5dca949efd4c6556b95cf976dd1202e992ec18ff1d7530b",
+      "bytes": 5565
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/PLANT_IMPLEMENTATION_SPEC.json",
+      "sha256": "312b2e7ae9ac62b2b14e8b04a9f78ed1c49185e157120f3cde4e84c425b52671",
+      "bytes": 10442
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/PLANT_VALIDATION_REPORT.json",
+      "sha256": "1c3fd7e4ac2dd2a0e08f1450c0fe6c4d3664dbf3aadf4a9f589eb5b0e08de5e1",
+      "bytes": 2255
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/REPRESENTATIVE_POSE_AUDIT.json",
+      "sha256": "5167d8defd6e612d5bf26280202ed7f0b7f0472b535a887e3c1ed27dd326a6be",
+      "bytes": 41363
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/RES83_RECEIPT.md",
+      "sha256": "6b1482448a734dd1c760a3d7c705ccf5c32f8b1eae2d042e1608088fce06669b",
+      "bytes": 12627
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/ROM_REACHABILITY_AUDIT.json",
+      "sha256": "38233fa18a86a96d53a3984a8ab8292a970766cc0ea20837f58049ffaab5a43a",
+      "bytes": 7014
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/ROOT_PASSIVITY_AUDIT.json",
+      "sha256": "7286994a8a96f33b70820c906c0ff7c14e647bd738a381f2ec6645646def1aee",
+      "bytes": 3252
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/build_evidence.py",
+      "sha256": "9681ddbeca99c2e4b918b10b51ad98610dd8725368301fe35ed6290862dab8af",
+      "bytes": 85747
+    },
+    {
+      "path": "audit/EXP-RES83-ELITE-SOCCER-HUMAN-VALID-PLANT-001/seal_evidence.py",
+      "sha256": "68e2dc022c7f9991a201a928af029cd739915a0903a730589916e4c17361985b",
+      "bytes": 4649
+    },
+    {
+      "path": "src/loaded_cmj/v3/__init__.py",
+      "sha256": "590b5d45e9695df90da992b7b12583899b4553eb19892e491a29930471418773",
+      "bytes": 716
+    },
+    {
+      "path": "src/loaded_cmj/v3/constants.py",
+      "sha256": "1f756f412d3ce8f2fecbae6af5e72fae5e0b3e92f185a96b96da7dcd0c4a20fb",
+      "bytes": 17847
+    },
+    {
+      "path": "src/loaded_cmj/v3/plant.py",
+      "sha256": "d861f45607a36fb9bf6597682e509c8adf2acc90e9717ce114b76a2e0dcd87e9",
+      "bytes": 18130
+    },
+    {
+      "path": "src/loaded_cmj/v3/assets/v3_plant.xml",
+      "sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+      "bytes": 17760
+    },
+    {
+      "path": "tests/test_res83_v3_plant.py",
+      "sha256": "171c01a0d84cd2855a8530634589b7151054a82865b11a2cbc4dfa2bbcf9b01c",
+      "bytes": 18702
+    }
+  ]
+}

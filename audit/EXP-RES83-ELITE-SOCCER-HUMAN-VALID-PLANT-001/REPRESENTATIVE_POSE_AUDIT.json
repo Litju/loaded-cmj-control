@@ -1,0 +1,1445 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "REPRESENTATIVE_POSE_AUDIT",
+  "authority": "PLANT_TOPOLOGY_AUTHORITY PT-05/PT-06; JOINT_COORDINATE_ROM_AUTHORITY JC-04..JC-10; COLLISION_CONTACT_POLICY CC-01/CC-02/CC-03",
+  "pose_count": 10,
+  "poses": [
+    {
+      "name": "legal_standing",
+      "spec": {
+        "trunk_deg": 0.0,
+        "hip_deg": 0.0,
+        "knee_deg": 0.0,
+        "ankle_deg": null,
+        "foot_pitch_deg": 0.0,
+        "mtp_deg": null,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.0
+      },
+      "qpos_rad": {
+        "root_tx": 0.10709960137926647,
+        "root_tz": 0.974018,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.0,
+        "left_hip": 0.0,
+        "left_knee": 0.0,
+        "left_ankle": 0.0,
+        "left_mtp": 0.0,
+        "right_hip": 0.0,
+        "right_knee": 0.0,
+        "right_ankle": 0.0,
+        "right_mtp": 0.0
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": 4.2500725161431774e-17,
+      "support_x_range_m": [
+        0.05209960137926646,
+        0.32709960137926647
+      ],
+      "system_com_m": [
+        0.08296875000000002,
+        0.0,
+        1.1701983419428266
+      ],
+      "com_over_support": true,
+      "contact_counts": {},
+      "contacts": [],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    },
+    {
+      "name": "deep_legal_countermovement",
+      "spec": {
+        "trunk_deg": 25.0,
+        "hip_deg": 85.0,
+        "knee_deg": 105.0,
+        "ankle_deg": null,
+        "foot_pitch_deg": 0.0,
+        "mtp_deg": null,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.0
+      },
+      "qpos_rad": {
+        "root_tx": 0.1669573741884471,
+        "root_tz": 0.5402251706900595,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.4363323129985824,
+        "left_hip": 1.4835298641951802,
+        "left_knee": 1.8325957145940461,
+        "left_ankle": 0.3490658503988659,
+        "left_mtp": 0.0,
+        "right_hip": 1.4835298641951802,
+        "right_knee": 1.8325957145940461,
+        "right_ankle": 0.3490658503988659,
+        "right_mtp": 0.0
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": -6.852157730108388e-17,
+      "support_x_range_m": [
+        0.398789146528999,
+        0.6737891465289991
+      ],
+      "system_com_m": [
+        0.3440192723405519,
+        0.0,
+        0.7952897441943363
+      ],
+      "com_over_support": false,
+      "contact_counts": {
+        "legal_plantar_floor": 24
+      },
+      "contacts": [
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_heel_support",
+          "body1": "world",
+          "body2": "left_hindfoot",
+          "side": "left",
+          "region": "heel",
+          "dist_m": -6.678685382510707e-17,
+          "penetration_m": 6.678685382510707e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_heel_support",
+          "body1": "world",
+          "body2": "left_hindfoot",
+          "side": "left",
+          "region": "heel",
+          "dist_m": -6.331740687315346e-17,
+          "penetration_m": 6.331740687315346e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_heel_support",
+          "body1": "world",
+          "body2": "left_hindfoot",
+          "side": "left",
+          "region": "heel",
+          "dist_m": -6.678685382510707e-17,
+          "penetration_m": 6.678685382510707e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_heel_support",
+          "body1": "world",
+          "body2": "left_hindfoot",
+          "side": "left",
+          "region": "heel",
+          "dist_m": -6.331740687315346e-17,
+          "penetration_m": 6.331740687315346e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_forefoot_support",
+          "body1": "world",
+          "body2": "left_forefoot",
+          "side": "left",
+          "region": "forefoot",
+          "dist_m": -6.852157730108388e-17,
+          "penetration_m": 6.852157730108388e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_forefoot_support",
+          "body1": "world",
+          "body2": "left_forefoot",
+          "side": "left",
+          "region": "forefoot",
+          "dist_m": -6.158268339717665e-17,
+          "penetration_m": 6.158268339717665e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_forefoot_support",
+          "body1": "world",
+          "body2": "left_forefoot",
+          "side": "left",
+          "region": "forefoot",
+          "dist_m": -6.852157730108388e-17,
+          "penetration_m": 6.852157730108388e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_forefoot_support",
+          "body1": "world",
+          "body2": "left_forefoot",
+          "side": "left",
+          "region": "forefoot",
+          "dist_m": -6.158268339717665e-17,
+          "penetration_m": 6.158268339717665e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -5.637851296924623e-17,
+          "penetration_m": 5.637851296924623e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -5.2909066017292616e-17,
+          "penetration_m": 5.2909066017292616e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -5.637851296924623e-17,
+          "penetration_m": 5.637851296924623e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -5.2909066017292616e-17,
+          "penetration_m": 5.2909066017292616e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_heel_support",
+          "body1": "world",
+          "body2": "right_hindfoot",
+          "side": "right",
+          "region": "heel",
+          "dist_m": -6.678685382510707e-17,
+          "penetration_m": 6.678685382510707e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_heel_support",
+          "body1": "world",
+          "body2": "right_hindfoot",
+          "side": "right",
+          "region": "heel",
+          "dist_m": -6.331740687315346e-17,
+          "penetration_m": 6.331740687315346e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_heel_support",
+          "body1": "world",
+          "body2": "right_hindfoot",
+          "side": "right",
+          "region": "heel",
+          "dist_m": -6.678685382510707e-17,
+          "penetration_m": 6.678685382510707e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_heel_support",
+          "body1": "world",
+          "body2": "right_hindfoot",
+          "side": "right",
+          "region": "heel",
+          "dist_m": -6.331740687315346e-17,
+          "penetration_m": 6.331740687315346e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_forefoot_support",
+          "body1": "world",
+          "body2": "right_forefoot",
+          "side": "right",
+          "region": "forefoot",
+          "dist_m": -6.852157730108388e-17,
+          "penetration_m": 6.852157730108388e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_forefoot_support",
+          "body1": "world",
+          "body2": "right_forefoot",
+          "side": "right",
+          "region": "forefoot",
+          "dist_m": -6.158268339717665e-17,
+          "penetration_m": 6.158268339717665e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_forefoot_support",
+          "body1": "world",
+          "body2": "right_forefoot",
+          "side": "right",
+          "region": "forefoot",
+          "dist_m": -6.852157730108388e-17,
+          "penetration_m": 6.852157730108388e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_forefoot_support",
+          "body1": "world",
+          "body2": "right_forefoot",
+          "side": "right",
+          "region": "forefoot",
+          "dist_m": -6.158268339717665e-17,
+          "penetration_m": 6.158268339717665e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -5.637851296924623e-17,
+          "penetration_m": 5.637851296924623e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -5.2909066017292616e-17,
+          "penetration_m": 5.2909066017292616e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -5.637851296924623e-17,
+          "penetration_m": 5.637851296924623e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -5.2909066017292616e-17,
+          "penetration_m": 5.2909066017292616e-17
+        }
+      ],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    },
+    {
+      "name": "braking",
+      "spec": {
+        "trunk_deg": 15.0,
+        "hip_deg": 45.0,
+        "knee_deg": 70.0,
+        "ankle_deg": null,
+        "foot_pitch_deg": 0.0,
+        "mtp_deg": null,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.0
+      },
+      "qpos_rad": {
+        "root_tx": 0.07723196170424455,
+        "root_tz": 0.8008232237438634,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.2617993877991494,
+        "left_hip": 0.7853981633974483,
+        "left_knee": 1.2217304763960306,
+        "left_ankle": 0.4363323129985824,
+        "left_mtp": 0.0,
+        "right_hip": 0.7853981633974483,
+        "right_knee": 1.2217304763960306,
+        "right_ankle": 0.4363323129985824,
+        "right_mtp": 0.0
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": -6.852157730108388e-17,
+      "support_x_range_m": [
+        0.1435523660811535,
+        0.4185523660811535
+      ],
+      "system_com_m": [
+        0.17850790437690892,
+        0.0,
+        1.0196308815420432
+      ],
+      "com_over_support": true,
+      "contact_counts": {
+        "legal_plantar_floor": 24
+      },
+      "contacts": [
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_heel_support",
+          "body1": "world",
+          "body2": "left_hindfoot",
+          "side": "left",
+          "region": "heel",
+          "dist_m": -6.678685382510707e-17,
+          "penetration_m": 6.678685382510707e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_heel_support",
+          "body1": "world",
+          "body2": "left_hindfoot",
+          "side": "left",
+          "region": "heel",
+          "dist_m": -6.331740687315346e-17,
+          "penetration_m": 6.331740687315346e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_heel_support",
+          "body1": "world",
+          "body2": "left_hindfoot",
+          "side": "left",
+          "region": "heel",
+          "dist_m": -6.678685382510707e-17,
+          "penetration_m": 6.678685382510707e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_heel_support",
+          "body1": "world",
+          "body2": "left_hindfoot",
+          "side": "left",
+          "region": "heel",
+          "dist_m": -6.331740687315346e-17,
+          "penetration_m": 6.331740687315346e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_forefoot_support",
+          "body1": "world",
+          "body2": "left_forefoot",
+          "side": "left",
+          "region": "forefoot",
+          "dist_m": -6.852157730108388e-17,
+          "penetration_m": 6.852157730108388e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_forefoot_support",
+          "body1": "world",
+          "body2": "left_forefoot",
+          "side": "left",
+          "region": "forefoot",
+          "dist_m": -6.158268339717665e-17,
+          "penetration_m": 6.158268339717665e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_forefoot_support",
+          "body1": "world",
+          "body2": "left_forefoot",
+          "side": "left",
+          "region": "forefoot",
+          "dist_m": -6.852157730108388e-17,
+          "penetration_m": 6.852157730108388e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_forefoot_support",
+          "body1": "world",
+          "body2": "left_forefoot",
+          "side": "left",
+          "region": "forefoot",
+          "dist_m": -6.158268339717665e-17,
+          "penetration_m": 6.158268339717665e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -5.637851296924623e-17,
+          "penetration_m": 5.637851296924623e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -5.2909066017292616e-17,
+          "penetration_m": 5.2909066017292616e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -5.637851296924623e-17,
+          "penetration_m": 5.637851296924623e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -5.2909066017292616e-17,
+          "penetration_m": 5.2909066017292616e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_heel_support",
+          "body1": "world",
+          "body2": "right_hindfoot",
+          "side": "right",
+          "region": "heel",
+          "dist_m": -6.678685382510707e-17,
+          "penetration_m": 6.678685382510707e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_heel_support",
+          "body1": "world",
+          "body2": "right_hindfoot",
+          "side": "right",
+          "region": "heel",
+          "dist_m": -6.331740687315346e-17,
+          "penetration_m": 6.331740687315346e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_heel_support",
+          "body1": "world",
+          "body2": "right_hindfoot",
+          "side": "right",
+          "region": "heel",
+          "dist_m": -6.678685382510707e-17,
+          "penetration_m": 6.678685382510707e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_heel_support",
+          "body1": "world",
+          "body2": "right_hindfoot",
+          "side": "right",
+          "region": "heel",
+          "dist_m": -6.331740687315346e-17,
+          "penetration_m": 6.331740687315346e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_forefoot_support",
+          "body1": "world",
+          "body2": "right_forefoot",
+          "side": "right",
+          "region": "forefoot",
+          "dist_m": -6.852157730108388e-17,
+          "penetration_m": 6.852157730108388e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_forefoot_support",
+          "body1": "world",
+          "body2": "right_forefoot",
+          "side": "right",
+          "region": "forefoot",
+          "dist_m": -6.158268339717665e-17,
+          "penetration_m": 6.158268339717665e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_forefoot_support",
+          "body1": "world",
+          "body2": "right_forefoot",
+          "side": "right",
+          "region": "forefoot",
+          "dist_m": -6.852157730108388e-17,
+          "penetration_m": 6.852157730108388e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_forefoot_support",
+          "body1": "world",
+          "body2": "right_forefoot",
+          "side": "right",
+          "region": "forefoot",
+          "dist_m": -6.158268339717665e-17,
+          "penetration_m": 6.158268339717665e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -5.637851296924623e-17,
+          "penetration_m": 5.637851296924623e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -5.2909066017292616e-17,
+          "penetration_m": 5.2909066017292616e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -5.637851296924623e-17,
+          "penetration_m": 5.637851296924623e-17
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -5.2909066017292616e-17,
+          "penetration_m": 5.2909066017292616e-17
+        }
+      ],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    },
+    {
+      "name": "propulsion",
+      "spec": {
+        "trunk_deg": 10.0,
+        "hip_deg": 15.0,
+        "knee_deg": 25.0,
+        "ankle_deg": null,
+        "foot_pitch_deg": 25.0,
+        "mtp_deg": null,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.0
+      },
+      "qpos_rad": {
+        "root_tx": 0.1425501890393801,
+        "root_tz": 1.0120788133311596,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.17453292519943295,
+        "left_hip": 0.2617993877991494,
+        "left_knee": 0.4363323129985824,
+        "left_ankle": -0.26179938779914946,
+        "left_mtp": 0.4363323129985824,
+        "right_hip": 0.2617993877991494,
+        "right_knee": 0.4363323129985824,
+        "right_ankle": -0.26179938779914946,
+        "right_mtp": 0.4363323129985824
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": -1.682681771697503e-16,
+      "support_x_range_m": [
+        0.2984577007711122,
+        0.3672077007711122
+      ],
+      "system_com_m": [
+        0.18694752537377085,
+        0.0,
+        1.2108673673254158
+      ],
+      "com_over_support": false,
+      "contact_counts": {
+        "legal_plantar_floor": 8
+      },
+      "contacts": [
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.6132928326584306e-16,
+          "penetration_m": 1.6132928326584306e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.682681771697503e-16,
+          "penetration_m": 1.682681771697503e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.6132928326584306e-16,
+          "penetration_m": 1.6132928326584306e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.682681771697503e-16,
+          "penetration_m": 1.682681771697503e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.6132928326584306e-16,
+          "penetration_m": 1.6132928326584306e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.682681771697503e-16,
+          "penetration_m": 1.682681771697503e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.6132928326584306e-16,
+          "penetration_m": 1.6132928326584306e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.682681771697503e-16,
+          "penetration_m": 1.682681771697503e-16
+        }
+      ],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    },
+    {
+      "name": "heel_rise_toe_rocker",
+      "spec": {
+        "trunk_deg": 5.0,
+        "hip_deg": 5.0,
+        "knee_deg": 20.0,
+        "ankle_deg": null,
+        "foot_pitch_deg": 40.0,
+        "mtp_deg": null,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.0
+      },
+      "qpos_rad": {
+        "root_tx": 0.03787695309749642,
+        "root_tz": 1.0446003329931906,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.08726646259971647,
+        "left_hip": 0.08726646259971647,
+        "left_knee": 0.3490658503988659,
+        "left_ankle": -0.4363323129985824,
+        "left_mtp": 0.6981317007977318,
+        "right_hip": 0.08726646259971647,
+        "right_knee": 0.3490658503988659,
+        "right_ankle": -0.4363323129985824,
+        "right_mtp": 0.6981317007977318
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": -1.6219664500383146e-16,
+      "support_x_range_m": [
+        0.048412102930356596,
+        0.1171621029303566
+      ],
+      "system_com_m": [
+        0.03983775210792128,
+        0.0,
+        1.2424025914826866
+      ],
+      "com_over_support": false,
+      "contact_counts": {
+        "legal_plantar_floor": 8
+      },
+      "contacts": [
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.5525775109992423e-16,
+          "penetration_m": 1.5525775109992423e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.6219664500383146e-16,
+          "penetration_m": 1.6219664500383146e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.5525775109992423e-16,
+          "penetration_m": 1.5525775109992423e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.6219664500383146e-16,
+          "penetration_m": 1.6219664500383146e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.5525775109992423e-16,
+          "penetration_m": 1.5525775109992423e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.6219664500383146e-16,
+          "penetration_m": 1.6219664500383146e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.5525775109992423e-16,
+          "penetration_m": 1.5525775109992423e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.6219664500383146e-16,
+          "penetration_m": 1.6219664500383146e-16
+        }
+      ],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    },
+    {
+      "name": "toe_off",
+      "spec": {
+        "trunk_deg": 0.0,
+        "hip_deg": 0.0,
+        "knee_deg": 10.0,
+        "ankle_deg": null,
+        "foot_pitch_deg": 50.0,
+        "mtp_deg": null,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.0
+      },
+      "qpos_rad": {
+        "root_tx": 0.03943310840370744,
+        "root_tz": 1.0686437975448133,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.0,
+        "left_hip": 0.0,
+        "left_knee": 0.17453292519943295,
+        "left_ankle": -0.6981317007977318,
+        "left_mtp": 0.8726646259971648,
+        "right_hip": 0.0,
+        "right_knee": 0.17453292519943295,
+        "right_ankle": -0.6981317007977318,
+        "right_mtp": 0.8726646259971648
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": -3.469446951953614e-18,
+      "support_x_range_m": [
+        0.02657490622354631,
+        0.09532490622354631
+      ],
+      "system_com_m": [
+        0.010058464486505542,
+        0.0,
+        1.2645435233662272
+      ],
+      "com_over_support": false,
+      "contact_counts": {
+        "legal_plantar_floor": 4
+      },
+      "contacts": [
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -3.469446951953614e-18,
+          "penetration_m": 3.469446951953614e-18
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -3.469446951953614e-18,
+          "penetration_m": 3.469446951953614e-18
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -3.469446951953614e-18,
+          "penetration_m": 3.469446951953614e-18
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -3.469446951953614e-18,
+          "penetration_m": 3.469446951953614e-18
+        }
+      ],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    },
+    {
+      "name": "flight",
+      "spec": {
+        "trunk_deg": 5.0,
+        "hip_deg": 40.0,
+        "knee_deg": 60.0,
+        "ankle_deg": -25.0,
+        "foot_pitch_deg": null,
+        "mtp_deg": 10.0,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.08
+      },
+      "qpos_rad": {
+        "root_tx": 0.0,
+        "root_tz": 1.051281242425586,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.08726646259971647,
+        "left_hip": 0.6981317007977318,
+        "left_knee": 1.0471975511965976,
+        "left_ankle": -0.4363323129985824,
+        "left_mtp": 0.17453292519943295,
+        "right_hip": 0.6981317007977318,
+        "right_knee": 1.0471975511965976,
+        "right_ankle": -0.4363323129985824,
+        "right_mtp": 0.17453292519943295
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": 0.07999999999999996,
+      "support_x_range_m": [
+        0.24644742782729112,
+        0.24644742782729112
+      ],
+      "system_com_m": [
+        0.045187508082258514,
+        0.0,
+        1.2684249315597422
+      ],
+      "com_over_support": false,
+      "contact_counts": {},
+      "contacts": [],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    },
+    {
+      "name": "toe_forefoot_first_touchdown",
+      "spec": {
+        "trunk_deg": 10.0,
+        "hip_deg": 20.0,
+        "knee_deg": 30.0,
+        "ankle_deg": null,
+        "foot_pitch_deg": 25.0,
+        "mtp_deg": null,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.0
+      },
+      "qpos_rad": {
+        "root_tx": 0.16657139776244312,
+        "root_tz": 1.0004053647973221,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.17453292519943295,
+        "left_hip": 0.3490658503988659,
+        "left_knee": 0.5235987755982988,
+        "left_ankle": -0.26179938779914946,
+        "left_mtp": 0.4363323129985824,
+        "right_hip": 0.3490658503988659,
+        "right_knee": 0.5235987755982988,
+        "right_ankle": -0.26179938779914946,
+        "right_mtp": 0.4363323129985824
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": -1.2663481374630692e-16,
+      "support_x_range_m": [
+        0.3595023581897484,
+        0.4282523581897484
+      ],
+      "system_com_m": [
+        0.21776297134093625,
+        0.0,
+        1.2013361335660002
+      ],
+      "com_over_support": false,
+      "contact_counts": {
+        "legal_plantar_floor": 8
+      },
+      "contacts": [
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.2663481374630692e-16,
+          "penetration_m": 1.2663481374630692e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.2663481374630692e-16,
+          "penetration_m": 1.2663481374630692e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.2663481374630692e-16,
+          "penetration_m": 1.2663481374630692e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "left_toe_support",
+          "body1": "world",
+          "body2": "left_toe",
+          "side": "left",
+          "region": "toe",
+          "dist_m": -1.2663481374630692e-16,
+          "penetration_m": 1.2663481374630692e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.2663481374630692e-16,
+          "penetration_m": 1.2663481374630692e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.2663481374630692e-16,
+          "penetration_m": 1.2663481374630692e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.2663481374630692e-16,
+          "penetration_m": 1.2663481374630692e-16
+        },
+        {
+          "kind": "legal_plantar_floor",
+          "geom1": "floor",
+          "geom2": "right_toe_support",
+          "body1": "world",
+          "body2": "right_toe",
+          "side": "right",
+          "region": "toe",
+          "dist_m": -1.2663481374630692e-16,
+          "penetration_m": 1.2663481374630692e-16
+        }
+      ],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    },
+    {
+      "name": "landing_absorption",
+      "spec": {
+        "trunk_deg": 20.0,
+        "hip_deg": 60.0,
+        "knee_deg": 95.0,
+        "ankle_deg": null,
+        "foot_pitch_deg": 0.0,
+        "mtp_deg": null,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.0
+      },
+      "qpos_rad": {
+        "root_tx": 0.08944921611207113,
+        "root_tz": 0.668792549516686,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.3490658503988659,
+        "left_hip": 1.0471975511965976,
+        "left_knee": 1.6580627893946132,
+        "left_ankle": 0.6108652381980153,
+        "left_mtp": 0.0,
+        "right_hip": 1.0471975511965976,
+        "right_knee": 1.6580627893946132,
+        "right_ankle": 0.6108652381980153,
+        "right_mtp": 0.0
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": 5.204170427930421e-17,
+      "support_x_range_m": [
+        0.15742826423504938,
+        0.4324282642350494
+      ],
+      "system_com_m": [
+        0.22547904812297825,
+        0.0,
+        0.9009276479667744
+      ],
+      "com_over_support": true,
+      "contact_counts": {},
+      "contacts": [],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    },
+    {
+      "name": "recovered_standing",
+      "spec": {
+        "trunk_deg": 0.0,
+        "hip_deg": 0.0,
+        "knee_deg": 0.0,
+        "ankle_deg": null,
+        "foot_pitch_deg": 0.0,
+        "mtp_deg": null,
+        "root_ry_deg": 0.0,
+        "clearance_m": 0.0
+      },
+      "qpos_rad": {
+        "root_tx": 0.10709960137926647,
+        "root_tz": 0.974018,
+        "root_ry": 0.0,
+        "trunk_pelvis": 0.0,
+        "left_hip": 0.0,
+        "left_knee": 0.0,
+        "left_ankle": 0.0,
+        "left_mtp": 0.0,
+        "right_hip": 0.0,
+        "right_knee": 0.0,
+        "right_ankle": 0.0,
+        "right_mtp": 0.0
+      },
+      "joint_limit_violations": [],
+      "support_min_z_m": 4.2500725161431774e-17,
+      "support_x_range_m": [
+        0.05209960137926646,
+        0.32709960137926647
+      ],
+      "system_com_m": [
+        0.08296875000000002,
+        0.0,
+        1.1701983419428266
+      ],
+      "com_over_support": true,
+      "contact_counts": {},
+      "contacts": [],
+      "prohibited_contacts": [],
+      "self_contacts": []
+    }
+  ],
+  "checks": [
+    {
+      "check": "pose_legal:legal_standing",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:legal_standing",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:legal_standing",
+      "pass": true
+    },
+    {
+      "check": "pose_legal:deep_legal_countermovement",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:deep_legal_countermovement",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:deep_legal_countermovement",
+      "pass": true
+    },
+    {
+      "check": "pose_legal:braking",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:braking",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:braking",
+      "pass": true
+    },
+    {
+      "check": "pose_legal:propulsion",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:propulsion",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:propulsion",
+      "pass": true
+    },
+    {
+      "check": "pose_legal:heel_rise_toe_rocker",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:heel_rise_toe_rocker",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:heel_rise_toe_rocker",
+      "pass": true
+    },
+    {
+      "check": "pose_legal:toe_off",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:toe_off",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:toe_off",
+      "pass": true
+    },
+    {
+      "check": "pose_legal:flight",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:flight",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:flight",
+      "pass": true
+    },
+    {
+      "check": "pose_legal:toe_forefoot_first_touchdown",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:toe_forefoot_first_touchdown",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:toe_forefoot_first_touchdown",
+      "pass": true
+    },
+    {
+      "check": "pose_legal:landing_absorption",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:landing_absorption",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:landing_absorption",
+      "pass": true
+    },
+    {
+      "check": "pose_legal:recovered_standing",
+      "pass": true,
+      "violations": []
+    },
+    {
+      "check": "pose_no_prohibited:recovered_standing",
+      "pass": true
+    },
+    {
+      "check": "pose_no_self_intersection:recovered_standing",
+      "pass": true
+    },
+    {
+      "check": "standing_flat_support",
+      "pass": true
+    },
+    {
+      "check": "deep_countermovement_knee_depth",
+      "pass": true
+    },
+    {
+      "check": "flight_no_contacts",
+      "pass": true
+    },
+    {
+      "check": "toe_off_ball_only",
+      "pass": true
+    },
+    {
+      "check": "touchdown_heel_above_floor",
+      "pass": true
+    }
+  ],
+  "status": "PASS"
+}

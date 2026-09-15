@@ -1,0 +1,694 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "MASS_INERTIA_AUDIT",
+  "authority": "ANTHROPOMETRY_BSIP_AUTHORITY AB-03/AB-04/AB-08/AB-14; FM-04/FM-07/FM-08; DERIVED_QUANTITIES",
+  "athlete_mass_kg": 79.00000000000001,
+  "system_mass_kg": 99.00000000000001,
+  "body_table": [
+    {
+      "name": "world",
+      "mass_kg": 0.0,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "diaginertia_kg_m2": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "pelvis",
+      "mass_kg": 8.8243,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        0.05966063512349223
+      ],
+      "diaginertia_kg_m2": [
+        0.06317964198451871,
+        0.07870896370431779,
+        0.07170511974256877
+      ]
+    },
+    {
+      "name": "HAT",
+      "mass_kg": 38.7969,
+      "com_pos_in_parent_frame_m": [
+        -0.01596456566162191,
+        0.0,
+        0.4496738763907584
+      ],
+      "diaginertia_kg_m2": [
+        1.6928650336618474,
+        1.4753589080582343,
+        0.8499125144729344
+      ]
+    },
+    {
+      "name": "bar",
+      "mass_kg": 20.0,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "diaginertia_kg_m2": [
+        11.75585696777048,
+        0.004786777979600392,
+        11.75585696777048
+      ]
+    },
+    {
+      "name": "left_thigh",
+      "mass_kg": 11.1864,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        -0.18222238125
+      ],
+      "diaginertia_kg_m2": [
+        0.23976057065071502,
+        0.23976057065071502,
+        0.04917660063207587
+      ]
+    },
+    {
+      "name": "left_shank",
+      "mass_kg": 3.4207,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        -0.20398386645
+      ],
+      "diaginertia_kg_m2": [
+        0.04438440231686326,
+        0.04654918083021296,
+        0.007594621444486416
+      ]
+    },
+    {
+      "name": "left_hindfoot",
+      "mass_kg": 0.4675536,
+      "com_pos_in_parent_frame_m": [
+        0.00831,
+        0.0,
+        -0.0277
+      ],
+      "diaginertia_kg_m2": [
+        0.0004337502415040432,
+        0.0005182470417970387,
+        0.0004168508814454441
+      ]
+    },
+    {
+      "name": "left_forefoot",
+      "mass_kg": 0.4588952,
+      "com_pos_in_parent_frame_m": [
+        0.05708875,
+        0.0,
+        0.00419
+      ],
+      "diaginertia_kg_m2": [
+        0.0003822233613175279,
+        0.0004723188679138023,
+        0.0006006367106418295
+      ]
+    },
+    {
+      "name": "left_toe",
+      "mass_kg": 0.1558512,
+      "com_pos_in_parent_frame_m": [
+        0.029975,
+        0.0,
+        0.0
+      ],
+      "diaginertia_kg_m2": [
+        0.0001150951698085389,
+        6.454356581420024e-05,
+        0.00015255751919720058
+      ]
+    },
+    {
+      "name": "right_thigh",
+      "mass_kg": 11.1864,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        -0.18222238125
+      ],
+      "diaginertia_kg_m2": [
+        0.23976057065071502,
+        0.23976057065071502,
+        0.04917660063207587
+      ]
+    },
+    {
+      "name": "right_shank",
+      "mass_kg": 3.4207,
+      "com_pos_in_parent_frame_m": [
+        0.0,
+        0.0,
+        -0.20398386645
+      ],
+      "diaginertia_kg_m2": [
+        0.04438440231686326,
+        0.04654918083021296,
+        0.007594621444486416
+      ]
+    },
+    {
+      "name": "right_hindfoot",
+      "mass_kg": 0.4675536,
+      "com_pos_in_parent_frame_m": [
+        0.00831,
+        0.0,
+        -0.0277
+      ],
+      "diaginertia_kg_m2": [
+        0.0004337502415040432,
+        0.0005182470417970387,
+        0.0004168508814454441
+      ]
+    },
+    {
+      "name": "right_forefoot",
+      "mass_kg": 0.4588952,
+      "com_pos_in_parent_frame_m": [
+        0.05708875,
+        0.0,
+        0.00419
+      ],
+      "diaginertia_kg_m2": [
+        0.0003822233613175279,
+        0.0004723188679138023,
+        0.0006006367106418295
+      ]
+    },
+    {
+      "name": "right_toe",
+      "mass_kg": 0.1558512,
+      "com_pos_in_parent_frame_m": [
+        0.029975,
+        0.0,
+        0.0
+      ],
+      "diaginertia_kg_m2": [
+        0.0001150951698085389,
+        6.454356581420024e-05,
+        0.00015255751919720058
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "mass:pelvis",
+      "pass": true,
+      "expected": 8.8243,
+      "actual": 8.8243
+    },
+    {
+      "check": "com:pelvis",
+      "pass": true,
+      "expected": [
+        0.0,
+        0.0,
+        0.05966063512349223
+      ],
+      "actual": [
+        0.0,
+        0.0,
+        0.05966063512349223
+      ]
+    },
+    {
+      "check": "diaginertia:pelvis",
+      "pass": true,
+      "expected": [
+        0.06317964198451871,
+        0.07870896370431779,
+        0.07170511974256877
+      ],
+      "actual": [
+        0.06317964198451871,
+        0.07870896370431779,
+        0.07170511974256877
+      ]
+    },
+    {
+      "check": "mass:HAT",
+      "pass": true,
+      "expected": 38.7969,
+      "actual": 38.7969
+    },
+    {
+      "check": "com:HAT",
+      "pass": true,
+      "expected": [
+        -0.01596456566162191,
+        -2.8616281832444254e-18,
+        0.4496738763907584
+      ],
+      "actual": [
+        -0.01596456566162191,
+        0.0,
+        0.4496738763907584
+      ]
+    },
+    {
+      "check": "fullinertia:HAT",
+      "pass": true,
+      "expected": [
+        [
+          1.692352492111382,
+          0.0,
+          -0.02077944879714553
+        ],
+        [
+          0.0,
+          1.4753589080582343,
+          0.0
+        ],
+        [
+          -0.02077944879714553,
+          0.0,
+          0.8504250560234003
+        ]
+      ],
+      "actual": [
+        [
+          1.6923524921113813,
+          0.0,
+          -0.02077944879714251
+        ],
+        [
+          0.0,
+          1.4753589080582343,
+          0.0
+        ],
+        [
+          -0.02077944879714251,
+          0.0,
+          0.8504250560233998
+        ]
+      ]
+    },
+    {
+      "check": "mass:bar",
+      "pass": true,
+      "expected": 20.0,
+      "actual": 20.0
+    },
+    {
+      "check": "com:bar",
+      "pass": true,
+      "expected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "actual": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "diaginertia:bar",
+      "pass": true,
+      "expected": [
+        11.75585696777048,
+        0.004786777979600392,
+        11.75585696777048
+      ],
+      "actual": [
+        11.75585696777048,
+        0.004786777979600392,
+        11.75585696777048
+      ]
+    },
+    {
+      "check": "mass:left_thigh",
+      "pass": true,
+      "expected": 11.1864,
+      "actual": 11.1864
+    },
+    {
+      "check": "com:left_thigh",
+      "pass": true,
+      "expected": [
+        0.0,
+        0.0,
+        -0.18222238124999998
+      ],
+      "actual": [
+        0.0,
+        0.0,
+        -0.18222238125
+      ]
+    },
+    {
+      "check": "diaginertia:left_thigh",
+      "pass": true,
+      "expected": [
+        0.23976057065071502,
+        0.23976057065071502,
+        0.04917660063207587
+      ],
+      "actual": [
+        0.23976057065071502,
+        0.23976057065071502,
+        0.04917660063207587
+      ]
+    },
+    {
+      "check": "mass:left_shank",
+      "pass": true,
+      "expected": 3.4207,
+      "actual": 3.4207
+    },
+    {
+      "check": "com:left_shank",
+      "pass": true,
+      "expected": [
+        0.0,
+        0.0,
+        -0.20398386645
+      ],
+      "actual": [
+        0.0,
+        0.0,
+        -0.20398386645
+      ]
+    },
+    {
+      "check": "diaginertia:left_shank",
+      "pass": true,
+      "expected": [
+        0.04438440231686326,
+        0.04654918083021296,
+        0.007594621444486416
+      ],
+      "actual": [
+        0.04438440231686326,
+        0.04654918083021296,
+        0.007594621444486416
+      ]
+    },
+    {
+      "check": "mass:left_hindfoot",
+      "pass": true,
+      "expected": 0.4675536,
+      "actual": 0.4675536
+    },
+    {
+      "check": "com:left_hindfoot",
+      "pass": true,
+      "expected": [
+        0.008310000000000005,
+        0.0,
+        -0.027700000000000002
+      ],
+      "actual": [
+        0.00831,
+        0.0,
+        -0.0277
+      ]
+    },
+    {
+      "check": "diaginertia:left_hindfoot",
+      "pass": true,
+      "expected": [
+        0.0004337502415040432,
+        0.0005182470417970387,
+        0.0004168508814454441
+      ],
+      "actual": [
+        0.0004337502415040432,
+        0.0005182470417970387,
+        0.0004168508814454441
+      ]
+    },
+    {
+      "check": "mass:left_forefoot",
+      "pass": true,
+      "expected": 0.4588952,
+      "actual": 0.4588952
+    },
+    {
+      "check": "com:left_forefoot",
+      "pass": true,
+      "expected": [
+        0.05708875,
+        0.0,
+        0.00419
+      ],
+      "actual": [
+        0.05708875,
+        0.0,
+        0.00419
+      ]
+    },
+    {
+      "check": "diaginertia:left_forefoot",
+      "pass": true,
+      "expected": [
+        0.0003822233613175279,
+        0.0004723188679138023,
+        0.0006006367106418295
+      ],
+      "actual": [
+        0.0003822233613175279,
+        0.0004723188679138023,
+        0.0006006367106418295
+      ]
+    },
+    {
+      "check": "mass:left_toe",
+      "pass": true,
+      "expected": 0.1558512,
+      "actual": 0.1558512
+    },
+    {
+      "check": "com:left_toe",
+      "pass": true,
+      "expected": [
+        0.029975,
+        0.0,
+        0.0
+      ],
+      "actual": [
+        0.029975,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "diaginertia:left_toe",
+      "pass": true,
+      "expected": [
+        0.0001150951698085389,
+        6.454356581420024e-05,
+        0.00015255751919720058
+      ],
+      "actual": [
+        0.0001150951698085389,
+        6.454356581420024e-05,
+        0.00015255751919720058
+      ]
+    },
+    {
+      "check": "mass:right_thigh",
+      "pass": true,
+      "expected": 11.1864,
+      "actual": 11.1864
+    },
+    {
+      "check": "com:right_thigh",
+      "pass": true,
+      "expected": [
+        0.0,
+        0.0,
+        -0.18222238124999998
+      ],
+      "actual": [
+        0.0,
+        0.0,
+        -0.18222238125
+      ]
+    },
+    {
+      "check": "diaginertia:right_thigh",
+      "pass": true,
+      "expected": [
+        0.23976057065071502,
+        0.23976057065071502,
+        0.04917660063207587
+      ],
+      "actual": [
+        0.23976057065071502,
+        0.23976057065071502,
+        0.04917660063207587
+      ]
+    },
+    {
+      "check": "mass:right_shank",
+      "pass": true,
+      "expected": 3.4207,
+      "actual": 3.4207
+    },
+    {
+      "check": "com:right_shank",
+      "pass": true,
+      "expected": [
+        0.0,
+        0.0,
+        -0.20398386645
+      ],
+      "actual": [
+        0.0,
+        0.0,
+        -0.20398386645
+      ]
+    },
+    {
+      "check": "diaginertia:right_shank",
+      "pass": true,
+      "expected": [
+        0.04438440231686326,
+        0.04654918083021296,
+        0.007594621444486416
+      ],
+      "actual": [
+        0.04438440231686326,
+        0.04654918083021296,
+        0.007594621444486416
+      ]
+    },
+    {
+      "check": "mass:right_hindfoot",
+      "pass": true,
+      "expected": 0.4675536,
+      "actual": 0.4675536
+    },
+    {
+      "check": "com:right_hindfoot",
+      "pass": true,
+      "expected": [
+        0.008310000000000005,
+        0.0,
+        -0.027700000000000002
+      ],
+      "actual": [
+        0.00831,
+        0.0,
+        -0.0277
+      ]
+    },
+    {
+      "check": "diaginertia:right_hindfoot",
+      "pass": true,
+      "expected": [
+        0.0004337502415040432,
+        0.0005182470417970387,
+        0.0004168508814454441
+      ],
+      "actual": [
+        0.0004337502415040432,
+        0.0005182470417970387,
+        0.0004168508814454441
+      ]
+    },
+    {
+      "check": "mass:right_forefoot",
+      "pass": true,
+      "expected": 0.4588952,
+      "actual": 0.4588952
+    },
+    {
+      "check": "com:right_forefoot",
+      "pass": true,
+      "expected": [
+        0.05708875,
+        0.0,
+        0.00419
+      ],
+      "actual": [
+        0.05708875,
+        0.0,
+        0.00419
+      ]
+    },
+    {
+      "check": "diaginertia:right_forefoot",
+      "pass": true,
+      "expected": [
+        0.0003822233613175279,
+        0.0004723188679138023,
+        0.0006006367106418295
+      ],
+      "actual": [
+        0.0003822233613175279,
+        0.0004723188679138023,
+        0.0006006367106418295
+      ]
+    },
+    {
+      "check": "mass:right_toe",
+      "pass": true,
+      "expected": 0.1558512,
+      "actual": 0.1558512
+    },
+    {
+      "check": "com:right_toe",
+      "pass": true,
+      "expected": [
+        0.029975,
+        0.0,
+        0.0
+      ],
+      "actual": [
+        0.029975,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "diaginertia:right_toe",
+      "pass": true,
+      "expected": [
+        0.0001150951698085389,
+        6.454356581420024e-05,
+        0.00015255751919720058
+      ],
+      "actual": [
+        0.0001150951698085389,
+        6.454356581420024e-05,
+        0.00015255751919720058
+      ]
+    },
+    {
+      "check": "athlete_mass_79kg",
+      "pass": true,
+      "value": 79.00000000000001
+    },
+    {
+      "check": "system_mass_99kg",
+      "pass": true,
+      "value": 99.00000000000001
+    },
+    {
+      "check": "two_feet_mass",
+      "pass": true,
+      "value": 2.1646
+    },
+    {
+      "check": "bar_mass",
+      "pass": true,
+      "value": 20.0
+    }
+  ],
+  "status": "PASS"
+}
