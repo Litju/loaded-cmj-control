@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "achievement": "A: RES-85 scientific control authority frozen",
+  "files": {
+    "ACTUATION_AUTHORITY.json": "159d0923cfa55aeb9edf40900d3b5bfd6979cc02d3e34ea97002ea7473826c51",
+    "METHOD_COMPARATOR_PANEL.json": "41d541981dfdee8c5f71097906e6324c361747d82ac7d7f30d3d6e50b578414c",
+    "MTP_ENERGY_AUTHORITY.json": "89b5fe14ef1ada9b2a60343be039c0950e0d1cd06afc2fbcfa4325727c3b44fc",
+    "PHASE_MACHINE_AUTHORITY.json": "b867f50f7041f6e0b241e667289f02dc081f2ecb970f8a0d463a977122e03cfc"
+  },
+  "plant_xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+  "res84_evidence_seal_sha256": "223b13fe5bc3b884c15750da6badd24c834cfec54a24a23338dfde25d1bcbeda",
+  "report_sha256": {
+    "AUTHORITY_CHECK_REPORT.json": "bc455e5c008b788096aa4edac9f7261e2353e24bfa133c7d6c887c49112cdafb"
+  }
+}

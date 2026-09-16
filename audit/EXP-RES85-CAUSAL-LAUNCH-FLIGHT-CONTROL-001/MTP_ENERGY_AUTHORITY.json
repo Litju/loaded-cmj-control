@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0.0",
+  "authority_id": "LCMJ_RES85_MTP_ENERGY_AUTHORITY_V1",
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "linear_issue": "RES-85",
+  "plant_authority": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "channel_pair": ["left_mtp", "right_mtp"],
+  "definitions": {
+    "joint_coordinate": "mtp joint angle q (rad), positive = dorsiflexion, negative = plantarflexion",
+    "joint_velocity": "qdot = dq/dt from the native Plant state",
+    "active_moment": {
+      "symbol": "tau_active",
+      "definition": "the net moment delivered by the m_left_mtp / m_right_mtp motor actuator, after the ACTUATION_AUTHORITY enforcement chain",
+      "source": "controller command",
+      "ceiling": "MTP moment/power/rate ceilings from ACTUATION_AUTHORITY.json"
+    },
+    "passive_moment": {
+      "symbol": "tau_passive",
+      "definition": "the FM-09 MTP passive engineering prior produced by the Plant: tau_passive = -k*(q - q_neutral) - c*qdot with k = 25 N*m/rad, c = 2 N*m*s/rad, q_neutral = 0.0 (V3_MTP_PASSIVE_STIFFNESS_NM_PER_RAD, V3_MTP_PASSIVE_DAMPING_NMS_PER_RAD, V3_MTP_NEUTRAL_RAD)",
+      "source": "Plant; immutable; not a controller quantity",
+      "measurement": "reconstructed from the Plant joint coordinate and velocity with the frozen prior, or read directly as the MTP component of the Plant passive generalized force; the two must agree to 1e-9 N*m in the deterministic checks"
+    },
+    "active_power": {
+      "symbol": "P_active",
+      "definition": "tau_active * qdot",
+      "units": "W"
+    },
+    "passive_power": {
+      "symbol": "P_passive",
+      "definition": "tau_passive * qdot",
+      "units": "W"
+    },
+    "total_power": {
+      "symbol": "P_total",
+      "definition": "tau_total * qdot with tau_total = tau_active + tau_passive",
+      "identity": "P_total = P_active + P_passive exactly (no double counting: the passive moment is never folded into tau_active and vice versa)"
+    },
+    "active_work": {
+      "symbol": "W_active",
+      "definition": "trapezoidal integral of P_active over native samples",
+      "units": "J",
+      "sign_convention": "positive = active moment does positive work on the toe (energy injection); negative = absorption"
+    },
+    "passive_work": {
+      "symbol": "W_passive",
+      "definition": "trapezoidal integral of P_passive over native samples",
+      "units": "J"
+    },
+    "total_work": {
+      "symbol": "W_total",
+      "definition": "trapezoidal integral of P_total over native samples",
+      "identity": "W_total = W_active + W_passive exactly"
+    }
+  },
+  "budgets_per_foot": {
+    "moment_ceiling_nm": 45.0,
+    "power_ceiling_w": 120.0,
+    "active_positive_work_budget_j": 25.0,
+    "total_positive_work_budget_j": 40.0,
+    "budget_scope": "the whole RES-85 control episode, per foot, from reset to the end of the RES-85 claim",
+    "sensitivity_values_active_budget_j": [0.0, 12.5, 25.0, 50.0],
+    "sensitivity_values_total_budget_j": [20.0, 40.0, 80.0]
+  },
+  "supported_phase_active_authority": {
+    "definition": "the active MTP channel may regulate supported toe/forefoot mechanics only while legal plantar support is active for that foot",
+    "permitted_roles": [
+      "maintain supported toe/forefoot contact geometry",
+      "contribute to the ankle-MTP rocker moment within the frozen ceilings",
+      "stabilise the foot segment during the countermovement and braking phases"
+    ],
+    "prohibited_roles": [
+      "arbitrary late toe-off energy injector",
+      "replacement for the ankle plantarflexor channel",
+      "post-takeoff propulsion of the free foot",
+      "compensation for a zero-passive MTP Plant by unbounded active work"
+    ],
+    "phase_gate": {
+      "STAND": {"active_allowed": true, "rationale": "quiet supported stance; foot geometry maintenance"},
+      "COUNTERMOVEMENT": {"active_allowed": true, "rationale": "supported braking/foot stabilisation"},
+      "BRAKING": {"active_allowed": true, "rationale": "supported arrest; MTP rocker authority"},
+      "PROPULSION": {"active_allowed": true, "rationale": "supported push-off; explicitly bounded by the late-phase budget fraction"},
+      "TAKEOFF_CONFIRM": {"active_allowed": false, "rationale": "support already lost; no toe-off energy injection is permitted during provisional flight"},
+      "FLIGHT": {"active_allowed": false, "rationale": "no ground contact exists; the toe may only hold posture with zero net positive work budget"},
+      "LANDING_PREP": {"active_allowed": false, "rationale": "RES-85 claim ends before landing optimisation"}
+    }
+  },
+  "late_phase_restriction": {
+    "definition": "the PROPULSION phase and every later phase of the episode",
+    "late_active_positive_work_fraction": 0.5,
+    "rule": "at most half of the active positive work budget may be spent in the late phase; the remainder must already have been spent in earlier supported phases",
+    "rationale": "the takeoff energy must be dominated by the ankle/knee/hip channels; the MTP may only assist the rocker mechanism"
+  },
+  "zero_passive_sensitivity": {
+    "case": "build_zero_passive_model() (FM-09 k = c = 0, active channels present and zeroed initially)",
+    "rule": "all MTP budgets in this authority are model-independent: the zero-passive Plant may not be compensated with additional active work beyond the same budgets",
+    "required_test": "with the zero-passive Plant and the zero-active command, the controller must still reach its declared phase sequence or report the degradation honestly; the active channel must not be turned up to reproduce the passive energy release",
+    "anti_compensation_statement": "An unbounded active-MTP energy injection that compensates a zero-passive MTP is a violation of this authority and fails the RES-85 negative-control gate."
+  },
+  "anti_energy_injection_rule": {
+    "rule_id": "AEI-1",
+    "statement": "The active MTP channel may not inject net positive work beyond the declared budgets, and may never be the dominant positive-work source of the takeoff. The takeoff claim requires that the ankle channel's positive mechanical work strictly exceeds the active MTP positive work.",
+    "enforcement": [
+      "AEI-1a: instantaneous |tau_active * qdot| <= power_ceiling_w at every native sample",
+      "AEI-1b: cumulative active positive work <= active_positive_work_budget_j at every native sample",
+      "AEI-1c: cumulative total positive work (active + passive) <= total_positive_work_budget_j at every native sample",
+      "AEI-1d: subsequent to exhausting either budget, the applied active MTP moment is gated to exactly 0.0 for the remainder of the episode (fail closed), and the gate event is recorded",
+      "AEI-1e: at TAKEOFF_CONFIRM entry and thereafter the applied active MTP moment is exactly 0.0",
+      "AEI-1f: the reported takeoff dominance check ankle_positive_work > active_mtp_positive_work must pass for the RES-85 flight claim"
+    ],
+    "violation_handling": "an AEI violation invalidates the RES-85 flight/performance claim (the episode may continue for telemetry but cannot be reported as a qualified launch)"
+  },
+  "double_counting_prohibitions": [
+    "the passive moment is never included in tau_active",
+    "the active moment is never included in tau_passive",
+    "P_total is the sum of the two measured powers, never the power of a summed command after clipping",
+    "work integrals are computed per native sample from the two separate powers, never from an aggregate"
+  ],
+  "energy_ledger_identity": {
+    "statement": "W_total = W_active + W_passive must hold to 1e-9 J in the deterministic checks for every recorded episode",
+    "auxiliary_identity": "the change in the toe segment's mechanical energy over the episode equals W_total plus the remaining joint-moment work terms in the segment chain; this balance is a diagnostic, not a gate"
+  },
+  "red_team_assertions": {
+    "no_double_counted_mtp_energy": true,
+    "no_unbounded_zero_passive_compensation": true,
+    "no_late_toe_off_injection": true,
+    "separate_active_and_passive_ledgers": true
+  },
+  "provenance": {
+    "plant_constants": [
+      "V3_MTP_PASSIVE_STIFFNESS_NM_PER_RAD = 25.0",
+      "V3_MTP_PASSIVE_DAMPING_NMS_PER_RAD = 2.0",
+      "V3_MTP_NEUTRAL_RAD = 0.0",
+      "V3_MTP_PASSIVE_SENSITIVITY"
+    ],
+    "external_evidence": [
+      {"id": "PMC3406365", "use": "measured external MTP moments 6.3-14.2 N*m bound the active channel magnitude"},
+      {"id": "ScienceDirect S0958259213000266", "use": "intrinsic toe-flexor moment capacity 4.27-6.84 N*m"},
+      {"id": "Anjo 2022 PLOS ONE 10.1371/journal.pone.0268634", "use": "MTP role in take-off; windlass coupling and passive structure"},
+      {"id": "PMC7068936", "use": "intrinsic foot joint moment/power order in the propulsive configuration"}
+    ]
+  }
+}

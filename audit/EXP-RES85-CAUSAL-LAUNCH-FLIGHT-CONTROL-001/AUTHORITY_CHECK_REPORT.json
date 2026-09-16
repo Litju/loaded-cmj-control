@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "achievement": "A: FREEZE RES-85 SCIENTIFIC CONTROL AUTHORITY",
+  "status": "PASS",
+  "sub_reports": {
+    "METHOD_COMPARATOR_PANEL": {
+      "status": "PASS",
+      "failed": []
+    },
+    "ACTUATION_AUTHORITY": {
+      "status": "PASS",
+      "failed": []
+    },
+    "MTP_ENERGY_AUTHORITY": {
+      "status": "PASS",
+      "failed": []
+    },
+    "PHASE_MACHINE_AUTHORITY": {
+      "status": "PASS",
+      "failed": []
+    }
+  },
+  "redteam_status": "PASS",
+  "redteam_failed": []
+}

@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0.0",
+  "authority_id": "LCMJ_RES85_METHOD_COMPARATOR_PANEL_V1",
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "linear_issue": "RES-85",
+  "scope": "Method-explicit reporting of takeoff-to-apex rise (H2) for the V3 20 kg loaded CMJ. This panel separates heterogeneous measurement methods and refuses to convert them into one elite target.",
+  "h2_authority": {
+    "quantity_name": "H2",
+    "definition": "SYSTEM_COM_z(APEX) - SYSTEM_COM_z(TAKEOFF_OCCURRENCE)",
+    "origin_event": "RES-84 TAKEOFF_OCCURRENCE (last ACTIVE legal plantar sample -> first zero active legal plantar sample; contact-force extrapolated timestamp)",
+    "origin_authority": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+    "apex_definition": "first SYSTEM_COM vertical-velocity + -> non-positive crossing strictly inside confirmed genuine flight",
+    "status": "FROZEN",
+    "primary_reporting_method": "DIRECT_SIMULATOR_SYSTEM_COM",
+    "elite_soccer_plus20_h2_hard_gate": "NOT_ESTABLISHED",
+    "hard_gate_withheld_reason": [
+      "no force-plate or bar/LVT study on file measures the same quantity as the direct simulator SYSTEM_COM span between the RES-84 occurrence and the in-flight apex crossing",
+      "the human literature reports takeoff-to-apex or standing-to-apex flight-time and impulse-derived heights whose definitions differ from the simulator quantity",
+      "no conversion with bounded uncertainty between SYSTEM_COM truth, force-plate impulse-momentum, flight-time and bar/LVT families has been established or calibrated for this Plant"
+    ],
+    "anti_triviality_reference_only": {
+      "value_m": 0.150,
+      "label": "HISTORICAL_ANTI_TRIVIALITY_NEGATIVE_CONTROL_ONLY",
+      "role_never": [
+        "not an elite-performance target",
+        "not a target band",
+        "not a performance floor to tune against",
+        "not a Plant or controller acceptance threshold"
+      ],
+      "permitted_uses": [
+        "named negative-control magnitude in deterministic checks",
+        "contextual illustration that a candidate outcome is non-trivial"
+      ]
+    },
+    "forbidden": [
+      "elite +20 kg H2 hard gate",
+      "single scalar H2 target",
+      "bare 'jump height' label without a method qualifier"
+    ]
+  },
+  "methods": [
+    {
+      "method_id": "DIRECT_SIMULATOR_SYSTEM_COM",
+      "method_family": "SIMULATOR_MODEL_TRUTH",
+      "quantity": "COM_RISE_TAKEOFF_TO_APEX",
+      "units": "m",
+      "definition": "SYSTEM_COM_z(apex) - SYSTEM_COM_z(TAKEOFF_OCCURRENCE), both read from the sealed-V3 SYSTEM_COM state at the RES-84 event timestamps; apex inside confirmed genuine flight; ballistic cross-check vz(occurrence)^2/(2g) is reported separately",
+      "status": "PRIMARY_CANONICAL",
+      "cross_check_role": "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ is a physics consistency residual, not an independent performance gate",
+      "processing_sensitivity": "none: no force threshold, no integration, no flight-time assumption participates in the span",
+      "evidence": [
+        "RES-82 PERFORMANCE_METRIC_CONTRACT quantity A (in-repo, structurally frozen)",
+        "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1 (occurrence, apex, SYSTEM_COM)"
+      ]
+    },
+    {
+      "method_id": "FORCE_PLATFORM_IMPULSE_MOMENTUM",
+      "method_family": "EXPERIMENTAL_FORCE_PLATE",
+      "quantity": "IMPULSE_DERIVED_TAKEOFF_VELOCITY",
+      "units": "m/s (with derived height v^2/(2g) m)",
+      "definition": "vertical impulse of (Fz - m g) over the takeoff interval, divided by system mass; on the simulator this is the discrete LEFT_RECTANGLE_INTEGRATOR_CONSISTENT cross-check of SYSTEM_COM vertical velocity",
+      "status": "SECONDARY_CROSS_CHECK_AND_EXPERIMENTAL_COMPARABILITY",
+      "known_biases": [
+        "requires a force threshold to bound the takeoff interval; the 10 N comparator is a diagnostic convention, not physical takeoff",
+        "numerical integration accumulates sampling/solver residual",
+        "yields the takeoff-to-apex family only under a point-mass assumption at apex"
+      ],
+      "evidence": [
+        "RES-84 IMPULSE_INTEGRATION_RULE and vertical_impulse_between",
+        "RES-82 PERFORMANCE_METRIC_CONTRACT quantities B and E (in-repo)"
+      ]
+    },
+    {
+      "method_id": "FORCE_PLATFORM_FLIGHT_TIME",
+      "method_family": "EXPERIMENTAL_FORCE_PLATE",
+      "quantity": "FLIGHT_TIME_HEIGHT",
+      "units": "m",
+      "definition": "g * T_flight^2 / 8 with both flight boundaries taken from force-threshold crossings",
+      "status": "EXPERIMENTAL_COMPARABILITY_METRIC_REPORT_ONLY",
+      "known_biases": [
+        "assumes equal COM height at takeoff and landing (violated by loaded landing absorption)",
+        "assumes posture symmetry between boundaries",
+        "boundary choice moves the flight interval by up to the comparator dwell",
+        "bias-class relative to model truth is uncalibrated on this Plant"
+      ],
+      "evidence": [
+        "RES-82 PERFORMANCE_METRIC_CONTRACT quantity C (in-repo)",
+        "Eythorsdottir 2024 PMID 39425876 (four height equations, up to ~15 cm divergence)",
+        "Xu 2023 PMID 36940054 (definition-dependent processing)"
+      ]
+    },
+    {
+      "method_id": "BAR_LVT_DISPLACEMENT_VELOCITY",
+      "method_family": "EXPERIMENTAL_BAR_TRANSDUCER",
+      "quantity": "BAR_DISPLACEMENT_OR_BAR_VELOCITY_DERIVED_HEIGHT",
+      "units": "m (displacement) or m/s (velocity) with derived height",
+      "definition": "linear position/velocity transducer on the bar or tether: peak positive displacement, or velocity-derived height h = v^2/(2g), or displacement/velocity-based jump height",
+      "status": "EXPERIMENTAL_COMPARABILITY_METRIC_REPORT_ONLY",
+      "known_biases": [
+        "measures the bar/handle path, not the SYSTEM_COM; the two diverge by segment motion and bar-path curvature",
+        "systematic overestimation of jump height versus force plate and motion capture (reported mean differences ~7.0-8.7 cm in CMJ/SJ)",
+        "velocity estimates from LPT/LVT show questionable concurrent validity; peak values are preferred over mean values",
+        "attachment site and device family change the bias; cross-device comparison is not advised",
+        "the simulator has no bar tether instrument, so this family cannot be produced natively here"
+      ],
+      "evidence": [
+        "Wadhi 2018 PMID 30572577 Sports (Basel) 6(4):177 (GymAware LPT overestimation, CMJ MD 8.68 +/- 2.99 cm)",
+        "O'Donnell 2018 Meas Phys Educ Exerc Sci 22(1):101-107 (LPT overestimation 7.0 +/- 2.8 cm)",
+        "Hojka 2022 Biol Sport 39(2):341-348 (attachment-site bias; recalculation needed before cross-device comparison)",
+        "Sports Biomech 2024;23(10) systematic review (LVT/LPT validity split by exercise; peak values recommended)",
+        "Suchomel 2023 PMC10055813 (device-family disagreement in barbell velocity)"
+      ]
+    }
+  ],
+  "conversion_policy": {
+    "cross_method_conversion_status": "NOT_ESTABLISHED",
+    "single_target_conversion": "PROHIBITED",
+    "requirements_for_any_future_conversion": [
+      "an explicit, named conversion model between the two method families",
+      "a bounded, method-matched uncertainty quantified on this Plant or on a matched human protocol",
+      "a registered acceptance test that fails closed when the conversion is applied outside its validated domain",
+      "an owner decision recorded in the experiment registry"
+    ],
+    "reporting_rule": "Every reported rise carries its method qualifier; heterogeneous family values may be displayed side by side but never pooled, averaged or reconciled into one number"
+  },
+  "res85_reporting_requirements": {
+    "must_report": [
+      "DIRECT_SIMULATOR_SYSTEM_COM H2 (primary)",
+      "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ and its residual vs the primary (consistency)",
+      "IMPULSE_DERIVED_TAKEOFF_VELOCITY and its velocity residual vs occurrence SYSTEM_COM vz (cross-check)",
+      "FLIGHT_TIME_HEIGHT from the diagnostic comparator boundaries (report-only, if evaluable)",
+      "bar/LVT family: NOT_APPLICABLE_NATIVE (no tether instrument exists on this Plant), stated explicitly"
+    ],
+    "must_not": [
+      "declare an elite loaded-CMJ performance claim from any H2 value",
+      "gate task success on 0.150 m",
+      "report an unqualified 'jump height'"
+    ]
+  },
+  "red_team_assertions": {
+    "no_hidden_height_target": true,
+    "no_elite_h2_hard_gate": true,
+    "method_separation_explicit": true,
+    "conversion_refused": true
+  },
+  "provenance": {
+    "in_repo_authority": [
+      "audit/EXP-RES82-SUCCESSOR-SCIENTIFIC-TASK-CONTRACT-001/PERFORMANCE_METRIC_CONTRACT.md",
+      "audit/EXP-RES84-V3-MEASUREMENT-CONTACT-AUTHORITY-001/APEX_H2_MEASUREMENT_AUDIT.json",
+      "audit/EXP-RES84-V3-MEASUREMENT-CONTACT-AUTHORITY-001/FORCE_THRESHOLD_COMPARATOR_AUDIT.json"
+    ],
+    "external_references": [
+      "PMID 39425876",
+      "PMID 36940054",
+      "PMID 41672931",
+      "PMID 30572577",
+      "PMID 20029097"
+    ]
+  }
+}

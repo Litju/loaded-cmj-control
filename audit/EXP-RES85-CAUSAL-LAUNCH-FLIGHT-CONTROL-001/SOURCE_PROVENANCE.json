@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "plant": {
+    "xml_path": "src/loaded_cmj/v3/assets/v3_plant.xml",
+    "xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+    "res83_sealed_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+    "matches_res83_seal": true
+  },
+  "measurement_authority": {
+    "module": "src/loaded_cmj/v3/measurement.py",
+    "module_sha256": "6198765cb7fdf5deeffaf726bc10e2ebf12fe03b16a62487302126e06a92a689",
+    "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+    "external_bundle": "EXP-RES84-V3-MEASUREMENT-CONTACT-AUTHORITY-001",
+    "external_evidence_seal_sha256": "223b13fe5bc3b884c15750da6badd24c834cfec54a24a23338dfde25d1bcbeda",
+    "seal_verification_note": "external seal verified at RES-85 mission start (checksums.sha256 digest and all file digests matched)"
+  },
+  "plant_module": {
+    "module": "src/loaded_cmj/v3/plant.py",
+    "module_sha256": "d861f45607a36fb9bf6597682e509c8adf2acc90e9717ce114b76a2e0dcd87e9"
+  },
+  "constants_module": {
+    "module": "src/loaded_cmj/v3/constants.py",
+    "module_sha256": "1f756f412d3ce8f2fecbae6af5e72fae5e0b3e92f185a96b96da7dcd0c4a20fb"
+  },
+  "authority_files": {
+    "METHOD_COMPARATOR_PANEL.json": {
+      "sha256": "41d541981dfdee8c5f71097906e6324c361747d82ac7d7f30d3d6e50b578414c"
+    },
+    "ACTUATION_AUTHORITY.json": {
+      "sha256": "159d0923cfa55aeb9edf40900d3b5bfd6979cc02d3e34ea97002ea7473826c51"
+    },
+    "MTP_ENERGY_AUTHORITY.json": {
+      "sha256": "89b5fe14ef1ada9b2a60343be039c0950e0d1cd06afc2fbcfa4325727c3b44fc"
+    },
+    "PHASE_MACHINE_AUTHORITY.json": {
+      "sha256": "b867f50f7041f6e0b241e667289f02dc081f2ecb970f8a0d463a977122e03cfc"
+    }
+  },
+  "git": {
+    "head_at_authoring": "b0eccb8a6eeda40950665b3be517854f8b48baab",
+    "tree_at_authoring": "62b5d5d7a20f4ac50090ab7602723a6cd373561c"
+  },
+  "import_boundary": {
+    "plant_constants_imported_from": "loaded_cmj.v3.constants",
+    "measurement_primitives_consumed_from": "loaded_cmj.v3.measurement",
+    "v1_v2_controller_imports": "PROHIBITED"
+  }
+}

@@ -1,0 +1,241 @@
+{
+  "schema_version": "1.0.0",
+  "authority_id": "LCMJ_RES85_PHASE_MACHINE_AUTHORITY_V1",
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "linear_issue": "RES-85",
+  "plant_authority": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "measurement_authority": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "states": [
+    {
+      "state": "STAND",
+      "purpose": "require a valid quiet supported state before launch initiation",
+      "observable_inputs": [
+        "RES-84 legal_plantar_active (bilateral)",
+        "RES-84 prohibited_detected / nonplantar_floor_active",
+        "RES-84 SYSTEM_COM position and velocity",
+        "RES-84 active support hull and sagittal margin",
+        "Plant pelvis pitch rate"
+      ],
+      "entry": "initial state at reset",
+      "exit_predicate": "quiet_supported_dwell_satisfied",
+      "hysteresis_debounce": {
+        "type": "MINIMUM_DWELL_DEBOUNCE",
+        "required_consecutive_native_samples": 125,
+        "duration_s": 0.25,
+        "quiet_criteria": {
+          "bilateral_legal_plantar_active": "left and right both have at least one ACTIVE legal plantar contact",
+          "prohibited_detected": 0,
+          "abs_system_com_vz_m_s_max": 0.02,
+          "abs_system_com_vx_m_s_max": 0.02,
+          "abs_pelvis_pitch_rate_rad_s_max": 0.05,
+          "sagittal_support_margin_m_min": 0.02
+        },
+        "reset_rule": "any failing sample resets the consecutive counter to zero"
+      },
+      "failure_reversion": {
+        "on_support_loss": "stay in STAND and restart the dwell; a support loss in STAND is never a takeoff",
+        "on_prohibited_contact": "FAIL_CLOSED: controller fault (RES-85 claim invalid)",
+        "on_invalid_observation": "FAIL_CLOSED: raise explicit controller fault"
+      },
+      "wall_clock_role": "the dwell is a physical-time count of native samples; no wall-clock authority"
+    },
+    {
+      "state": "COUNTERMOVEMENT",
+      "purpose": "initiate controlled descent using state feedback; no hard-coded ideal knee/hip depth",
+      "observable_inputs": [
+        "RES-84 SYSTEM_COM z and vz (descent rate feedback)",
+        "RES-84 legal_plantar_active / support mode",
+        "Plant joint coordinates and velocities",
+        "RES-84 active support hull sagittal interval (CoP clamping)"
+      ],
+      "entry": "from STAND on the quiet-dwell predicate",
+      "descent_law": "state feedback: the leg-flexion reference rate is driven by the measured descent-velocity error against the frozen descent-velocity command; structural joint limits are bounds on the reference, never movement targets",
+      "exit_predicate": "predictive_braking_trigger",
+      "hysteresis_debounce": {
+        "type": "STATE_PREDICATE_ONLY_NO_COUNTER",
+        "trigger": "d_stop >= remaining_structural_descent_budget - margin OR measured vz <= -0.55 m/s OR flexion reference reaches the structural limit",
+        "definitions": {
+          "d_stop_m": "vz^2 / (2 * a_brake) with a_brake = 2.5 m/s^2 (frozen braking acceleration authority)",
+          "remaining_structural_descent_budget_m": "z(SYSTEM_COM, current) - z_struct_min, where z_struct_min is the SYSTEM_COM height at the structural maximum-flexion bound computed from the sealed Plant geometry (knee at its ROM limit) at controller initialisation",
+          "margin_m": 0.02
+        },
+        "one_way": "the trigger is one-way; there is no revert to COUNTERMOVEMENT"
+      },
+      "failure_reversion": {
+        "on_support_loss": "enter TAKEOFF_CONFIRM provisionally if a RES-84 support-to-zero candidate exists; otherwise revert to STAND",
+        "on_prohibited_contact": "FAIL_CLOSED: controller fault",
+        "on_invalid_observation": "FAIL_CLOSED: raise explicit controller fault"
+      },
+      "wall_clock_role": "none; the phase duration is determined by the measured state"
+    },
+    {
+      "state": "BRAKING",
+      "purpose": "arrest downward momentum without relying on a hard time switch",
+      "observable_inputs": [
+        "RES-84 SYSTEM_COM z and vz",
+        "RES-84 legal ground wrench and CoP validity",
+        "Plant joint coordinates and velocities"
+      ],
+      "entry": "from COUNTERMOVEMENT on the predictive braking trigger",
+      "exit_predicate": "physical_upward_reversal",
+      "hysteresis_debounce": {
+        "type": "SIGN_CROSSING_WITH_PRIOR_SAMPLE_REQUIREMENT",
+        "rule": "SYSTEM_COM_vz >= 0.0 at native sample k with SYSTEM_COM_vz < 0.0 at sample k-1",
+        "not_time": "explicitly not a timer, not a stored timestamp, not a replay schedule"
+      },
+      "failure_reversion": {
+        "on_support_loss": "enter TAKEOFF_CONFIRM provisionally if a RES-84 support-to-zero candidate exists; otherwise revert to STAND",
+        "on_prohibited_contact": "FAIL_CLOSED: controller fault",
+        "on_invalid_observation": "FAIL_CLOSED: raise explicit controller fault"
+      },
+      "wall_clock_role": "none"
+    },
+    {
+      "state": "PROPULSION",
+      "purpose": "generate bounded extension under the frozen moment/rate/power authority",
+      "observable_inputs": [
+        "RES-84 SYSTEM_COM z, vz and the measured leg extension",
+        "RES-84 legal ground wrench",
+        "ACTUATION_AUTHORITY saturation state",
+        "MTP_ENERGY_AUTHORITY budgets"
+      ],
+      "entry": "from BRAKING on the physical upward reversal",
+      "exit_predicate": "RES-84_TAKEOFF_OCCURRENCE_candidate",
+      "hysteresis_debounce": {
+        "type": "MEASUREMENT_EVENT_ONLY",
+        "rule": "the RES-84 support-to-zero transition (legal_plantar_active[k-1] > 0 and legal_plantar_active[k] == 0) using the RES-84 native frame stream",
+        "prohibition": "the diagnostic 10 N force comparator is never the takeoff authority"
+      },
+      "failure_reversion": {
+        "on_support_loss_without_candidate": "revert to BRAKING if vz <= 0.0 else remain in PROPULSION and re-evaluate from measured state",
+        "on_prohibited_contact": "FAIL_CLOSED: controller fault",
+        "on_invalid_observation": "FAIL_CLOSED: raise explicit controller fault"
+      },
+      "wall_clock_role": "none"
+    },
+    {
+      "state": "TAKEOFF_CONFIRM",
+      "purpose": "provisional flight candidate entered at physical support loss; continuity-preserving posture law; never the diagnostic comparator",
+      "observable_inputs": [
+        "RES-84 native frames: legal_plantar_active, legal_plantar_detected, prohibited_detected",
+        "RES-84 foot clearances (bilateral)",
+        "RES-84 SYSTEM_COM vz at the occurrence",
+        "RES-84 PHYSICAL_TIME dwell evaluation through the shared primitive"
+      ],
+      "entry": "provisionally at physical support loss (PROPULSION exit predicate)",
+      "exit_predicates": {
+        "to_FLIGHT": "RES-84 TAKEOFF_CONFIRMATION confirmed == true (all frozen checks pass: dwell coverage, no legal plantar recontact through the confirmation sample, bilateral clearance reaching the guard, positive SYSTEM_COM vz at the occurrence, no prohibited contact)",
+        "to_supported_state": "legal plantar recontact (legal_plantar_active > 0) at any native sample before confirmation",
+        "to_claim_end_no_flight": "horizon ends before any confirmation or recontact; the episode closes WITHOUT a flight claim and the failed checks are recorded"
+      },
+      "hysteresis_debounce": {
+        "type": "RES84_PHYSICAL_TIME_DWELL_AND_SUSTAIN",
+        "dwell_s": 0.050,
+        "confirmation_sample": "first native sample at or after occurrence_time + 0.050 s (never the last sample before the requirement)",
+        "prohibited": "no wall-clock latch, no early allowance, no shifted occurrence timestamp"
+      },
+      "reversion_mapping": {
+        "recontact_with_vz_positive": "PROPULSION",
+        "recontact_with_vz_nonpositive": "BRAKING",
+        "prohibited_contact": "FAIL_CLOSED: controller fault; the candidate is rejected and is never shifted",
+        "candidate_rejected_by_clearance_or_vz": "remain in TAKEOFF_CONFIRM monitoring without the FLIGHT latch; the RES-85 flight claim is refused"
+      },
+      "failure_reversion": {
+        "on_invalid_observation": "FAIL_CLOSED: raise explicit controller fault"
+      },
+      "wall_clock_role": "none"
+    },
+    {
+      "state": "FLIGHT",
+      "purpose": "latched genuine flight with a posture policy continuous with terminal propulsion; no ground impulse exists after physical takeoff",
+      "observable_inputs": [
+        "RES-84 TAKEOFF_CONFIRMATION (latched)",
+        "RES-84 SYSTEM_COM z, vz",
+        "Plant joint coordinates and velocities",
+        "ACTUATION_AUTHORITY limits (internal joint torques allowed)"
+      ],
+      "entry": "only on a valid RES-84 TAKEOFF_CONFIRMATION; monotone latch that cannot be un-entered in the same episode",
+      "exit_predicate": "landing_prep_entry",
+      "hysteresis_debounce": {
+        "type": "STATE_PREDICATE_WITH_TWO_SAMPLE_CONFIRM",
+        "rule": "apex/descent: two consecutive native samples with SYSTEM_COM_vz <= 0 after at least one positive sample, or vz <= -0.25 m/s, or predicted touchdown z/(-vz) <= 0.05 s with vz < -0.05",
+        "prohibited": "no stored replay timestamps, no scheduled landing time"
+      },
+      "failure_reversion": {
+        "on_illegal_ground_contact": "FAIL_CLOSED: prohibited or non-plantar floor contact during flight invalidates the flight claim and raises the controller fault",
+        "on_invalid_observation": "FAIL_CLOSED: raise explicit controller fault"
+      },
+      "wall_clock_role": "none"
+    },
+    {
+      "state": "LANDING_PREP",
+      "purpose": "enter from the actual flight/apex/descent/predicted-touchdown state; stop the RES-85 control claim before RES-86 landing optimisation",
+      "observable_inputs": [
+        "RES-84 SYSTEM_COM z, vz",
+        "RES-84 foot clearances",
+        "Plant joint coordinates and velocities"
+      ],
+      "entry": "from FLIGHT on the apex/descent predicate",
+      "exit_predicate": "first legal plantar recontact (touchdown) -> RES-85 claim ends",
+      "hysteresis_debounce": {
+        "type": "MEASUREMENT_EVENT_ONLY",
+        "rule": "legal_plantar_active > 0 at a native sample while in LANDING_PREP"
+      },
+      "failure_reversion": {
+        "on_prohibited_contact_before_touchdown": "FAIL_CLOSED: controller fault",
+        "on_invalid_observation": "FAIL_CLOSED: raise explicit controller fault"
+      },
+      "scope_limit": "no landing capture optimisation, no recovery work; the controller holds a declared landing-prep posture within the RES-85 actuation authority only",
+      "wall_clock_role": "none"
+    }
+  ],
+  "global_rules": {
+    "no_scorer_private_memory": {
+      "rule": "the phase machine may use only the current and previous RES-84 native frames, the RES-84 event primitives and its own phase/debounce counters; it may not read scorer internals, trajectories, replay arrays, oracle outputs or stored timestamps",
+      "state_whitelist": [
+        "current_phase",
+        "phase_entry_native_index",
+        "consecutive_sample_counters_for_declared_debounces",
+        "next_unconfirmed_candidate_index",
+        "flight_latch",
+        "mtp_energy_ledger"
+      ]
+    },
+    "wall_clock_prohibition": {
+      "statement": "Wall-clock time may implement minimum dwell/debounce only. It may not be the primary FLEX->EXTEND, reversal, takeoff or flight authority.",
+      "frozen_prohibition": "no time-programmed or schedule-replay primary transition exists in any state definition above"
+    },
+    "duplicated_event_definitions": {
+      "rule": "the controller contains no second definition of contact truth, support classification, SYSTEM_COM, takeoff occurrence, takeoff confirmation, force comparator, PHYSICAL_TIME dwell, clearance or CoP/support hull: those are consumed from loaded_cmj.v3.measurement",
+      "prohibition": "no local re-implementation, no parallel threshold"
+    },
+    "fail_closed": {
+      "rule": "an invalid controller state or malformed observation raises/returns an explicit failure state",
+      "forbidden": "broad exception swallowing and silent zero actions"
+    }
+  },
+  "mandatory_negative_controls_supported_by_this_machine": [
+    "one native-sample support dropout cannot permanently enter FLIGHT",
+    "five true diagnostic-comparator samples at 500 Hz reject; six true samples confirm the diagnostic comparator only (never FLIGHT)",
+    "support loss followed by recontact before 50 ms rejects confirmation",
+    "one foot still supported cannot be physical takeoff",
+    "zero support with insufficient clearance cannot confirm flight",
+    "prohibited contact during confirmation rejects",
+    "nonpositive SYSTEM_COM_vz at the occurrence rejects"
+  ],
+  "red_team_assertions": {
+    "no_time_programmed_primary_transitions": true,
+    "no_duplicated_event_definitions": true,
+    "no_scorer_private_memory": true,
+    "no_silent_flight_latch": true,
+    "no_broad_except_zero_action": true
+  },
+  "provenance": {
+    "in_repo_authority": [
+      "audit/EXP-RES84-V3-MEASUREMENT-CONTACT-AUTHORITY-001/MEASUREMENT_IMPLEMENTATION_SPEC.json",
+      "audit/EXP-RES84-V3-MEASUREMENT-CONTACT-AUTHORITY-001/PHYSICAL_TIME_DWELL_AUDIT.json",
+      "audit/EXP-RES84-V3-MEASUREMENT-CONTACT-AUTHORITY-001/TAKEOFF_OCCURRENCE_CONFIRMATION_AUDIT.json",
+      "audit/EXP-RES82-SUCCESSOR-SCIENTIFIC-TASK-CONTRACT-001/DWELL_SEMANTICS.json"
+    ]
+  }
+}
