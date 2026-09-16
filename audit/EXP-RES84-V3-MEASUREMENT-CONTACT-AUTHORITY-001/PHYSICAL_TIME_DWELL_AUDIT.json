@@ -1,0 +1,529 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "PHYSICAL_TIME_DWELL_AUDIT",
+  "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "controlling_authority": {
+    "res82": "audit/EXP-RES82-SUCCESSOR-SCIENTIFIC-TASK-CONTRACT-001/DWELL_SEMANTICS.json",
+    "res95": "audit/EXP-RES95-ELITE-SOCCER-PLANT-MODEL-AUTHORITY-001/EVENT_MEASUREMENT_BOUNDARY.json",
+    "dwell_type": "PHYSICAL_TIME"
+  },
+  "semantics": {
+    "k_d": "K_D = ceil(D / dt), integer-nanosecond authority (Fraction.limit_denominator(1e9))",
+    "required_samples": "K_D intervals and K_D + 1 consecutive true samples",
+    "boundary_inclusivity": "predicate true at every sample from onset i through i+K_D inclusive",
+    "comparison": "elapsed_ns >= required_ns; floating elapsed is reporting only",
+    "off_grid_onset": "confirmation sample is the FIRST native sample with t >= onset_time + D",
+    "retired": [
+      "inclusive sample count >= K_D",
+      "t_end - dt early allowance",
+      "floating accumulated dwell as primary authority"
+    ]
+  },
+  "shared_primitive": {
+    "function": "physical_time_dwell",
+    "module": "src/loaded_cmj/v3/measurement.py",
+    "used_by": [
+      "force_takeoff_comparator",
+      "confirm_takeoff"
+    ],
+    "reported_fields": [
+      "onset_index",
+      "onset_time_s",
+      "confirmation_index",
+      "confirmation_time_s",
+      "required_duration_s",
+      "elapsed_duration_s",
+      "k_d",
+      "true_sample_count",
+      "confirmed"
+    ]
+  },
+  "comparator_boundaries_500hz": {
+    "dt_s": 0.002,
+    "required_duration_s": 0.01,
+    "K_D": 5,
+    "required_true_samples": 6,
+    "4_true_samples": {
+      "status": "NOT_TRIGGERED",
+      "first_to_last_elapsed_s": 0.006
+    },
+    "5_true_samples": {
+      "status": "NOT_TRIGGERED",
+      "first_to_last_elapsed_s": 0.008
+    },
+    "6_true_samples": {
+      "status": "TRIGGERED",
+      "onset_time_s": 0.008,
+      "confirmation_time_s": 0.018000000000000002,
+      "first_to_last_elapsed_s": 0.01,
+      "elapsed_duration_s": 0.01
+    }
+  },
+  "flight_boundaries_500hz": {
+    "dt_s": 0.002,
+    "required_duration_s": 0.05,
+    "exactly_k_d_intervals": {
+      "confirmation_sample": 35,
+      "confirmation_time_s": 0.07,
+      "confirmation_elapsed_s": 0.05,
+      "confirmed": true,
+      "dwell": {
+        "dwell_type": "PHYSICAL_TIME",
+        "onset_index": 10,
+        "onset_time_s": 0.02,
+        "required_duration_s": 0.05,
+        "k_d": 25,
+        "confirmation_index": 35,
+        "confirmation_time_s": 0.07,
+        "confirmation_intervals": 25,
+        "elapsed_duration_s": 0.05,
+        "true_sample_count": 26,
+        "coverage_complete": true,
+        "confirmed": true,
+        "reason": ""
+      }
+    },
+    "k_d_minus_1_intervals": {
+      "confirmed": false,
+      "reason": "REJECT_DWELL_COVERAGE",
+      "latest_sample_s": 0.068,
+      "required_end_s": 0.07
+    }
+  },
+  "timestep_parameterization": {
+    "0.0020": {
+      "dt_s": 0.002,
+      "comparator": {
+        "K_D": 5,
+        "required_true_samples": 6,
+        "confirmation_intervals": 5,
+        "elapsed_duration_s": 0.01,
+        "triggered": true
+      },
+      "flight": {
+        "K_D": 25,
+        "confirmation_intervals": 25,
+        "confirmation_sample": 35,
+        "elapsed_duration_s": 0.05,
+        "confirmed": true,
+        "k_d_minus_1_reason": "REJECT_DWELL_COVERAGE"
+      },
+      "primitive": {
+        "k_d_intervals_confirmed": true,
+        "k_d_intervals_elapsed_s": 0.01,
+        "k_d_minus_1_reason": "REJECT_SUSTAIN_GAP"
+      }
+    },
+    "0.0010": {
+      "dt_s": 0.001,
+      "comparator": {
+        "K_D": 10,
+        "required_true_samples": 11,
+        "confirmation_intervals": 10,
+        "elapsed_duration_s": 0.01,
+        "triggered": true
+      },
+      "flight": {
+        "K_D": 50,
+        "confirmation_intervals": 50,
+        "confirmation_sample": 60,
+        "elapsed_duration_s": 0.05,
+        "confirmed": true,
+        "k_d_minus_1_reason": "REJECT_DWELL_COVERAGE"
+      },
+      "primitive": {
+        "k_d_intervals_confirmed": true,
+        "k_d_intervals_elapsed_s": 0.01,
+        "k_d_minus_1_reason": "REJECT_SUSTAIN_GAP"
+      }
+    },
+    "0.0005": {
+      "dt_s": 0.0005,
+      "comparator": {
+        "K_D": 20,
+        "required_true_samples": 21,
+        "confirmation_intervals": 20,
+        "elapsed_duration_s": 0.01,
+        "triggered": true
+      },
+      "flight": {
+        "K_D": 100,
+        "confirmation_intervals": 100,
+        "confirmation_sample": 110,
+        "elapsed_duration_s": 0.05,
+        "confirmed": true,
+        "k_d_minus_1_reason": "REJECT_DWELL_COVERAGE"
+      },
+      "primitive": {
+        "k_d_intervals_confirmed": true,
+        "k_d_intervals_elapsed_s": 0.01,
+        "k_d_minus_1_reason": "REJECT_SUSTAIN_GAP"
+      }
+    }
+  },
+  "offgrid_occurrence": {
+    "occurrence_time_s": 0.0273,
+    "required_end_s": 0.07730000000000001,
+    "confirmation_sample": 39,
+    "last_sample_before_required_end": 38,
+    "confirmation_time_s": 0.078,
+    "confirmation_elapsed_s": 0.0507,
+    "confirmed": true,
+    "dwell": {
+      "dwell_type": "PHYSICAL_TIME",
+      "onset_index": 14,
+      "onset_time_s": 0.0273,
+      "required_duration_s": 0.05,
+      "k_d": 25,
+      "confirmation_index": 39,
+      "confirmation_time_s": 0.078,
+      "confirmation_intervals": 25,
+      "elapsed_duration_s": 0.0507,
+      "true_sample_count": 65,
+      "coverage_complete": true,
+      "confirmed": true,
+      "reason": ""
+    }
+  },
+  "real_hop": {
+    "occurrence_time_s": 0.028,
+    "occurrence_native_index": 14,
+    "comparator_onset_index": 12,
+    "comparator_onset_time_s": 0.024,
+    "comparator_confirmation_time_s": 0.034,
+    "comparator_onset_offset_s": -0.004,
+    "comparator_confirmation_offset_s": 0.006000000000000002,
+    "TAKEOFF_CONFIRMATION_SAMPLE": 39,
+    "TAKEOFF_CONFIRMATION_TIME": 0.078,
+    "TAKEOFF_CONFIRMATION_ELAPSED_S": 0.05,
+    "confirmed": true
+  },
+  "checks": [
+    {
+      "check": "res82_dwell_type_physical_time",
+      "pass": true,
+      "detail": "PHYSICAL_TIME"
+    },
+    {
+      "check": "res82_k_d_is_integer_ratio",
+      "pass": true,
+      "detail": "K_D is an integer constant from the exact ratio (K_D = D_ns / 125); runtime ceil(D/dt) on floating values is prohibited"
+    },
+    {
+      "check": "res82_boundary_inclusivity",
+      "pass": true,
+      "detail": "predicate true at every sample from i through i+K_D inclusive"
+    },
+    {
+      "check": "res82_retires_inclusive_sample_count_and_early_allowance",
+      "pass": true,
+      "detail": [
+        "sample-inclusive count N_true = j - i + 1 confirmed against K_D (confirms one sample early; MED-001)",
+        "distance-minus-one K >= K_D - 1 (equivalent early confirmation)",
+        "floating accumulated t[j]-t[i] comparison without declared tolerance",
+        "dwell reconstruction on a control-rate grid instead of the physics grid"
+      ]
+    },
+    {
+      "check": "res95_em06_flight_dwell_050s",
+      "pass": true,
+      "detail": "starting from the candidate TAKEOFF_OCCURRENCE, zero legal plantar contacts must persist for at least 0.050 s; within the confirmation window both feet establish positive clearance above the numerical guard and no prohibited contact occurs"
+    },
+    {
+      "check": "res95_em10_comparator_10n_10ms_diagnostic_only",
+      "pass": true,
+      "detail": "bilateral per-foot vertical GRF threshold 10 N with 0.010 s persistence (the RES-82 F_thr convention; an equivalent total-GRF display may be reported) is comparator/diagnostic only and never defines the simulated physical event"
+    },
+    {
+      "check": "shared_primitive_defined",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "comparator_routes_through_shared_primitive",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "confirmation_routes_through_shared_primitive",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "primitive_uses_integer_nanosecond_authority",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "comparator_500hz_k_d_5_intervals_6_samples",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "comparator_500hz_4_true_samples_reject",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "comparator_500hz_5_true_samples_reject",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "comparator_500hz_6_true_samples_accept",
+      "pass": true,
+      "detail": {
+        "onset_s": 0.008,
+        "confirmation_s": 0.018000000000000002,
+        "elapsed_s": 0.01
+      }
+    },
+    {
+      "check": "comparator_500hz_first_to_last_boundary_times",
+      "pass": true,
+      "detail": {
+        "4_samples_first_to_last_s": 0.006,
+        "5_samples_first_to_last_s": 0.008,
+        "6_samples_first_to_last_s": 0.01
+      }
+    },
+    {
+      "check": "flight_500hz_k_d_25_intervals_26_samples",
+      "pass": true,
+      "detail": {
+        "dwell_type": "PHYSICAL_TIME",
+        "onset_index": 10,
+        "onset_time_s": 0.02,
+        "required_duration_s": 0.05,
+        "k_d": 25,
+        "confirmation_index": 35,
+        "confirmation_time_s": 0.07,
+        "confirmation_intervals": 25,
+        "elapsed_duration_s": 0.05,
+        "true_sample_count": 26,
+        "coverage_complete": true,
+        "confirmed": true,
+        "reason": ""
+      }
+    },
+    {
+      "check": "flight_500hz_exactly_k_d_intervals_eligible",
+      "pass": true,
+      "detail": {
+        "confirmation_sample": 35,
+        "confirmation_time_s": 0.07,
+        "elapsed_s": 0.05
+      }
+    },
+    {
+      "check": "flight_500hz_k_d_minus_1_intervals_reject",
+      "pass": true,
+      "detail": {
+        "reason": "REJECT_DWELL_COVERAGE",
+        "failed": [
+          "dwell_coverage",
+          "bilateral_clearance_reaches_guard"
+        ]
+      }
+    },
+    {
+      "check": "dt_0.0020_comparator_k_d_exact",
+      "pass": true,
+      "detail": {
+        "K_D": 5,
+        "required_true_samples": 6,
+        "confirmation_intervals": 5,
+        "elapsed_duration_s": 0.01,
+        "triggered": true
+      }
+    },
+    {
+      "check": "dt_0.0020_flight_k_d_exact",
+      "pass": true,
+      "detail": {
+        "K_D": 25,
+        "confirmation_intervals": 25,
+        "confirmation_sample": 35,
+        "elapsed_duration_s": 0.05,
+        "confirmed": true,
+        "k_d_minus_1_reason": "REJECT_DWELL_COVERAGE"
+      }
+    },
+    {
+      "check": "dt_0.0020_k_d_minus_1_rejected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "dt_0.0020_primitive_elapsed_authority",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "dt_0.0010_comparator_k_d_exact",
+      "pass": true,
+      "detail": {
+        "K_D": 10,
+        "required_true_samples": 11,
+        "confirmation_intervals": 10,
+        "elapsed_duration_s": 0.01,
+        "triggered": true
+      }
+    },
+    {
+      "check": "dt_0.0010_flight_k_d_exact",
+      "pass": true,
+      "detail": {
+        "K_D": 50,
+        "confirmation_intervals": 50,
+        "confirmation_sample": 60,
+        "elapsed_duration_s": 0.05,
+        "confirmed": true,
+        "k_d_minus_1_reason": "REJECT_DWELL_COVERAGE"
+      }
+    },
+    {
+      "check": "dt_0.0010_k_d_minus_1_rejected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "dt_0.0010_primitive_elapsed_authority",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "dt_0.0005_comparator_k_d_exact",
+      "pass": true,
+      "detail": {
+        "K_D": 20,
+        "required_true_samples": 21,
+        "confirmation_intervals": 20,
+        "elapsed_duration_s": 0.01,
+        "triggered": true
+      }
+    },
+    {
+      "check": "dt_0.0005_flight_k_d_exact",
+      "pass": true,
+      "detail": {
+        "K_D": 100,
+        "confirmation_intervals": 100,
+        "confirmation_sample": 110,
+        "elapsed_duration_s": 0.05,
+        "confirmed": true,
+        "k_d_minus_1_reason": "REJECT_DWELL_COVERAGE"
+      }
+    },
+    {
+      "check": "dt_0.0005_k_d_minus_1_rejected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "dt_0.0005_primitive_elapsed_authority",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "offgrid_confirmation_is_first_sample_at_or_after_required_end",
+      "pass": true,
+      "detail": {
+        "t_star_s": 0.0273,
+        "required_end_s": 0.07730000000000001,
+        "first_index": 39,
+        "last_index_before": 38,
+        "confirmation_sample": 39
+      }
+    },
+    {
+      "check": "offgrid_elapsed_physical_time_ge_050s",
+      "pass": true,
+      "detail": 0.0507
+    },
+    {
+      "check": "offgrid_sustain_predicate_through_confirmation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "offgrid_intervals_at_least_k_d",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "negative_single_false_sample_at_final_required_sample",
+      "pass": true,
+      "detail": {
+        "reason": "REJECT_SUSTAIN_GAP",
+        "true_sample_count": 5
+      }
+    },
+    {
+      "check": "negative_stream_ends_one_sample_before_confirmation",
+      "pass": true,
+      "detail": {
+        "reason": "REJECT_DWELL_COVERAGE",
+        "n_samples": 5
+      }
+    },
+    {
+      "check": "negative_recontact_exactly_at_confirmation_sample",
+      "pass": true,
+      "detail": {
+        "confirmation_sample": 39,
+        "failed": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact"
+        ]
+      }
+    },
+    {
+      "check": "negative_prohibited_contact_exactly_at_confirmation_sample",
+      "pass": true,
+      "detail": {
+        "confirmation_sample": 39,
+        "failed": [
+          "no_prohibited_contact"
+        ]
+      }
+    },
+    {
+      "check": "real_hop_comparator_onset_recomputed",
+      "pass": true,
+      "detail": {
+        "onset_index": 12,
+        "onset_time_s": 0.024
+      }
+    },
+    {
+      "check": "real_hop_comparator_confirmation_recomputed",
+      "pass": true,
+      "detail": {
+        "confirmation_index": 17,
+        "confirmation_time_s": 0.034,
+        "confirmation_offset_s": 0.006000000000000002
+      }
+    },
+    {
+      "check": "real_hop_confirmation_sample_recomputed",
+      "pass": true,
+      "detail": {
+        "confirmation_sample": 39,
+        "confirmation_time_s": 0.078,
+        "confirmation_elapsed_s": 0.05
+      }
+    },
+    {
+      "check": "real_hop_confirmation_elapsed_ge_050s",
+      "pass": true,
+      "detail": 0.05
+    },
+    {
+      "check": "plant_xml_sha256_unchanged",
+      "pass": true,
+      "detail": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d"
+    }
+  ],
+  "status": "PASS"
+}

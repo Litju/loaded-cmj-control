@@ -2,16 +2,19 @@
   "schema_version": "1.0.0",
   "artifact": "MEASUREMENT_IMPLEMENTATION_SPEC",
   "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
-  "mission": "RES84A_CORRECT_DIAGNOSTIC_COMPARATOR_AND_SAMPLING_ERRATA_001",
+  "mission": "RES84B_CLOSE_PHYSICAL_TIME_DWELL_SEMANTICS_001",
   "parent_mission": "RES84_REBUILD_V3_MEASUREMENT_CONTACT_AUTHORITY_001",
+  "erratum_mission": "RES84A_CORRECT_DIAGNOSTIC_COMPARATOR_AND_SAMPLING_ERRATA_001",
   "linear_issue": "RES-84",
   "model_id": "loaded-cmj-20kg-elite-soccer-v3",
-  "entry_head": "0fdb4f3bd19dd12360c104f4a567467195980fbc",
-  "entry_tree": "ba008e925b83eeca68f02d7409ba34e35efcc2d1",
+  "entry_head": "da54a66107b77e07068db130d4a6d8872e0d2e47",
+  "entry_tree": "0544aa94ec5c262283c7d3bf531bb8daeaad1d5a",
+  "supersedes_head": "da54a66107b77e07068db130d4a6d8872e0d2e47",
+  "previous_evidence_seal": "308db0c95cdbd8789a9ec4da0b1685c6778419e0b8cc47e6ea3cbadc4c5ef324",
   "original_res84_entry_head": "7f1917164d137a9d3852acfbf9ee045972871285",
   "original_res84_entry_tree": "84d5f14b5ecd6d08aaa307ecb05b75c4ab0937fb",
   "module": "src/loaded_cmj/v3/measurement.py",
-  "module_sha256": "37d1700e6e28df6ba0a75d5db67b50c17ab420d664ac38bf79c0a9326cd53255",
+  "module_sha256": "6198765cb7fdf5deeffaf726bc10e2ebf12fe03b16a62487302126e06a92a689",
   "plant_xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
   "surface": {
     "contact_semantics": [
@@ -68,6 +71,11 @@
       "sampling_authority",
       "signal_processing_authority"
     ],
+    "dwell": [
+      "physical_time_dwell",
+      "V3PhysicalTimeDwell",
+      "integer-nanosecond K_D authority (NANOSECONDS_PER_SECOND)"
+    ],
     "events": [
       "detect_takeoff_occurrence",
       "scan_takeoff_candidates",
@@ -94,9 +102,13 @@
     "clearance_guard_measured_max_penetration_m": 0.000355785,
     "cop_low_fz_tolerance_n": 0.001,
     "cop_reporting_resolution_m": 0.001,
+    "dwell_type": "PHYSICAL_TIME",
+    "dwell_nanoseconds_per_second": 1000000000,
     "takeoff_dwell_s": 0.05,
+    "takeoff_dwell_k_d_at_500hz": 25,
     "comparator_force_n": 10.0,
     "comparator_dwell_s": 0.01,
+    "comparator_dwell_k_d_at_500hz": 5,
     "comparator_predicate": "LEFT_FOOT_FZ < 10 N AND RIGHT_FOOT_FZ < 10 N continuously for >= 0.010 s",
     "comparator_total_fz_role": "REPORT_FIELD_ONLY",
     "native_dt_s": 0.002,
@@ -136,7 +148,12 @@
     {
       "check": "spec_records_all_mandatory_families",
       "pass": true,
-      "detail": 13
+      "detail": 14
+    },
+    {
+      "check": "spec_records_physical_time_dwell",
+      "pass": true,
+      "detail": ""
     },
     {
       "check": "mujoco_contact_semantics_version_3_8_0",

@@ -64,6 +64,16 @@
       "status": "PASS"
     },
     {
+      "requirement": "RES-82 PHYSICAL_TIME dwell: K_D intervals / K_D + 1 true samples, integer-nanosecond authority, no early allowance",
+      "evidence": "PHYSICAL_TIME_DWELL_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "one shared dwell primitive used by force_takeoff_comparator and confirm_takeoff",
+      "evidence": "PHYSICAL_TIME_DWELL_AUDIT",
+      "status": "PASS"
+    },
+    {
       "requirement": "apex/H2 support in confirmed flight",
       "evidence": "APEX_H2_MEASUREMENT_AUDIT",
       "status": "PASS"
@@ -117,6 +127,7 @@
   "frozen_assertions": {
     "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS": "PASS",
     "SAMPLING_FAIL_CLOSED_1000HZ_CANONICAL": "PASS",
+    "RES82_PHYSICAL_TIME_DWELL_SEMANTICS": "PASS",
     "MUJOCO_CONTACT_SEMANTICS_VERSION": "3.8.0"
   },
   "red_team_scan": {
@@ -172,6 +183,21 @@
     },
     "comparator_uses_total_force_substitute": {
       "pattern": "abs(f.total_floor_force_world_n[2]) < threshold_n",
+      "present": false,
+      "resolved": true
+    },
+    "float_ceil_dwell_authority": {
+      "pattern": "ceil(dwell_s / dt",
+      "present": false,
+      "resolved": true
+    },
+    "dwell_early_coverage_allowance": {
+      "pattern": "t_end - dt",
+      "present": false,
+      "resolved": true
+    },
+    "dwell_inclusive_sample_count": {
+      "pattern": "end - start < k_d",
       "present": false,
       "resolved": true
     },
@@ -284,6 +310,21 @@
       "detail": ""
     },
     {
+      "check": "red_team_absent:float_ceil_dwell_authority",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:dwell_early_coverage_allowance",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:dwell_inclusive_sample_count",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "check": "red_team_absent:sampling_1khz_dt_le_bug",
       "pass": true,
       "detail": ""
@@ -356,10 +397,15 @@
     {
       "check": "conformance_rows_complete",
       "pass": true,
-      "detail": 22
+      "detail": 24
     },
     {
       "check": "res95_em10_assertion_pass",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "res82_physical_time_dwell_assertion_pass",
       "pass": true,
       "detail": ""
     },

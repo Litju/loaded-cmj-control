@@ -5,11 +5,11 @@
   "policy": {
     "occurrence": "final ACTIVE LEGAL PLANTAR support -> zero ACTIVE LEGAL PLANTAR support transition; interpolated contact-force extrapolation clamped to the native interval; clearance is never used to move the timestamp",
     "confirmation": [
-      "zero legal support persists >= 0.050 s",
+      "zero legal support persists >= 0.050 s (RES-82 PHYSICAL_TIME: K_D = 25 intervals / 26 true samples at 500 Hz; confirmation sample is the FIRST native sample at or after occurrence + 0.050 s)",
       "bilateral clearance reaches the clearance guard",
       "SYSTEM_COM_vz at occurrence > 0",
-      "no prohibited contact in the window",
-      "no legal plantar recontact"
+      "no prohibited contact through the confirmation sample",
+      "no legal plantar recontact through the confirmation sample"
     ],
     "failure": "REJECTED, never shifted"
   },
@@ -43,12 +43,12 @@
         {
           "check": "dwell_coverage",
           "pass": true,
-          "detail": "window covers >= 0.050 s of native samples"
+          "detail": "confirmation sample is the first native sample at or after occurrence + 0.050 s; K_D=25 intervals, elapsed=0.05, reason=OK"
         },
         {
           "check": "no_legal_plantar_recontact",
           "pass": true,
-          "detail": "zero active legal plantar contact throughout the window"
+          "detail": "zero active legal plantar contact through the confirmation sample"
         },
         {
           "check": "bilateral_clearance_reaches_guard",
@@ -63,24 +63,102 @@
         {
           "check": "no_prohibited_contact",
           "pass": true,
-          "detail": "no prohibited floor contact inside the window"
+          "detail": "no prohibited floor contact through the confirmation sample"
         }
       ],
-      "bilateral_clearance_max_m": 0.0021077406907115074
+      "bilateral_clearance_max_m": 0.0021077406907115074,
+      "TAKEOFF_CONFIRMATION_SAMPLE": 39,
+      "TAKEOFF_CONFIRMATION_TIME": 0.078,
+      "TAKEOFF_CONFIRMATION_ELAPSED_S": 0.05,
+      "required_end_time_s": 0.078,
+      "dwell": {
+        "dwell_type": "PHYSICAL_TIME",
+        "onset_index": 14,
+        "onset_time_s": 0.028,
+        "required_duration_s": 0.05,
+        "k_d": 25,
+        "confirmation_index": 39,
+        "confirmation_time_s": 0.078,
+        "confirmation_intervals": 25,
+        "elapsed_duration_s": 0.05,
+        "true_sample_count": 65,
+        "coverage_complete": true,
+        "confirmed": true,
+        "reason": ""
+      }
     }
+  },
+  "offgrid_occurrence_regression": {
+    "occurrence_time_s": 0.0273,
+    "required_end_time_s": 0.07730000000000001,
+    "confirmation_sample": 39,
+    "confirmation_time_s": 0.078,
+    "confirmation_elapsed_s": 0.0507,
+    "confirmed": true,
+    "last_sample_at_or_before_required_end": 38,
+    "not_the_last_sample_before_required_end": true,
+    "dwell": {
+      "dwell_type": "PHYSICAL_TIME",
+      "onset_index": 14,
+      "onset_time_s": 0.0273,
+      "required_duration_s": 0.05,
+      "k_d": 25,
+      "confirmation_index": 39,
+      "confirmation_time_s": 0.078,
+      "confirmation_intervals": 25,
+      "elapsed_duration_s": 0.0507,
+      "true_sample_count": 65,
+      "coverage_complete": true,
+      "confirmed": true,
+      "reason": ""
+    }
+  },
+  "truncated_stream_control": {
+    "stream_latest_sample_s": 0.076,
+    "required_end_s": 0.078,
+    "confirmed": false,
+    "reason": "REJECT_DWELL_COVERAGE",
+    "failed": [
+      "dwell_coverage",
+      "bilateral_clearance_reaches_guard"
+    ]
   },
   "negative_controls": {
     "transient_dropout": {
       "occurrence": true,
       "confirmed": false,
       "failed": [
+        "dwell_coverage",
         "no_legal_plantar_recontact"
       ]
     },
     "recontact_in_dwell": {
       "confirmed": false,
       "failed": [
+        "dwell_coverage",
         "no_legal_plantar_recontact"
+      ]
+    },
+    "final_sample_sustain_gap": {
+      "confirmed": false,
+      "reason": "REJECT_SUSTAIN_GAP",
+      "failed": [
+        "dwell_coverage",
+        "no_legal_plantar_recontact"
+      ]
+    },
+    "recontact_at_confirmation_sample": {
+      "confirmation_sample": 39,
+      "confirmed": false,
+      "failed": [
+        "dwell_coverage",
+        "no_legal_plantar_recontact"
+      ]
+    },
+    "prohibited_at_confirmation_sample": {
+      "confirmed": false,
+      "failed": [
+        "no_prohibited_contact"
       ]
     },
     "clearance_below_guard": {
@@ -158,6 +236,81 @@
       "detail": 0.0021077406907115074
     },
     {
+      "check": "confirmation_sample_exists",
+      "pass": true,
+      "detail": {
+        "dwell_type": "PHYSICAL_TIME",
+        "onset_index": 14,
+        "onset_time_s": 0.028,
+        "required_duration_s": 0.05,
+        "k_d": 25,
+        "confirmation_index": 39,
+        "confirmation_time_s": 0.078,
+        "confirmation_intervals": 25,
+        "elapsed_duration_s": 0.05,
+        "true_sample_count": 65,
+        "coverage_complete": true,
+        "confirmed": true,
+        "reason": ""
+      }
+    },
+    {
+      "check": "confirmation_sample_is_first_at_or_after_required_end",
+      "pass": true,
+      "detail": {
+        "required_end_s": 0.078,
+        "confirmation_sample": 39,
+        "confirmation_time_s": 0.078,
+        "previous_sample_time_s": 0.076
+      }
+    },
+    {
+      "check": "confirmation_elapsed_ge_required_dwell",
+      "pass": true,
+      "detail": {
+        "elapsed_s": 0.05,
+        "required_s": 0.05
+      }
+    },
+    {
+      "check": "confirmation_k_d_intervals_exact",
+      "pass": true,
+      "detail": {
+        "dwell_type": "PHYSICAL_TIME",
+        "onset_index": 14,
+        "onset_time_s": 0.028,
+        "required_duration_s": 0.05,
+        "k_d": 25,
+        "confirmation_index": 39,
+        "confirmation_time_s": 0.078,
+        "confirmation_intervals": 25,
+        "elapsed_duration_s": 0.05,
+        "true_sample_count": 65,
+        "coverage_complete": true,
+        "confirmed": true,
+        "reason": ""
+      }
+    },
+    {
+      "check": "confirmation_elapsed_positive_physical_time",
+      "pass": true,
+      "detail": 0.05
+    },
+    {
+      "check": "confirmation_not_shifting_occurrence",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "early_allowance_last_sample_not_used",
+      "pass": true,
+      "detail": {
+        "last_before_s": 0.076,
+        "required_end_s": 0.078,
+        "confirmation_time_s": 0.078
+      }
+    },
+    {
       "check": "dropout_occurrence_detected",
       "pass": true,
       "detail": ""
@@ -166,6 +319,7 @@
       "check": "dropout_confirmation_rejected",
       "pass": true,
       "detail": [
+        "dwell_coverage",
         "no_legal_plantar_recontact"
       ]
     },
@@ -178,8 +332,66 @@
       "check": "recontact_confirmation_rejected",
       "pass": true,
       "detail": [
+        "dwell_coverage",
         "no_legal_plantar_recontact"
       ]
+    },
+    {
+      "check": "truncated_stream_rejected",
+      "pass": true,
+      "detail": {
+        "latest_sample_s": 0.076,
+        "required_end_s": 0.078
+      }
+    },
+    {
+      "check": "truncated_stream_not_accepted_by_early_allowance",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "final_sample_sustain_gap_rejected",
+      "pass": true,
+      "detail": {
+        "reason": "REJECT_SUSTAIN_GAP",
+        "failed": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact"
+        ]
+      }
+    },
+    {
+      "check": "prohibited_at_confirmation_rejected",
+      "pass": true,
+      "detail": [
+        "no_prohibited_contact"
+      ]
+    },
+    {
+      "check": "offgrid_occurrence_confirms_at_first_sample_at_or_after_required_end",
+      "pass": true,
+      "detail": {
+        "t_star_s": 0.0273,
+        "required_end_s": 0.07730000000000001,
+        "confirmation_sample": 39,
+        "confirmation_time_s": 0.078,
+        "previous_sample_s": 0.076
+      }
+    },
+    {
+      "check": "offgrid_occurrence_no_early_confirmation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "offgrid_occurrence_elapsed_ge_dwell",
+      "pass": true,
+      "detail": 0.0507
+    },
+    {
+      "check": "offgrid_occurrence_sustain_predicate_through_sample",
+      "pass": true,
+      "detail": ""
     },
     {
       "check": "low_clearance_confirmation_rejected",

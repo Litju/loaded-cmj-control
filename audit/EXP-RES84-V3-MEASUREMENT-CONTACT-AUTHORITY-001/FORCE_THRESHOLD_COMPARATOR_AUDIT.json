@@ -16,16 +16,51 @@
     "replace contact truth",
     "move the H2 timestamp"
   ],
+  "physical_time_semantics": {
+    "dwell_type": "PHYSICAL_TIME",
+    "k_d": 5,
+    "required_true_samples": 6,
+    "dt_s": 0.002,
+    "required_duration_s": 0.01,
+    "retired": [
+      "inclusive sample count >= K_D",
+      "t_end - dt early allowance",
+      "floating accumulated dwell as primary authority"
+    ]
+  },
   "hop_result": {
     "triggered": true,
     "invalid": false,
     "status": "TRIGGERED",
-    "comparator_time_s": 0.024,
+    "comparator_time_s": 0.034,
     "occurrence_time_s": 0.028,
-    "offset_s": -0.004,
-    "left_fz_at_trigger_n": 0.2417408459626436,
-    "right_fz_at_trigger_n": 0.24174084596314682,
-    "total_fz_at_trigger_n": 0.48348169192579044
+    "offset_s": 0.006000000000000002,
+    "COMPARATOR_ONSET_TIME": 0.024,
+    "COMPARATOR_CONFIRMATION_TIME": 0.034,
+    "COMPARATOR_ONSET_OFFSET_FROM_TAKEOFF": -0.004,
+    "COMPARATOR_CONFIRMATION_OFFSET_FROM_TAKEOFF": 0.006000000000000002,
+    "COMPARATOR_K_D": 5,
+    "COMPARATOR_REQUIRED_TRUE_SAMPLES": 6,
+    "COMPARATOR_ELAPSED_DURATION_S": 0.01,
+    "COMPARATOR_TRUE_SAMPLE_COUNT": 67,
+    "left_fz_at_trigger_n": 0.0,
+    "right_fz_at_trigger_n": 0.0,
+    "total_fz_at_trigger_n": 0.0,
+    "dwell": {
+      "dwell_type": "PHYSICAL_TIME",
+      "onset_index": 12,
+      "onset_time_s": 0.024,
+      "required_duration_s": 0.01,
+      "k_d": 5,
+      "confirmation_index": 17,
+      "confirmation_time_s": 0.034,
+      "confirmation_intervals": 5,
+      "elapsed_duration_s": 0.01,
+      "true_sample_count": 67,
+      "coverage_complete": true,
+      "confirmed": true,
+      "reason": ""
+    }
   },
   "regression_receipt": {
     "A_bilateral_8n_8n_total_16n": {
@@ -40,13 +75,17 @@
       "status": "PASS",
       "comparator_status": "INVALID"
     },
-    "D_sub_persistence_lt_10ms": {
+    "D_4_true_samples_lt_10ms": {
       "status": "PASS",
       "comparator_status": "NOT_TRIGGERED"
     },
-    "E_persistence_ge_10ms": {
+    "E_6_true_samples_k_d_intervals": {
       "status": "PASS",
       "comparator_status": true
+    },
+    "F_5_true_samples_k_d_minus_1_intervals": {
+      "status": "PASS",
+      "comparator_status": "NOT_TRIGGERED"
     }
   },
   "checks": [
@@ -56,8 +95,8 @@
       "detail": {
         "triggered": true,
         "status": "TRIGGERED",
-        "time_s": 0.024,
-        "offset_s": -0.004
+        "time_s": 0.034,
+        "offset_s": 0.006000000000000002
       }
     },
     {
@@ -90,18 +129,89 @@
       "pass": true,
       "detail": {
         "role": "REPORT_FIELD_ONLY",
-        "total_fz_at_trigger_n": 0.48348169192579044
+        "total_fz_at_trigger_n": 0.0
       }
     },
     {
       "check": "comparator_offset_finite",
       "pass": true,
-      "detail": -0.004
+      "detail": 0.006000000000000002
     },
     {
       "check": "comparator_offset_small",
       "pass": true,
-      "detail": -0.004
+      "detail": 0.006000000000000002
+    },
+    {
+      "check": "comparator_k_d_is_5_intervals",
+      "pass": true,
+      "detail": {
+        "K_D": 5,
+        "required_true_samples": 6
+      }
+    },
+    {
+      "check": "comparator_onset_is_first_below_threshold_sample",
+      "pass": true,
+      "detail": {
+        "trace_onset_index": 12,
+        "trace_onset_s": 0.024,
+        "onset_offset_s": -0.004,
+        "expected_engineering_onset_s": 0.024
+      }
+    },
+    {
+      "check": "comparator_confirmation_is_onset_plus_k_d",
+      "pass": true,
+      "detail": {
+        "trace_confirmation_index": 17,
+        "trace_confirmation_s": 0.034,
+        "confirmation_offset_s": 0.006000000000000002,
+        "expected_engineering_confirmation_s": 0.034
+      }
+    },
+    {
+      "check": "comparator_confirmation_elapsed_ge_10ms",
+      "pass": true,
+      "detail": 0.01
+    },
+    {
+      "check": "comparator_onset_and_confirmation_separately_reported",
+      "pass": true,
+      "detail": {
+        "onset": [
+          0.024,
+          -0.004
+        ],
+        "confirmation": [
+          0.034,
+          0.006000000000000002
+        ]
+      }
+    },
+    {
+      "check": "comparator_true_sample_count_covers_k_d_plus_1",
+      "pass": true,
+      "detail": 67
+    },
+    {
+      "check": "comparator_dwell_record_uses_physical_time",
+      "pass": true,
+      "detail": {
+        "dwell_type": "PHYSICAL_TIME",
+        "onset_index": 12,
+        "onset_time_s": 0.024,
+        "required_duration_s": 0.01,
+        "k_d": 5,
+        "confirmation_index": 17,
+        "confirmation_time_s": 0.034,
+        "confirmation_intervals": 5,
+        "elapsed_duration_s": 0.01,
+        "true_sample_count": 67,
+        "coverage_complete": true,
+        "confirmed": true,
+        "reason": ""
+      }
     },
     {
       "check": "comparator_does_not_shift_occurrence",
@@ -145,8 +255,9 @@
       "pass": true,
       "detail": {
         "status": "NOT_TRIGGERED",
-        "samples_below": 4,
-        "dt_s": 0.002
+        "true_samples": 4,
+        "dt_s": 0.002,
+        "first_to_last_elapsed_s": 0.006
       }
     },
     {
@@ -154,8 +265,48 @@
       "pass": true,
       "detail": {
         "status": "TRIGGERED",
-        "samples_below": 6,
-        "comparator_time_s": 0.008
+        "true_samples": 6,
+        "onset_time_s": 0.008,
+        "confirmation_time_s": 0.018000000000000002,
+        "comparator_time_s": 0.018000000000000002
+      }
+    },
+    {
+      "check": "regression_F_k_d_minus_1_false",
+      "pass": true,
+      "detail": {
+        "status": "NOT_TRIGGERED",
+        "true_samples": 5,
+        "first_to_last_elapsed_s": 0.008
+      }
+    },
+    {
+      "check": "boundary_4_true_samples_rejected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "boundary_5_true_samples_rejected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "boundary_6_true_samples_confirmed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "boundary_6_samples_first_to_last_elapsed_is_10ms",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "single_false_sample_at_final_required_sample_rejected",
+      "pass": true,
+      "detail": {
+        "status": "NOT_TRIGGERED",
+        "true_samples": 5,
+        "final_required_sample_index": 9
       }
     },
     {

@@ -52,6 +52,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from enum import Enum
+from fractions import Fraction
 from typing import Iterable, Sequence
 
 import mujoco
@@ -175,6 +176,32 @@ masquerade as bilateral below-threshold force."""
 COMPARATOR_TOTAL_FZ_ROLE = "REPORT_FIELD_ONLY"
 """An equivalent total Fz may be emitted for comparison but never replaces the
 per-foot predicate."""
+
+# --- RES-82 PHYSICAL_TIME dwell semantics (controlling convention) -----------
+DWELL_TYPE_PHYSICAL_TIME = "PHYSICAL_TIME"
+"""RES-82 ``DWELL_SEMANTICS.json`` normative dwell type.
+
+A dwell of declared duration ``D`` on a native grid with timestep ``dt``
+requires ``K_D = ceil(D / dt)`` intervals and ``K_D + 1`` consecutive true
+samples; the predicate is true at every sample from the onset sample ``i``
+through ``i + K_D`` inclusive.  The retired erroneous convention (sample
+inclusive count ``j - i + 1 >= K_D``, or a trailing-step early allowance)
+confirms one sample early and must never be used.
+"""
+
+NANOSECONDS_PER_SECOND = 1_000_000_000
+"""Integer physical-time authority for declared dwell/grid values.
+
+``D`` and ``dt`` are reconstructed exactly at integer-nanosecond resolution
+(``Fraction.limit_denominator(1e9)``); all dwell arithmetic is integer
+nanoseconds and every duration comparison is ``elapsed_ns >= required_ns``.
+Floating accumulated dwell is never the primary authority.
+"""
+
+DWELL_REJECT_COVERAGE = "REJECT_DWELL_COVERAGE"
+DWELL_REJECT_SUSTAIN = "REJECT_SUSTAIN_GAP"
+DWELL_REJECT_INTERVALS = "REJECT_INSUFFICIENT_INTERVALS"
+DWELL_REJECT_ELAPSED = "REJECT_INSUFFICIENT_ELAPSED"
 
 # --- sampling / resampling authority ----------------------------------------
 NATIVE_DT_S = 0.002
@@ -1750,6 +1777,150 @@ def detect_takeoff_occurrence(frames: Sequence[V3NativeFrame], *, dt_s: float | 
 
 
 @dataclass(frozen=True)
+class V3PhysicalTimeDwell:
+    """One deterministic RES-82 PHYSICAL_TIME dwell evaluation.
+
+    ``confirmed`` requires all of: a native confirmation sample exists at or
+    after ``onset_time_s + required_duration_s`` (the sample is the *first*
+    such sample, never the last sample before the requirement); every native
+    sample from ``onset_index`` through the confirmation sample inclusive
+    satisfies the sustain predicate; at least ``k_d`` intervals separate the
+    onset sample from the confirmation sample; and the integer-nanosecond
+    elapsed physical time is ``>=`` the required duration.
+    """
+
+    dwell_type: str
+    onset_index: int
+    onset_time_s: float
+    required_duration_s: float
+    k_d: int
+    confirmation_index: int | None
+    confirmation_time_s: float | None
+    confirmation_intervals: int | None
+    elapsed_duration_s: float | None
+    true_sample_count: int
+    coverage_complete: bool
+    confirmed: bool
+    reason: str = ""
+
+
+class V3DwellAuthorityError(ValueError):
+    """A dwell/grid value is not exact at declared nanosecond resolution."""
+
+
+def _exact_nanoseconds(seconds: float, *, field: str) -> int:
+    """Exact integer-nanosecond view of a declared dwell/grid value.
+
+    The declared value is reconstructed as the closest rational with
+    denominator ``<= 1e9`` (nanosecond resolution) and must be exact there.
+    This replaces runtime ``ceil(D/dt)`` on floats and any floating epsilon
+    allowance with integer authority.
+    """
+    value = Fraction(float(seconds)).limit_denominator(NANOSECONDS_PER_SECOND)
+    scaled = value * NANOSECONDS_PER_SECOND
+    if scaled.denominator != 1:
+        raise V3DwellAuthorityError(
+            f"{field}={seconds!r} is not exact at integer-nanosecond resolution")
+    return scaled.numerator
+
+
+def physical_time_dwell(
+    sample_times_s: Sequence[float],
+    true_flags: Sequence[bool],
+    *,
+    onset_index: int,
+    onset_time_s: float,
+    required_duration_s: float,
+    dt_s: float | None = None,
+) -> V3PhysicalTimeDwell:
+    """Single shared RES-82 PHYSICAL_TIME dwell primitive (V3 measurement layer).
+
+    ``onset_time_s`` is the physical onset time: the native sample time for an
+    exact-grid onset, or the declared contact-force extrapolation ``t*`` when
+    the onset falls inside the native interval.  ``true_flags[j]`` is the
+    sustain predicate at native sample ``j``; the predicate must hold at every
+    sample from ``onset_index`` (the first sustained sample) through the
+    confirmation sample inclusive.
+
+    The confirmation sample is the **first** native sample whose integer-
+    nanosecond time is ``>= onset_time_s + required_duration_s``.  If the stream
+    ends before that sample exists the dwell is rejected
+    (``REJECT_DWELL_COVERAGE``) and never accepted with an early allowance.
+    """
+    n = len(sample_times_s)
+    if len(true_flags) != n:
+        raise V3DwellAuthorityError("true_flags length must match sample_times_s")
+    if not 0 <= onset_index < n:
+        raise V3DwellAuthorityError(f"onset_index {onset_index} outside 0..{n - 1}")
+    if dt_s is not None:
+        dt = float(dt_s)
+    elif n > 1:
+        dt = float(sample_times_s[1]) - float(sample_times_s[0])
+    else:
+        dt = NATIVE_DT_S
+    dt_ns = _exact_nanoseconds(dt, field="dt_s")
+    duration_ns = _exact_nanoseconds(required_duration_s, field="required_duration_s")
+    if dt_ns <= 0:
+        raise V3DwellAuthorityError(f"dt_s={dt!r} must be positive")
+    if duration_ns <= 0:
+        raise V3DwellAuthorityError(f"required_duration_s={required_duration_s!r} must be positive")
+    times_ns = [_exact_nanoseconds(t, field=f"sample_times_s[{j}]") for j, t in enumerate(sample_times_s)]
+    for j in range(1, n):
+        if times_ns[j] - times_ns[j - 1] != dt_ns:
+            raise V3DwellAuthorityError(
+                f"sample times are not an exact native grid at nanosecond resolution "
+                f"(sample {j}: step {times_ns[j] - times_ns[j - 1]} ns != dt {dt_ns} ns)")
+    onset_ns = _exact_nanoseconds(onset_time_s, field="onset_time_s")
+    if onset_ns > times_ns[onset_index]:
+        raise V3DwellAuthorityError(
+            "onset_time_s must not be later than the first sustained native sample")
+    k_d = -(-duration_ns // dt_ns)
+    required_end_ns = onset_ns + duration_ns
+    confirmation_index = next(
+        (j for j in range(onset_index, n) if times_ns[j] >= required_end_ns), None)
+    true_sample_count = 0
+    for j in range(onset_index, n):
+        if true_flags[j]:
+            true_sample_count += 1
+        else:
+            break
+    coverage_complete = confirmation_index is not None
+    confirmation_intervals = (
+        None if confirmation_index is None else confirmation_index - onset_index)
+    if confirmation_index is None:
+        confirmed = False
+        reason = DWELL_REJECT_COVERAGE
+    elif true_sample_count < confirmation_intervals + 1:
+        confirmed = False
+        reason = DWELL_REJECT_SUSTAIN
+    elif confirmation_intervals < k_d:
+        confirmed = False
+        reason = DWELL_REJECT_INTERVALS
+    else:
+        elapsed_ns = times_ns[confirmation_index] - onset_ns
+        confirmed = elapsed_ns >= duration_ns
+        reason = "" if confirmed else DWELL_REJECT_ELAPSED
+    elapsed_duration_s = (
+        None if confirmation_index is None
+        else (times_ns[confirmation_index] - onset_ns) / NANOSECONDS_PER_SECOND)
+    return V3PhysicalTimeDwell(
+        dwell_type=DWELL_TYPE_PHYSICAL_TIME,
+        onset_index=int(onset_index),
+        onset_time_s=float(onset_time_s),
+        required_duration_s=float(required_duration_s),
+        k_d=int(k_d),
+        confirmation_index=confirmation_index,
+        confirmation_time_s=(None if confirmation_index is None else float(sample_times_s[confirmation_index])),
+        confirmation_intervals=confirmation_intervals,
+        elapsed_duration_s=elapsed_duration_s,
+        true_sample_count=true_sample_count,
+        coverage_complete=coverage_complete,
+        confirmed=confirmed,
+        reason=reason,
+    )
+
+
+@dataclass(frozen=True)
 class V3TakeoffConfirmation:
     confirmed: bool
     occurrence: V3TakeoffOccurrence
@@ -1758,6 +1929,10 @@ class V3TakeoffConfirmation:
     clearance_guard_m: float
     dwell_s: float
     bilateral_clearance_max_m: float | None
+    dwell: V3PhysicalTimeDwell | None = None
+    confirmation_sample: int | None = None
+    confirmation_time_s: float | None = None
+    confirmation_elapsed_s: float | None = None
 
     @property
     def failed_checks(self) -> tuple[str, ...]:
@@ -1774,12 +1949,16 @@ def confirm_takeoff(
 ) -> V3TakeoffConfirmation:
     """Fail-closed confirmation of a candidate occurrence (EM-03/EM-06).
 
-    Checks: zero active legal plantar support persists for >= ``dwell_s`` from
-    the occurrence; bilateral clearance reaches the clearance guard inside the
-    window; SYSTEM_COM vertical velocity at the occurrence is > 0; no
-    prohibited contact is detected inside the window; no legal plantar
-    recontact occurs.  A failed confirmation rejects the occurrence and never
-    shifts or redefines the timestamp.
+    Physical-time semantics (RES-82 ``DWELL_SEMANTICS.json``): the confirmation
+    sample ``j`` is the **first** native sample whose time is
+    ``>= occurrence_time + dwell_s``; that sample must exist (a stream ending
+    earlier is ``REJECT_DWELL_COVERAGE``, never an early acceptance).  Every
+    native sample from the first zero-support sample through ``j`` inclusive
+    must show zero active legal plantar support, no legal recontact and no
+    prohibited contact, bilateral clearance must reach the guard inside that
+    interval, and SYSTEM_COM vertical velocity at the occurrence must be > 0.
+    A failed confirmation rejects the occurrence and never shifts or redefines
+    the timestamp.
     """
     if not occurrence.valid or occurrence.occurrence_time_s is None or occurrence.native_index is None:
         return V3TakeoffConfirmation(
@@ -1790,15 +1969,28 @@ def confirm_takeoff(
             clearance_guard_m=clearance_guard_m,
             dwell_s=dwell_s,
             bilateral_clearance_max_m=None,
+            dwell=None,
+            confirmation_sample=None,
+            confirmation_time_s=None,
+            confirmation_elapsed_s=None,
         )
     dt = float(dt_s if dt_s is not None else (frames[1].time_s - frames[0].time_s) if len(frames) > 1 else NATIVE_DT_S)
     t_star = occurrence.occurrence_time_s
     k = occurrence.native_index
-    t_end = t_star + dwell_s
-    window = [f for f in frames if t_star <= f.time_s <= t_end + 1e-12]
-    coverage_ok = bool(window) and (window[-1].time_s >= t_end - dt - 1e-12)
+    dwell = physical_time_dwell(
+        [f.time_s for f in frames],
+        [f.legal_plantar_active == 0 for f in frames],
+        onset_index=k,
+        onset_time_s=t_star,
+        required_duration_s=dwell_s,
+        dt_s=dt,
+    )
+    j = dwell.confirmation_index
+    window = frames[k:] if j is None else frames[k:j + 1]
+    window_end_time_s = None if j is None else float(frames[j].time_s)
     recontact_free = all(f.legal_plantar_active == 0 for f in window)
-    max_bilateral = max((min(f.left_clearance_m, f.right_clearance_m) for f in window), default=None)
+    max_bilateral = None if j is None else max(
+        (min(f.left_clearance_m, f.right_clearance_m) for f in window), default=None)
     clearance_ok = bool(max_bilateral is not None and max_bilateral >= clearance_guard_m)
     prohibited_free = all(f.prohibited_detected == 0 for f in window)
     vz_ok = bool(occurrence.com_velocity_world_m_s is not None and occurrence.com_velocity_world_m_s[2] > 0.0)
@@ -1806,21 +1998,29 @@ def confirm_takeoff(
     checks = (
         ("occurrence_valid", True, "candidate derived from a support-to-zero transition"),
         ("zero_support_at_native_index", support_zero_at_k, f"native index {k} has zero active legal plantar support"),
-        ("dwell_coverage", coverage_ok, f"window covers >= {dwell_s:.3f} s of native samples"),
-        ("no_legal_plantar_recontact", recontact_free, "zero active legal plantar contact throughout the window"),
+        ("dwell_coverage", dwell.confirmed,
+         f"confirmation sample is the first native sample at or after occurrence + {dwell_s:.3f} s; "
+         f"K_D={dwell.k_d} intervals, elapsed={dwell.elapsed_duration_s}, reason={dwell.reason or 'OK'}"),
+        ("no_legal_plantar_recontact", recontact_free,
+         "zero active legal plantar contact through the confirmation sample"),
         ("bilateral_clearance_reaches_guard", clearance_ok,
          f"max bilateral clearance {max_bilateral} vs guard {clearance_guard_m}"),
         ("system_com_vz_positive", vz_ok, "SYSTEM_COM vertical velocity at the occurrence is positive"),
-        ("no_prohibited_contact", prohibited_free, "no prohibited floor contact inside the window"),
+        ("no_prohibited_contact", prohibited_free,
+         "no prohibited floor contact through the confirmation sample"),
     )
     return V3TakeoffConfirmation(
         confirmed=all(ok for _, ok, _ in checks),
         occurrence=occurrence,
         checks=checks,
-        window_end_time_s=float(t_end),
+        window_end_time_s=window_end_time_s,
         clearance_guard_m=clearance_guard_m,
         dwell_s=dwell_s,
         bilateral_clearance_max_m=max_bilateral,
+        dwell=dwell,
+        confirmation_sample=j,
+        confirmation_time_s=(None if j is None else float(frames[j].time_s)),
+        confirmation_elapsed_s=dwell.elapsed_duration_s,
     )
 
 
@@ -1845,13 +2045,25 @@ class V3ComparatorResult:
     invalid: bool
     status: str
     comparator_time_s: float | None
+    """Confirmation time: the first native sample satisfying the full
+    ``dwell_s`` persistence, i.e. onset + ``K_D`` intervals."""
     offset_s: float | None
+    """Confirmation time minus TAKEOFF_OCCURRENCE time (report only)."""
     threshold_n: float
     dwell_s: float
     left_fz_at_trigger_n: float | None
     right_fz_at_trigger_n: float | None
     total_fz_at_trigger_n: float | None
     invalidation_reason: str | None
+    onset_time_s: float | None = None
+    onset_offset_s: float | None = None
+    confirmation_time_s: float | None = None
+    confirmation_offset_s: float | None = None
+    k_d: int | None = None
+    required_true_samples: int | None = None
+    elapsed_duration_s: float | None = None
+    true_sample_count: int | None = None
+    dwell: V3PhysicalTimeDwell | None = None
     predicate: str = COMPARATOR_PREDICATE
     note: str = (
         "Diagnostic/comparability only.  Never defines physical takeoff, flight "
@@ -1869,7 +2081,11 @@ def force_takeoff_comparator(
     """RES95 EM-10 bilateral per-foot comparator (diagnostic only).
 
     Condition: ``LEFT_FOOT_FZ < threshold_n`` AND ``RIGHT_FOOT_FZ < threshold_n``
-    continuously for >= ``dwell_s`` on the legal plantar per-foot wrenches.
+    continuously for >= ``dwell_s`` on the legal plantar per-foot wrenches,
+    evaluated with the shared RES-82 PHYSICAL_TIME dwell primitive: an exact
+    native-grid onset at sample ``i`` confirms at ``i + K_D`` with
+    ``K_D = ceil(D / dt)`` intervals (``K_D + 1`` true samples) and no
+    floating-epsilon or inclusive-sample-count allowance.
 
     The first contiguous below-threshold episode that reaches the persistence
     requirement decides the result:
@@ -1880,17 +2096,33 @@ def force_takeoff_comparator(
       read as bilateral unloading while another support carries load);
     * no qualifying episode -> ``NOT_TRIGGERED``.
 
-    An equivalent total Fz is emitted only as a report field
-    (``total_fz_at_trigger_n``); it never replaces the per-foot predicate.
+    Onset time, confirmation time and their separate offsets from
+    TAKEOFF_OCCURRENCE are reported independently.  An equivalent total Fz is
+    emitted only as a report field (``total_fz_at_trigger_n``); it never
+    replaces the per-foot predicate.
     """
     if not frames:
         raise ValueError("empty frame sequence")
-    dt = frames[1].time_s - frames[0].time_s if len(frames) > 1 else NATIVE_DT_S
-    need = max(int(math.ceil(dwell_s / dt - 1e-12)), 1)
+    dt = float(frames[1].time_s - frames[0].time_s) if len(frames) > 1 else NATIVE_DT_S
+    dt_ns = _exact_nanoseconds(dt, field="dt_s")
+    dwell_ns = _exact_nanoseconds(dwell_s, field="dwell_s")
+    k_d = -(-dwell_ns // dt_ns)
+    need_samples = k_d + 1
+    flags = [
+        bilateral_per_foot_below_threshold(
+            f.left_foot_force_world_n[2], f.right_foot_force_world_n[2], threshold_n=threshold_n)
+        for f in frames
+    ]
+    times = [f.time_s for f in frames]
+
+    def _offset(t: float) -> float | None:
+        if occurrence.occurrence_time_s is None:
+            return None
+        return float(t - occurrence.occurrence_time_s)
 
     def _evaluate_episode(start: int, end: int) -> V3ComparatorResult | None:
         """Evaluate one contiguous below-threshold episode ``[start, end)``."""
-        if end - start < need:
+        if end - start < need_samples:
             return None
         contaminated = [j for j in range(start, end) if frames[j].nonplantar_floor_active > 0]
         if contaminated:
@@ -1909,27 +2141,44 @@ def force_takeoff_comparator(
                     f"{COMPARATOR_INVALIDATION}: ACTIVE non-plantar floor support in native "
                     f"frames {contaminated[0]}..{contaminated[-1]} of the persistence episode"
                 ),
+                k_d=int(k_d),
+                required_true_samples=int(need_samples),
             )
-        t_cmp = frames[start].time_s
-        offset = None if occurrence.occurrence_time_s is None else float(t_cmp - occurrence.occurrence_time_s)
+        dwell = physical_time_dwell(
+            times, flags,
+            onset_index=start,
+            onset_time_s=float(times[start]),
+            required_duration_s=dwell_s,
+            dt_s=dt,
+        )
+        if not dwell.confirmed or dwell.confirmation_index is None:
+            return None
+        j = dwell.confirmation_index
         return V3ComparatorResult(
             triggered=True,
             invalid=False,
             status="TRIGGERED",
-            comparator_time_s=float(t_cmp),
-            offset_s=offset,
+            comparator_time_s=float(times[j]),
+            offset_s=_offset(float(times[j])),
             threshold_n=threshold_n,
             dwell_s=dwell_s,
-            left_fz_at_trigger_n=float(frames[start].left_foot_force_world_n[2]),
-            right_fz_at_trigger_n=float(frames[start].right_foot_force_world_n[2]),
-            total_fz_at_trigger_n=float(frames[start].total_floor_force_world_n[2]),
+            left_fz_at_trigger_n=float(frames[j].left_foot_force_world_n[2]),
+            right_fz_at_trigger_n=float(frames[j].right_foot_force_world_n[2]),
+            total_fz_at_trigger_n=float(frames[j].total_floor_force_world_n[2]),
             invalidation_reason=None,
+            onset_time_s=float(times[start]),
+            onset_offset_s=_offset(float(times[start])),
+            confirmation_time_s=float(times[j]),
+            confirmation_offset_s=_offset(float(times[j])),
+            k_d=int(dwell.k_d),
+            required_true_samples=int(dwell.k_d + 1),
+            elapsed_duration_s=dwell.elapsed_duration_s,
+            true_sample_count=dwell.true_sample_count,
+            dwell=dwell,
         )
 
     run_start: int | None = None
-    for i, f in enumerate(frames):
-        below = bilateral_per_foot_below_threshold(
-            f.left_foot_force_world_n[2], f.right_foot_force_world_n[2], threshold_n=threshold_n)
+    for i, below in enumerate(flags):
         if below:
             if run_start is None:
                 run_start = i
@@ -1954,6 +2203,8 @@ def force_takeoff_comparator(
         right_fz_at_trigger_n=None,
         total_fz_at_trigger_n=None,
         invalidation_reason=None,
+        k_d=int(k_d),
+        required_true_samples=int(need_samples),
     )
 
 
@@ -2160,12 +2411,18 @@ __all__ = [
     "COP_REPORTING_RESOLUTION_M",
     "DIFFERENTIATION_METHOD",
     "DOWN_SAMPLING_AUTHORIZED",
+    "DWELL_REJECT_COVERAGE",
+    "DWELL_REJECT_ELAPSED",
+    "DWELL_REJECT_INTERVALS",
+    "DWELL_REJECT_SUSTAIN",
+    "DWELL_TYPE_PHYSICAL_TIME",
     "EVENT_INTERPOLATION_METHOD",
     "FILTER_FAMILY",
     "GRAVITY_M_S2",
     "IMPULSE_INTEGRATION_RULE",
     "MUJOCO_CONTACT_SEMANTICS_REQUALIFICATION_NOTE",
     "MUJOCO_CONTACT_SEMANTICS_VERSION",
+    "NANOSECONDS_PER_SECOND",
     "NATIVE_1000HZ_STREAM_STATUS",
     "NATIVE_POSITION_VELOCITY_HALF_STEP_OFFSET",
     "INTEGRATION_METHOD",
@@ -2190,12 +2447,14 @@ __all__ = [
     "V3ContactState",
     "V3CopResult",
     "V3CopValidity",
+    "V3DwellAuthorityError",
     "V3FootClearance",
     "V3MassState",
     "V3MeasurementSnapshot",
     "V3NativeFrame",
     "V3OrientationState",
     "V3OutOfPlaneObservables",
+    "V3PhysicalTimeDwell",
     "V3SamplingAuthorityError",
     "V3SupportHull",
     "V3SupportMode",
@@ -2236,6 +2495,7 @@ __all__ = [
     "native_spacing_s",
     "orientation_state",
     "out_of_plane_observables",
+    "physical_time_dwell",
     "prohibited_records",
     "scan_takeoff_candidates",
     "sampling_authority",

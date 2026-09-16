@@ -6,7 +6,7 @@
     {
       "artifact": "MEASUREMENT_IMPLEMENTATION_SPEC.json",
       "status": "PASS",
-      "checks": 5,
+      "checks": 6,
       "failed": []
     },
     {
@@ -54,7 +54,7 @@
     {
       "artifact": "TAKEOFF_OCCURRENCE_CONFIRMATION_AUDIT.json",
       "status": "PASS",
-      "checks": 21,
+      "checks": 36,
       "failed": []
     },
     {
@@ -66,7 +66,13 @@
     {
       "artifact": "FORCE_THRESHOLD_COMPARATOR_AUDIT.json",
       "status": "PASS",
-      "checks": 16,
+      "checks": 29,
+      "failed": []
+    },
+    {
+      "artifact": "PHYSICAL_TIME_DWELL_AUDIT.json",
+      "status": "PASS",
+      "checks": 43,
       "failed": []
     },
     {
@@ -120,12 +126,12 @@
     {
       "artifact": "AUTHORITY_CONFORMANCE_MATRIX.json",
       "status": "PASS",
-      "checks": 29,
+      "checks": 33,
       "failed": []
     }
   ],
-  "artifact_count": 20,
-  "total_checks": 424,
+  "artifact_count": 21,
+  "total_checks": 500,
   "failed_checks": [],
   "status": "PASS"
 }

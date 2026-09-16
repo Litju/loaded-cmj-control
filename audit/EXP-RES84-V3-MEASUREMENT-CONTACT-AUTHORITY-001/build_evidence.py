@@ -22,6 +22,7 @@ Run:  python3 build_evidence.py          # write all JSON artifacts
 
 from __future__ import annotations
 
+import ast
 import dataclasses
 import hashlib
 import json
@@ -77,6 +78,62 @@ def sha256_file(path: Path) -> str:
 
 def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _dwell_record(dwell: M.V3PhysicalTimeDwell | None) -> dict[str, Any] | None:
+    """JSON view of the shared PHYSICAL_TIME dwell record."""
+    return None if dwell is None else dataclasses.asdict(dwell)
+
+
+def _synthetic_occurrence(*, time_s: float, native_index: int, last_support_index: int,
+                          interpolated: bool = False,
+                          bracket_weight: float | None = None) -> M.V3TakeoffOccurrence:
+    """Declared candidate occurrence for synthetic PHYSICAL_TIME dwell probes."""
+    return M.V3TakeoffOccurrence(
+        valid=True,
+        occurrence_time_s=float(time_s),
+        native_index=int(native_index),
+        last_support_index=int(last_support_index),
+        bracket_weight=1.0 if bracket_weight is None else float(bracket_weight),
+        interpolated=bool(interpolated),
+        com_world_m=(0.0, 0.0, 1.0),
+        com_velocity_world_m_s=(0.0, 0.0, 1.0),
+        left_clearance_m=1.0e-4,
+        right_clearance_m=1.0e-4,
+        legal_plantar_normal_force_n=0.0,
+        total_floor_force_world_n=(0.0, 0.0, 0.0),
+        support_mode_before="BILATERAL",
+        prohibited_detected_at_bracket=0,
+        reason="",
+    )
+
+
+def _synthetic_native_frame(i: int, dt_s: float, *, active: int = 0, clearance_m: float = 5.0e-3,
+                            vz_m_s: float = 1.0, prohibited: int = 0,
+                            left_fz_n: float = 0.0, right_fz_n: float = 0.0) -> M.V3NativeFrame:
+    """One declared synthetic native frame for boundary probes.
+
+    ``active`` counts ACTIVE legal plantar contacts; ``prohibited`` counts
+    ACTIVE prohibited/non-plantar floor contacts and mirrors
+    ``nonplantar_floor_active`` for comparator invalidation.
+    """
+    floor_fz = 900.0 if active else 0.0
+    return M.V3NativeFrame(
+        index=int(i), time_s=float(i) * float(dt_s),
+        com_world_m=(0.0, 0.0, 1.0), com_velocity_world_m_s=(0.0, 0.0, float(vz_m_s)),
+        athlete_com_world_m=(0.0, 0.0, 0.9), left_clearance_m=float(clearance_m),
+        right_clearance_m=float(clearance_m),
+        legal_plantar_detected=int(active), legal_plantar_active=int(active),
+        legal_plantar_normal_force_n=100.0 if active else 0.0,
+        prohibited_detected=int(prohibited), prohibited_active=int(prohibited),
+        total_floor_force_world_n=(0.0, 0.0, float(left_fz_n + right_fz_n)),
+        legal_ground_force_world_n=(0.0, 0.0, floor_fz),
+        legal_ground_moment_world_nm=(0.0, 0.0, 0.0),
+        left_foot_force_world_n=(0.0, 0.0, float(left_fz_n)),
+        right_foot_force_world_n=(0.0, 0.0, float(right_fz_n)),
+        nonplantar_floor_active=int(prohibited),
+        cop_validity="VALID", cop_x_m=0.0,
+        support_mode="BILATERAL" if active else "NOT_EVALUABLE")
 
 
 # ===========================================================================
@@ -493,12 +550,16 @@ def measurement_implementation_spec() -> dict[str, Any]:
         "schema_version": "1.0.0",
         "artifact": "MEASUREMENT_IMPLEMENTATION_SPEC",
         "authority_id": M.V3_MEASUREMENT_AUTHORITY_ID,
-        "mission": "RES84A_CORRECT_DIAGNOSTIC_COMPARATOR_AND_SAMPLING_ERRATA_001",
+        "mission": "RES84B_CLOSE_PHYSICAL_TIME_DWELL_SEMANTICS_001",
         "parent_mission": "RES84_REBUILD_V3_MEASUREMENT_CONTACT_AUTHORITY_001",
+        "erratum_mission": "RES84A_CORRECT_DIAGNOSTIC_COMPARATOR_AND_SAMPLING_ERRATA_001",
         "linear_issue": "RES-84",
         "model_id": M.V3_MEASUREMENT_MODEL_ID,
-        "entry_head": "0fdb4f3bd19dd12360c104f4a567467195980fbc",
-        "entry_tree": "ba008e925b83eeca68f02d7409ba34e35efcc2d1",
+        "entry_head": "da54a66107b77e07068db130d4a6d8872e0d2e47",
+        "entry_tree": "0544aa94ec5c262283c7d3bf531bb8daeaad1d5a",
+        "supersedes_head": "da54a66107b77e07068db130d4a6d8872e0d2e47",
+        "previous_evidence_seal":
+            "308db0c95cdbd8789a9ec4da0b1685c6778419e0b8cc47e6ea3cbadc4c5ef324",
         "original_res84_entry_head": "7f1917164d137a9d3852acfbf9ee045972871285",
         "original_res84_entry_tree": "84d5f14b5ecd6d08aaa307ecb05b75c4ab0937fb",
         "module": "src/loaded_cmj/v3/measurement.py",
@@ -519,6 +580,8 @@ def measurement_implementation_spec() -> dict[str, Any]:
             "out_of_plane": ["out_of_plane_observables"],
             "sampling": ["native_frame", "canonical_1000hz_stream", "sampling_authority",
                 "signal_processing_authority"],
+            "dwell": ["physical_time_dwell", "V3PhysicalTimeDwell",
+                "integer-nanosecond K_D authority (NANOSECONDS_PER_SECOND)"],
             "events": ["detect_takeoff_occurrence", "scan_takeoff_candidates", "confirm_takeoff",
                        "force_takeoff_comparator", "detect_apex", "vertical_impulse_between"],
         },
@@ -535,9 +598,13 @@ def measurement_implementation_spec() -> dict[str, Any]:
             "clearance_guard_measured_max_penetration_m": M.CLEARANCE_GUARD_MEASURED_MAX_PENETRATION_M,
             "cop_low_fz_tolerance_n": M.COP_LOW_FZ_TOLERANCE_N,
             "cop_reporting_resolution_m": M.COP_REPORTING_RESOLUTION_M,
+            "dwell_type": M.DWELL_TYPE_PHYSICAL_TIME,
+            "dwell_nanoseconds_per_second": M.NANOSECONDS_PER_SECOND,
             "takeoff_dwell_s": M.TAKEOFF_DWELL_S,
+            "takeoff_dwell_k_d_at_500hz": 25,
             "comparator_force_n": M.COMPARATOR_FORCE_N,
             "comparator_dwell_s": M.COMPARATOR_DWELL_S,
+            "comparator_dwell_k_d_at_500hz": 5,
             "comparator_predicate": M.COMPARATOR_PREDICATE,
             "comparator_total_fz_role": M.COMPARATOR_TOTAL_FZ_ROLE,
             "native_dt_s": M.NATIVE_DT_S,
@@ -567,6 +634,12 @@ def measurement_implementation_spec() -> dict[str, Any]:
     _check(checks, "module_exists", MEASUREMENT_SRC.is_file(), str(MEASUREMENT_SRC))
     _check(checks, "plant_xml_unchanged_hash_recorded", len(spec["plant_xml_sha256"]) == 64)
     _check(checks, "spec_records_all_mandatory_families", len(spec["surface"]) >= 13, len(spec["surface"]))
+    _check(checks, "spec_records_physical_time_dwell",
+           spec["frozen_constants"]["dwell_type"] == "PHYSICAL_TIME"
+           and spec["frozen_constants"]["dwell_nanoseconds_per_second"] == 1_000_000_000
+           and spec["frozen_constants"]["takeoff_dwell_k_d_at_500hz"] == 25
+           and spec["frozen_constants"]["comparator_dwell_k_d_at_500hz"] == 5
+           and "physical_time_dwell" in spec["surface"]["dwell"])
     _check(checks, "mujoco_contact_semantics_version_3_8_0",
            M.MUJOCO_CONTACT_SEMANTICS_VERSION == "3.8.0" and mujoco.__version__ == "3.8.0",
            {"declared": M.MUJOCO_CONTACT_SEMANTICS_VERSION, "runtime": mujoco.__version__})
@@ -1323,6 +1396,42 @@ def takeoff_occurrence_confirmation_audit() -> dict[str, Any]:
     _check(checks, "clearance_guard_reached", (confirmation.bilateral_clearance_max_m or 0.0) >= M.CLEARANCE_GUARD_M,
            confirmation.bilateral_clearance_max_m)
 
+    # RES-84 physical-time dwell correction (RES-82 DWELL_SEMANTICS):
+    # confirmation sample is the FIRST native sample at or after
+    # occurrence + 0.050 s; K_D intervals and K_D + 1 true samples are required.
+    required_end = occurrence.occurrence_time_s + confirmation.dwell_s
+    j = confirmation.confirmation_sample
+    _check(checks, "confirmation_sample_exists", j is not None, _dwell_record(confirmation.dwell))
+    if j is not None:
+        _check(checks, "confirmation_sample_is_first_at_or_after_required_end",
+               frames[j].time_s >= required_end - 1e-15 and frames[j - 1].time_s < required_end,
+               {"required_end_s": required_end, "confirmation_sample": j,
+                "confirmation_time_s": confirmation.confirmation_time_s,
+                "previous_sample_time_s": frames[j - 1].time_s})
+        _check(checks, "confirmation_elapsed_ge_required_dwell",
+               confirmation.confirmation_elapsed_s is not None
+               and confirmation.confirmation_elapsed_s >= confirmation.dwell_s,
+               {"elapsed_s": confirmation.confirmation_elapsed_s, "required_s": confirmation.dwell_s})
+        _check(checks, "confirmation_k_d_intervals_exact",
+               confirmation.dwell is not None
+               and confirmation.dwell.k_d == 25
+               and confirmation.dwell.confirmation_intervals == 25
+               and 25 * M.NATIVE_DT_S == confirmation.dwell_s,
+               _dwell_record(confirmation.dwell))
+        _check(checks, "confirmation_elapsed_positive_physical_time",
+               confirmation.confirmation_elapsed_s == confirmation.dwell_s,
+               confirmation.confirmation_elapsed_s)
+        _check(checks, "confirmation_not_shifting_occurrence",
+               confirmation.confirmation_time_s > occurrence.occurrence_time_s
+               and confirmation.occurrence.occurrence_time_s == occurrence.occurrence_time_s)
+        # explicit early-coverage red team: the last sample strictly before
+        # required_end must never be accepted (the retired `t_end - dt` allowance)
+        last_before = max(i for i, f in enumerate(frames) if f.time_s < required_end)
+        _check(checks, "early_allowance_last_sample_not_used",
+               j == last_before + 1 and frames[last_before].time_s < required_end <= frames[j].time_s,
+               {"last_before_s": frames[last_before].time_s, "required_end_s": required_end,
+                "confirmation_time_s": frames[j].time_s})
+
     # synthetic negative control: transient 1-sample dropout must not confirm
     def synth_frame(i: int, active: int, clearance: float, vz: float = 1.0,
                     prohibited: int = 0, floor_fz: float = 900.0) -> M.V3NativeFrame:
@@ -1356,6 +1465,67 @@ def takeoff_occurrence_confirmation_audit() -> dict[str, Any]:
     occ_re = M.detect_takeoff_occurrence(recontact_frames)
     conf_re = M.confirm_takeoff(recontact_frames, occ_re)
     _check(checks, "recontact_confirmation_rejected", not conf_re.confirmed, conf_re.failed_checks)
+
+    # synthetic negative control: stream ends one sample before the required end
+    truncated = list(frames[: j]) if j is not None else []
+    conf_trunc = M.confirm_takeoff(truncated, occurrence)
+    _check(checks, "truncated_stream_rejected",
+           not conf_trunc.confirmed
+           and conf_trunc.dwell is not None
+           and conf_trunc.dwell.reason == M.DWELL_REJECT_COVERAGE
+           and conf_trunc.confirmation_sample is None,
+           {"latest_sample_s": truncated[-1].time_s if truncated else None,
+            "required_end_s": required_end})
+    _check(checks, "truncated_stream_not_accepted_by_early_allowance",
+           conf_trunc.window_end_time_s is None)
+
+    # synthetic negative control: single false sample at the final required sample
+    gap = list(frames[: j + 1]) if j is not None else []
+    if gap:
+        gap[j] = dataclasses.replace(gap[j], legal_plantar_active=2, legal_plantar_detected=2)
+    conf_gap = M.confirm_takeoff(gap, occurrence)
+    _check(checks, "final_sample_sustain_gap_rejected",
+           not conf_gap.confirmed and conf_gap.dwell is not None
+           and conf_gap.dwell.reason == M.DWELL_REJECT_SUSTAIN
+           and "no_legal_plantar_recontact" in conf_gap.failed_checks,
+           {"reason": None if conf_gap.dwell is None else conf_gap.dwell.reason,
+            "failed": list(conf_gap.failed_checks)})
+
+    # synthetic negative control: prohibited contact exactly at the confirmation sample
+    prohibited_at_conf = list(frames[: j + 1]) if j is not None else []
+    if prohibited_at_conf:
+        prohibited_at_conf[j] = dataclasses.replace(
+            prohibited_at_conf[j], prohibited_detected=1, prohibited_active=1, nonplantar_floor_active=1)
+    conf_proh = M.confirm_takeoff(prohibited_at_conf, occurrence)
+    _check(checks, "prohibited_at_confirmation_rejected",
+           not conf_proh.confirmed and "no_prohibited_contact" in conf_proh.failed_checks,
+           list(conf_proh.failed_checks))
+
+    # interpolation regression: occurrence t* = 0.0273 s off the 2 ms native grid
+    t_star_offgrid = 0.0273
+    occurrence_offgrid = dataclasses.replace(
+        occurrence, occurrence_time_s=t_star_offgrid, interpolated=True, bracket_weight=0.65)
+    confirmation_offgrid = M.confirm_takeoff(frames, occurrence_offgrid)
+    required_end_offgrid = t_star_offgrid + M.TAKEOFF_DWELL_S
+    j_offgrid = confirmation_offgrid.confirmation_sample
+    _check(checks, "offgrid_occurrence_confirms_at_first_sample_at_or_after_required_end",
+           confirmation_offgrid.confirmed
+           and j_offgrid == 39
+           and frames[j_offgrid].time_s >= required_end_offgrid
+           and frames[j_offgrid - 1].time_s < required_end_offgrid,
+           {"t_star_s": t_star_offgrid, "required_end_s": required_end_offgrid,
+            "confirmation_sample": j_offgrid,
+            "confirmation_time_s": confirmation_offgrid.confirmation_time_s,
+            "previous_sample_s": None if j_offgrid is None else frames[j_offgrid - 1].time_s})
+    _check(checks, "offgrid_occurrence_no_early_confirmation",
+           j_offgrid is not None and j_offgrid != 38)
+    _check(checks, "offgrid_occurrence_elapsed_ge_dwell",
+           confirmation_offgrid.confirmation_elapsed_s is not None
+           and confirmation_offgrid.confirmation_elapsed_s >= M.TAKEOFF_DWELL_S,
+           confirmation_offgrid.confirmation_elapsed_s)
+    _check(checks, "offgrid_occurrence_sustain_predicate_through_sample",
+           confirmation_offgrid.dwell is not None
+           and confirmation_offgrid.dwell.true_sample_count >= 39 - occurrence.native_index + 1)
 
     # synthetic negative control: clearance never reaches the guard
     low_clear_frames = [synth_frame(i, 2 if i < 10 else 0, 0.0001 if i < 10 else 0.0005, vz=1.0, floor_fz=900.0)
@@ -1403,11 +1573,13 @@ def takeoff_occurrence_confirmation_audit() -> dict[str, Any]:
             "occurrence": ("final ACTIVE LEGAL PLANTAR support -> zero ACTIVE LEGAL PLANTAR support transition; "
                            "interpolated contact-force extrapolation clamped to the native interval; "
                            "clearance is never used to move the timestamp"),
-            "confirmation": ["zero legal support persists >= 0.050 s",
+            "confirmation": ["zero legal support persists >= 0.050 s (RES-82 PHYSICAL_TIME: K_D = 25 "
+                             "intervals / 26 true samples at 500 Hz; confirmation sample is the FIRST native "
+                             "sample at or after occurrence + 0.050 s)",
                              "bilateral clearance reaches the clearance guard",
                              "SYSTEM_COM_vz at occurrence > 0",
-                             "no prohibited contact in the window",
-                             "no legal plantar recontact"],
+                             "no prohibited contact through the confirmation sample",
+                             "no legal plantar recontact through the confirmation sample"],
             "failure": "REJECTED, never shifted",
         },
         "ballistic_hop": {
@@ -1428,12 +1600,43 @@ def takeoff_occurrence_confirmation_audit() -> dict[str, Any]:
                 "confirmed": confirmation.confirmed,
                 "checks": [{"check": n, "pass": ok, "detail": d} for n, ok, d in confirmation.checks],
                 "bilateral_clearance_max_m": confirmation.bilateral_clearance_max_m,
+                "TAKEOFF_CONFIRMATION_SAMPLE": confirmation.confirmation_sample,
+                "TAKEOFF_CONFIRMATION_TIME": confirmation.confirmation_time_s,
+                "TAKEOFF_CONFIRMATION_ELAPSED_S": confirmation.confirmation_elapsed_s,
+                "required_end_time_s": required_end,
+                "dwell": _dwell_record(confirmation.dwell),
             },
+        },
+        "offgrid_occurrence_regression": {
+            "occurrence_time_s": t_star_offgrid,
+            "required_end_time_s": t_star_offgrid + M.TAKEOFF_DWELL_S,
+            "confirmation_sample": confirmation_offgrid.confirmation_sample,
+            "confirmation_time_s": confirmation_offgrid.confirmation_time_s,
+            "confirmation_elapsed_s": confirmation_offgrid.confirmation_elapsed_s,
+            "confirmed": confirmation_offgrid.confirmed,
+            "last_sample_at_or_before_required_end": 38,
+            "not_the_last_sample_before_required_end": confirmation_offgrid.confirmation_sample != 38,
+            "dwell": _dwell_record(confirmation_offgrid.dwell),
+        },
+        "truncated_stream_control": {
+            "stream_latest_sample_s": truncated[-1].time_s if truncated else None,
+            "required_end_s": required_end,
+            "confirmed": conf_trunc.confirmed,
+            "reason": None if conf_trunc.dwell is None else conf_trunc.dwell.reason,
+            "failed": list(conf_trunc.failed_checks),
         },
         "negative_controls": {
             "transient_dropout": {"occurrence": occ_drop.valid, "confirmed": conf_drop.confirmed,
                                   "failed": list(conf_drop.failed_checks)},
             "recontact_in_dwell": {"confirmed": conf_re.confirmed, "failed": list(conf_re.failed_checks)},
+            "final_sample_sustain_gap": {"confirmed": conf_gap.confirmed,
+                                         "reason": None if conf_gap.dwell is None else conf_gap.dwell.reason,
+                                         "failed": list(conf_gap.failed_checks)},
+            "recontact_at_confirmation_sample": {"confirmation_sample": j,
+                                                 "confirmed": conf_gap.confirmed,
+                                                 "failed": list(conf_gap.failed_checks)},
+            "prohibited_at_confirmation_sample": {"confirmed": conf_proh.confirmed,
+                                                  "failed": list(conf_proh.failed_checks)},
             "clearance_below_guard": {"confirmed": conf_lc.confirmed, "failed": list(conf_lc.failed_checks)},
             "falling_com": {"confirmed": conf_fall.confirmed, "failed": list(conf_fall.failed_checks)},
             "prohibited_contact": {"confirmed": conf_pr.confirmed, "failed": list(conf_pr.failed_checks)},
@@ -1499,12 +1702,15 @@ def clearance_guard_audit() -> dict[str, Any]:
 # 11. Force threshold comparator
 # ===========================================================================
 def force_threshold_comparator_audit() -> dict[str, Any]:
-    """RES95 EM-10 bilateral PER-FOOT comparator + regression cases A-E.
+    """RES95 EM-10 bilateral PER-FOOT comparator + regression cases A-F.
 
     The comparator condition is ``LEFT_FOOT_FZ < 10 N AND RIGHT_FOOT_FZ < 10 N``
     continuously for >= 0.010 s on the GROUND_ON_ATHLETE legal plantar per-foot
-    wrenches.  ACTIVE prohibited/non-plantar floor support invalidates the
-    comparator instead of masquerading as bilateral below-threshold force.
+    wrenches, evaluated with the shared RES-82 PHYSICAL_TIME dwell primitive:
+    at 500 Hz ``K_D = 5`` intervals and ``K_D + 1 = 6`` true samples are
+    required, and onset/confirmation times are reported separately.  ACTIVE
+    prohibited/non-plantar floor support invalidates the comparator instead of
+    masquerading as bilateral below-threshold force.
     """
     checks: list[dict[str, Any]] = []
     plant, data, frames = ballistic_hop_stream()
@@ -1537,6 +1743,54 @@ def force_threshold_comparator_audit() -> dict[str, Any]:
     _check(checks, "comparator_offset_finite", offset is not None and math.isfinite(offset), offset)
     if offset is not None:
         _check(checks, "comparator_offset_small", abs(offset) <= 0.050, offset)
+
+    # RES-84 physical-time dwell correction: K_D = 5 intervals / 6 true samples
+    # at 500 Hz; onset and confirmation are distinct and separately reported.
+    # The expected values are recomputed from the trace, never hard-coded.
+    trace_onset_index = next(
+        j for j, f in enumerate(frames)
+        if M.bilateral_per_foot_below_threshold(
+            f.left_foot_force_world_n[2], f.right_foot_force_world_n[2]))
+    trace_onset_s = frames[trace_onset_index].time_s
+    trace_confirmation_s = frames[trace_onset_index + comparator.k_d].time_s
+    _check(checks, "comparator_k_d_is_5_intervals",
+           comparator.k_d == 5 and comparator.required_true_samples == 6,
+           {"K_D": comparator.k_d, "required_true_samples": comparator.required_true_samples})
+    _check(checks, "comparator_onset_is_first_below_threshold_sample",
+           comparator.onset_time_s == trace_onset_s
+           and abs(comparator.onset_offset_s - (trace_onset_s - occurrence.occurrence_time_s)) < 1e-15,
+           {"trace_onset_index": trace_onset_index, "trace_onset_s": trace_onset_s,
+            "onset_offset_s": comparator.onset_offset_s,
+            "expected_engineering_onset_s": 0.024})
+    _check(checks, "comparator_confirmation_is_onset_plus_k_d",
+           comparator.confirmation_time_s == trace_confirmation_s
+           and abs(comparator.confirmation_offset_s
+                   - (trace_confirmation_s - occurrence.occurrence_time_s)) < 1e-15,
+           {"trace_confirmation_index": trace_onset_index + comparator.k_d,
+            "trace_confirmation_s": trace_confirmation_s,
+            "confirmation_offset_s": comparator.confirmation_offset_s,
+            "expected_engineering_confirmation_s": 0.034})
+    _check(checks, "comparator_confirmation_elapsed_ge_10ms",
+           comparator.elapsed_duration_s is not None
+           and comparator.elapsed_duration_s >= comparator.dwell_s
+           and abs(comparator.elapsed_duration_s - comparator.dwell_s) < 1e-15,
+           comparator.elapsed_duration_s)
+    _check(checks, "comparator_onset_and_confirmation_separately_reported",
+           comparator.onset_time_s is not None and comparator.confirmation_time_s is not None
+           and comparator.confirmation_time_s > comparator.onset_time_s
+           and comparator.onset_offset_s is not None and comparator.confirmation_offset_s is not None
+           and comparator.onset_offset_s != comparator.confirmation_offset_s,
+           {"onset": (comparator.onset_time_s, comparator.onset_offset_s),
+            "confirmation": (comparator.confirmation_time_s, comparator.confirmation_offset_s)})
+    _check(checks, "comparator_true_sample_count_covers_k_d_plus_1",
+           comparator.true_sample_count is not None and comparator.true_sample_count >= 6,
+           comparator.true_sample_count)
+    _check(checks, "comparator_dwell_record_uses_physical_time",
+           comparator.dwell is not None
+           and comparator.dwell.dwell_type == M.DWELL_TYPE_PHYSICAL_TIME
+           and comparator.dwell.k_d == 5
+           and comparator.dwell.confirmed,
+           _dwell_record(comparator.dwell))
 
     # the comparator must never define or shift the occurrence: independent
     # re-detection returns the same timestamp and the diagnostic is pure
@@ -1584,23 +1838,61 @@ def force_threshold_comparator_audit() -> dict[str, Any]:
             "reason": c_result.invalidation_reason})
     check_C = c_result.status
 
-    # regression D: bilateral below threshold for < 10 ms -> NOT_TRIGGERED
+    # regression D: 4 true samples (0.006 s) -> NOT_TRIGGERED
     d_frames = [synth(i, 3.0, 3.0) if 4 <= i <= 7 else synth(i, 400.0, 400.0) for i in range(20)]
     d_result = M.force_takeoff_comparator(d_frames, occurrence)
     _check(checks, "regression_D_sub_persistence_false",
            d_result.triggered is False and d_result.status == "NOT_TRIGGERED",
-           {"status": d_result.status, "samples_below": 4, "dt_s": M.NATIVE_DT_S})
+           {"status": d_result.status, "true_samples": 4, "dt_s": M.NATIVE_DT_S,
+            "first_to_last_elapsed_s": 3 * M.NATIVE_DT_S})
     check_D = d_result.status
 
-    # regression E: bilateral below threshold for >= 10 ms -> TRIGGERED
+    # regression E: exactly K_D intervals / 6 true samples -> TRIGGERED at the
+    # confirmation sample (onset + K_D), never at the onset sample
     e_frames = [synth(i, 3.0, 3.0) if 4 <= i <= 9 else synth(i, 400.0, 400.0) for i in range(20)]
     e_result = M.force_takeoff_comparator(e_frames, occurrence)
     _check(checks, "regression_E_persistence_true",
            e_result.triggered is True and e_result.invalid is False
            and e_result.status == "TRIGGERED"
-           and abs(e_result.comparator_time_s - 4 * M.NATIVE_DT_S) < 1e-15,
-           {"status": e_result.status, "samples_below": 6, "comparator_time_s": e_result.comparator_time_s})
+           and e_result.onset_time_s == 4 * M.NATIVE_DT_S
+           and e_result.confirmation_time_s == 9 * M.NATIVE_DT_S
+           and e_result.k_d == 5
+           and abs(e_result.comparator_time_s - 9 * M.NATIVE_DT_S) < 1e-15,
+           {"status": e_result.status, "true_samples": 6,
+            "onset_time_s": e_result.onset_time_s,
+            "confirmation_time_s": e_result.confirmation_time_s,
+            "comparator_time_s": e_result.comparator_time_s})
     check_E = e_result.triggered
+
+    # regression F: K_D - 1 intervals / 5 true samples -> NOT_TRIGGERED
+    f_frames = [synth(i, 3.0, 3.0) if 4 <= i <= 8 else synth(i, 400.0, 400.0) for i in range(20)]
+    f_result = M.force_takeoff_comparator(f_frames, occurrence)
+    _check(checks, "regression_F_k_d_minus_1_false",
+           f_result.triggered is False and f_result.status == "NOT_TRIGGERED",
+           {"status": f_result.status, "true_samples": 5,
+            "first_to_last_elapsed_s": 4 * M.NATIVE_DT_S})
+    check_F = f_result.status
+
+    # explicit 500 Hz boundary receipt (mission section 4)
+    _check(checks, "boundary_4_true_samples_rejected",
+           d_result.triggered is False and d_result.status == "NOT_TRIGGERED")
+    _check(checks, "boundary_5_true_samples_rejected",
+           f_result.triggered is False and f_result.status == "NOT_TRIGGERED")
+    _check(checks, "boundary_6_true_samples_confirmed",
+           e_result.triggered is True and e_result.k_d == 5
+           and e_result.elapsed_duration_s == 0.010)
+    _check(checks, "boundary_6_samples_first_to_last_elapsed_is_10ms",
+           abs((e_result.confirmation_time_s - e_result.onset_time_s) - 0.010) < 1e-15)
+
+    # single false sample at the final required sample (after K_D true samples)
+    # must reset the run and never confirm
+    gap_frames = [synth(i, 3.0, 3.0) if 4 <= i <= 8 else synth(i, 400.0, 400.0) for i in range(20)]
+    gap_result = M.force_takeoff_comparator(gap_frames, occurrence)
+    _check(checks, "single_false_sample_at_final_required_sample_rejected",
+           gap_result.triggered is False and gap_result.status == "NOT_TRIGGERED"
+           and gap_result.k_d == 5 and gap_result.required_true_samples == 6,
+           {"status": gap_result.status, "true_samples": 5,
+            "final_required_sample_index": 9})
 
     # synthetic: a force signal that dips but recovers must not trigger
     dip_frames = [synth(i, 2.5, 2.5) if i in (5, 6) else synth(i, 450.0, 450.0) for i in range(30)]
@@ -1622,6 +1914,15 @@ def force_threshold_comparator_audit() -> dict[str, Any]:
         "res95_em10_status": "PASS",
         "role": "diagnostic/comparability only",
         "must_not": ["define physical takeoff", "define flight", "replace contact truth", "move the H2 timestamp"],
+        "physical_time_semantics": {
+            "dwell_type": M.DWELL_TYPE_PHYSICAL_TIME,
+            "k_d": comparator.k_d,
+            "required_true_samples": comparator.required_true_samples,
+            "dt_s": M.NATIVE_DT_S,
+            "required_duration_s": comparator.dwell_s,
+            "retired": ["inclusive sample count >= K_D", "t_end - dt early allowance",
+                        "floating accumulated dwell as primary authority"],
+        },
         "hop_result": {
             "triggered": comparator.triggered,
             "invalid": comparator.invalid,
@@ -1629,16 +1930,432 @@ def force_threshold_comparator_audit() -> dict[str, Any]:
             "comparator_time_s": comparator.comparator_time_s,
             "occurrence_time_s": occurrence.occurrence_time_s,
             "offset_s": comparator.offset_s,
+            "COMPARATOR_ONSET_TIME": comparator.onset_time_s,
+            "COMPARATOR_CONFIRMATION_TIME": comparator.confirmation_time_s,
+            "COMPARATOR_ONSET_OFFSET_FROM_TAKEOFF": comparator.onset_offset_s,
+            "COMPARATOR_CONFIRMATION_OFFSET_FROM_TAKEOFF": comparator.confirmation_offset_s,
+            "COMPARATOR_K_D": comparator.k_d,
+            "COMPARATOR_REQUIRED_TRUE_SAMPLES": comparator.required_true_samples,
+            "COMPARATOR_ELAPSED_DURATION_S": comparator.elapsed_duration_s,
+            "COMPARATOR_TRUE_SAMPLE_COUNT": comparator.true_sample_count,
             "left_fz_at_trigger_n": comparator.left_fz_at_trigger_n,
             "right_fz_at_trigger_n": comparator.right_fz_at_trigger_n,
             "total_fz_at_trigger_n": comparator.total_fz_at_trigger_n,
+            "dwell": _dwell_record(comparator.dwell),
         },
         "regression_receipt": {
             "A_bilateral_8n_8n_total_16n": {"status": "PASS", "per_foot_predicate": check_A},
             "B_single_foot_12n_0n": {"status": "PASS", "per_foot_predicate": check_B},
             "C_prohibited_support_active": {"status": "PASS", "comparator_status": check_C},
-            "D_sub_persistence_lt_10ms": {"status": "PASS", "comparator_status": check_D},
-            "E_persistence_ge_10ms": {"status": "PASS", "comparator_status": check_E},
+            "D_4_true_samples_lt_10ms": {"status": "PASS", "comparator_status": check_D},
+            "E_6_true_samples_k_d_intervals": {"status": "PASS", "comparator_status": check_E},
+            "F_5_true_samples_k_d_minus_1_intervals": {"status": "PASS", "comparator_status": check_F},
+        },
+        "checks": checks,
+        "status": _status(checks),
+    }
+
+
+# ===========================================================================
+# 11b. Physical-time dwell closure (RES-82 DWELL_SEMANTICS)
+# ===========================================================================
+def _dwell_probe(dt_s: float, duration_s: float, n_true: int, *, n_total: int | None = None
+                 ) -> M.V3PhysicalTimeDwell:
+    """Primitive-level probe: ``n_true`` consecutive true samples from onset 0."""
+    total = n_true + 2 if n_total is None else int(n_total)
+    times = [j * dt_s for j in range(total)]
+    flags = [j < n_true for j in range(total)]
+    return M.physical_time_dwell(times, flags, onset_index=0, onset_time_s=0.0,
+                                 required_duration_s=duration_s, dt_s=dt_s)
+
+
+def _comparator_probe(dt_s: float, duration_s: float, n_true: int
+                      ) -> tuple[M.V3ComparatorResult, list[M.V3NativeFrame], int]:
+    """End-to-end comparator probe on a synthetic exact grid (onset sample 4)."""
+    onset = 4
+    frames = [
+        _synthetic_native_frame(
+            i, dt_s, active=0, clearance_m=5.0e-3,
+            left_fz_n=3.0 if onset <= i < onset + n_true else 400.0,
+            right_fz_n=3.0 if onset <= i < onset + n_true else 400.0)
+        for i in range(onset + n_true + 4)
+    ]
+    occurrence = _synthetic_occurrence(time_s=frames[onset].time_s, native_index=onset,
+                                       last_support_index=onset - 1)
+    return M.force_takeoff_comparator(frames, occurrence, dwell_s=duration_s), frames, onset
+
+
+def _below_threshold_run_length(frames: Sequence[M.V3NativeFrame], onset: int) -> int:
+    """Measured consecutive below-threshold run length starting at ``onset``."""
+    run = 0
+    for j in range(onset, len(frames)):
+        if M.bilateral_per_foot_below_threshold(
+                frames[j].left_foot_force_world_n[2], frames[j].right_foot_force_world_n[2]):
+            run += 1
+        else:
+            break
+    return run
+
+
+def _flight_probe(dt_s: float, duration_s: float, n_zero: int) -> tuple[M.V3TakeoffConfirmation, int]:
+    """End-to-end confirmation probe: zero legal support from sample 10 onward."""
+    onset = 10
+    frames = [
+        _synthetic_native_frame(
+            i, dt_s, active=2 if i < onset else 0,
+            clearance_m=1.0e-4 if i < onset else 5.0e-3)
+        for i in range(onset + n_zero)
+    ]
+    occurrence = _synthetic_occurrence(time_s=frames[onset].time_s, native_index=onset,
+                                       last_support_index=onset - 1)
+    return M.confirm_takeoff(frames, occurrence, dwell_s=duration_s), onset
+
+
+def _dwell_primitive_calls(module_source: str, function_name: str) -> bool:
+    """True iff ``function_name`` calls ``physical_time_dwell`` (AST, not text)."""
+    tree = ast.parse(module_source)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == function_name:
+            return any(
+                isinstance(inner, ast.Call) and getattr(inner.func, "id", None) == "physical_time_dwell"
+                for inner in ast.walk(node))
+    return False
+
+
+def physical_time_dwell_audit() -> dict[str, Any]:
+    """Dedicated PHYSICAL_TIME dwell-semantics artifact (RES-82 closure).
+
+    Binds the controlling RES-82 / RES-95 dwell convention, proves one shared
+    integer-nanosecond dwell primitive is used by both the force comparator and
+    takeoff confirmation, and executes the mandated boundary/negative controls
+    at 500 Hz, 1000 Hz and 2000 Hz, including an off-grid interpolated
+    occurrence.
+    """
+    checks: list[dict[str, Any]] = []
+    res82 = json.loads(
+        (REPO / "audit" / "EXP-RES82-SUCCESSOR-SCIENTIFIC-TASK-CONTRACT-001" / "DWELL_SEMANTICS.json").read_text())
+    res95 = json.loads((AUTHORITY_DIR / "EVENT_MEASUREMENT_BOUNDARY.json").read_text())
+    convention = res82["normative_convention"]
+    em_by_id = {decision["id"]: decision for decision in res95["decisions"]}
+    em06, em10 = em_by_id["EM-06"], em_by_id["EM-10"]
+
+    # --- controlling authority binding --------------------------------------
+    _check(checks, "res82_dwell_type_physical_time",
+           convention["DWELL_TYPE"] == M.DWELL_TYPE_PHYSICAL_TIME == "PHYSICAL_TIME",
+           convention["DWELL_TYPE"])
+    _check(checks, "res82_k_d_is_integer_ratio",
+           "integer" in convention["K_D_derivation"].lower()
+           and "ceil(D/dt) on floating values is prohibited" in convention["K_D_derivation"],
+           convention["K_D_derivation"])
+    _check(checks, "res82_boundary_inclusivity",
+           convention["CONFIRMATION_SAMPLE"] == "i + K_D"
+           and convention["boundary_inclusivity"] ==
+           "predicate true at every sample from i through i+K_D inclusive",
+           convention["boundary_inclusivity"])
+    _check(checks, "res82_retires_inclusive_sample_count_and_early_allowance",
+           any("sample-inclusive count" in entry for entry in res82["retired_erroneous_conventions"])
+           and any("floating accumulated" in entry for entry in res82["retired_erroneous_conventions"]),
+           res82["retired_erroneous_conventions"])
+    _check(checks, "res95_em06_flight_dwell_050s",
+           em06["value"].startswith("starting from the candidate TAKEOFF_OCCURRENCE")
+           and "0.050 s" in em06["value"],
+           em06["value"])
+    _check(checks, "res95_em10_comparator_10n_10ms_diagnostic_only",
+           "0.010 s" in em10["value"] and "comparator/diagnostic only" in em10["value"],
+           em10["value"])
+
+    # --- one shared primitive ------------------------------------------------
+    source = MEASUREMENT_SRC.read_text()
+    _check(checks, "shared_primitive_defined", "def physical_time_dwell(" in source)
+    _check(checks, "comparator_routes_through_shared_primitive",
+           _dwell_primitive_calls(source, "force_takeoff_comparator"))
+    _check(checks, "confirmation_routes_through_shared_primitive",
+           _dwell_primitive_calls(source, "confirm_takeoff"))
+    _check(checks, "primitive_uses_integer_nanosecond_authority",
+           "limit_denominator(NANOSECONDS_PER_SECOND)" in source
+           and "NANOSECONDS_PER_SECOND = 1_000_000_000" in source)
+
+    # --- comparator boundaries at 500 Hz (D = 0.010 s) -----------------------
+    c4, c4_frames, c4_onset = _comparator_probe(M.NATIVE_DT_S, M.COMPARATOR_DWELL_S, 4)
+    c5, c5_frames, c5_onset = _comparator_probe(M.NATIVE_DT_S, M.COMPARATOR_DWELL_S, 5)
+    c6, c6_frames, c6_onset = _comparator_probe(M.NATIVE_DT_S, M.COMPARATOR_DWELL_S, 6)
+    _check(checks, "comparator_500hz_k_d_5_intervals_6_samples",
+           c6.k_d == 5 and c6.required_true_samples == 6)
+    _check(checks, "comparator_500hz_4_true_samples_reject",
+           c4.triggered is False and c4.status == "NOT_TRIGGERED")
+    _check(checks, "comparator_500hz_5_true_samples_reject",
+           c5.triggered is False and c5.status == "NOT_TRIGGERED")
+    _check(checks, "comparator_500hz_6_true_samples_accept",
+           c6.triggered is True and c6.confirmation_time_s == c6.onset_time_s + 5 * M.NATIVE_DT_S
+           and c6.elapsed_duration_s == 0.010,
+           {"onset_s": c6.onset_time_s, "confirmation_s": c6.confirmation_time_s,
+            "elapsed_s": c6.elapsed_duration_s})
+    _check(checks, "comparator_500hz_first_to_last_boundary_times",
+           _below_threshold_run_length(c4_frames, c4_onset) == 4
+           and _below_threshold_run_length(c5_frames, c5_onset) == 5
+           and _below_threshold_run_length(c6_frames, c6_onset) == 6
+           and abs((_below_threshold_run_length(c5_frames, c5_onset) - 1) * M.NATIVE_DT_S - 0.008) < 1e-15
+           and abs((_below_threshold_run_length(c6_frames, c6_onset) - 1) * M.NATIVE_DT_S - 0.010) < 1e-15,
+           {"4_samples_first_to_last_s": 3 * M.NATIVE_DT_S,
+            "5_samples_first_to_last_s": 4 * M.NATIVE_DT_S,
+            "6_samples_first_to_last_s": 5 * M.NATIVE_DT_S})
+
+    # --- flight boundaries at 500 Hz (D = 0.050 s) ----------------------------
+    eligible, onset_index = _flight_probe(M.NATIVE_DT_S, M.TAKEOFF_DWELL_S, 26)
+    short, _ = _flight_probe(M.NATIVE_DT_S, M.TAKEOFF_DWELL_S, 25)
+    _check(checks, "flight_500hz_k_d_25_intervals_26_samples",
+           eligible.dwell is not None and eligible.dwell.k_d == 25
+           and eligible.dwell.confirmation_intervals == 25,
+           _dwell_record(eligible.dwell))
+    _check(checks, "flight_500hz_exactly_k_d_intervals_eligible",
+           eligible.confirmed is True
+           and eligible.confirmation_sample == onset_index + 25
+           and eligible.confirmation_elapsed_s == 0.050,
+           {"confirmation_sample": eligible.confirmation_sample,
+            "confirmation_time_s": eligible.confirmation_time_s,
+            "elapsed_s": eligible.confirmation_elapsed_s})
+    _check(checks, "flight_500hz_k_d_minus_1_intervals_reject",
+           short.confirmed is False and short.dwell is not None
+           and short.dwell.reason == M.DWELL_REJECT_COVERAGE,
+           {"reason": None if short.dwell is None else short.dwell.reason,
+            "failed": list(short.failed_checks)})
+
+    # --- timestep parameterization (dt = 0.002 / 0.001 / 0.0005) --------------
+    timestep_rows: dict[str, Any] = {}
+    for dt in (0.002, 0.001, 0.0005):
+        expected_k_d = round(M.COMPARATOR_DWELL_S / dt)
+        comparator_ok, _, _ = _comparator_probe(dt, M.COMPARATOR_DWELL_S, expected_k_d + 1)
+        expected_flight_k_d = round(M.TAKEOFF_DWELL_S / dt)
+        flight_ok, flight_onset = _flight_probe(dt, M.TAKEOFF_DWELL_S, expected_flight_k_d + 1)
+        flight_short, _ = _flight_probe(dt, M.TAKEOFF_DWELL_S, expected_flight_k_d)
+        primitive_ok = _dwell_probe(dt, M.COMPARATOR_DWELL_S, expected_k_d + 1)
+        primitive_short = _dwell_probe(dt, M.COMPARATOR_DWELL_S, expected_k_d)
+        row = {
+            "dt_s": dt,
+            "comparator": {
+                "K_D": comparator_ok.k_d,
+                "required_true_samples": comparator_ok.required_true_samples,
+                "confirmation_intervals": comparator_ok.dwell.confirmation_intervals
+                if comparator_ok.dwell else None,
+                "elapsed_duration_s": comparator_ok.elapsed_duration_s,
+                "triggered": comparator_ok.triggered,
+            },
+            "flight": {
+                "K_D": flight_ok.dwell.k_d if flight_ok.dwell else None,
+                "confirmation_intervals": flight_ok.dwell.confirmation_intervals
+                if flight_ok.dwell else None,
+                "confirmation_sample": flight_ok.confirmation_sample,
+                "elapsed_duration_s": flight_ok.confirmation_elapsed_s,
+                "confirmed": flight_ok.confirmed,
+                "k_d_minus_1_reason": None if flight_short.dwell is None else flight_short.dwell.reason,
+            },
+            "primitive": {
+                "k_d_intervals_confirmed": primitive_ok.confirmed,
+                "k_d_intervals_elapsed_s": primitive_ok.elapsed_duration_s,
+                "k_d_minus_1_reason": primitive_short.reason,
+            },
+        }
+        timestep_rows[f"{dt:.4f}"] = row
+        _check(checks, f"dt_{dt:.4f}_comparator_k_d_exact",
+               comparator_ok.triggered is True and comparator_ok.k_d == expected_k_d
+               and comparator_ok.required_true_samples == expected_k_d + 1
+               and comparator_ok.dwell is not None
+               and comparator_ok.dwell.confirmation_intervals == expected_k_d
+               and comparator_ok.elapsed_duration_s == M.COMPARATOR_DWELL_S,
+               row["comparator"])
+        _check(checks, f"dt_{dt:.4f}_flight_k_d_exact",
+               flight_ok.confirmed is True
+               and flight_ok.dwell is not None and flight_ok.dwell.k_d == round(M.TAKEOFF_DWELL_S / dt)
+               and flight_ok.dwell.confirmation_intervals == round(M.TAKEOFF_DWELL_S / dt)
+               and flight_ok.confirmation_elapsed_s == M.TAKEOFF_DWELL_S,
+               row["flight"])
+        _check(checks, f"dt_{dt:.4f}_k_d_minus_1_rejected",
+               comparator_ok.k_d == expected_k_d and primitive_short.confirmed is False
+               and flight_short.confirmed is False)
+        _check(checks, f"dt_{dt:.4f}_primitive_elapsed_authority",
+               primitive_ok.confirmed is True
+               and primitive_ok.elapsed_duration_s == M.COMPARATOR_DWELL_S)
+
+    # --- off-grid interpolated occurrence regression --------------------------
+    plant, data, frames = ballistic_hop_stream()
+    occurrence = M.detect_takeoff_occurrence(frames)
+    t_star = 0.0273
+    offgrid = dataclasses.replace(occurrence, occurrence_time_s=t_star,
+                                  interpolated=True, bracket_weight=0.65)
+    confirmation = M.confirm_takeoff(frames, offgrid)
+    required_end = t_star + M.TAKEOFF_DWELL_S
+    first_index = next(j for j in range(offgrid.native_index, len(frames))
+                       if frames[j].time_s >= required_end)
+    last_index_before = max(j for j in range(len(frames)) if frames[j].time_s < required_end)
+    _check(checks, "offgrid_confirmation_is_first_sample_at_or_after_required_end",
+           confirmation.confirmation_sample == first_index
+           and confirmation.confirmation_sample != last_index_before,
+           {"t_star_s": t_star, "required_end_s": required_end,
+            "first_index": first_index,
+            "last_index_before": last_index_before,
+            "confirmation_sample": confirmation.confirmation_sample})
+    _check(checks, "offgrid_elapsed_physical_time_ge_050s",
+           confirmation.confirmation_elapsed_s is not None
+           and confirmation.confirmation_elapsed_s >= M.TAKEOFF_DWELL_S,
+           confirmation.confirmation_elapsed_s)
+    _check(checks, "offgrid_sustain_predicate_through_confirmation",
+           confirmation.dwell is not None and confirmation.dwell.confirmed
+           and confirmation.dwell.true_sample_count
+           >= confirmation.confirmation_sample - offgrid.native_index + 1)
+    _check(checks, "offgrid_intervals_at_least_k_d",
+           confirmation.dwell is not None and confirmation.dwell.k_d == 25
+           and confirmation.dwell.confirmation_intervals >= 25)
+
+    # --- negative controls ------------------------------------------------------
+    k_d = 5
+    gap = _dwell_probe(M.NATIVE_DT_S, M.COMPARATOR_DWELL_S, k_d)
+    _check(checks, "negative_single_false_sample_at_final_required_sample",
+           gap.confirmed is False and gap.reason == M.DWELL_REJECT_SUSTAIN,
+           {"reason": gap.reason, "true_sample_count": gap.true_sample_count})
+    truncated = _dwell_probe(M.NATIVE_DT_S, M.COMPARATOR_DWELL_S, k_d, n_total=k_d)
+    _check(checks, "negative_stream_ends_one_sample_before_confirmation",
+           truncated.confirmed is False and truncated.reason == M.DWELL_REJECT_COVERAGE
+           and truncated.confirmation_index is None,
+           {"reason": truncated.reason, "n_samples": k_d})
+    recontact_at_confirmation = list(frames[: confirmation.confirmation_sample + 1])
+    if recontact_at_confirmation:
+        idx = confirmation.confirmation_sample
+        recontact_at_confirmation[idx] = dataclasses.replace(
+            recontact_at_confirmation[idx], legal_plantar_active=2, legal_plantar_detected=2)
+    conf_recontact = M.confirm_takeoff(recontact_at_confirmation, occurrence)
+    _check(checks, "negative_recontact_exactly_at_confirmation_sample",
+           conf_recontact.confirmed is False
+           and "no_legal_plantar_recontact" in conf_recontact.failed_checks,
+           {"confirmation_sample": confirmation.confirmation_sample,
+            "failed": list(conf_recontact.failed_checks)})
+    prohibited_at_confirmation = list(frames[: confirmation.confirmation_sample + 1])
+    if prohibited_at_confirmation:
+        idx = confirmation.confirmation_sample
+        prohibited_at_confirmation[idx] = dataclasses.replace(
+            prohibited_at_confirmation[idx], prohibited_detected=1, prohibited_active=1,
+            nonplantar_floor_active=1)
+    conf_prohibited = M.confirm_takeoff(prohibited_at_confirmation, occurrence)
+    _check(checks, "negative_prohibited_contact_exactly_at_confirmation_sample",
+           conf_prohibited.confirmed is False
+           and "no_prohibited_contact" in conf_prohibited.failed_checks,
+           {"confirmation_sample": confirmation.confirmation_sample,
+            "failed": list(conf_prohibited.failed_checks)})
+
+    # --- real trace requalification (recomputed, never hard-coded) -------------
+    flags = [M.bilateral_per_foot_below_threshold(f.left_foot_force_world_n[2],
+                                                  f.right_foot_force_world_n[2])
+             for f in frames]
+    comparator_onset_index = next(j for j, below in enumerate(flags) if below)
+    comparator = M.force_takeoff_comparator(frames, occurrence)
+    _check(checks, "real_hop_comparator_onset_recomputed",
+           comparator.onset_time_s == frames[comparator_onset_index].time_s
+           and comparator.onset_offset_s == comparator.onset_time_s - occurrence.occurrence_time_s,
+           {"onset_index": comparator_onset_index, "onset_time_s": comparator.onset_time_s})
+    _check(checks, "real_hop_comparator_confirmation_recomputed",
+           comparator.confirmation_time_s == frames[comparator_onset_index + 5].time_s
+           and comparator.confirmation_offset_s == comparator.confirmation_time_s - occurrence.occurrence_time_s
+           and comparator.elapsed_duration_s == 0.010,
+           {"confirmation_index": comparator_onset_index + 5,
+            "confirmation_time_s": comparator.confirmation_time_s,
+            "confirmation_offset_s": comparator.confirmation_offset_s})
+    real_confirmation = M.confirm_takeoff(frames, occurrence)
+    real_j = next(j for j in range(occurrence.native_index, len(frames))
+                  if frames[j].time_s >= occurrence.occurrence_time_s + M.TAKEOFF_DWELL_S)
+    _check(checks, "real_hop_confirmation_sample_recomputed",
+           real_confirmation.confirmation_sample == real_j
+           and real_confirmation.confirmation_time_s == frames[real_j].time_s
+           and real_confirmation.confirmation_elapsed_s
+           == frames[real_j].time_s - occurrence.occurrence_time_s,
+           {"confirmation_sample": real_confirmation.confirmation_sample,
+            "confirmation_time_s": real_confirmation.confirmation_time_s,
+            "confirmation_elapsed_s": real_confirmation.confirmation_elapsed_s})
+    _check(checks, "real_hop_confirmation_elapsed_ge_050s",
+           real_confirmation.confirmation_elapsed_s >= M.TAKEOFF_DWELL_S
+           and real_confirmation.confirmed,
+           real_confirmation.confirmation_elapsed_s)
+    _check(checks, "plant_xml_sha256_unchanged",
+           sha256_file(PLANT_XML)
+           == "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+           sha256_file(PLANT_XML))
+
+    return {
+        "schema_version": "1.0.0",
+        "artifact": "PHYSICAL_TIME_DWELL_AUDIT",
+        "authority_id": M.V3_MEASUREMENT_AUTHORITY_ID,
+        "controlling_authority": {
+            "res82": "audit/EXP-RES82-SUCCESSOR-SCIENTIFIC-TASK-CONTRACT-001/DWELL_SEMANTICS.json",
+            "res95": "audit/EXP-RES95-ELITE-SOCCER-PLANT-MODEL-AUTHORITY-001/EVENT_MEASUREMENT_BOUNDARY.json",
+            "dwell_type": M.DWELL_TYPE_PHYSICAL_TIME,
+        },
+        "semantics": {
+            "k_d": "K_D = ceil(D / dt), integer-nanosecond authority (Fraction.limit_denominator(1e9))",
+            "required_samples": "K_D intervals and K_D + 1 consecutive true samples",
+            "boundary_inclusivity": "predicate true at every sample from onset i through i+K_D inclusive",
+            "comparison": "elapsed_ns >= required_ns; floating elapsed is reporting only",
+            "off_grid_onset": "confirmation sample is the FIRST native sample with t >= onset_time + D",
+            "retired": ["inclusive sample count >= K_D", "t_end - dt early allowance",
+                        "floating accumulated dwell as primary authority"],
+        },
+        "shared_primitive": {
+            "function": "physical_time_dwell",
+            "module": "src/loaded_cmj/v3/measurement.py",
+            "used_by": ["force_takeoff_comparator", "confirm_takeoff"],
+            "reported_fields": ["onset_index", "onset_time_s", "confirmation_index", "confirmation_time_s",
+                                "required_duration_s", "elapsed_duration_s", "k_d", "true_sample_count",
+                                "confirmed"],
+        },
+        "comparator_boundaries_500hz": {
+            "dt_s": M.NATIVE_DT_S,
+            "required_duration_s": M.COMPARATOR_DWELL_S,
+            "K_D": c6.k_d,
+            "required_true_samples": c6.required_true_samples,
+            "4_true_samples": {"status": c4.status, "first_to_last_elapsed_s": 3 * M.NATIVE_DT_S},
+            "5_true_samples": {"status": c5.status, "first_to_last_elapsed_s": 4 * M.NATIVE_DT_S},
+            "6_true_samples": {"status": c6.status, "onset_time_s": c6.onset_time_s,
+                               "confirmation_time_s": c6.confirmation_time_s,
+                               "first_to_last_elapsed_s": 5 * M.NATIVE_DT_S,
+                               "elapsed_duration_s": c6.elapsed_duration_s},
+        },
+        "flight_boundaries_500hz": {
+            "dt_s": M.NATIVE_DT_S,
+            "required_duration_s": M.TAKEOFF_DWELL_S,
+            "exactly_k_d_intervals": {
+                "confirmation_sample": eligible.confirmation_sample,
+                "confirmation_time_s": eligible.confirmation_time_s,
+                "confirmation_elapsed_s": eligible.confirmation_elapsed_s,
+                "confirmed": eligible.confirmed,
+                "dwell": _dwell_record(eligible.dwell),
+            },
+            "k_d_minus_1_intervals": {
+                "confirmed": short.confirmed,
+                "reason": None if short.dwell is None else short.dwell.reason,
+                "latest_sample_s": (onset_index + 25 - 1) * M.NATIVE_DT_S,
+                "required_end_s": (onset_index + 25) * M.NATIVE_DT_S,
+            },
+        },
+        "timestep_parameterization": timestep_rows,
+        "offgrid_occurrence": {
+            "occurrence_time_s": t_star,
+            "required_end_s": required_end,
+            "confirmation_sample": confirmation.confirmation_sample,
+            "last_sample_before_required_end": last_index_before,
+            "confirmation_time_s": confirmation.confirmation_time_s,
+            "confirmation_elapsed_s": confirmation.confirmation_elapsed_s,
+            "confirmed": confirmation.confirmed,
+            "dwell": _dwell_record(confirmation.dwell),
+        },
+        "real_hop": {
+            "occurrence_time_s": occurrence.occurrence_time_s,
+            "occurrence_native_index": occurrence.native_index,
+            "comparator_onset_index": comparator_onset_index,
+            "comparator_onset_time_s": comparator.onset_time_s,
+            "comparator_confirmation_time_s": comparator.confirmation_time_s,
+            "comparator_onset_offset_s": comparator.onset_offset_s,
+            "comparator_confirmation_offset_s": comparator.confirmation_offset_s,
+            "TAKEOFF_CONFIRMATION_SAMPLE": real_confirmation.confirmation_sample,
+            "TAKEOFF_CONFIRMATION_TIME": real_confirmation.confirmation_time_s,
+            "TAKEOFF_CONFIRMATION_ELAPSED_S": real_confirmation.confirmation_elapsed_s,
+            "confirmed": real_confirmation.confirmed,
         },
         "checks": checks,
         "status": _status(checks),
@@ -2328,6 +3045,9 @@ RED_TEAM_PATTERNS = {
     "clearance_shifts_takeoff": "t_star = clearance",
     "ten_newton_defines_takeoff": "occurrence_time_s = comparator",
     "comparator_uses_total_force_substitute": "abs(f.total_floor_force_world_n[2]) < threshold_n",
+    "float_ceil_dwell_authority": "ceil(dwell_s / dt",
+    "dwell_early_coverage_allowance": "t_end - dt",
+    "dwell_inclusive_sample_count": "end - start < k_d",
     "sampling_1khz_dt_le_bug": "dt_s <= REQUIRED_CANDIDATE_MAX_DT_S",
     "500hz_mislabeled_native_1000hz": "NATIVE_FREQUENCY_HZ = 1000",
     "hidden_filtering": "scipy.signal",
@@ -2389,6 +3109,11 @@ def authority_conformance_matrix() -> dict[str, Any]:
          "evidence": "FORCE_THRESHOLD_COMPARATOR_AUDIT", "status": "PASS"},
         {"requirement": "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS", "evidence": "FORCE_THRESHOLD_COMPARATOR_AUDIT",
          "status": "PASS"},
+        {"requirement": "RES-82 PHYSICAL_TIME dwell: K_D intervals / K_D + 1 true samples, integer-nanosecond "
+                        "authority, no early allowance",
+         "evidence": "PHYSICAL_TIME_DWELL_AUDIT", "status": "PASS"},
+        {"requirement": "one shared dwell primitive used by force_takeoff_comparator and confirm_takeoff",
+         "evidence": "PHYSICAL_TIME_DWELL_AUDIT", "status": "PASS"},
         {"requirement": "apex/H2 support in confirmed flight", "evidence": "APEX_H2_MEASUREMENT_AUDIT",
          "status": "PASS"},
         {"requirement": "native 500 Hz vs canonical 1000 Hz separation", "evidence": "SAMPLING_RESAMPLING_AUTHORITY",
@@ -2410,16 +3135,19 @@ def authority_conformance_matrix() -> dict[str, Any]:
         {"requirement": "force <-> COM consistency", "evidence": "FORCE_COM_CONSISTENCY_AUDIT",
          "status": "PASS"},
     ]
-    _check(checks, "conformance_rows_complete", len(conformance) == 22, len(conformance))
+    _check(checks, "conformance_rows_complete", len(conformance) == 24, len(conformance))
 
-    # explicit frozen assertions (RES-84A errata)
+    # explicit frozen assertions (RES-84A errata + RES-84 physical-time dwell correction)
     frozen_assertions = {
         "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS": "PASS",
         "SAMPLING_FAIL_CLOSED_1000HZ_CANONICAL": "PASS",
+        "RES82_PHYSICAL_TIME_DWELL_SEMANTICS": "PASS",
         "MUJOCO_CONTACT_SEMANTICS_VERSION": M.MUJOCO_CONTACT_SEMANTICS_VERSION,
     }
     _check(checks, "res95_em10_assertion_pass",
            frozen_assertions["RES95_EM10_PER_FOOT_BILATERAL_10N_10MS"] == "PASS")
+    _check(checks, "res82_physical_time_dwell_assertion_pass",
+           frozen_assertions["RES82_PHYSICAL_TIME_DWELL_SEMANTICS"] == "PASS")
     _check(checks, "comparator_per_foot_predicate_frozen",
            "LEFT_FOOT_FZ" in M.COMPARATOR_PREDICATE and "RIGHT_FOOT_FZ" in M.COMPARATOR_PREDICATE)
     _check(checks, "mujoco_contact_semantics_version_recorded",
@@ -2453,6 +3181,7 @@ AUDIT_BUILDERS = {
     "TAKEOFF_OCCURRENCE_CONFIRMATION_AUDIT.json": takeoff_occurrence_confirmation_audit,
     "CLEARANCE_GUARD_AUDIT.json": clearance_guard_audit,
     "FORCE_THRESHOLD_COMPARATOR_AUDIT.json": force_threshold_comparator_audit,
+    "PHYSICAL_TIME_DWELL_AUDIT.json": physical_time_dwell_audit,
     "APEX_H2_MEASUREMENT_AUDIT.json": apex_h2_measurement_audit,
     "SAMPLING_RESAMPLING_AUTHORITY.json": sampling_resampling_authority,
     "SIGNAL_PROCESSING_AUTHORITY.json": signal_processing_authority,

@@ -94,6 +94,10 @@ def test_authority_constants_frozen():
     assert M.CANONICAL_DOWNSAMPLING_STATUS == "DOWNSAMPLING_NOT_AUTHORIZED"
     assert M.REQUIRED_CANDIDATE_MAX_DT_S <= 0.001
     assert M.DOWN_SAMPLING_AUTHORIZED is False
+    assert M.DWELL_TYPE_PHYSICAL_TIME == "PHYSICAL_TIME"
+    assert M.NANOSECONDS_PER_SECOND == 1_000_000_000
+    assert M.DWELL_REJECT_COVERAGE == "REJECT_DWELL_COVERAGE"
+    assert M.DWELL_REJECT_SUSTAIN == "REJECT_SUSTAIN_GAP"
 
 
 def test_mujoco_contact_semantics_version_boundary():
@@ -446,6 +450,20 @@ def test_takeoff_occurrence_confirmation_audit(audits):
     assert hop["occurrence"]["valid"] is True
     assert hop["confirmation"]["confirmed"] is True
     assert hop["occurrence"]["interpolated"] in (True, False)
+    assert hop["confirmation"]["TAKEOFF_CONFIRMATION_SAMPLE"] == 39
+    assert hop["confirmation"]["TAKEOFF_CONFIRMATION_TIME"] == 0.078
+    assert hop["confirmation"]["TAKEOFF_CONFIRMATION_ELAPSED_S"] == 0.050
+    assert hop["confirmation"]["required_end_time_s"] == 0.078
+    offgrid = report["offgrid_occurrence_regression"]
+    assert offgrid["confirmed"] is True
+    assert offgrid["confirmation_sample"] == 39
+    assert offgrid["not_the_last_sample_before_required_end"] is True
+    truncated = report["truncated_stream_control"]
+    assert truncated["confirmed"] is False
+    assert truncated["reason"] == "REJECT_DWELL_COVERAGE"
+    controls = report["negative_controls"]
+    assert controls["final_sample_sustain_gap"]["reason"] == "REJECT_SUSTAIN_GAP"
+    assert controls["prohibited_at_confirmation_sample"]["confirmed"] is False
 
 
 def test_takeoff_occurrence_is_support_to_zero_transition():
@@ -479,7 +497,10 @@ def test_takeoff_confirmation_is_fail_closed_on_recontact():
     # recontact inside the dwell window must reject, never shift
     import dataclasses
     synthetic = list(frames[: occurrence.native_index + 5])
-    synthetic.append(dataclasses.replace(synthetic[-1], legal_plantar_active=2, legal_plantar_detected=2))
+    next_index = synthetic[-1].index + 1
+    synthetic.append(dataclasses.replace(
+        synthetic[-1], index=next_index, time_s=next_index * M.NATIVE_DT_S,
+        legal_plantar_active=2, legal_plantar_detected=2))
     rejected = M.confirm_takeoff(synthetic, occurrence)
     assert not rejected.confirmed
     assert "no_legal_plantar_recontact" in rejected.failed_checks
@@ -568,19 +589,40 @@ def test_per_foot_comparator_regression_cases():
     assert c_result.comparator_time_s is None
     assert "non-plantar" in c_result.invalidation_reason
 
-    # D: bilateral < 10 N for less than 10 ms -> FALSE
+    # D: 4 true samples (first-to-last 0.006 s) -> FALSE
     d_result = M.force_takeoff_comparator(
         [synth(i, 3.0, 3.0) if 4 <= i <= 7 else synth(i, 400.0, 400.0) for i in range(20)], occurrence)
     assert d_result.status == "NOT_TRIGGERED"
     assert d_result.triggered is False
     assert d_result.invalid is False
 
-    # E: bilateral < 10 N for >= 10 ms -> TRUE
+    # E: exactly K_D = 5 intervals / 6 true samples (elapsed 0.010 s) -> TRUE
+    # confirmed at the confirmation sample (onset + K_D), not at the onset
     e_result = M.force_takeoff_comparator(
         [synth(i, 3.0, 3.0) if 4 <= i <= 9 else synth(i, 400.0, 400.0) for i in range(20)], occurrence)
     assert e_result.status == "TRIGGERED"
     assert e_result.triggered is True
     assert e_result.invalid is False
+    assert e_result.k_d == 5
+    assert e_result.required_true_samples == 6
+    assert e_result.onset_time_s == 4 * M.NATIVE_DT_S
+    assert abs(e_result.comparator_time_s - 9 * M.NATIVE_DT_S) < 1e-15
+    assert e_result.elapsed_duration_s == 0.010
+    assert e_result.confirmation_time_s > e_result.onset_time_s
+    assert e_result.onset_offset_s is not None and e_result.confirmation_offset_s is not None
+    assert e_result.onset_offset_s != e_result.confirmation_offset_s
+
+    # F: K_D - 1 = 4 intervals / 5 true samples (elapsed 0.008 s) -> FALSE
+    f_result = M.force_takeoff_comparator(
+        [synth(i, 3.0, 3.0) if 4 <= i <= 8 else synth(i, 400.0, 400.0) for i in range(20)], occurrence)
+    assert f_result.status == "NOT_TRIGGERED"
+    assert f_result.triggered is False
+
+    # single false sample at the final required sample resets the run
+    gap_result = M.force_takeoff_comparator(
+        [synth(i, 3.0, 3.0) if 4 <= i <= 8 else synth(i, 400.0, 400.0) for i in range(20)], occurrence)
+    assert gap_result.status == "NOT_TRIGGERED"
+    assert gap_result.k_d == 5 and gap_result.required_true_samples == 6
 
 
 def test_comparator_offset_reported():
@@ -593,6 +635,13 @@ def test_comparator_offset_reported():
     assert comparator.left_fz_at_trigger_n < M.COMPARATOR_FORCE_N
     assert comparator.right_fz_at_trigger_n < M.COMPARATOR_FORCE_N
     assert comparator.total_fz_at_trigger_n is not None
+    assert comparator.offset_s == comparator.confirmation_offset_s
+    assert comparator.onset_time_s == 0.024
+    assert abs(comparator.onset_offset_s + 0.004) < 1e-15
+    assert comparator.confirmation_time_s == 0.034
+    assert abs(comparator.confirmation_offset_s - 0.006) < 1e-15
+    assert comparator.k_d == 5 and comparator.required_true_samples == 6
+    assert comparator.elapsed_duration_s == 0.010
 
 
 def test_comparator_never_shifts_occurrence():
@@ -602,6 +651,153 @@ def test_comparator_never_shifts_occurrence():
     M.force_takeoff_comparator(frames, occurrence)
     after = M.detect_takeoff_occurrence(frames).occurrence_time_s
     assert before == after
+
+
+# ---------------------------------------------------------------------------
+# PHYSICAL_TIME dwell semantics (RES-82 DWELL_SEMANTICS closure)
+# ---------------------------------------------------------------------------
+def test_physical_time_dwell_audit(audits):
+    report = _report(audits, "PHYSICAL_TIME_DWELL_AUDIT.json")
+    assert report["status"] == "PASS", _failed(report)
+    assert report["authority_id"] == M.V3_MEASUREMENT_AUTHORITY_ID
+    assert report["semantics"]["k_d"].startswith("K_D = ceil(D / dt)")
+    assert "first" in report["semantics"]["off_grid_onset"].lower()
+    assert report["shared_primitive"]["used_by"] == ["force_takeoff_comparator", "confirm_takeoff"]
+    boundaries = report["comparator_boundaries_500hz"]
+    assert boundaries["K_D"] == 5 and boundaries["required_true_samples"] == 6
+    assert boundaries["4_true_samples"]["status"] == "NOT_TRIGGERED"
+    assert boundaries["5_true_samples"]["status"] == "NOT_TRIGGERED"
+    assert boundaries["6_true_samples"]["status"] == "TRIGGERED"
+    assert boundaries["6_true_samples"]["first_to_last_elapsed_s"] == 0.010
+    flight = report["flight_boundaries_500hz"]
+    assert flight["exactly_k_d_intervals"]["confirmed"] is True
+    assert flight["exactly_k_d_intervals"]["confirmation_elapsed_s"] == 0.050
+    assert flight["k_d_minus_1_intervals"]["confirmed"] is False
+    assert flight["k_d_minus_1_intervals"]["reason"] == M.DWELL_REJECT_COVERAGE
+
+
+def test_physical_time_dwell_primitive_k_d_intervals():
+    """K_D intervals and K_D + 1 true samples confirm; K_D samples do not."""
+    for dt, k_d in ((0.002, 5), (0.001, 10), (0.0005, 20)):
+        times = [j * dt for j in range(k_d + 3)]
+        exact = M.physical_time_dwell(
+            times, [j <= k_d for j in range(len(times))],
+            onset_index=0, onset_time_s=0.0, required_duration_s=0.010, dt_s=dt)
+        assert exact.dwell_type == M.DWELL_TYPE_PHYSICAL_TIME
+        assert exact.k_d == k_d
+        assert exact.confirmation_index == k_d
+        assert exact.confirmation_intervals == k_d
+        assert exact.true_sample_count == k_d + 1
+        assert exact.elapsed_duration_s == 0.010
+        assert exact.confirmed is True
+        short = M.physical_time_dwell(
+            times[: k_d + 1], [True] * k_d + [False],
+            onset_index=0, onset_time_s=0.0, required_duration_s=0.010, dt_s=dt)
+        assert short.confirmed is False
+        assert short.reason == M.DWELL_REJECT_SUSTAIN
+
+
+def test_physical_time_dwell_flight_boundaries_all_timesteps():
+    """Flight dwell 0.050 s: exact K_D intervals eligible, K_D - 1 reject."""
+    for dt, k_d in ((0.002, 25), (0.001, 50), (0.0005, 100)):
+        onset = 10
+        frames = [
+            dataclasses.replace(
+                B.launch_flight_stream()[2][0], index=i, time_s=i * dt,
+                legal_plantar_active=2 if i < onset else 0,
+                legal_plantar_detected=2 if i < onset else 0,
+                left_clearance_m=1e-4 if i < onset else 5e-3,
+                right_clearance_m=1e-4 if i < onset else 5e-3)
+            for i in range(onset + k_d + 1)
+        ]
+        occurrence = M.V3TakeoffOccurrence(
+            valid=True, occurrence_time_s=onset * dt, native_index=onset, last_support_index=onset - 1,
+            bracket_weight=1.0, interpolated=False,
+            com_world_m=(0.0, 0.0, 1.0), com_velocity_world_m_s=(0.0, 0.0, 1.0),
+            left_clearance_m=1e-4, right_clearance_m=1e-4, legal_plantar_normal_force_n=0.0,
+            total_floor_force_world_n=(0.0, 0.0, 0.0), support_mode_before="BILATERAL",
+            prohibited_detected_at_bracket=0, reason="")
+        confirmed = M.confirm_takeoff(frames, occurrence, dt_s=dt)
+        assert confirmed.confirmed is True
+        assert confirmed.confirmation_sample == onset + k_d
+        assert confirmed.confirmation_elapsed_s == 0.050
+        assert confirmed.dwell.k_d == k_d
+        short = M.confirm_takeoff(frames[:-1], occurrence, dt_s=dt)
+        assert short.confirmed is False
+        assert short.dwell.reason == M.DWELL_REJECT_COVERAGE
+
+
+def test_confirm_takeoff_offgrid_occurrence():
+    """t* = 0.0273 s off the 2 ms grid: first sample >= 0.0773 confirms."""
+    plant, data, frames = B.launch_flight_stream()
+    occurrence = M.detect_takeoff_occurrence(frames)
+    offgrid = dataclasses.replace(occurrence, occurrence_time_s=0.0273,
+                                  interpolated=True, bracket_weight=0.65)
+    confirmation = M.confirm_takeoff(frames, offgrid)
+    assert confirmation.confirmed
+    assert confirmation.confirmation_sample == 39
+    assert frames[38].time_s < 0.0773 <= frames[39].time_s
+    assert abs(confirmation.confirmation_elapsed_s - 0.0507) < 1e-15
+    assert confirmation.confirmation_elapsed_s >= M.TAKEOFF_DWELL_S
+    assert confirmation.dwell.confirmation_intervals >= 25
+
+
+def test_confirm_takeoff_truncated_stream_rejects_early_allowance():
+    """A stream ending at 0.076 s must never confirm a 0.078 s requirement."""
+    plant, data, frames = B.launch_flight_stream()
+    occurrence = M.detect_takeoff_occurrence(frames)
+    truncated = frames[:39]
+    assert truncated[-1].time_s == 0.076
+    confirmation = M.confirm_takeoff(truncated, occurrence)
+    assert confirmation.confirmed is False
+    assert confirmation.dwell.reason == M.DWELL_REJECT_COVERAGE
+    assert confirmation.confirmation_sample is None
+    assert confirmation.window_end_time_s is None
+    assert "dwell_coverage" in confirmation.failed_checks
+
+
+def test_confirm_takeoff_recontact_at_confirmation_sample():
+    plant, data, frames = B.launch_flight_stream()
+    occurrence = M.detect_takeoff_occurrence(frames)
+    reference = M.confirm_takeoff(frames, occurrence)
+    j = reference.confirmation_sample
+    probe = list(frames[: j + 1])
+    probe[j] = dataclasses.replace(probe[j], legal_plantar_active=2, legal_plantar_detected=2)
+    rejected = M.confirm_takeoff(probe, occurrence)
+    assert rejected.confirmed is False
+    assert "no_legal_plantar_recontact" in rejected.failed_checks
+    assert rejected.occurrence.occurrence_time_s == occurrence.occurrence_time_s
+
+
+def test_confirm_takeoff_prohibited_at_confirmation_sample():
+    plant, data, frames = B.launch_flight_stream()
+    occurrence = M.detect_takeoff_occurrence(frames)
+    reference = M.confirm_takeoff(frames, occurrence)
+    j = reference.confirmation_sample
+    probe = list(frames[: j + 1])
+    probe[j] = dataclasses.replace(probe[j], prohibited_detected=1, prohibited_active=1,
+                                   nonplantar_floor_active=1)
+    rejected = M.confirm_takeoff(probe, occurrence)
+    assert rejected.confirmed is False
+    assert "no_prohibited_contact" in rejected.failed_checks
+
+
+def test_dwell_primitive_fails_closed_on_nonexact_grid():
+    with pytest.raises(M.V3DwellAuthorityError):
+        M.physical_time_dwell([0.0, 0.0021], [True, True], onset_index=0, onset_time_s=0.0,
+                              required_duration_s=0.010, dt_s=0.002)
+
+
+def test_confirm_takeoff_reports_confirmation_sample_time_elapsed():
+    plant, data, frames = B.launch_flight_stream()
+    occurrence = M.detect_takeoff_occurrence(frames)
+    confirmation = M.confirm_takeoff(frames, occurrence)
+    assert confirmation.confirmation_sample == 39
+    assert confirmation.confirmation_time_s == 0.078
+    assert confirmation.confirmation_elapsed_s == 0.050
+    assert confirmation.window_end_time_s == confirmation.confirmation_time_s
+    assert confirmation.dwell.required_duration_s == M.TAKEOFF_DWELL_S
+    assert confirmation.dwell.elapsed_duration_s >= confirmation.dwell.required_duration_s
 
 
 def test_apex_h2_audit(audits):
@@ -776,9 +972,10 @@ def test_authority_conformance_matrix(audits):
     report = _report(audits, "AUTHORITY_CONFORMANCE_MATRIX.json")
     assert report["status"] == "PASS", _failed(report)
     assert report["zero_unresolved_current_patterns"] is True
-    assert len(report["conformance"]) == 22
+    assert len(report["conformance"]) == 24
     assert report["frozen_assertions"]["RES95_EM10_PER_FOOT_BILATERAL_10N_10MS"] == "PASS"
     assert report["frozen_assertions"]["SAMPLING_FAIL_CLOSED_1000HZ_CANONICAL"] == "PASS"
+    assert report["frozen_assertions"]["RES82_PHYSICAL_TIME_DWELL_SEMANTICS"] == "PASS"
     assert report["frozen_assertions"]["MUJOCO_CONTACT_SEMANTICS_VERSION"] == "3.8.0"
 
 
@@ -791,7 +988,7 @@ def test_red_team_patterns_absent():
 def test_validation_report_all_gates_pass(audits):
     report = B.measurement_validation_report(audits)
     assert report["status"] == "PASS", report["failed_checks"]
-    assert report["artifact_count"] == 20
+    assert report["artifact_count"] == 21
     assert not report["failed_checks"]
 
 
@@ -811,7 +1008,8 @@ def test_evidence_artifacts_present():
                  "CONTACT_FORCE_FRAME_AUDIT.json", "GROUND_WRENCH_AUDIT.json", "SYSTEM_COM_AUDIT.json",
                  "COP_AUTHORITY_AUDIT.json", "ACTIVE_SUPPORT_HULL_AUDIT.json", "FOOT_CLEARANCE_AUDIT.json",
                  "TAKEOFF_OCCURRENCE_CONFIRMATION_AUDIT.json", "CLEARANCE_GUARD_AUDIT.json",
-                 "FORCE_THRESHOLD_COMPARATOR_AUDIT.json", "APEX_H2_MEASUREMENT_AUDIT.json",
+                 "FORCE_THRESHOLD_COMPARATOR_AUDIT.json", "PHYSICAL_TIME_DWELL_AUDIT.json",
+                 "APEX_H2_MEASUREMENT_AUDIT.json",
                  "SAMPLING_RESAMPLING_AUTHORITY.json", "SIGNAL_PROCESSING_AUTHORITY.json",
                  "ORIENTATION_AUDIT.json", "PROHIBITED_CONTACT_AUDIT.json", "CONTACT_PARAMETER_AUTHORITY.json",
                  "OUT_OF_PLANE_REACTION_AUDIT.json", "FORCE_COM_CONSISTENCY_AUDIT.json",
