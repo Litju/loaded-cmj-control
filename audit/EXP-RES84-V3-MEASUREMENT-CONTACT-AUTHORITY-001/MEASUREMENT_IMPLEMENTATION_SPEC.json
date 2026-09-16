@@ -2,13 +2,16 @@
   "schema_version": "1.0.0",
   "artifact": "MEASUREMENT_IMPLEMENTATION_SPEC",
   "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
-  "mission": "RES84_REBUILD_V3_MEASUREMENT_CONTACT_AUTHORITY_001",
+  "mission": "RES84A_CORRECT_DIAGNOSTIC_COMPARATOR_AND_SAMPLING_ERRATA_001",
+  "parent_mission": "RES84_REBUILD_V3_MEASUREMENT_CONTACT_AUTHORITY_001",
   "linear_issue": "RES-84",
   "model_id": "loaded-cmj-20kg-elite-soccer-v3",
-  "entry_head": "7f1917164d137a9d3852acfbf9ee045972871285",
-  "entry_tree": "84d5f14b5ecd6d08aaa307ecb05b75c4ab0937fb",
+  "entry_head": "0fdb4f3bd19dd12360c104f4a567467195980fbc",
+  "entry_tree": "ba008e925b83eeca68f02d7409ba34e35efcc2d1",
+  "original_res84_entry_head": "7f1917164d137a9d3852acfbf9ee045972871285",
+  "original_res84_entry_tree": "84d5f14b5ecd6d08aaa307ecb05b75c4ab0937fb",
   "module": "src/loaded_cmj/v3/measurement.py",
-  "module_sha256": "df5eba99ace8bf04b3a8c62ea3561c5d09f33911d7cfc93600cb26c2fb623b28",
+  "module_sha256": "37d1700e6e28df6ba0a75d5db67b50c17ab420d664ac38bf79c0a9326cd53255",
   "plant_xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
   "surface": {
     "contact_semantics": [
@@ -94,12 +97,22 @@
     "takeoff_dwell_s": 0.05,
     "comparator_force_n": 10.0,
     "comparator_dwell_s": 0.01,
+    "comparator_predicate": "LEFT_FOOT_FZ < 10 N AND RIGHT_FOOT_FZ < 10 N continuously for >= 0.010 s",
+    "comparator_total_fz_role": "REPORT_FIELD_ONLY",
     "native_dt_s": 0.002,
     "native_frequency_hz": 500.0,
     "canonical_frequency_hz": 1000.0,
     "canonical_stream_status": "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH",
+    "native_1000hz_stream_status": "NATIVE_1000HZ_EVENT_TRUTH",
+    "canonical_downsampling_status": "DOWNSAMPLING_NOT_AUTHORIZED",
     "required_candidate_max_dt_s": 0.001,
     "support_footprint_tolerance_m": 0.0005
+  },
+  "contact_semantics_provenance": {
+    "mujoco_contact_semantics_version": "3.8.0",
+    "detection": "dist < margin",
+    "force": "dist < margin - gap",
+    "requalification_obligation": "MuJoCo >= 3.9 changed margin/gap semantics; a runtime bump requires contact-semantics requalification (detection vs force bands, detected-but-inactive contacts, clearance guard) before reuse."
   },
   "explicit_omissions": [
     "no controller, trajectory, scorer or phase machine",
@@ -124,6 +137,19 @@
       "check": "spec_records_all_mandatory_families",
       "pass": true,
       "detail": 13
+    },
+    {
+      "check": "mujoco_contact_semantics_version_3_8_0",
+      "pass": true,
+      "detail": {
+        "declared": "3.8.0",
+        "runtime": "3.8.0"
+      }
+    },
+    {
+      "check": "comparator_predicate_per_foot",
+      "pass": true,
+      "detail": ""
     }
   ],
   "status": "PASS"

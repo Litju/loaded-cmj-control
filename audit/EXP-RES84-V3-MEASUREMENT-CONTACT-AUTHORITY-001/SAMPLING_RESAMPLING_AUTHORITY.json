@@ -19,9 +19,37 @@
     "anti_alias": "NONE_REQUIRED_FOR_UPSAMPLING",
     "down_sampling_authorized": false
   },
+  "fail_closed_cases": {
+    "native_dt_gt_canonical": {
+      "canonical_status": "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH",
+      "generation_authorized": true
+    },
+    "native_dt_eq_canonical_grid_unverified": {
+      "canonical_status": "NATIVE_GRID_COINCIDENCE_UNVERIFIED",
+      "generation_authorized": false
+    },
+    "native_dt_eq_canonical_grid_coincident": {
+      "canonical_status": "NATIVE_1000HZ_EVENT_TRUTH",
+      "generation_authorized": true,
+      "grid_coincidence": true
+    },
+    "native_dt_lt_canonical_2000hz_to_1000hz": {
+      "canonical_status": "DOWNSAMPLING_NOT_AUTHORIZED",
+      "generation_authorized": false,
+      "blocked_reason": "native dt < canonical dt requires downsampling; DOWN_SAMPLING_AUTHORIZED=false and no anti-alias authority is frozen",
+      "anti_alias_authority_frozen": false
+    }
+  },
   "requirement": {
     "required_candidate_max_dt_s": 0.001,
     "statement": "candidate qualification must use a native timestep compatible with the claimed temporal resolution: dt <= 0.001 s to claim >= 1000 Hz; RES-86/89/91 own the final selection"
+  },
+  "mujoco_contact_semantics": {
+    "version": "3.8.0",
+    "runtime_version": "3.8.0",
+    "detection": "dist < margin",
+    "force": "dist < margin - gap",
+    "requalification_obligation": "MuJoCo >= 3.9 changed margin/gap semantics; a runtime bump requires contact-semantics requalification (detection vs force bands, detected-but-inactive contacts, clearance guard) before reuse."
   },
   "probe": {
     "canonical_samples": 639,
@@ -99,12 +127,37 @@
       "detail": ""
     },
     {
-      "check": "sampling_authority_status",
+      "check": "sampling_authority_500hz_status",
       "pass": true,
       "detail": ""
     },
     {
-      "check": "sampling_authority_1khz_native_case",
+      "check": "sampling_authority_1khz_unverified_fails_closed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "sampling_authority_1khz_coincident_is_native_truth",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "sampling_authority_2khz_downsampling_not_authorized",
+      "pass": true,
+      "detail": "DOWNSAMPLING_NOT_AUTHORIZED"
+    },
+    {
+      "check": "canonical_generation_native_1khz_exact_grid",
+      "pass": true,
+      "detail": "NATIVE_1000HZ_EVENT_TRUTH"
+    },
+    {
+      "check": "canonical_generation_jittered_1khz_fails_closed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "canonical_generation_2khz_fails_closed",
       "pass": true,
       "detail": ""
     }

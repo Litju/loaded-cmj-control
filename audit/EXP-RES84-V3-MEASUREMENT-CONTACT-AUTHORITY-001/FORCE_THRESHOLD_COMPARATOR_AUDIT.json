@@ -2,7 +2,13 @@
   "schema_version": "1.0.0",
   "artifact": "FORCE_THRESHOLD_COMPARATOR_AUDIT",
   "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
-  "definition": "total vertical GRF < 10 N continuously for >= 0.010 s",
+  "definition": "LEFT_FOOT_FZ < 10 N AND RIGHT_FOOT_FZ < 10 N continuously for >= 0.010 s",
+  "predicate": "LEFT_FOOT_FZ < 10 N AND RIGHT_FOOT_FZ < 10 N continuously for >= 0.010 s",
+  "force_source": "legal plantar per-foot wrenches (GROUND_ON_ATHLETE)",
+  "invalidation": "ACTIVE prohibited/non-plantar floor support invalidates the comparator",
+  "total_fz_role": "REPORT_FIELD_ONLY",
+  "res95_em10_assertion": "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS",
+  "res95_em10_status": "PASS",
   "role": "diagnostic/comparability only",
   "must_not": [
     "define physical takeoff",
@@ -12,9 +18,36 @@
   ],
   "hop_result": {
     "triggered": true,
+    "invalid": false,
+    "status": "TRIGGERED",
     "comparator_time_s": 0.024,
     "occurrence_time_s": 0.028,
-    "offset_s": -0.004
+    "offset_s": -0.004,
+    "left_fz_at_trigger_n": 0.2417408459626436,
+    "right_fz_at_trigger_n": 0.24174084596314682,
+    "total_fz_at_trigger_n": 0.48348169192579044
+  },
+  "regression_receipt": {
+    "A_bilateral_8n_8n_total_16n": {
+      "status": "PASS",
+      "per_foot_predicate": true
+    },
+    "B_single_foot_12n_0n": {
+      "status": "PASS",
+      "per_foot_predicate": false
+    },
+    "C_prohibited_support_active": {
+      "status": "PASS",
+      "comparator_status": "INVALID"
+    },
+    "D_sub_persistence_lt_10ms": {
+      "status": "PASS",
+      "comparator_status": "NOT_TRIGGERED"
+    },
+    "E_persistence_ge_10ms": {
+      "status": "PASS",
+      "comparator_status": true
+    }
   },
   "checks": [
     {
@@ -22,9 +55,25 @@
       "pass": true,
       "detail": {
         "triggered": true,
+        "status": "TRIGGERED",
         "time_s": 0.024,
         "offset_s": -0.004
       }
+    },
+    {
+      "check": "comparator_status_triggered",
+      "pass": true,
+      "detail": "TRIGGERED"
+    },
+    {
+      "check": "comparator_predicate_is_per_foot",
+      "pass": true,
+      "detail": "LEFT_FOOT_FZ < 10 N AND RIGHT_FOOT_FZ < 10 N continuously for >= 0.010 s"
+    },
+    {
+      "check": "res95_em10_per_foot_bilateral_10n_10ms",
+      "pass": true,
+      "detail": "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS"
     },
     {
       "check": "comparator_threshold_10n",
@@ -35,6 +84,14 @@
       "check": "comparator_dwell_10ms",
       "pass": true,
       "detail": ""
+    },
+    {
+      "check": "comparator_total_fz_report_only",
+      "pass": true,
+      "detail": {
+        "role": "REPORT_FIELD_ONLY",
+        "total_fz_at_trigger_n": 0.48348169192579044
+      }
     },
     {
       "check": "comparator_offset_finite",
@@ -49,12 +106,62 @@
     {
       "check": "comparator_does_not_shift_occurrence",
       "pass": true,
-      "detail": ""
+      "detail": {
+        "occurrence_before": 0.028,
+        "occurrence_again": 0.028
+      }
+    },
+    {
+      "check": "regression_A_bilateral_per_foot_true_despite_total_16n",
+      "pass": true,
+      "detail": {
+        "left_fz_n": 8.0,
+        "right_fz_n": 8.0,
+        "total_fz_n": 16.0,
+        "per_foot_predicate": true,
+        "total_substitute_would_be": false
+      }
+    },
+    {
+      "check": "regression_B_single_foot_12n_false",
+      "pass": true,
+      "detail": {
+        "left_fz_n": 12.0,
+        "right_fz_n": 0.0,
+        "per_foot_predicate": false
+      }
+    },
+    {
+      "check": "regression_C_prohibited_support_invalid",
+      "pass": true,
+      "detail": {
+        "status": "INVALID",
+        "invalid": true,
+        "reason": "ACTIVE prohibited/non-plantar floor support invalidates the comparator: ACTIVE non-plantar floor support in native frames 8..8 of the persistence episode"
+      }
+    },
+    {
+      "check": "regression_D_sub_persistence_false",
+      "pass": true,
+      "detail": {
+        "status": "NOT_TRIGGERED",
+        "samples_below": 4,
+        "dt_s": 0.002
+      }
+    },
+    {
+      "check": "regression_E_persistence_true",
+      "pass": true,
+      "detail": {
+        "status": "TRIGGERED",
+        "samples_below": 6,
+        "comparator_time_s": 0.008
+      }
     },
     {
       "check": "comparator_requires_persistence",
       "pass": true,
-      "detail": false
+      "detail": "NOT_TRIGGERED"
     }
   ],
   "status": "PASS"

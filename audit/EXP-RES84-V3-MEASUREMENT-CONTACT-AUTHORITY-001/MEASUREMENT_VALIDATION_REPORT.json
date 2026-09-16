@@ -6,7 +6,7 @@
     {
       "artifact": "MEASUREMENT_IMPLEMENTATION_SPEC.json",
       "status": "PASS",
-      "checks": 3,
+      "checks": 5,
       "failed": []
     },
     {
@@ -66,7 +66,7 @@
     {
       "artifact": "FORCE_THRESHOLD_COMPARATOR_AUDIT.json",
       "status": "PASS",
-      "checks": 7,
+      "checks": 16,
       "failed": []
     },
     {
@@ -78,7 +78,7 @@
     {
       "artifact": "SAMPLING_RESAMPLING_AUTHORITY.json",
       "status": "PASS",
-      "checks": 14,
+      "checks": 19,
       "failed": []
     },
     {
@@ -120,12 +120,12 @@
     {
       "artifact": "AUTHORITY_CONFORMANCE_MATRIX.json",
       "status": "PASS",
-      "checks": 24,
+      "checks": 29,
       "failed": []
     }
   ],
   "artifact_count": 20,
-  "total_checks": 403,
+  "total_checks": 424,
   "failed_checks": [],
   "status": "PASS"
 }

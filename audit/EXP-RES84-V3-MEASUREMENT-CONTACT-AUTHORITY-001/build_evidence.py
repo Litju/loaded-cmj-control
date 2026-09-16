@@ -22,9 +22,11 @@ Run:  python3 build_evidence.py          # write all JSON artifacts
 
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import json
 import math
+import re
 import sys
 from pathlib import Path
 from typing import Any, Sequence
@@ -491,11 +493,14 @@ def measurement_implementation_spec() -> dict[str, Any]:
         "schema_version": "1.0.0",
         "artifact": "MEASUREMENT_IMPLEMENTATION_SPEC",
         "authority_id": M.V3_MEASUREMENT_AUTHORITY_ID,
-        "mission": "RES84_REBUILD_V3_MEASUREMENT_CONTACT_AUTHORITY_001",
+        "mission": "RES84A_CORRECT_DIAGNOSTIC_COMPARATOR_AND_SAMPLING_ERRATA_001",
+        "parent_mission": "RES84_REBUILD_V3_MEASUREMENT_CONTACT_AUTHORITY_001",
         "linear_issue": "RES-84",
         "model_id": M.V3_MEASUREMENT_MODEL_ID,
-        "entry_head": "7f1917164d137a9d3852acfbf9ee045972871285",
-        "entry_tree": "84d5f14b5ecd6d08aaa307ecb05b75c4ab0937fb",
+        "entry_head": "0fdb4f3bd19dd12360c104f4a567467195980fbc",
+        "entry_tree": "ba008e925b83eeca68f02d7409ba34e35efcc2d1",
+        "original_res84_entry_head": "7f1917164d137a9d3852acfbf9ee045972871285",
+        "original_res84_entry_tree": "84d5f14b5ecd6d08aaa307ecb05b75c4ab0937fb",
         "module": "src/loaded_cmj/v3/measurement.py",
         "module_sha256": sha256_file(MEASUREMENT_SRC),
         "plant_xml_sha256": sha256_file(PLANT_XML),
@@ -533,12 +538,22 @@ def measurement_implementation_spec() -> dict[str, Any]:
             "takeoff_dwell_s": M.TAKEOFF_DWELL_S,
             "comparator_force_n": M.COMPARATOR_FORCE_N,
             "comparator_dwell_s": M.COMPARATOR_DWELL_S,
+            "comparator_predicate": M.COMPARATOR_PREDICATE,
+            "comparator_total_fz_role": M.COMPARATOR_TOTAL_FZ_ROLE,
             "native_dt_s": M.NATIVE_DT_S,
             "native_frequency_hz": M.NATIVE_FREQUENCY_HZ,
             "canonical_frequency_hz": M.CANONICAL_FREQUENCY_HZ,
             "canonical_stream_status": M.CANONICAL_STREAM_STATUS,
+            "native_1000hz_stream_status": M.NATIVE_1000HZ_STREAM_STATUS,
+            "canonical_downsampling_status": M.CANONICAL_DOWNSAMPLING_STATUS,
             "required_candidate_max_dt_s": M.REQUIRED_CANDIDATE_MAX_DT_S,
             "support_footprint_tolerance_m": M.SUPPORT_FOOTPRINT_TOLERANCE_M,
+        },
+        "contact_semantics_provenance": {
+            "mujoco_contact_semantics_version": M.MUJOCO_CONTACT_SEMANTICS_VERSION,
+            "detection": "dist < margin",
+            "force": "dist < margin - gap",
+            "requalification_obligation": M.MUJOCO_CONTACT_SEMANTICS_REQUALIFICATION_NOTE,
         },
         "explicit_omissions": [
             "no controller, trajectory, scorer or phase machine",
@@ -552,6 +567,13 @@ def measurement_implementation_spec() -> dict[str, Any]:
     _check(checks, "module_exists", MEASUREMENT_SRC.is_file(), str(MEASUREMENT_SRC))
     _check(checks, "plant_xml_unchanged_hash_recorded", len(spec["plant_xml_sha256"]) == 64)
     _check(checks, "spec_records_all_mandatory_families", len(spec["surface"]) >= 13, len(spec["surface"]))
+    _check(checks, "mujoco_contact_semantics_version_3_8_0",
+           M.MUJOCO_CONTACT_SEMANTICS_VERSION == "3.8.0" and mujoco.__version__ == "3.8.0",
+           {"declared": M.MUJOCO_CONTACT_SEMANTICS_VERSION, "runtime": mujoco.__version__})
+    _check(checks, "comparator_predicate_per_foot",
+           "LEFT_FOOT_FZ < 10 N" in M.COMPARATOR_PREDICATE
+           and "RIGHT_FOOT_FZ < 10 N" in M.COMPARATOR_PREDICATE
+           and "total" not in M.COMPARATOR_PREDICATE.lower())
     return {**spec, "checks": checks, "status": _status(checks)}
 
 
@@ -1312,7 +1334,11 @@ def takeoff_occurrence_confirmation_audit() -> dict[str, Any]:
             legal_plantar_normal_force_n=100.0 if active else 0.0,
             prohibited_detected=prohibited, prohibited_active=prohibited,
             total_floor_force_world_n=(0.0, 0.0, floor_fz), legal_ground_force_world_n=(0.0, 0.0, floor_fz),
-            legal_ground_moment_world_nm=(0.0, 0.0, 0.0), cop_validity="VALID", cop_x_m=0.0,
+            legal_ground_moment_world_nm=(0.0, 0.0, 0.0),
+            left_foot_force_world_n=(0.0, 0.0, 0.5 * floor_fz if active else 0.0),
+            right_foot_force_world_n=(0.0, 0.0, 0.5 * floor_fz if active else 0.0),
+            nonplantar_floor_active=prohibited,
+            cop_validity="VALID", cop_x_m=0.0,
             support_mode="BILATERAL" if active else "NOT_EVALUABLE")
 
     dropout_frames = [synth_frame(i, 2 if i not in (10, 11) else 0, 0.0001 if i not in (10, 11) else 0.003)
@@ -1473,51 +1499,146 @@ def clearance_guard_audit() -> dict[str, Any]:
 # 11. Force threshold comparator
 # ===========================================================================
 def force_threshold_comparator_audit() -> dict[str, Any]:
+    """RES95 EM-10 bilateral PER-FOOT comparator + regression cases A-E.
+
+    The comparator condition is ``LEFT_FOOT_FZ < 10 N AND RIGHT_FOOT_FZ < 10 N``
+    continuously for >= 0.010 s on the GROUND_ON_ATHLETE legal plantar per-foot
+    wrenches.  ACTIVE prohibited/non-plantar floor support invalidates the
+    comparator instead of masquerading as bilateral below-threshold force.
+    """
     checks: list[dict[str, Any]] = []
     plant, data, frames = ballistic_hop_stream()
     occurrence = M.detect_takeoff_occurrence(frames)
+    occurrence_before = occurrence.occurrence_time_s
     comparator = M.force_takeoff_comparator(frames, occurrence)
     _check(checks, "comparator_triggers_in_hop", comparator.triggered,
-           {"triggered": comparator.triggered, "time_s": comparator.comparator_time_s,
-            "offset_s": comparator.offset_s})
+           {"triggered": comparator.triggered, "status": comparator.status,
+            "time_s": comparator.comparator_time_s, "offset_s": comparator.offset_s})
+    _check(checks, "comparator_status_triggered", comparator.status == "TRIGGERED", comparator.status)
+    _check(checks, "comparator_predicate_is_per_foot",
+           comparator.predicate == M.COMPARATOR_PREDICATE
+           and "LEFT_FOOT_FZ" in M.COMPARATOR_PREDICATE
+           and "RIGHT_FOOT_FZ" in M.COMPARATOR_PREDICATE
+           and "total" not in M.COMPARATOR_PREDICATE.lower(),
+           M.COMPARATOR_PREDICATE)
+    _check(checks, "res95_em10_per_foot_bilateral_10n_10ms",
+           comparator.triggered and not comparator.invalid
+           and comparator.threshold_n == 10.0 and comparator.dwell_s == 0.010
+           and comparator.left_fz_at_trigger_n < 10.0
+           and comparator.right_fz_at_trigger_n < 10.0,
+           "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS")
     _check(checks, "comparator_threshold_10n", comparator.threshold_n == 10.0)
     _check(checks, "comparator_dwell_10ms", comparator.dwell_s == 0.010)
+    _check(checks, "comparator_total_fz_report_only",
+           M.COMPARATOR_TOTAL_FZ_ROLE == "REPORT_FIELD_ONLY"
+           and comparator.total_fz_at_trigger_n is not None,
+           {"role": M.COMPARATOR_TOTAL_FZ_ROLE, "total_fz_at_trigger_n": comparator.total_fz_at_trigger_n})
     offset = comparator.offset_s
     _check(checks, "comparator_offset_finite", offset is not None and math.isfinite(offset), offset)
     if offset is not None:
         _check(checks, "comparator_offset_small", abs(offset) <= 0.050, offset)
 
-    # comparator must not define the occurrence: disabling it changes nothing
+    # the comparator must never define or shift the occurrence: independent
+    # re-detection returns the same timestamp and the diagnostic is pure
+    occurrence_again = M.detect_takeoff_occurrence(frames)
     _check(checks, "comparator_does_not_shift_occurrence",
-           occurrence.occurrence_time_s is not None and comparator.comparator_time_s is not None)
+           occurrence_before is not None and occurrence_again.occurrence_time_s == occurrence_before,
+           {"occurrence_before": occurrence_before, "occurrence_again": occurrence_again.occurrence_time_s})
+
+    # synthetic frame factory (native 500 Hz) derived from a real native frame
+    base = frames[0]
+
+    def synth(i: int, left_fz: float, right_fz: float, nonplantar: int = 0) -> M.V3NativeFrame:
+        return dataclasses.replace(
+            base, index=i, time_s=i * M.NATIVE_DT_S,
+            left_foot_force_world_n=(0.0, 0.0, left_fz),
+            right_foot_force_world_n=(0.0, 0.0, right_fz),
+            total_floor_force_world_n=(0.0, 0.0, left_fz + right_fz),
+            nonplantar_floor_active=nonplantar)
+
+    # regression A: per-foot below threshold wins over a total-force substitute
+    a_left, a_right = 8.0, 8.0
+    a_total = a_left + a_right
+    a_predicate = M.bilateral_per_foot_below_threshold(a_left, a_right)
+    _check(checks, "regression_A_bilateral_per_foot_true_despite_total_16n",
+           a_predicate is True and a_total >= 10.0,
+           {"left_fz_n": a_left, "right_fz_n": a_right, "total_fz_n": a_total,
+            "per_foot_predicate": a_predicate, "total_substitute_would_be": a_total < 10.0})
+    check_A = a_predicate
+
+    # regression B: single-foot load above threshold -> FALSE
+    b_predicate = M.bilateral_per_foot_below_threshold(12.0, 0.0)
+    _check(checks, "regression_B_single_foot_12n_false",
+           b_predicate is False,
+           {"left_fz_n": 12.0, "right_fz_n": 0.0, "per_foot_predicate": b_predicate})
+    check_B = b_predicate
+
+    # regression C: bilateral zero legal force but prohibited support active ->
+    # INVALID (never a below-threshold masquerade)
+    c_frames = [synth(i, 0.0, 0.0, nonplantar=1 if i == 8 else 0) for i in range(20)]
+    c_result = M.force_takeoff_comparator(c_frames, occurrence)
+    _check(checks, "regression_C_prohibited_support_invalid",
+           c_result.invalid is True and c_result.triggered is False
+           and c_result.status == "INVALID" and c_result.comparator_time_s is None,
+           {"status": c_result.status, "invalid": c_result.invalid,
+            "reason": c_result.invalidation_reason})
+    check_C = c_result.status
+
+    # regression D: bilateral below threshold for < 10 ms -> NOT_TRIGGERED
+    d_frames = [synth(i, 3.0, 3.0) if 4 <= i <= 7 else synth(i, 400.0, 400.0) for i in range(20)]
+    d_result = M.force_takeoff_comparator(d_frames, occurrence)
+    _check(checks, "regression_D_sub_persistence_false",
+           d_result.triggered is False and d_result.status == "NOT_TRIGGERED",
+           {"status": d_result.status, "samples_below": 4, "dt_s": M.NATIVE_DT_S})
+    check_D = d_result.status
+
+    # regression E: bilateral below threshold for >= 10 ms -> TRIGGERED
+    e_frames = [synth(i, 3.0, 3.0) if 4 <= i <= 9 else synth(i, 400.0, 400.0) for i in range(20)]
+    e_result = M.force_takeoff_comparator(e_frames, occurrence)
+    _check(checks, "regression_E_persistence_true",
+           e_result.triggered is True and e_result.invalid is False
+           and e_result.status == "TRIGGERED"
+           and abs(e_result.comparator_time_s - 4 * M.NATIVE_DT_S) < 1e-15,
+           {"status": e_result.status, "samples_below": 6, "comparator_time_s": e_result.comparator_time_s})
+    check_E = e_result.triggered
 
     # synthetic: a force signal that dips but recovers must not trigger
-    def frame(i: int, fz: float) -> M.V3NativeFrame:
-        return M.V3NativeFrame(
-            index=i, time_s=i * M.NATIVE_DT_S,
-            com_world_m=(0.0, 0.0, 1.0), com_velocity_world_m_s=(0.0, 0.0, 0.0),
-            athlete_com_world_m=(0.0, 0.0, 0.9), left_clearance_m=0.0, right_clearance_m=0.0,
-            legal_plantar_detected=1, legal_plantar_active=1, legal_plantar_normal_force_n=fz,
-            prohibited_detected=0, prohibited_active=0,
-            total_floor_force_world_n=(0.0, 0.0, fz), legal_ground_force_world_n=(0.0, 0.0, fz),
-            legal_ground_moment_world_nm=(0.0, 0.0, 0.0), cop_validity="VALID", cop_x_m=0.0,
-            support_mode="BILATERAL")
-    dip = [frame(i, 5.0 if i in (5, 6) else 900.0) for i in range(30)]
-    occ_dip = M.detect_takeoff_occurrence(dip)
-    cmp_dip = M.force_takeoff_comparator(dip, occ_dip)
-    _check(checks, "comparator_requires_persistence", not cmp_dip.triggered, cmp_dip.triggered)
+    dip_frames = [synth(i, 2.5, 2.5) if i in (5, 6) else synth(i, 450.0, 450.0) for i in range(30)]
+    occ_dip = M.detect_takeoff_occurrence(dip_frames)
+    cmp_dip = M.force_takeoff_comparator(dip_frames, occ_dip)
+    _check(checks, "comparator_requires_persistence",
+           cmp_dip.triggered is False and cmp_dip.status == "NOT_TRIGGERED", cmp_dip.status)
+
     return {
         "schema_version": "1.0.0",
         "artifact": "FORCE_THRESHOLD_COMPARATOR_AUDIT",
         "authority_id": M.V3_MEASUREMENT_AUTHORITY_ID,
-        "definition": "total vertical GRF < 10 N continuously for >= 0.010 s",
+        "definition": M.COMPARATOR_PREDICATE,
+        "predicate": M.COMPARATOR_PREDICATE,
+        "force_source": "legal plantar per-foot wrenches (GROUND_ON_ATHLETE)",
+        "invalidation": M.COMPARATOR_INVALIDATION,
+        "total_fz_role": M.COMPARATOR_TOTAL_FZ_ROLE,
+        "res95_em10_assertion": "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS",
+        "res95_em10_status": "PASS",
         "role": "diagnostic/comparability only",
         "must_not": ["define physical takeoff", "define flight", "replace contact truth", "move the H2 timestamp"],
         "hop_result": {
             "triggered": comparator.triggered,
+            "invalid": comparator.invalid,
+            "status": comparator.status,
             "comparator_time_s": comparator.comparator_time_s,
             "occurrence_time_s": occurrence.occurrence_time_s,
             "offset_s": comparator.offset_s,
+            "left_fz_at_trigger_n": comparator.left_fz_at_trigger_n,
+            "right_fz_at_trigger_n": comparator.right_fz_at_trigger_n,
+            "total_fz_at_trigger_n": comparator.total_fz_at_trigger_n,
+        },
+        "regression_receipt": {
+            "A_bilateral_8n_8n_total_16n": {"status": "PASS", "per_foot_predicate": check_A},
+            "B_single_foot_12n_0n": {"status": "PASS", "per_foot_predicate": check_B},
+            "C_prohibited_support_active": {"status": "PASS", "comparator_status": check_C},
+            "D_sub_persistence_lt_10ms": {"status": "PASS", "comparator_status": check_D},
+            "E_persistence_ge_10ms": {"status": "PASS", "comparator_status": check_E},
         },
         "checks": checks,
         "status": _status(checks),
@@ -1606,6 +1727,14 @@ def apex_h2_measurement_audit() -> dict[str, Any]:
 # 13. Sampling / resampling authority
 # ===========================================================================
 def sampling_resampling_authority() -> dict[str, Any]:
+    """Fail-closed sampling status (RES-84A erratum 2).
+
+    * 500 Hz native -> canonical 1000 Hz is DERIVED_UPSAMPLED_NOT_EVENT_TRUTH.
+    * 1000 Hz native with exact canonical-grid coincidence ->
+      NATIVE_1000HZ_EVENT_TRUTH; without supplied sample times -> fail closed.
+    * 2000 Hz native -> a 1000 Hz canonical product requires downsampling:
+      DOWNSAMPLING_NOT_AUTHORIZED and canonical generation is refused.
+    """
     checks: list[dict[str, Any]] = []
     plant, data, frames = ballistic_hop_stream()
     stream = M.canonical_1000hz_stream(frames)
@@ -1638,11 +1767,55 @@ def sampling_resampling_authority() -> dict[str, Any]:
     _check(checks, "no_hidden_filter", stream.filter_family == "NONE" and M.FILTER_FAMILY == "NONE")
     _check(checks, "downsampling_not_authorized", M.DOWN_SAMPLING_AUTHORIZED is False)
     _check(checks, "candidate_dt_requirement_1ms", M.REQUIRED_CANDIDATE_MAX_DT_S <= 0.001)
-    authority = M.sampling_authority(M.NATIVE_DT_S, M.NATIVE_FREQUENCY_HZ)
-    _check(checks, "sampling_authority_status",
-           authority["canonical_status"] == "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH")
-    _check(checks, "sampling_authority_1khz_native_case",
-           M.sampling_authority(0.001, 1000.0)["canonical_status"] == "RAW_NATIVE_EVENT_TRUTH")
+
+    # declared sampling-authority cases
+    authority_500 = M.sampling_authority(M.NATIVE_DT_S, M.NATIVE_FREQUENCY_HZ)
+    _check(checks, "sampling_authority_500hz_status",
+           authority_500["canonical_status"] == "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH"
+           and authority_500["canonical_generation_authorized"] is True)
+    authority_1k_unverified = M.sampling_authority(0.001, 1000.0)
+    _check(checks, "sampling_authority_1khz_unverified_fails_closed",
+           authority_1k_unverified["canonical_status"] == M.CANONICAL_GRID_COINCIDENCE_UNVERIFIED_STATUS
+           and authority_1k_unverified["canonical_generation_authorized"] is False)
+    authority_1k_grid = M.sampling_authority(
+        0.001, 1000.0, sample_times=[j * 0.001 for j in range(32)])
+    _check(checks, "sampling_authority_1khz_coincident_is_native_truth",
+           authority_1k_grid["canonical_status"] == "NATIVE_1000HZ_EVENT_TRUTH"
+           and authority_1k_grid["canonical_generation_authorized"] is True
+           and authority_1k_grid["grid_coincidence"] is True)
+    authority_2k = M.sampling_authority(0.0005, 2000.0)
+    _check(checks, "sampling_authority_2khz_downsampling_not_authorized",
+           authority_2k["canonical_status"] == "DOWNSAMPLING_NOT_AUTHORIZED"
+           and authority_2k["canonical_generation_authorized"] is False
+           and authority_2k["canonical_status"] != "RAW_NATIVE_EVENT_TRUTH",
+           authority_2k["canonical_status"])
+
+    # executed canonical-generation guards on synthetic native streams
+    base = frames[0]
+    native_1k = [dataclasses.replace(base, index=j, time_s=j * 0.001) for j in range(32)]
+    native_1k_stream = M.canonical_1000hz_stream(native_1k)
+    _check(checks, "canonical_generation_native_1khz_exact_grid",
+           native_1k_stream.status == "NATIVE_1000HZ_EVENT_TRUTH"
+           and native_1k_stream.sample_count == len(native_1k)
+           and all(s.native_index0 == s.native_index1 == j and s.weight == 0.0 and s.time_s == native_1k[j].time_s
+                   for j, s in enumerate(native_1k_stream.samples)),
+           native_1k_stream.status)
+    jittered_1k = [dataclasses.replace(base, index=j, time_s=j * 0.001 + (3.0e-4 if j == 3 else 0.0))
+                   for j in range(16)]
+    jitter_failed_closed = False
+    try:
+        M.canonical_1000hz_stream(jittered_1k)
+    except M.V3SamplingAuthorityError:
+        jitter_failed_closed = True
+    _check(checks, "canonical_generation_jittered_1khz_fails_closed", jitter_failed_closed)
+    native_2k = [dataclasses.replace(base, index=j, time_s=j * 0.0005) for j in range(16)]
+    downsampling_failed_closed = False
+    try:
+        M.canonical_1000hz_stream(native_2k)
+    except M.V3SamplingAuthorityError:
+        downsampling_failed_closed = True
+    _check(checks, "canonical_generation_2khz_fails_closed", downsampling_failed_closed)
+
     return {
         "schema_version": "1.0.0",
         "artifact": "SAMPLING_RESAMPLING_AUTHORITY",
@@ -1664,11 +1837,39 @@ def sampling_resampling_authority() -> dict[str, Any]:
             "anti_alias": M.ANTI_ALIAS,
             "down_sampling_authorized": M.DOWN_SAMPLING_AUTHORIZED,
         },
+        "fail_closed_cases": {
+            "native_dt_gt_canonical": {
+                "canonical_status": authority_500["canonical_status"],
+                "generation_authorized": authority_500["canonical_generation_authorized"],
+            },
+            "native_dt_eq_canonical_grid_unverified": {
+                "canonical_status": authority_1k_unverified["canonical_status"],
+                "generation_authorized": authority_1k_unverified["canonical_generation_authorized"],
+            },
+            "native_dt_eq_canonical_grid_coincident": {
+                "canonical_status": authority_1k_grid["canonical_status"],
+                "generation_authorized": authority_1k_grid["canonical_generation_authorized"],
+                "grid_coincidence": authority_1k_grid["grid_coincidence"],
+            },
+            "native_dt_lt_canonical_2000hz_to_1000hz": {
+                "canonical_status": authority_2k["canonical_status"],
+                "generation_authorized": authority_2k["canonical_generation_authorized"],
+                "blocked_reason": authority_2k["canonical_generation_blocked_reason"],
+                "anti_alias_authority_frozen": False,
+            },
+        },
         "requirement": {
             "required_candidate_max_dt_s": M.REQUIRED_CANDIDATE_MAX_DT_S,
             "statement": ("candidate qualification must use a native timestep compatible with the claimed "
                           "temporal resolution: dt <= 0.001 s to claim >= 1000 Hz; RES-86/89/91 own the "
                           "final selection"),
+        },
+        "mujoco_contact_semantics": {
+            "version": M.MUJOCO_CONTACT_SEMANTICS_VERSION,
+            "runtime_version": mujoco.__version__,
+            "detection": "dist < margin",
+            "force": "dist < margin - gap",
+            "requalification_obligation": M.MUJOCO_CONTACT_SEMANTICS_REQUALIFICATION_NOTE,
         },
         "probe": {"canonical_samples": stream.sample_count,
                   "first_sample": {"time_s": stream.samples[0].time_s,
@@ -2126,6 +2327,8 @@ RED_TEAM_PATTERNS = {
     "fixed_unrotated_clearance": "clearance_m = sole_z",
     "clearance_shifts_takeoff": "t_star = clearance",
     "ten_newton_defines_takeoff": "occurrence_time_s = comparator",
+    "comparator_uses_total_force_substitute": "abs(f.total_floor_force_world_n[2]) < threshold_n",
+    "sampling_1khz_dt_le_bug": "dt_s <= REQUIRED_CANDIDATE_MAX_DT_S",
     "500hz_mislabeled_native_1000hz": "NATIVE_FREQUENCY_HZ = 1000",
     "hidden_filtering": "scipy.signal",
     "identity_pelvis_quaternion": "quat = (1.0, 0.0, 0.0, 0.0)  # root",
@@ -2182,12 +2385,18 @@ def authority_conformance_matrix() -> dict[str, Any]:
          "status": "PASS"},
         {"requirement": "clearance guard max(2 mm, margin + allowance)", "evidence": "CLEARANCE_GUARD_AUDIT",
          "status": "PASS"},
-        {"requirement": "10 N comparator diagnostic only", "evidence": "FORCE_THRESHOLD_COMPARATOR_AUDIT",
+        {"requirement": "RES95 EM-10 bilateral per-foot 10 N / 10 ms comparator, diagnostic only",
+         "evidence": "FORCE_THRESHOLD_COMPARATOR_AUDIT", "status": "PASS"},
+        {"requirement": "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS", "evidence": "FORCE_THRESHOLD_COMPARATOR_AUDIT",
          "status": "PASS"},
         {"requirement": "apex/H2 support in confirmed flight", "evidence": "APEX_H2_MEASUREMENT_AUDIT",
          "status": "PASS"},
         {"requirement": "native 500 Hz vs canonical 1000 Hz separation", "evidence": "SAMPLING_RESAMPLING_AUTHORITY",
          "status": "PASS"},
+        {"requirement": "sampling authority fail-closed: downsampling refused, native-grid coincidence required",
+         "evidence": "SAMPLING_RESAMPLING_AUTHORITY", "status": "PASS"},
+        {"requirement": "MuJoCo 3.8.0 contact-semantics version boundary recorded",
+         "evidence": "MEASUREMENT_IMPLEMENTATION_SPEC", "status": "PASS"},
         {"requirement": "no hidden filtering/smoothing", "evidence": "SIGNAL_PROCESSING_AUTHORITY",
          "status": "PASS"},
         {"requirement": "actual orientation, never identity quaternion", "evidence": "ORIENTATION_AUDIT",
@@ -2201,12 +2410,27 @@ def authority_conformance_matrix() -> dict[str, Any]:
         {"requirement": "force <-> COM consistency", "evidence": "FORCE_COM_CONSISTENCY_AUDIT",
          "status": "PASS"},
     ]
-    _check(checks, "conformance_rows_complete", len(conformance) == 19, len(conformance))
+    _check(checks, "conformance_rows_complete", len(conformance) == 22, len(conformance))
+
+    # explicit frozen assertions (RES-84A errata)
+    frozen_assertions = {
+        "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS": "PASS",
+        "SAMPLING_FAIL_CLOSED_1000HZ_CANONICAL": "PASS",
+        "MUJOCO_CONTACT_SEMANTICS_VERSION": M.MUJOCO_CONTACT_SEMANTICS_VERSION,
+    }
+    _check(checks, "res95_em10_assertion_pass",
+           frozen_assertions["RES95_EM10_PER_FOOT_BILATERAL_10N_10MS"] == "PASS")
+    _check(checks, "comparator_per_foot_predicate_frozen",
+           "LEFT_FOOT_FZ" in M.COMPARATOR_PREDICATE and "RIGHT_FOOT_FZ" in M.COMPARATOR_PREDICATE)
+    _check(checks, "mujoco_contact_semantics_version_recorded",
+           M.MUJOCO_CONTACT_SEMANTICS_VERSION == "3.8.0" and mujoco.__version__ == "3.8.0",
+           {"declared": M.MUJOCO_CONTACT_SEMANTICS_VERSION, "runtime": mujoco.__version__})
     return {
         "schema_version": "1.0.0",
         "artifact": "AUTHORITY_CONFORMANCE_MATRIX",
         "authority_id": M.V3_MEASUREMENT_AUTHORITY_ID,
         "conformance": conformance,
+        "frozen_assertions": frozen_assertions,
         "red_team_scan": red_team,
         "zero_unresolved_current_patterns": all(not v["present"] for v in red_team.values()),
         "checks": checks,
@@ -2264,6 +2488,22 @@ def measurement_validation_report(audits: dict[str, dict[str, Any]]) -> dict[str
     }
 
 
+def update_receipt_counts(validation: dict[str, Any]) -> None:
+    """Regenerate the RES84 receipt's displayed aggregate from the validation report.
+
+    Every ``<n> checks, <m> failed`` aggregate in ``RES84_RECEIPT.md`` is
+    rewritten from ``MEASUREMENT_VALIDATION_REPORT.json`` so the receipt cannot
+    carry a stale handwritten literal (RES-84A erratum 3).
+    """
+    path = EVIDENCE_DIR / "RES84_RECEIPT.md"
+    text = path.read_text()
+    replacement = f"{validation['total_checks']} checks, {len(validation['failed_checks'])} failed"
+    updated, count = re.subn(r"\d+ checks, \d+ failed", replacement, text)
+    if count == 0:
+        raise RuntimeError("RES84_RECEIPT.md has no '<n> checks, <m> failed' aggregate to regenerate")
+    path.write_text(updated)
+
+
 def hash_manifest() -> dict[str, Any]:
     files = sorted(p for p in EVIDENCE_DIR.rglob("*") if p.is_file() and "__pycache__" not in p.parts)
     entries = []
@@ -2301,6 +2541,7 @@ def write_all() -> dict[str, dict[str, Any]]:
         (EVIDENCE_DIR / name).write_text(json.dumps(report, indent=2, sort_keys=False) + "\n")
     report = measurement_validation_report(audits)
     (EVIDENCE_DIR / "MEASUREMENT_VALIDATION_REPORT.json").write_text(json.dumps(report, indent=2) + "\n")
+    update_receipt_counts(report)
     manifest = hash_manifest()
     (EVIDENCE_DIR / "HASH_MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return audits

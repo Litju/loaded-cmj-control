@@ -20,6 +20,7 @@ provenance and force/COM consistency.
 
 from __future__ import annotations
 
+import dataclasses
 import importlib.util
 import math
 import sys
@@ -84,9 +85,30 @@ def test_authority_constants_frozen():
     assert M.TAKEOFF_DWELL_S == 0.050
     assert M.COMPARATOR_FORCE_N == 10.0
     assert M.COMPARATOR_DWELL_S == 0.010
+    assert "LEFT_FOOT_FZ" in M.COMPARATOR_PREDICATE
+    assert "RIGHT_FOOT_FZ" in M.COMPARATOR_PREDICATE
+    assert "total" not in M.COMPARATOR_PREDICATE.lower()
+    assert M.COMPARATOR_TOTAL_FZ_ROLE == "REPORT_FIELD_ONLY"
     assert M.NATIVE_DT_S == 0.002 and M.NATIVE_FREQUENCY_HZ == 500.0
+    assert M.NATIVE_1000HZ_STREAM_STATUS == "NATIVE_1000HZ_EVENT_TRUTH"
+    assert M.CANONICAL_DOWNSAMPLING_STATUS == "DOWNSAMPLING_NOT_AUTHORIZED"
     assert M.REQUIRED_CANDIDATE_MAX_DT_S <= 0.001
     assert M.DOWN_SAMPLING_AUTHORIZED is False
+
+
+def test_mujoco_contact_semantics_version_boundary():
+    """MuJoCo 3.8.0 contact semantics are provenance, not a Plant change."""
+    import mujoco
+    assert M.MUJOCO_CONTACT_SEMANTICS_VERSION == "3.8.0"
+    assert mujoco.__version__ == "3.8.0"
+    assert "3.9" in M.MUJOCO_CONTACT_SEMANTICS_REQUALIFICATION_NOTE
+    pyproject = (TASK_ROOT / "pyproject.toml").read_text()
+    assert "mujoco==3.8.0" in pyproject
+    report = B.measurement_implementation_spec()
+    provenance = report["contact_semantics_provenance"]
+    assert provenance["mujoco_contact_semantics_version"] == "3.8.0"
+    assert provenance["detection"] == "dist < margin"
+    assert provenance["force"] == "dist < margin - gap"
 
 
 def test_measurement_implementation_spec(audits):
@@ -477,7 +499,11 @@ def test_transient_dropout_does_not_confirm():
             prohibited_detected=0, prohibited_active=0,
             total_floor_force_world_n=(0.0, 0.0, 900.0 if active else 0.0),
             legal_ground_force_world_n=(0.0, 0.0, 900.0 if active else 0.0),
-            legal_ground_moment_world_nm=(0.0, 0.0, 0.0), cop_validity="VALID", cop_x_m=0.0,
+            legal_ground_moment_world_nm=(0.0, 0.0, 0.0),
+            left_foot_force_world_n=(0.0, 0.0, 450.0 if active else 0.0),
+            right_foot_force_world_n=(0.0, 0.0, 450.0 if active else 0.0),
+            nonplantar_floor_active=0,
+            cop_validity="VALID", cop_x_m=0.0,
             support_mode="BILATERAL" if active else "NOT_EVALUABLE")
 
     dropout = [synthetic_frame(i, 0 if i in (10, 11) else 2, 0.003 if i in (10, 11) else 1e-4, 1.0)
@@ -503,8 +529,58 @@ def test_comparator_is_diagnostic_only(audits):
     report = _report(audits, "FORCE_THRESHOLD_COMPARATOR_AUDIT.json")
     assert report["status"] == "PASS", _failed(report)
     assert report["hop_result"]["triggered"] is True
+    assert report["hop_result"]["status"] == "TRIGGERED"
     assert report["role"] == "diagnostic/comparability only"
     assert "define physical takeoff" in report["must_not"]
+    assert report["res95_em10_assertion"] == "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS"
+    assert report["res95_em10_status"] == "PASS"
+    assert report["total_fz_role"] == "REPORT_FIELD_ONLY"
+    assert "LEFT_FOOT_FZ" in report["predicate"] and "RIGHT_FOOT_FZ" in report["predicate"]
+    for name, entry in report["regression_receipt"].items():
+        assert entry["status"] == "PASS", name
+
+
+def test_per_foot_comparator_regression_cases():
+    """RES-84A erratum 1 regression cases A-E."""
+    # A: left = 8 N, right = 8 N, total = 16 N -> TRUE (a total comparator would fail)
+    assert M.bilateral_per_foot_below_threshold(8.0, 8.0) is True
+    # B: left = 12 N, right = 0 N -> FALSE
+    assert M.bilateral_per_foot_below_threshold(12.0, 0.0) is False
+
+    plant, data, frames = B.launch_flight_stream()
+    occurrence = M.detect_takeoff_occurrence(frames)
+    base = frames[0]
+
+    def synth(i: int, left_fz: float, right_fz: float, nonplantar: int = 0) -> M.V3NativeFrame:
+        return dataclasses.replace(
+            base, index=i, time_s=i * M.NATIVE_DT_S,
+            left_foot_force_world_n=(0.0, 0.0, left_fz),
+            right_foot_force_world_n=(0.0, 0.0, right_fz),
+            total_floor_force_world_n=(0.0, 0.0, left_fz + right_fz),
+            nonplantar_floor_active=nonplantar)
+
+    # C: left = 0 N, right = 0 N, prohibited floor support active -> INVALID / FALSE
+    c_result = M.force_takeoff_comparator(
+        [synth(i, 0.0, 0.0, 1 if i == 8 else 0) for i in range(20)], occurrence)
+    assert c_result.status == "INVALID"
+    assert c_result.invalid is True
+    assert c_result.triggered is False
+    assert c_result.comparator_time_s is None
+    assert "non-plantar" in c_result.invalidation_reason
+
+    # D: bilateral < 10 N for less than 10 ms -> FALSE
+    d_result = M.force_takeoff_comparator(
+        [synth(i, 3.0, 3.0) if 4 <= i <= 7 else synth(i, 400.0, 400.0) for i in range(20)], occurrence)
+    assert d_result.status == "NOT_TRIGGERED"
+    assert d_result.triggered is False
+    assert d_result.invalid is False
+
+    # E: bilateral < 10 N for >= 10 ms -> TRUE
+    e_result = M.force_takeoff_comparator(
+        [synth(i, 3.0, 3.0) if 4 <= i <= 9 else synth(i, 400.0, 400.0) for i in range(20)], occurrence)
+    assert e_result.status == "TRIGGERED"
+    assert e_result.triggered is True
+    assert e_result.invalid is False
 
 
 def test_comparator_offset_reported():
@@ -514,6 +590,18 @@ def test_comparator_offset_reported():
     assert comparator.triggered
     assert comparator.offset_s is not None
     assert abs(comparator.offset_s) <= 0.05
+    assert comparator.left_fz_at_trigger_n < M.COMPARATOR_FORCE_N
+    assert comparator.right_fz_at_trigger_n < M.COMPARATOR_FORCE_N
+    assert comparator.total_fz_at_trigger_n is not None
+
+
+def test_comparator_never_shifts_occurrence():
+    plant, data, frames = B.launch_flight_stream()
+    occurrence = M.detect_takeoff_occurrence(frames)
+    before = occurrence.occurrence_time_s
+    M.force_takeoff_comparator(frames, occurrence)
+    after = M.detect_takeoff_occurrence(frames).occurrence_time_s
+    assert before == after
 
 
 def test_apex_h2_audit(audits):
@@ -543,6 +631,63 @@ def test_sampling_authority_is_explicit(audits):
     assert report["raw_native_stream"]["frequency_hz"] == 500.0
     assert report["canonical_1000hz_stream"]["status"] == "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH"
     assert report["canonical_1000hz_stream"]["down_sampling_authorized"] is False
+
+
+def test_sampling_authority_fail_closed_cases(audits):
+    """RES-84A erratum 2 frozen sampling cases."""
+    report = _report(audits, "SAMPLING_RESAMPLING_AUTHORITY.json")
+    cases = report["fail_closed_cases"]
+    assert cases["native_dt_gt_canonical"]["canonical_status"] == "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH"
+    assert cases["native_dt_gt_canonical"]["generation_authorized"] is True
+    assert cases["native_dt_eq_canonical_grid_unverified"]["canonical_status"] == "NATIVE_GRID_COINCIDENCE_UNVERIFIED"
+    assert cases["native_dt_eq_canonical_grid_unverified"]["generation_authorized"] is False
+    assert cases["native_dt_eq_canonical_grid_coincident"]["canonical_status"] == "NATIVE_1000HZ_EVENT_TRUTH"
+    assert cases["native_dt_eq_canonical_grid_coincident"]["generation_authorized"] is True
+    assert cases["native_dt_eq_canonical_grid_coincident"]["grid_coincidence"] is True
+    downsampling = cases["native_dt_lt_canonical_2000hz_to_1000hz"]
+    assert downsampling["canonical_status"] == "DOWNSAMPLING_NOT_AUTHORIZED"
+    assert downsampling["canonical_status"] != "RAW_NATIVE_EVENT_TRUTH"
+    assert downsampling["generation_authorized"] is False
+    assert downsampling["anti_alias_authority_frozen"] is False
+
+
+def test_sampling_2000hz_must_not_be_raw_native_event_truth():
+    """dt = 0.0005 s / 2000 Hz regression (RES-84A erratum 2)."""
+    result = M.sampling_authority(0.0005, 2000.0)
+    assert result["canonical_status"] != "RAW_NATIVE_EVENT_TRUTH"
+    assert result["canonical_status"] == M.CANONICAL_DOWNSAMPLING_STATUS
+    assert result["canonical_generation_authorized"] is False
+
+
+def test_sampling_1000hz_requires_exact_grid_coincidence():
+    times = [j * 0.001 for j in range(16)]
+    coincident = M.sampling_authority(0.001, 1000.0, sample_times=times)
+    assert coincident["canonical_status"] == "NATIVE_1000HZ_EVENT_TRUTH"
+    assert coincident["canonical_generation_authorized"] is True
+    unverified = M.sampling_authority(0.001, 1000.0)
+    assert unverified["canonical_status"] == "NATIVE_GRID_COINCIDENCE_UNVERIFIED"
+    assert unverified["canonical_generation_authorized"] is False
+    jittered = [j * 0.001 + (3.0e-4 if j == 3 else 0.0) for j in range(16)]
+    mismatch = M.sampling_authority(0.001, 1000.0, sample_times=jittered)
+    assert mismatch["canonical_status"] == "NATIVE_GRID_MISMATCH_NOT_EVENT_TRUTH"
+    assert mismatch["canonical_generation_authorized"] is False
+
+
+def test_canonical_generation_fails_closed():
+    base = B.launch_flight_stream()[2][0]
+    native_2k = [dataclasses.replace(base, index=j, time_s=j * 0.0005) for j in range(8)]
+    with pytest.raises(M.V3SamplingAuthorityError):
+        M.canonical_1000hz_stream(native_2k)
+    jittered = [dataclasses.replace(base, index=j, time_s=j * 0.001 + (3.0e-4 if j == 3 else 0.0))
+                for j in range(8)]
+    with pytest.raises(M.V3SamplingAuthorityError):
+        M.canonical_1000hz_stream(jittered)
+    native_1k = [dataclasses.replace(base, index=j, time_s=j * 0.001) for j in range(8)]
+    stream = M.canonical_1000hz_stream(native_1k)
+    assert stream.status == "NATIVE_1000HZ_EVENT_TRUTH"
+    assert stream.sample_count == len(native_1k)
+    assert all(s.native_index0 == s.native_index1 == j and s.weight == 0.0
+               for j, s in enumerate(stream.samples))
 
 
 def test_canonical_stream_provenance():
@@ -631,7 +776,10 @@ def test_authority_conformance_matrix(audits):
     report = _report(audits, "AUTHORITY_CONFORMANCE_MATRIX.json")
     assert report["status"] == "PASS", _failed(report)
     assert report["zero_unresolved_current_patterns"] is True
-    assert len(report["conformance"]) == 19
+    assert len(report["conformance"]) == 22
+    assert report["frozen_assertions"]["RES95_EM10_PER_FOOT_BILATERAL_10N_10MS"] == "PASS"
+    assert report["frozen_assertions"]["SAMPLING_FAIL_CLOSED_1000HZ_CANONICAL"] == "PASS"
+    assert report["frozen_assertions"]["MUJOCO_CONTACT_SEMANTICS_VERSION"] == "3.8.0"
 
 
 def test_red_team_patterns_absent():
@@ -645,6 +793,17 @@ def test_validation_report_all_gates_pass(audits):
     assert report["status"] == "PASS", report["failed_checks"]
     assert report["artifact_count"] == 20
     assert not report["failed_checks"]
+
+
+def test_receipt_count_is_generated_from_validation_report(audits):
+    """The receipt aggregate must never be a stale handwritten literal."""
+    import re
+    report = B.measurement_validation_report(audits)
+    receipt = (EVIDENCE_DIR / "RES84_RECEIPT.md").read_text()
+    aggregates = re.findall(r"(\d+) checks, (\d+) failed", receipt)
+    assert aggregates, "receipt must display a generated aggregate"
+    expected = (report["total_checks"], len(report["failed_checks"]))
+    assert all((int(total), int(failed)) == expected for total, failed in aggregates)
 
 
 def test_evidence_artifacts_present():

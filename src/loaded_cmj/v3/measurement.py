@@ -13,8 +13,8 @@ Plant (:mod:`loaded_cmj.v3.plant`):
 * true foot clearance, orientation, prohibited/penetration state,
 * SYSTEM_COM / ATHLETE_COM and force-COM consistency observables,
 * native-vs-canonical sampling, signal-processing and event authority
-  (TAKEOFF_OCCURRENCE / TAKEOFF_CONFIRMATION / 10 N comparator / apex + H2
-  support quantities).
+  (TAKEOFF_OCCURRENCE / TAKEOFF_CONFIRMATION / RES95 EM-10 bilateral per-foot
+  10 N comparator / apex + H2 support quantities).
 
 Frozen facts established by RES-84 deterministic probes (see the evidence
 bundle; every one is re-executed by ``tests/test_res84_v3_measurement_contact.py``):
@@ -136,13 +136,45 @@ COP_NUMERICAL_BOUND_M = 2.0
 """A reconstructed CoP further than this from the origin is a numerical
 failure (NOT_EVALUABLE_NUMERICAL), not a physical result."""
 
+# --- contact-semantics version boundary (RES-84A provenance) -----------------
+MUJOCO_CONTACT_SEMANTICS_VERSION = "3.8.0"
+"""MuJoCo version whose contact semantics this authority was measured against.
+
+3.8 authority (measured on the sealed Plant and the margin/gap overlay probe):
+  detection  dist < margin
+  force      dist < margin - gap
+
+MuJoCo >= 3.9 changed the margin/gap semantics; bumping the pinned runtime
+therefore requires contact-semantics requalification before this authority is
+reused.  This is provenance/regression metadata, not a Plant change.
+``pyproject.toml`` remains ``mujoco==3.8.0``."""
+
+MUJOCO_CONTACT_SEMANTICS_REQUALIFICATION_NOTE = (
+    "MuJoCo >= 3.9 changed margin/gap semantics; a runtime bump requires "
+    "contact-semantics requalification (detection vs force bands, "
+    "detected-but-inactive contacts, clearance guard) before reuse."
+)
+
 # --- event authority ---------------------------------------------------------
 TAKEOFF_DWELL_S = 0.050
 """Genuine-flight dwell required for TAKEOFF_CONFIRMATION (EM-06)."""
 
 COMPARATOR_FORCE_N = 10.0
 COMPARATOR_DWELL_S = 0.010
-"""Force-plate comparator only (EM-10).  Never defines physical takeoff."""
+"""Force-plate comparator only (RES95 EM-10 / RES-82 F_thr).  Never defines
+physical takeoff, genuine flight, the occurrence timestamp or the H2 origin."""
+
+COMPARATOR_PREDICATE = "LEFT_FOOT_FZ < 10 N AND RIGHT_FOOT_FZ < 10 N continuously for >= 0.010 s"
+"""RES95 EM-10 / RES-82 per-foot comparator condition, evaluated on the two
+legal plantar per-foot wrenches (GROUND_ON_ATHLETE)."""
+
+COMPARATOR_INVALIDATION = "ACTIVE prohibited/non-plantar floor support invalidates the comparator"
+"""Prohibited/non-plantar support must invalidate the comparator rather than
+masquerade as bilateral below-threshold force."""
+
+COMPARATOR_TOTAL_FZ_ROLE = "REPORT_FIELD_ONLY"
+"""An equivalent total Fz may be emitted for comparison but never replaces the
+per-foot predicate."""
 
 # --- sampling / resampling authority ----------------------------------------
 NATIVE_DT_S = 0.002
@@ -151,6 +183,16 @@ NATIVE_STREAM_STATUS = "RAW_NATIVE_EVENT_TRUTH"
 CANONICAL_FREQUENCY_HZ = 1000.0
 CANONICAL_DT_S = 0.001
 CANONICAL_STREAM_STATUS = "DERIVED_UPSAMPLED_NOT_EVENT_TRUTH"
+NATIVE_1000HZ_STREAM_STATUS = "NATIVE_1000HZ_EVENT_TRUTH"
+"""A 1000 Hz native stream may be canonical event truth only when its sample
+times coincide exactly with the canonical grid."""
+CANONICAL_GRID_COINCIDENCE_UNVERIFIED_STATUS = "NATIVE_GRID_COINCIDENCE_UNVERIFIED"
+CANONICAL_GRID_MISMATCH_STATUS = "NATIVE_GRID_MISMATCH_NOT_EVENT_TRUTH"
+CANONICAL_DOWNSAMPLING_STATUS = "DOWNSAMPLING_NOT_AUTHORIZED"
+SAMPLING_DT_TOLERANCE_S = 1.0e-12
+"""Declared numerical tolerance for 'native dt == canonical dt' and for the
+native grid coincidence check.  Anything outside it is treated as a distinct
+cadence and fails closed."""
 REQUIRED_CANDIDATE_MAX_DT_S = 0.001
 """A candidate claiming >= 1000 Hz temporal resolution must run dt <= 0.001 s.
 RES-84 freezes the requirement; RES-86/89/91 own final timestep selection."""
@@ -1179,7 +1221,13 @@ def contact_parameter_authority(plant: V3Plant) -> dict[str, object]:
 @dataclass(frozen=True)
 class V3NativeFrame:
     """One raw native sample (event truth).  Every canonical sample derives
-    from these by declared interpolation with bracketing provenance."""
+    from these by declared interpolation with bracketing provenance.
+
+    ``left_foot_force_world_n`` / ``right_foot_force_world_n`` are the
+    GROUND_ON_ATHLETE legal plantar per-foot wrenches (ACTIVE legal plantar
+    contacts only) used by the RES95 EM-10 per-foot comparator.
+    ``nonplantar_floor_active`` counts ACTIVE floor contacts that are not legal
+    plantar (prohibited or other-floor): non-zero invalidates the comparator."""
 
     index: int
     time_s: float
@@ -1196,6 +1244,9 @@ class V3NativeFrame:
     total_floor_force_world_n: tuple[float, float, float]
     legal_ground_force_world_n: tuple[float, float, float]
     legal_ground_moment_world_nm: tuple[float, float, float]
+    left_foot_force_world_n: tuple[float, float, float]
+    right_foot_force_world_n: tuple[float, float, float]
+    nonplantar_floor_active: int
     cop_validity: str
     cop_x_m: float | None
     support_mode: str
@@ -1209,6 +1260,11 @@ def native_frame(plant: V3Plant, data: mujoco.MjData, index: int, time_s: float)
     legal = [r for r in legal_active]
     prohibited = [r for r in records if r.prohibited]
     wrench = _wrench_from_records(legal, WRENCH_REFERENCE_ORIGIN_M)
+    left_wrench = _wrench_from_records([r for r in legal if r.side == "left"], WRENCH_REFERENCE_ORIGIN_M)
+    right_wrench = _wrench_from_records([r for r in legal if r.side == "right"], WRENCH_REFERENCE_ORIGIN_M)
+    nonplantar_floor_active = sum(
+        1 for r in records if r.active_constraint
+        and r.contact_class in (V3ContactClass.PROHIBITED_FLOOR, V3ContactClass.OTHER_FLOOR))
     plate = ground_reaction_wrench(plant, data, include_prohibited=True)
     cop = cop_from_plant(plant, data)
     hull = active_support_hull(plant, data)
@@ -1232,6 +1288,9 @@ def native_frame(plant: V3Plant, data: mujoco.MjData, index: int, time_s: float)
         total_floor_force_world_n=plate.force_world_n,
         legal_ground_force_world_n=wrench.force_world_n,
         legal_ground_moment_world_nm=wrench.moment_world_nm,
+        left_foot_force_world_n=left_wrench.force_world_n,
+        right_foot_force_world_n=right_wrench.force_world_n,
+        nonplantar_floor_active=nonplantar_floor_active,
         cop_validity=cop.validity.value,
         cop_x_m=cop.cop_x_m,
         support_mode=hull.support_mode.value,
@@ -1323,6 +1382,9 @@ def interpolate_state(frames: Sequence[V3NativeFrame], t_s: float) -> tuple[int,
         total_floor_force_world_n=lerp3(a.total_floor_force_world_n, b.total_floor_force_world_n),
         legal_ground_force_world_n=lerp3(a.legal_ground_force_world_n, b.legal_ground_force_world_n),
         legal_ground_moment_world_nm=lerp3(a.legal_ground_moment_world_nm, b.legal_ground_moment_world_nm),
+        left_foot_force_world_n=lerp3(a.left_foot_force_world_n, b.left_foot_force_world_n),
+        right_foot_force_world_n=lerp3(a.right_foot_force_world_n, b.right_foot_force_world_n),
+        nonplantar_floor_active=a.nonplantar_floor_active,
         cop_validity=a.cop_validity,
         cop_x_m=a.cop_x_m if w == 0.0 else (b.cop_x_m if w == 1.0 else None),
         support_mode=a.support_mode,
@@ -1330,16 +1392,94 @@ def interpolate_state(frames: Sequence[V3NativeFrame], t_s: float) -> tuple[int,
     return i0, i1, w, interpolated
 
 
-def canonical_1000hz_stream(frames: Sequence[V3NativeFrame]) -> V3CanonicalStream:
-    """Derived 1000 Hz comparison stream with per-sample native provenance.
+class V3SamplingAuthorityError(RuntimeError):
+    """Canonical stream generation refused by the frozen sampling authority."""
 
-    Native 500 Hz < canonical 1000 Hz, therefore the canonical stream is an
-    *upsampled* reporting product: ``DERIVED_UPSAMPLED_NOT_EVENT_TRUTH``.
-    No filter is applied; no anti-alias is required for upsampling; canonical
-    samples are only produced inside the native time span.
+
+def native_sample_times_coincide(sample_times: Sequence[float],
+                                 *, tolerance_s: float = SAMPLING_DT_TOLERANCE_S) -> bool:
+    """True when the times lie exactly on the canonical 1000 Hz grid.
+
+    The grid is anchored at the first sample time: ``t_j = t_0 + j * 0.001``.
+    """
+    times = [float(t) for t in sample_times]
+    if not times:
+        return False
+    return all(abs(times[i] - (times[0] + i * CANONICAL_DT_S)) <= tolerance_s
+               for i in range(len(times)))
+
+
+def native_grid_coincides_with_canonical(frames: Sequence[V3NativeFrame],
+                                         *, tolerance_s: float = SAMPLING_DT_TOLERANCE_S) -> bool:
+    return native_sample_times_coincide([f.time_s for f in frames], tolerance_s=tolerance_s)
+
+
+def native_spacing_s(frames: Sequence[V3NativeFrame]) -> float:
+    if len(frames) < 2:
+        return NATIVE_DT_S
+    return float(frames[1].time_s - frames[0].time_s)
+
+
+def canonical_1000hz_stream(frames: Sequence[V3NativeFrame]) -> V3CanonicalStream:
+    """Canonical 1000 Hz comparison stream with per-sample native provenance.
+
+    Fail-closed sampling authority (RES-84A erratum 2):
+
+    * native dt < 0.001 s: producing a 1000 Hz stream requires downsampling.
+      ``DOWN_SAMPLING_AUTHORIZED = False`` and no anti-alias authority is
+      frozen, so generation raises :class:`V3SamplingAuthorityError`.
+    * native dt == 0.001 s within the declared tolerance: the canonical grid
+      may be ``NATIVE_1000HZ_EVENT_TRUTH`` only when the sample times coincide
+      exactly with the canonical grid; otherwise generation raises.
+    * native dt > 0.001 s: the canonical stream is an *upsampled* reporting
+      product, ``DERIVED_UPSAMPLED_NOT_EVENT_TRUTH``.  No filter is applied;
+      no anti-alias is required for upsampling; canonical samples are only
+      produced inside the native time span.
     """
     if not frames:
         raise ValueError("empty frame sequence")
+    dt = native_spacing_s(frames)
+    if dt < CANONICAL_DT_S - SAMPLING_DT_TOLERANCE_S:
+        raise V3SamplingAuthorityError(
+            f"{CANONICAL_DOWNSAMPLING_STATUS}: native dt={dt!r} s < canonical dt={CANONICAL_DT_S!r} s; "
+            "downsampling is not authorized without a separately frozen anti-alias authority"
+        )
+    if abs(dt - CANONICAL_DT_S) <= SAMPLING_DT_TOLERANCE_S:
+        if not native_grid_coincides_with_canonical(frames):
+            raise V3SamplingAuthorityError(
+                f"{CANONICAL_GRID_MISMATCH_STATUS}: native dt == canonical dt but the sample times "
+                "do not coincide exactly with the canonical grid"
+            )
+        samples = tuple(
+            V3CanonicalSample(
+                index=j,
+                time_s=float(f.time_s),
+                native_index0=j,
+                native_index1=j,
+                weight=0.0,
+                com_world_m=f.com_world_m,
+                com_velocity_world_m_s=f.com_velocity_world_m_s,
+                total_floor_force_world_n=f.total_floor_force_world_n,
+                legal_ground_force_world_n=f.legal_ground_force_world_n,
+                left_clearance_m=f.left_clearance_m,
+                right_clearance_m=f.right_clearance_m,
+            )
+            for j, f in enumerate(frames)
+        )
+        return V3CanonicalStream(
+            status=NATIVE_1000HZ_STREAM_STATUS,
+            source_status=NATIVE_STREAM_STATUS,
+            native_dt_s=dt,
+            native_frequency_hz=1.0 / dt,
+            canonical_dt_s=CANONICAL_DT_S,
+            canonical_frequency_hz=CANONICAL_FREQUENCY_HZ,
+            interpolation=INTERPOLATION_METHOD,
+            filter_family=FILTER_FAMILY,
+            anti_alias=ANTI_ALIAS,
+            boundary_handling="NATIVE_SAMPLES_ALREADY_ON_CANONICAL_GRID; NO_INTERPOLATION",
+            sample_count=len(samples),
+            samples=samples,
+        )
     t0, t1 = frames[0].time_s, frames[-1].time_s
     n = int(math.floor((t1 - t0) / CANONICAL_DT_S)) + 1
     samples = []
@@ -1362,8 +1502,8 @@ def canonical_1000hz_stream(frames: Sequence[V3NativeFrame]) -> V3CanonicalStrea
     return V3CanonicalStream(
         status=CANONICAL_STREAM_STATUS,
         source_status=NATIVE_STREAM_STATUS,
-        native_dt_s=NATIVE_DT_S,
-        native_frequency_hz=NATIVE_FREQUENCY_HZ,
+        native_dt_s=dt,
+        native_frequency_hz=1.0 / dt,
         canonical_dt_s=CANONICAL_DT_S,
         canonical_frequency_hz=CANONICAL_FREQUENCY_HZ,
         interpolation=INTERPOLATION_METHOD,
@@ -1375,16 +1515,60 @@ def canonical_1000hz_stream(frames: Sequence[V3NativeFrame]) -> V3CanonicalStrea
     )
 
 
-def sampling_authority(dt_s: float, frequency_hz: float) -> dict[str, object]:
-    """Declared sampling status for a stream with the given native cadence."""
-    is_native_1khz = dt_s <= REQUIRED_CANDIDATE_MAX_DT_S + 1e-15
+def sampling_authority(dt_s: float, frequency_hz: float,
+                       sample_times: Sequence[float] | None = None) -> dict[str, object]:
+    """Declared sampling status for a stream with the given native cadence.
+
+    Fail-closed cases (RES-84A erratum 2):
+
+    * ``dt > 0.001 s``: the canonical 1000 Hz product is
+      ``DERIVED_UPSAMPLED_NOT_EVENT_TRUTH`` (generation authorized).
+    * ``dt == 0.001 s`` within ``SAMPLING_DT_TOLERANCE_S``: the canonical grid
+      may be ``NATIVE_1000HZ_EVENT_TRUTH`` only when ``sample_times`` are
+      supplied and coincide exactly with the canonical grid; otherwise the
+      status fails closed and generation is not authorized.
+    * ``dt < 0.001 s``: a 1000 Hz canonical stream would require downsampling;
+      status is ``DOWNSAMPLING_NOT_AUTHORIZED`` and generation is refused until
+      an anti-alias authority is separately frozen.
+    """
+    dt = float(dt_s)
+    if dt < CANONICAL_DT_S - SAMPLING_DT_TOLERANCE_S:
+        canonical_status = CANONICAL_DOWNSAMPLING_STATUS
+        generation_authorized = False
+        reason = ("native dt < canonical dt requires downsampling; "
+                  "DOWN_SAMPLING_AUTHORIZED=false and no anti-alias authority is frozen")
+    elif abs(dt - CANONICAL_DT_S) <= SAMPLING_DT_TOLERANCE_S:
+        if sample_times is None:
+            canonical_status = CANONICAL_GRID_COINCIDENCE_UNVERIFIED_STATUS
+            generation_authorized = False
+            reason = ("native dt == canonical dt but no sample times were supplied; "
+                      "canonical-grid coincidence cannot be verified")
+        elif native_sample_times_coincide(sample_times):
+            canonical_status = NATIVE_1000HZ_STREAM_STATUS
+            generation_authorized = True
+            reason = "native sample times coincide exactly with the canonical 1000 Hz grid"
+        else:
+            canonical_status = CANONICAL_GRID_MISMATCH_STATUS
+            generation_authorized = False
+            reason = "native sample times do not coincide exactly with the canonical 1000 Hz grid"
+    else:
+        canonical_status = CANONICAL_STREAM_STATUS
+        generation_authorized = True
+        reason = "native dt > canonical dt; the canonical product is a derived upsampled reporting stream"
     return {
         "authority_id": V3_MEASUREMENT_AUTHORITY_ID,
-        "native_dt_s": float(dt_s),
+        "native_dt_s": dt,
         "native_frequency_hz": float(frequency_hz),
-        "native_status": NATIVE_STREAM_STATUS if abs(dt_s - NATIVE_DT_S) < 1e-15 else "CALLER_DECLARED_NATIVE",
+        "native_status": NATIVE_STREAM_STATUS if abs(dt - NATIVE_DT_S) < SAMPLING_DT_TOLERANCE_S
+                         else "CALLER_DECLARED_NATIVE",
         "canonical_frequency_hz": CANONICAL_FREQUENCY_HZ,
-        "canonical_status": NATIVE_STREAM_STATUS if is_native_1khz else CANONICAL_STREAM_STATUS,
+        "canonical_dt_s": CANONICAL_DT_S,
+        "canonical_status": canonical_status,
+        "canonical_generation_authorized": generation_authorized,
+        "canonical_generation_blocked_reason": None if generation_authorized else reason,
+        "grid_coincidence": (
+            None if sample_times is None else native_sample_times_coincide(sample_times)
+        ),
         "interpolation": INTERPOLATION_METHOD,
         "filter_family": FILTER_FAMILY,
         "anti_alias": ANTI_ALIAS,
@@ -1640,13 +1824,35 @@ def confirm_takeoff(
     )
 
 
+def bilateral_per_foot_below_threshold(
+    left_fz_n: float,
+    right_fz_n: float,
+    *,
+    threshold_n: float = COMPARATOR_FORCE_N,
+) -> bool:
+    """RES95 EM-10 / RES-82 per-foot predicate.
+
+    ``LEFT_FOOT_FZ < threshold AND RIGHT_FOOT_FZ < threshold`` on the
+    GROUND_ON_ATHLETE legal plantar per-foot wrenches.  This is the comparator
+    condition; it never defines physical takeoff, flight or the H2 origin.
+    """
+    return bool(float(left_fz_n) < threshold_n and float(right_fz_n) < threshold_n)
+
+
 @dataclass(frozen=True)
 class V3ComparatorResult:
     triggered: bool
+    invalid: bool
+    status: str
     comparator_time_s: float | None
     offset_s: float | None
     threshold_n: float
     dwell_s: float
+    left_fz_at_trigger_n: float | None
+    right_fz_at_trigger_n: float | None
+    total_fz_at_trigger_n: float | None
+    invalidation_reason: str | None
+    predicate: str = COMPARATOR_PREDICATE
     note: str = (
         "Diagnostic/comparability only.  Never defines physical takeoff, flight "
         "or the H2 time origin."
@@ -1660,34 +1866,94 @@ def force_takeoff_comparator(
     threshold_n: float = COMPARATOR_FORCE_N,
     dwell_s: float = COMPARATOR_DWELL_S,
 ) -> V3ComparatorResult:
-    """Total vertical GRF < ``threshold_n`` continuously for >= ``dwell_s``."""
+    """RES95 EM-10 bilateral per-foot comparator (diagnostic only).
+
+    Condition: ``LEFT_FOOT_FZ < threshold_n`` AND ``RIGHT_FOOT_FZ < threshold_n``
+    continuously for >= ``dwell_s`` on the legal plantar per-foot wrenches.
+
+    The first contiguous below-threshold episode that reaches the persistence
+    requirement decides the result:
+
+    * clean episode -> ``TRIGGERED`` (``status == "TRIGGERED"``);
+    * episode during which ACTIVE prohibited/non-plantar floor support exists ->
+      ``INVALID`` (fail closed; the below-threshold per-foot force may not be
+      read as bilateral unloading while another support carries load);
+    * no qualifying episode -> ``NOT_TRIGGERED``.
+
+    An equivalent total Fz is emitted only as a report field
+    (``total_fz_at_trigger_n``); it never replaces the per-foot predicate.
+    """
     if not frames:
         raise ValueError("empty frame sequence")
     dt = frames[1].time_s - frames[0].time_s if len(frames) > 1 else NATIVE_DT_S
-    need = int(math.ceil(dwell_s / dt - 1e-12))
-    run_start: int | None = None
-    for i, f in enumerate(frames):
-        below = abs(f.total_floor_force_world_n[2]) < threshold_n
-        if below and run_start is None:
-            run_start = i
-        if not below:
-            run_start = None
-        if run_start is not None and i - run_start + 1 >= max(need, 1):
-            t_cmp = frames[run_start].time_s
-            offset = None if occurrence.occurrence_time_s is None else float(t_cmp - occurrence.occurrence_time_s)
+    need = max(int(math.ceil(dwell_s / dt - 1e-12)), 1)
+
+    def _evaluate_episode(start: int, end: int) -> V3ComparatorResult | None:
+        """Evaluate one contiguous below-threshold episode ``[start, end)``."""
+        if end - start < need:
+            return None
+        contaminated = [j for j in range(start, end) if frames[j].nonplantar_floor_active > 0]
+        if contaminated:
             return V3ComparatorResult(
-                triggered=True,
-                comparator_time_s=float(t_cmp),
-                offset_s=offset,
+                triggered=False,
+                invalid=True,
+                status="INVALID",
+                comparator_time_s=None,
+                offset_s=None,
                 threshold_n=threshold_n,
                 dwell_s=dwell_s,
+                left_fz_at_trigger_n=None,
+                right_fz_at_trigger_n=None,
+                total_fz_at_trigger_n=None,
+                invalidation_reason=(
+                    f"{COMPARATOR_INVALIDATION}: ACTIVE non-plantar floor support in native "
+                    f"frames {contaminated[0]}..{contaminated[-1]} of the persistence episode"
+                ),
             )
+        t_cmp = frames[start].time_s
+        offset = None if occurrence.occurrence_time_s is None else float(t_cmp - occurrence.occurrence_time_s)
+        return V3ComparatorResult(
+            triggered=True,
+            invalid=False,
+            status="TRIGGERED",
+            comparator_time_s=float(t_cmp),
+            offset_s=offset,
+            threshold_n=threshold_n,
+            dwell_s=dwell_s,
+            left_fz_at_trigger_n=float(frames[start].left_foot_force_world_n[2]),
+            right_fz_at_trigger_n=float(frames[start].right_foot_force_world_n[2]),
+            total_fz_at_trigger_n=float(frames[start].total_floor_force_world_n[2]),
+            invalidation_reason=None,
+        )
+
+    run_start: int | None = None
+    for i, f in enumerate(frames):
+        below = bilateral_per_foot_below_threshold(
+            f.left_foot_force_world_n[2], f.right_foot_force_world_n[2], threshold_n=threshold_n)
+        if below:
+            if run_start is None:
+                run_start = i
+        elif run_start is not None:
+            result = _evaluate_episode(run_start, i)
+            if result is not None:
+                return result
+            run_start = None
+    if run_start is not None:
+        result = _evaluate_episode(run_start, len(frames))
+        if result is not None:
+            return result
     return V3ComparatorResult(
         triggered=False,
+        invalid=False,
+        status="NOT_TRIGGERED",
         comparator_time_s=None,
         offset_s=None,
         threshold_n=threshold_n,
         dwell_s=dwell_s,
+        left_fz_at_trigger_n=None,
+        right_fz_at_trigger_n=None,
+        total_fz_at_trigger_n=None,
+        invalidation_reason=None,
     )
 
 
@@ -1874,8 +2140,11 @@ __all__ = [
     "ACTIVE_FORCE_STRICT_GT_ZERO",
     "ANTI_ALIAS",
     "ATHLETE_MASS_KG",
+    "CANONICAL_DOWNSAMPLING_STATUS",
     "CANONICAL_DT_S",
     "CANONICAL_FREQUENCY_HZ",
+    "CANONICAL_GRID_COINCIDENCE_UNVERIFIED_STATUS",
+    "CANONICAL_GRID_MISMATCH_STATUS",
     "CANONICAL_STREAM_STATUS",
     "CLEARANCE_GUARD_EFFECTIVE_MARGIN_M",
     "CLEARANCE_GUARD_M",
@@ -1883,6 +2152,9 @@ __all__ = [
     "CLEARANCE_GUARD_PENETRATION_ALLOWANCE_M",
     "COMPARATOR_DWELL_S",
     "COMPARATOR_FORCE_N",
+    "COMPARATOR_INVALIDATION",
+    "COMPARATOR_PREDICATE",
+    "COMPARATOR_TOTAL_FZ_ROLE",
     "COP_LOW_FZ_TOLERANCE_N",
     "COP_NUMERICAL_BOUND_M",
     "COP_REPORTING_RESOLUTION_M",
@@ -1892,6 +2164,9 @@ __all__ = [
     "FILTER_FAMILY",
     "GRAVITY_M_S2",
     "IMPULSE_INTEGRATION_RULE",
+    "MUJOCO_CONTACT_SEMANTICS_REQUALIFICATION_NOTE",
+    "MUJOCO_CONTACT_SEMANTICS_VERSION",
+    "NATIVE_1000HZ_STREAM_STATUS",
     "NATIVE_POSITION_VELOCITY_HALF_STEP_OFFSET",
     "INTEGRATION_METHOD",
     "INTERPOLATION_METHOD",
@@ -1900,6 +2175,7 @@ __all__ = [
     "NATIVE_STREAM_STATUS",
     "PLATE_FRAME_ID",
     "REQUIRED_CANDIDATE_MAX_DT_S",
+    "SAMPLING_DT_TOLERANCE_S",
     "SUPPORT_FOOTPRINT_TOLERANCE_M",
     "SUPPORT_PLANE_Z_M",
     "SYSTEM_MASS_KG",
@@ -1920,6 +2196,7 @@ __all__ = [
     "V3NativeFrame",
     "V3OrientationState",
     "V3OutOfPlaneObservables",
+    "V3SamplingAuthorityError",
     "V3SupportHull",
     "V3SupportMode",
     "V3TakeoffConfirmation",
@@ -1934,6 +2211,7 @@ __all__ = [
     "active_support_hull",
     "athlete_body_ids",
     "athlete_com_state",
+    "bilateral_per_foot_below_threshold",
     "canonical_1000hz_stream",
     "central_difference",
     "confirm_takeoff",
@@ -1953,6 +2231,9 @@ __all__ = [
     "legal_plantar_records",
     "measure",
     "native_frame",
+    "native_grid_coincides_with_canonical",
+    "native_sample_times_coincide",
+    "native_spacing_s",
     "orientation_state",
     "out_of_plane_observables",
     "prohibited_records",

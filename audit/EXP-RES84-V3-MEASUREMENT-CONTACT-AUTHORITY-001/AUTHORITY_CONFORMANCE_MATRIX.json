@@ -54,7 +54,12 @@
       "status": "PASS"
     },
     {
-      "requirement": "10 N comparator diagnostic only",
+      "requirement": "RES95 EM-10 bilateral per-foot 10 N / 10 ms comparator, diagnostic only",
+      "evidence": "FORCE_THRESHOLD_COMPARATOR_AUDIT",
+      "status": "PASS"
+    },
+    {
+      "requirement": "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS",
       "evidence": "FORCE_THRESHOLD_COMPARATOR_AUDIT",
       "status": "PASS"
     },
@@ -66,6 +71,16 @@
     {
       "requirement": "native 500 Hz vs canonical 1000 Hz separation",
       "evidence": "SAMPLING_RESAMPLING_AUTHORITY",
+      "status": "PASS"
+    },
+    {
+      "requirement": "sampling authority fail-closed: downsampling refused, native-grid coincidence required",
+      "evidence": "SAMPLING_RESAMPLING_AUTHORITY",
+      "status": "PASS"
+    },
+    {
+      "requirement": "MuJoCo 3.8.0 contact-semantics version boundary recorded",
+      "evidence": "MEASUREMENT_IMPLEMENTATION_SPEC",
       "status": "PASS"
     },
     {
@@ -99,6 +114,11 @@
       "status": "PASS"
     }
   ],
+  "frozen_assertions": {
+    "RES95_EM10_PER_FOOT_BILATERAL_10N_10MS": "PASS",
+    "SAMPLING_FAIL_CLOSED_1000HZ_CANONICAL": "PASS",
+    "MUJOCO_CONTACT_SEMANTICS_VERSION": "3.8.0"
+  },
   "red_team_scan": {
     "ncon_as_active_support": {
       "pattern": "active = data.ncon",
@@ -147,6 +167,16 @@
     },
     "ten_newton_defines_takeoff": {
       "pattern": "occurrence_time_s = comparator",
+      "present": false,
+      "resolved": true
+    },
+    "comparator_uses_total_force_substitute": {
+      "pattern": "abs(f.total_floor_force_world_n[2]) < threshold_n",
+      "present": false,
+      "resolved": true
+    },
+    "sampling_1khz_dt_le_bug": {
+      "pattern": "dt_s <= REQUIRED_CANDIDATE_MAX_DT_S",
       "present": false,
       "resolved": true
     },
@@ -249,6 +279,16 @@
       "detail": ""
     },
     {
+      "check": "red_team_absent:comparator_uses_total_force_substitute",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "red_team_absent:sampling_1khz_dt_le_bug",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "check": "red_team_absent:500hz_mislabeled_native_1000hz",
       "pass": true,
       "detail": ""
@@ -316,7 +356,25 @@
     {
       "check": "conformance_rows_complete",
       "pass": true,
-      "detail": 19
+      "detail": 22
+    },
+    {
+      "check": "res95_em10_assertion_pass",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "comparator_per_foot_predicate_frozen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "mujoco_contact_semantics_version_recorded",
+      "pass": true,
+      "detail": {
+        "declared": "3.8.0",
+        "runtime": "3.8.0"
+      }
     }
   ],
   "status": "PASS"
