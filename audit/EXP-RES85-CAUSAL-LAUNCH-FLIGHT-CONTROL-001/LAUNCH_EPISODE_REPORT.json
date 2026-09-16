@@ -1,0 +1,245 @@
+{
+  "apex_h2": {
+    "apex_time_s": 1.6131824859906343,
+    "ballistic_cross_check_delta_m": -0.001020129487257243,
+    "ballistic_height_m": 0.031186345438236257,
+    "com_z_apex_m": 1.1637886526683083,
+    "com_z_takeoff_m": 1.1336224367173293,
+    "evaluable": true,
+    "h2_support_m": 0.030166215950979014,
+    "reason": "",
+    "takeoff_vz_m_s": 0.782225093881675
+  },
+  "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
+  "diagnostic_comparator": {
+    "confirmation_offset_s": 1.538,
+    "confirmation_time_s": 1.544,
+    "invalid": false,
+    "k_d": 5,
+    "left_fz_at_trigger_n": 0.0,
+    "note": "Diagnostic/comparability only.  Never defines physical takeoff, flight or the H2 time origin.",
+    "onset_offset_s": 1.528,
+    "onset_time_s": 1.534,
+    "required_true_samples": 6,
+    "right_fz_at_trigger_n": 0.0,
+    "status": "TRIGGERED",
+    "total_fz_at_trigger_n": 0.0,
+    "triggered": true,
+    "true_sample_count": 76
+  },
+  "episode_status": "COMPLETED",
+  "fault": null,
+  "impulse_cross_check": {
+    "cross_check_end_index": 807,
+    "cross_check_end_reason": "APEX_VZ_NONPOSITIVE_CROSSING",
+    "impulse_derived_delta_vz_m_s": -0.7848000000000002,
+    "impulse_n_s": -77.69520000000001,
+    "measured_delta_vz_m_s": -0.7902762341710249,
+    "occurrence_index": 767,
+    "occurrence_vz_m_s": 0.782225093881675,
+    "residual_m_s": 0.005476234171024719,
+    "rule": "LEFT_RECTANGLE_INTEGRATOR_CONSISTENT"
+  },
+  "method_explicit_h2_report": {
+    "BAR_LVT_DISPLACEMENT_VELOCITY": {
+      "reason": "the sealed Plant has no bar tether instrument; the bar/LVT family cannot be produced natively",
+      "status": "NOT_APPLICABLE_NATIVE"
+    },
+    "ELITE_SOCCER_PLUS20_H2_HARD_GATE": "NOT_ESTABLISHED",
+    "EXPERIMENTAL_COMPARABILITY_REPORT_ONLY": {
+      "FORCE_PLATFORM_FLIGHT_TIME": {
+        "T_flight_s": 0.1419999999999999,
+        "height_m": 0.024726104999999967,
+        "method_id": "FORCE_PLATFORM_FLIGHT_TIME",
+        "note": "boundaries are force-comparator crossings, not physical takeoff",
+        "status": "EXPERIMENTAL_COMPARABILITY_METRIC_REPORT_ONLY"
+      }
+    },
+    "PRIMARY_CANONICAL": {
+      "evaluable": true,
+      "method_id": "DIRECT_SIMULATOR_SYSTEM_COM",
+      "quantity": "COM_RISE_TAKEOFF_TO_APEX",
+      "value_m": 0.030166215950979014
+    },
+    "SECONDARY_CROSS_CHECKS": {
+      "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ": {
+        "residual_m": -0.001020129487257243,
+        "takeoff_vz_m_s": 0.782225093881675,
+        "value_m": 0.031186345438236257
+      },
+      "IMPULSE_DERIVED_TAKEOFF_VELOCITY": {
+        "delta_vz_m_s": -0.7848000000000002,
+        "residual_m_s": 0.005476234171024719
+      }
+    },
+    "anti_triviality_reference": {
+      "role": "HISTORICAL_ANTI_TRIVIALITY_NEGATIVE_CONTROL_ONLY",
+      "used_as_target": false,
+      "value_m": 0.15
+    }
+  },
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "phase_trajectory": [
+    "STAND",
+    "COUNTERMOVEMENT",
+    "BRAKING",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "FLIGHT",
+    "LANDING_PREP"
+  ],
+  "profiled": {
+    "horizon_s": 2.998,
+    "measurement_authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+    "native_dt_s": 0.002,
+    "native_samples": 1500,
+    "plant_xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+    "zero_passive": false
+  },
+  "res85_claim_end": {
+    "reason": "FIRST_LEGAL_PLANTAR_RECONTACT_AFTER_FLIGHT",
+    "sample": 843,
+    "time_s": 1.686
+  },
+  "schema_version": "1.0.0",
+  "takeoff_confirmation": {
+    "bilateral_clearance_max_m": 0.015197500419071868,
+    "checks": [
+      {
+        "check": "occurrence_valid",
+        "detail": "candidate derived from a support-to-zero transition",
+        "pass": true
+      },
+      {
+        "check": "zero_support_at_native_index",
+        "detail": "native index 767 has zero active legal plantar support",
+        "pass": true
+      },
+      {
+        "check": "dwell_coverage",
+        "detail": "confirmation sample is the first native sample at or after occurrence + 0.050 s; K_D=25 intervals, elapsed=0.05, reason=OK",
+        "pass": true
+      },
+      {
+        "check": "no_legal_plantar_recontact",
+        "detail": "zero active legal plantar contact through the confirmation sample",
+        "pass": true
+      },
+      {
+        "check": "bilateral_clearance_reaches_guard",
+        "detail": "max bilateral clearance 0.015197500419071868 vs guard 0.002",
+        "pass": true
+      },
+      {
+        "check": "system_com_vz_positive",
+        "detail": "SYSTEM_COM vertical velocity at the occurrence is positive",
+        "pass": true
+      },
+      {
+        "check": "no_prohibited_contact",
+        "detail": "no prohibited floor contact through the confirmation sample",
+        "pass": true
+      }
+    ],
+    "clearance_guard_m": 0.002,
+    "confirmation_elapsed_s": 0.05,
+    "confirmation_sample": 792,
+    "confirmation_time_s": 1.584,
+    "confirmed": true,
+    "failed_checks": []
+  },
+  "takeoff_occurrence": {
+    "bracket_weight": 1.0,
+    "com_vz_m_s": 0.04937114511807065,
+    "com_z_m": 1.1699746450098456,
+    "interpolated": false,
+    "last_support_index": 2,
+    "left_clearance_m": -0.0011684992469545791,
+    "native_index": 3,
+    "reason": "SUPPORT_TO_ZERO_TRANSITION",
+    "right_clearance_m": -0.0011684992469545756,
+    "time_s": 0.006,
+    "valid": true
+  },
+  "transition_log": [
+    {
+      "from": "COUNTERMOVEMENT",
+      "reason": "QUIET_SUPPORTED_STATE_ESTABLISHED",
+      "sample": 145,
+      "time_s": 0.29
+    },
+    {
+      "from": "BRAKING",
+      "reason": "PREDICTIVE_BRAKING_TRIGGER",
+      "sample": 566,
+      "time_s": 1.1320000000000001
+    },
+    {
+      "from": "PROPULSION",
+      "reason": "PHYSICAL_UPWARD_REVERSAL",
+      "sample": 653,
+      "time_s": 1.306
+    },
+    {
+      "from": "TAKEOFF_CONFIRM",
+      "reason": "RES84_TAKEOFF_OCCURRENCE_CANDIDATE",
+      "sample": 734,
+      "time_s": 1.468
+    },
+    {
+      "from": "PROPULSION",
+      "reason": "RECONTACT_CANCELS_PROVISIONAL_FLIGHT",
+      "sample": 735,
+      "time_s": 1.47
+    },
+    {
+      "from": "TAKEOFF_CONFIRM",
+      "reason": "RES84_TAKEOFF_OCCURRENCE_CANDIDATE",
+      "sample": 755,
+      "time_s": 1.51
+    },
+    {
+      "from": "PROPULSION",
+      "reason": "RECONTACT_CANCELS_PROVISIONAL_FLIGHT",
+      "sample": 757,
+      "time_s": 1.514
+    },
+    {
+      "from": "TAKEOFF_CONFIRM",
+      "reason": "RES84_TAKEOFF_OCCURRENCE_CANDIDATE",
+      "sample": 760,
+      "time_s": 1.52
+    },
+    {
+      "from": "PROPULSION",
+      "reason": "RECONTACT_CANCELS_PROVISIONAL_FLIGHT",
+      "sample": 761,
+      "time_s": 1.522
+    },
+    {
+      "from": "TAKEOFF_CONFIRM",
+      "reason": "RES84_TAKEOFF_OCCURRENCE_CANDIDATE",
+      "sample": 767,
+      "time_s": 1.534
+    },
+    {
+      "from": "FLIGHT",
+      "reason": "RES84_TAKEOFF_CONFIRMATION",
+      "sample": 792,
+      "time_s": 1.584
+    },
+    {
+      "from": "LANDING_PREP",
+      "reason": "ACTUAL_DESCENT_OR_PREDICTED_TOUCHDOWN",
+      "sample": 808,
+      "time_s": 1.616
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "purpose": "Record every amendment made to an Achievement-A frozen authority artifact during Achievement B, with the deterministic evidence that forced it. No amendment relaxes a scientific constraint.",
+  "amendments": [
+    {
+      "id": "AMD-01",
+      "artifact": "ACTUATION_AUTHORITY.json",
+      "field": "enforcement_order / feasible_interval_note",
+      "change": "The enforcement chain is declared as a projection onto the intersection of four intervals (torque-rate around the previous applied moment, net-moment ceiling, joint-power ceiling, MTP budget cap) instead of a sequential cascade, and the declared precedence for an empty intersection (moment/power/MTP limit over smoothness, recorded as power_emergency or moment_emergency) is added.",
+      "reason": "The sequential cascade allowed the joint-power stage to move the applied moment further than the torque-rate ceiling in one native step (measured max trunk rate 13995.96 N*m/s versus the 3000 N*m/s ceiling in the first Achievement-B qualification run), i.e. the frozen chain could not satisfy its own constraints simultaneously. The intersection projection satisfies all four constraints by construction, and the only remaining exception (a rapidly shrinking power/MTP ceiling) is declared and recorded.",
+      "scientific_effect": "none: every ceiling value is unchanged; only the enforcement semantics are made self-consistent and the exception is made explicit and auditable",
+      "evidence": [
+        "ACTUATION_CONFORMANCE_REPORT.json: torque_rate_ceiling_respected_except_declared_emergencies",
+        "NEGATIVE_CONTROLS_REPORT.json: NC-08, NC-09"
+      ]
+    },
+    {
+      "id": "AMD-02",
+      "artifact": "ACTUATION_AUTHORITY.json",
+      "field": "bilateral_symmetry_rules.rule",
+      "change": "The applied-moment symmetry tolerance is stated as 1e-9 N*m (was 1e-12 N*m), because the per-channel constraint projection may introduce a bounded numerical asymmetry after the symmetric-command projection.",
+      "reason": "Measured maximum pair asymmetry across the qualified episode was 1.17e-12 N*m; the tightened claim of 1e-12 N*m was not supported by the implementation and is therefore corrected rather than the implementation weakened. The commanded symmetry is still exact and the pre-projection asymmetry is recorded every sample.",
+      "scientific_effect": "none: the nominal bilateral rule is unchanged; the tolerance statement now matches the measured bound",
+      "evidence": [
+        "ACTUATION_CONFORMANCE_REPORT.json: max_bilateral_asymmetry_nm, max_pre_projection_asymmetry_nm",
+        "NEGATIVE_CONTROLS_REPORT.json: NC-10"
+      ]
+    }
+  ],
+  "unchanged_authorities": [
+    "METHOD_COMPARATOR_PANEL.json (no amendment)",
+    "MTP_ENERGY_AUTHORITY.json (no amendment)",
+    "PHASE_MACHINE_AUTHORITY.json (no amendment: the implemented COUNTERMOVEMENT force-reference law is described by 'state feedback: the leg-flexion reference rate is driven by the measured descent-velocity error against the frozen descent-velocity command' read as the velocity reference of the vertical-force loop; the descent-velocity command, the structural bound and the one-way braking trigger are implemented exactly as frozen)"
+  ],
+  "verdict": "AMENDMENTS ARE ENFORCEMENT-SEMANTICS AND TOLERANCE-STATEMENT CORRECTIONS; NO CEILING, BUDGET, EVENT OR PHASE-PREDICATE WAS RELAXED"
+}

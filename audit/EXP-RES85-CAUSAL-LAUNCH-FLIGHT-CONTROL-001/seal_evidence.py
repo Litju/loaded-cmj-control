@@ -62,7 +62,8 @@ def seal_external() -> dict:
         "schema_version": "1.0.0",
         "MISSION": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
         "LINEAR_ISSUE": "RES-85",
-        "ACHIEVEMENT": "V3 causal loaded-CMJ launch and flight control rebuilt and sealed on the RES-84 measurement authority",
+        "ACHIEVEMENT": ("V3 causal loaded-CMJ launch and flight control rebuilt and "
+                        "sealed on the RES-84 measurement authority"),
         "AUTHORITY_ID": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
         "BUNDLE_PATH": str(EXTERNAL_ROOT),
         "CHECKSUMS_FILE": "checksums.sha256",

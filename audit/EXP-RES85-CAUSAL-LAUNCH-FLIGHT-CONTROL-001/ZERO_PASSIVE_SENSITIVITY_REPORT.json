@@ -1,0 +1,68 @@
+{
+  "checks": [
+    {
+      "check": "zero_passive_active_work_within_budget",
+      "detail": {
+        "active_positive_work_j": 25.0
+      },
+      "pass": true
+    },
+    {
+      "check": "zero_passive_unbounded_command_is_budget_gated",
+      "detail": {
+        "left_gated": true,
+        "left_j": 25.0,
+        "right_j": 25.0
+      },
+      "pass": true
+    },
+    {
+      "check": "zero_passive_episode_closes_or_reports_degradation",
+      "detail": {
+        "fault": null,
+        "phases": [
+          "STAND",
+          "COUNTERMOVEMENT",
+          "BRAKING",
+          "PROPULSION",
+          "TAKEOFF_CONFIRM",
+          "PROPULSION",
+          "TAKEOFF_CONFIRM",
+          "PROPULSION",
+          "TAKEOFF_CONFIRM",
+          "PROPULSION",
+          "TAKEOFF_CONFIRM",
+          "PROPULSION",
+          "TAKEOFF_CONFIRM",
+          "FLIGHT",
+          "LANDING_PREP"
+        ],
+        "status": "COMPLETED"
+      },
+      "pass": true
+    }
+  ],
+  "episode_phases": [
+    "STAND",
+    "COUNTERMOVEMENT",
+    "BRAKING",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "FLIGHT",
+    "LANDING_PREP"
+  ],
+  "episode_status": "COMPLETED",
+  "negative_control_status": "PASS",
+  "schema_version": "1.0.0",
+  "status": "PASS",
+  "zero_passive_active_positive_work_max_j": 25.0,
+  "zero_passive_budget_gated": true
+}

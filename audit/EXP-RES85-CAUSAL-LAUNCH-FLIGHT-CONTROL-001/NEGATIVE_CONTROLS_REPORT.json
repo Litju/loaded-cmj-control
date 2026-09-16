@@ -1,0 +1,295 @@
+{
+  "checks": [
+    {
+      "check": "NC-01_single_sample_dropout_refuses_permanent_flight",
+      "detail": {
+        "candidate_rejections": [],
+        "fault": null,
+        "flight_latched": false,
+        "phase_trajectory": [
+          "STAND"
+        ],
+        "takeoff_confirmed": false
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-01b_dropout_truncated_stream_refuses_flight",
+      "detail": {
+        "candidate_rejections": [],
+        "fault": null,
+        "flight_latched": false,
+        "phase_trajectory": [
+          "STAND"
+        ],
+        "takeoff_confirmed": false
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-02_five_true_comparator_samples_reject",
+      "detail": {
+        "below_threshold_frames": 5,
+        "confirmation_confirmed": false,
+        "requested_below_samples": 5,
+        "required_true_samples": 6,
+        "status": "NOT_TRIGGERED",
+        "triggered": false,
+        "true_sample_count": null
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-02b_six_true_samples_confirm_comparator_only",
+      "detail": {
+        "below_threshold_frames": 6,
+        "confirmation_confirmed": false,
+        "requested_below_samples": 6,
+        "required_true_samples": 6,
+        "status": "TRIGGERED",
+        "triggered": true,
+        "true_sample_count": 6
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-02c_comparator_never_defines_takeoff_or_flight",
+      "detail": {
+        "comparator": "TRIGGERED",
+        "phase": {
+          "candidate_rejections": [],
+          "fault": null,
+          "flight_latched": false,
+          "phase_trajectory": [
+            "STAND"
+          ],
+          "takeoff_confirmed": false
+        }
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-03_recontact_before_dwell_rejects_confirmation",
+      "detail": {
+        "confirmed": false,
+        "failed_checks": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact"
+        ],
+        "phase_probe": {
+          "candidate_rejections": [],
+          "fault": null,
+          "flight_latched": false,
+          "phase_trajectory": [
+            "STAND"
+          ],
+          "takeoff_confirmed": false
+        }
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-04_one_foot_contact_is_not_physical_takeoff",
+      "detail": {
+        "occurrence_valid": false,
+        "phase_probe": {
+          "candidate_rejections": [],
+          "fault": null,
+          "flight_latched": false,
+          "phase_trajectory": [
+            "STAND"
+          ],
+          "takeoff_confirmed": false
+        }
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-05_insufficient_clearance_never_confirms_flight",
+      "detail": {
+        "confirmed": false,
+        "failed_checks": [
+          "bilateral_clearance_reaches_guard"
+        ],
+        "occurrence_valid": true,
+        "phase_probe": {
+          "candidate_rejections": [],
+          "fault": null,
+          "flight_latched": false,
+          "phase_trajectory": [
+            "STAND"
+          ],
+          "takeoff_confirmed": false
+        }
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-06_prohibited_contact_rejects_confirmation",
+      "detail": {
+        "confirmed": false,
+        "failed_checks": [
+          "no_prohibited_contact"
+        ],
+        "phase_probe": {
+          "candidate_rejections": [],
+          "fault": "PROHIBITED_CONTACT_WHILE_SUPPORTED",
+          "flight_latched": false,
+          "phase_trajectory": [
+            "STAND"
+          ],
+          "takeoff_confirmed": false
+        }
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-07_nonpositive_occurrence_vz_rejects",
+      "detail": {
+        "confirmed": false,
+        "failed_checks": [
+          "system_com_vz_positive"
+        ],
+        "occurrence_valid": true,
+        "occurrence_vz": -0.1,
+        "phase_probe": {
+          "candidate_rejections": [],
+          "fault": null,
+          "flight_latched": false,
+          "phase_trajectory": [
+            "STAND"
+          ],
+          "takeoff_confirmed": false
+        }
+      },
+      "pass": true
+    }
+  ],
+  "probes": {
+    "NC-01_single_sample_dropout": {
+      "candidate_rejections": [],
+      "fault": null,
+      "flight_latched": false,
+      "phase_trajectory": [
+        "STAND"
+      ],
+      "takeoff_confirmed": false
+    },
+    "NC-01b_dropout_truncated_stream": {
+      "candidate_rejections": [],
+      "fault": null,
+      "flight_latched": false,
+      "phase_trajectory": [
+        "STAND"
+      ],
+      "takeoff_confirmed": false
+    },
+    "NC-02_five_true_samples": {
+      "below_threshold_frames": 5,
+      "confirmation_confirmed": false,
+      "requested_below_samples": 5,
+      "required_true_samples": 6,
+      "status": "NOT_TRIGGERED",
+      "triggered": false,
+      "true_sample_count": null
+    },
+    "NC-02b_six_true_samples": {
+      "below_threshold_frames": 6,
+      "confirmation_confirmed": false,
+      "requested_below_samples": 6,
+      "required_true_samples": 6,
+      "status": "TRIGGERED",
+      "triggered": true,
+      "true_sample_count": 6
+    },
+    "NC-02c_comparator_phase_probe": {
+      "comparator": "TRIGGERED",
+      "phase": {
+        "candidate_rejections": [],
+        "fault": null,
+        "flight_latched": false,
+        "phase_trajectory": [
+          "STAND"
+        ],
+        "takeoff_confirmed": false
+      }
+    },
+    "NC-03_recontact_before_50ms": {
+      "confirmed": false,
+      "failed_checks": [
+        "dwell_coverage",
+        "no_legal_plantar_recontact"
+      ],
+      "phase_probe": {
+        "candidate_rejections": [],
+        "fault": null,
+        "flight_latched": false,
+        "phase_trajectory": [
+          "STAND"
+        ],
+        "takeoff_confirmed": false
+      }
+    },
+    "NC-04_one_foot_supported": {
+      "occurrence_valid": false,
+      "phase_probe": {
+        "candidate_rejections": [],
+        "fault": null,
+        "flight_latched": false,
+        "phase_trajectory": [
+          "STAND"
+        ],
+        "takeoff_confirmed": false
+      }
+    },
+    "NC-05_insufficient_clearance": {
+      "confirmed": false,
+      "failed_checks": [
+        "bilateral_clearance_reaches_guard"
+      ],
+      "occurrence_valid": true,
+      "phase_probe": {
+        "candidate_rejections": [],
+        "fault": null,
+        "flight_latched": false,
+        "phase_trajectory": [
+          "STAND"
+        ],
+        "takeoff_confirmed": false
+      }
+    },
+    "NC-06_prohibited_during_confirmation": {
+      "confirmed": false,
+      "failed_checks": [
+        "no_prohibited_contact"
+      ],
+      "phase_probe": {
+        "candidate_rejections": [],
+        "fault": "PROHIBITED_CONTACT_WHILE_SUPPORTED",
+        "flight_latched": false,
+        "phase_trajectory": [
+          "STAND"
+        ],
+        "takeoff_confirmed": false
+      }
+    },
+    "NC-07_nonpositive_occurrence_vz": {
+      "confirmed": false,
+      "failed_checks": [
+        "system_com_vz_positive"
+      ],
+      "occurrence_valid": true,
+      "occurrence_vz": -0.1,
+      "phase_probe": {
+        "candidate_rejections": [],
+        "fault": null,
+        "flight_latched": false,
+        "phase_trajectory": [
+          "STAND"
+        ],
+        "takeoff_confirmed": false
+      }
+    }
+  },
+  "status": "PASS"
+}

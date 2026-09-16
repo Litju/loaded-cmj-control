@@ -1,0 +1,210 @@
+{
+  "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
+  "consumed_measurement_primitives": [
+    "native_frame",
+    "measure",
+    "scan_takeoff_candidates",
+    "confirm_takeoff",
+    "detect_takeoff_occurrence",
+    "detect_apex",
+    "force_takeoff_comparator",
+    "vertical_impulse_between",
+    "active_support_hull",
+    "system_com_state"
+  ],
+  "controller": {
+    "actuation": {
+      "actuator_names": [
+        "m_trunk_pelvis",
+        "m_left_hip",
+        "m_right_hip",
+        "m_left_knee",
+        "m_right_knee",
+        "m_left_ankle",
+        "m_right_ankle",
+        "m_left_mtp",
+        "m_right_mtp"
+      ],
+      "authority_id": "LCMJ_RES85_ACTUATION_AUTHORITY_V1",
+      "bundle": "audit/EXP-RES85-CAUSAL-LAUNCH-FLIGHT-CONTROL-001",
+      "channels": [
+        "trunk_pelvis",
+        "left_hip",
+        "right_hip",
+        "left_knee",
+        "right_knee",
+        "left_ankle",
+        "right_ankle",
+        "left_mtp",
+        "right_mtp"
+      ],
+      "mirrored_pairs": [
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          7,
+          8
+        ]
+      ],
+      "moment_ceiling_nm": [
+        220.0,
+        330.0,
+        330.0,
+        380.0,
+        380.0,
+        260.0,
+        260.0,
+        45.0,
+        45.0
+      ],
+      "mtp_budgets": {
+        "active_positive_work_j": 25.0,
+        "late_active_fraction": 0.5,
+        "total_positive_work_j": 40.0
+      },
+      "mtp_energy_authority_id": "LCMJ_RES85_MTP_ENERGY_AUTHORITY_V1",
+      "plant_passive_prior": {
+        "damping_nms_per_rad": 2.0,
+        "neutral_rad": 0.0,
+        "owner": "Plant authority (FM-09); not a controller command",
+        "stiffness_nm_per_rad": 25.0
+      },
+      "power_ceiling_w": [
+        600.0,
+        1600.0,
+        1600.0,
+        1700.0,
+        1700.0,
+        1100.0,
+        1100.0,
+        120.0,
+        120.0
+      ],
+      "qdot_epsilon_rad_per_s": 1e-06,
+      "rate_ceiling_nm_per_s": [
+        3000.0,
+        6000.0,
+        6000.0,
+        8000.0,
+        8000.0,
+        6000.0,
+        6000.0,
+        1500.0,
+        1500.0
+      ],
+      "stages": [
+        "none",
+        "symmetry",
+        "rate",
+        "moment",
+        "power",
+        "mtp_budget",
+        "mtp_phase_gate",
+        "power_emergency",
+        "moment_emergency"
+      ],
+      "symmetry_mode": "ENFORCED_FOR_ALL_RES85_PHASES",
+      "symmetry_tolerance_nm": 1e-09
+    },
+    "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_CONTROLLER_V1",
+    "control_law": {
+      "a_brake_m_s2": 2.5,
+      "a_countermovement_m_s2": -1.0,
+      "a_thrust_m_s2": 8.0,
+      "braking_trigger_margin_m": 0.02,
+      "cop_hull_margin_m": 0.005,
+      "fx_fraction_max": 0.4,
+      "joint_kd": [
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        0.4,
+        0.4
+      ],
+      "joint_kp": [
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        4.0,
+        4.0
+      ],
+      "landing_prep_flexion": 0.5,
+      "quiet_stand_samples": 125,
+      "reference_lag_max_m": 0.05,
+      "reference_lead_max_m": 0.02,
+      "structural_flexion_safety_rad": 0.05,
+      "thrust_az_bounds_m_s2": [
+        -4.0,
+        12.0
+      ],
+      "v_brake_trigger_m_s": -0.55,
+      "v_countermovement_cmd_m_s": -0.35
+    },
+    "fault_mode": "FAIL_CLOSED_EXPLICIT_EXCEPTION",
+    "phase_machine_authority": "LCMJ_RES85_PHASE_MACHINE_AUTHORITY_V1",
+    "phase_order": [
+      "STAND",
+      "COUNTERMOVEMENT",
+      "BRAKING",
+      "PROPULSION",
+      "TAKEOFF_CONFIRM",
+      "FLIGHT",
+      "LANDING_PREP"
+    ],
+    "scorer_private_memory": "NONE",
+    "supported_phases": [
+      "STAND",
+      "COUNTERMOVEMENT",
+      "BRAKING",
+      "PROPULSION"
+    ]
+  },
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "modules": {
+    "actuation.py": "f315aededdbd8af48fbf3b1d3badfd99bfaa70acfaed440f489bab4ec3e439a3",
+    "constants.py": "1f756f412d3ce8f2fecbae6af5e72fae5e0b3e92f185a96b96da7dcd0c4a20fb",
+    "controller.py": "75d068452b9f53ccd4fb339aea036f485b4870c4c9a38883d3d5c936d7b853e3",
+    "launch_runtime.py": "1618da0520445ac9b56c18b062706ea7ce6f774f13492c438ed2e1eb81e08b88",
+    "measurement.py": "6198765cb7fdf5deeffaf726bc10e2ebf12fe03b16a62487302126e06a92a689",
+    "plant.py": "d861f45607a36fb9bf6597682e509c8adf2acc90e9717ce114b76a2e0dcd87e9"
+  },
+  "no_reimplemented_measurement_semantics": true,
+  "phase_order": [
+    "STAND",
+    "COUNTERMOVEMENT",
+    "BRAKING",
+    "PROPULSION",
+    "TAKEOFF_CONFIRM",
+    "FLIGHT",
+    "LANDING_PREP"
+  ],
+  "plant_xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+  "res83_sealed_plant_xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
+  "res84_evidence_seal_sha256": "223b13fe5bc3b884c15750da6badd24c834cfec54a24a23338dfde25d1bcbeda",
+  "res84_measurement_authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
+  "schema_version": "1.0.0",
+  "supported_phases": [
+    "STAND",
+    "COUNTERMOVEMENT",
+    "BRAKING",
+    "PROPULSION"
+  ]
+}

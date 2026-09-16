@@ -133,8 +133,10 @@ def test_v2_and_r001_values_are_not_imported():
 def test_enforcement_order_and_symmetry_are_frozen():
     auth = _authority("ACTUATION_AUTHORITY.json")
     assert auth["enforcement_order_frozen"] is True
-    assert auth["enforcement_order"][2].startswith("3_rate_limit")
-    assert "previous applied torque is the sole history state" in auth["enforcement_order"][2]
+    assert auth["enforcement_order"][2].startswith("3_constraint_interval_construction")
+    assert any("sole history state" in entry for entry in auth["enforcement_order"])
+    assert "projection onto the intersection of four intervals" in \
+        auth["feasible_interval_note"]
     assert auth["bilateral_symmetry_rules"]["nominal_mode"] == "ENFORCED_FOR_ALL_RES85_PHASES"
     assert auth["bilateral_symmetry_rules"]["mirrored_pairs"] == [
         ["left_hip", "right_hip"], ["left_knee", "right_knee"],

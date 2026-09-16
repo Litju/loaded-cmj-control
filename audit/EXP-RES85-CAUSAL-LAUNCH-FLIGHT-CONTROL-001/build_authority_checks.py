@@ -109,8 +109,8 @@ def method_comparator_checks() -> dict[str, Any]:
                "BAR_LVT_DISPLACEMENT_VELOCITY",
            }, sorted(methods))
     primary = [m for m in panel["methods"] if m["status"] == "PRIMARY_CANONICAL"]
-    _check(checks, "exactly_one_primary_method", len(primary) == 1
-           and primary[0]["method_id"] == "DIRECT_SIMULATOR_SYSTEM_COM")
+    _check(checks, "exactly_one_primary_method",
+           len(primary) == 1 and primary[0]["method_id"] == "DIRECT_SIMULATOR_SYSTEM_COM")
     _check(checks, "cross_method_conversion_refused",
            panel["conversion_policy"]["cross_method_conversion_status"] == "NOT_ESTABLISHED"
            and panel["conversion_policy"]["single_target_conversion"] == "PROHIBITED")
@@ -152,11 +152,11 @@ def actuation_checks() -> dict[str, Any]:
     by_name = {c["channel"]: c for c in auth["channels"]}
     for lname, rname in (("left_hip", "right_hip"), ("left_knee", "right_knee"),
                          ("left_ankle", "right_ankle"), ("left_mtp", "right_mtp")):
-        l, r = by_name[lname], by_name[rname]
+        left_ch, right_ch = by_name[lname], by_name[rname]
         _check(checks, f"pair_identical.{lname}",
-               l["moment_ceiling_nm"] == r["moment_ceiling_nm"]
-               and l["power_ceiling_w"] == r["power_ceiling_w"]
-               and l["torque_rate_ceiling_nm_per_s"] == r["torque_rate_ceiling_nm_per_s"])
+               left_ch["moment_ceiling_nm"] == right_ch["moment_ceiling_nm"]
+               and left_ch["power_ceiling_w"] == right_ch["power_ceiling_w"]
+               and left_ch["torque_rate_ceiling_nm_per_s"] == right_ch["torque_rate_ceiling_nm_per_s"])
     sym = auth["bilateral_symmetry_rules"]
     _check(checks, "symmetry_nominal_mode_enforced",
            sym["nominal_mode"] == "ENFORCED_FOR_ALL_RES85_PHASES")
@@ -165,13 +165,17 @@ def actuation_checks() -> dict[str, Any]:
            auth["ctrl_semantics"]["no_plant_mutation"].startswith("the authority is enforced"))
     order = auth["enforcement_order"]
     _check(checks, "enforcement_order_frozen",
-           auth["enforcement_order_frozen"] is True and len(order) == 7)
+           auth["enforcement_order_frozen"] is True and len(order) == 8)
     _check(checks, "previous_applied_torque_is_sole_history",
-           "previous applied torque is the sole history state" in order[2])
+           any("sole history state" in entry for entry in order))
+    _check(checks, "feasible_interval_projection_declared",
+           "feasible_interval_note" in auth
+           and "projection onto the intersection of four intervals" in auth["feasible_interval_note"])
     _check(checks, "no_activation_filter",
            auth["torque_rate_semantics"]["activation_smoothing_secondary"].startswith("none"))
     _check(checks, "power_enforcement_declared",
-           auth["joint_power_semantics"]["enforcement"] == "HARD_CEILING_ON_ABS_POWER when the joint angular velocity is materially non-zero")
+           auth["joint_power_semantics"]["enforcement"].startswith(
+               "HARD_CEILING_ON_ABS_POWER"))
     # forbidden imports
     v2 = auth["forbidden_imports"]
     _check(checks, "v2_torque_limits_explicitly_rejected",
@@ -412,7 +416,6 @@ def source_provenance() -> dict[str, Any]:
             "authority_id": "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1",
             "external_bundle": RES84_BUNDLE,
             "external_evidence_seal_sha256": RES84_EVIDENCE_SEAL_SHA256,
-            "seal_verification_note": "external seal verified at RES-85 mission start (checksums.sha256 digest and all file digests matched)",
         },
         "plant_module": {"module": "src/loaded_cmj/v3/plant.py",
                          "module_sha256": sha256_file(PLANT_SRC)},

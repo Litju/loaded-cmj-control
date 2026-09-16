@@ -1,0 +1,152 @@
+{
+  "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
+  "collection_errors": [
+    {
+      "category": "PRE_EXISTING_COLLECTION_ERROR",
+      "error": "FileNotFoundError: external session path .../F4-ORACLE-INFRASTRUCTURE/ML241-WRAPPED-DERIVATIVES/.../qacc_resolution_summary.json",
+      "module": "tests/test_ml241_qacc_resolution.py"
+    },
+    {
+      "category": "PRE_EXISTING_COLLECTION_ERROR",
+      "error": "ImportError: cannot import name 'shift_wrench_to_origin' from loaded_cmj.simulation.plant",
+      "module": "tests/test_public_support_wrench_contract.py"
+    }
+  ],
+  "commands": {
+    "entry_head_reproduction": "git worktree add <tmp> b0eccb8a && pytest <same files> -q --tb=no",
+    "full_suite": "pytest tests/ -q -p no:randomly --ignore=tests/test_ml241_qacc_resolution.py --ignore=tests/test_public_support_wrench_contract.py",
+    "res83_plant": "pytest tests/test_res83_v3_plant.py",
+    "res84_regression": "pytest tests/test_res84_v3_measurement_contact.py",
+    "targeted_res85": "pytest tests/test_res85_v3_causal_launch.py tests/test_res85_authority_freeze.py"
+  },
+  "entry_head_reproduction": {
+    "path_dependent_explanation": "the test resolves the external evidence root relative to the repository parent; it fails in the temporary worktree and passes in the primary checkout where the evidence root exists",
+    "path_dependent_test": "tests/test_v2_1_res16_true_standing.py::test_01_captured_satisfies_old_but_fails_new",
+    "same_failures_reproduced": 24,
+    "worktree_head": "b0eccb8a6eeda40950665b3be517854f8b48baab"
+  },
+  "failure_categories": {
+    "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT": 2,
+    "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT": 14,
+    "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY": 9
+  },
+  "failures": [
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res54_true_com_velocity.py::test_event_rebase_determinism"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res73_balance_capture.py::test_01_exact_e10_restore"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res73_balance_capture.py::test_03_trunk_rate_semantics"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res73_balance_capture.py::test_04_cop_support_frame"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res73_balance_capture.py::test_05_centroidal_wrench_identity"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res73_balance_capture.py::test_06_local_effectiveness"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res73_balance_capture.py::test_10_rr_spec_immutable"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res73_balance_capture.py::test_11_e11_alone_insufficient"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT",
+      "test": "tests/test_res73_balance_capture.py::test_13_evidence_contract"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res74_stable_recovery.py::test_01_rr_confirmed_start"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res74_stable_recovery.py::test_03_handoff_spec_immutable"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res74_stable_recovery.py::test_04_fixed_foot_path"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res74_stable_recovery.py::test_07_timescaling_identity"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res74_stable_recovery.py::test_12_e12_identity_and_post_hold"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT",
+      "test": "tests/test_res74_stable_recovery.py::test_13_evidence_contract"
+    },
+    {
+      "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+      "test": "tests/test_res76_full_closure.py::test_05_rr_dwell_to_recovery_init"
+    },
+    {
+      "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+      "test": "tests/test_res76_full_closure.py::test_07_res43_one_way_handoff"
+    },
+    {
+      "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+      "test": "tests/test_res76_full_closure.py::test_11_handoff_transfer"
+    },
+    {
+      "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+      "test": "tests/test_v2_1_res16_true_standing.py::test_12_E1_E11_unchanged"
+    },
+    {
+      "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+      "test": "tests/test_v2_1_res31_honest_planar_root.py::test_pre_limit_trajectory_identity"
+    },
+    {
+      "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+      "test": "tests/test_v2_1_res43_true_standing_rebase.py::test_16_controller_unchanged"
+    },
+    {
+      "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+      "test": "tests/test_v2_1_res5_honest_fall.py::test_fall_shell_physical_contact"
+    },
+    {
+      "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+      "test": "tests/test_v2_1_res6_compliant_landing_contact.py::test_standing_pass"
+    },
+    {
+      "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+      "test": "tests/test_v2_1_res8_captured_squat.py::test_capture_target_from_proven_state"
+    },
+    {
+      "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+      "test": "tests/test_v2_1_res8_captured_squat.py::test_E11_before_fall"
+    }
+  ],
+  "full_suite": {
+    "collected": 859,
+    "collection_error_modules": 2,
+    "failed": 25,
+    "passed": 834,
+    "res83_res84_failures": 0,
+    "res85_owned_failures": 0
+  },
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "schema_version": "1.0.0",
+  "targeted_and_regression": {
+    "tests/test_res83_v3_plant.py": "PASS",
+    "tests/test_res84_v3_measurement_contact.py": "PASS",
+    "tests/test_res85_authority_freeze.py": "PASS",
+    "tests/test_res85_v3_causal_launch.py": "PASS"
+  },
+  "verdict": "ALL RECORDED FAILURES PRE-EXIST AT ENTRY_HEAD AND ARE CLASSIFIED AS ENVIRONMENTAL OR LEGACY-V2; NONE IS INTRODUCED BY RES-85"
+}

@@ -1,0 +1,734 @@
+{
+  "array_count": 63,
+  "arrays": [
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "applied_nm",
+      "nbytes": 108000,
+      "offset": 0,
+      "sha256": "24a33628b68396142b7fe6d79b154e9eeba7801386cf99fcbb93e59d96a28a9c",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "az_des_m_s2",
+      "nbytes": 12000,
+      "offset": 108000,
+      "sha256": "dace009600ef9f4f9459fbb3706e6710346eba917df11c74b718c012db5ea37f",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "com_velocity_world_m_s",
+      "nbytes": 36000,
+      "offset": 120000,
+      "sha256": "c7846e4cc5e2d5828ca14c286d4301db6ee7a41cc01603d1fd7a253dc04b1073",
+      "shape": [
+        1500,
+        3
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "com_world_m",
+      "nbytes": 36000,
+      "offset": 156000,
+      "sha256": "184197a31ddf89af14d85e0c35eec4bc2413a51eb38ced7ed90b508888ea6bcd",
+      "shape": [
+        1500,
+        3
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "commanded_nm",
+      "nbytes": 108000,
+      "offset": 192000,
+      "sha256": "7104c32fd0b1f533b69d84984fb6a72d643ae419cbfdcc94473a02d80045a2ea",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "bool",
+      "encoding": "raw_little_endian",
+      "name": "cop_clamped",
+      "nbytes": 1500,
+      "offset": 300000,
+      "sha256": "bdb930fc0a11f4aa83978c254aff8696b8a79839d44f4b7fa0832a9fa5feb88d",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "cop_clamped_x_m",
+      "nbytes": 12000,
+      "offset": 301500,
+      "sha256": "12a6f83245fc98b7752f43d741bbd5ff05dd0b36a2277dadb1d73504c4db1b77",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "cop_des_x_m",
+      "nbytes": 12000,
+      "offset": 313500,
+      "sha256": "fdebb4e40f1bc6940c4cbe76cd41386b5c98e2fc8a551aaa7b0ac2832957eac0",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "object",
+      "encoding": "utf8_object_records_unit_separated",
+      "name": "cop_validity",
+      "nbytes": 12100,
+      "offset": 325500,
+      "sha256": "755e7f35980204cbd2fe5da9fc97a2ae84b4312b93506289e795106ef413e2b0",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "cop_x_m",
+      "nbytes": 12000,
+      "offset": 337600,
+      "sha256": "91c53569aa08321ddb28fe04fa4ed7d9cad63135ffc551b4e73c76c4efe68ed6",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "fx_des_n",
+      "nbytes": 12000,
+      "offset": 349600,
+      "sha256": "90a079781c36a506664af6a4c93d863a05cfad1e12478f9c9f95ea50fb4afb35",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "fz_des_n",
+      "nbytes": 12000,
+      "offset": 361600,
+      "sha256": "fc820beb463a78a9ca416952791c6678859aa638c08a55cb6ee66682045eed7a",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "index",
+      "nbytes": 12000,
+      "offset": 373600,
+      "sha256": "50a855022070ba1b399050fa682c88f3cdb2f2ef0f2c20acfdc8dceda2a2dd8e",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "joint_limit_margin",
+      "nbytes": 144000,
+      "offset": 385600,
+      "sha256": "cf653c2f6241086cbc7c17468e99a58f49f5cf2a19dab664a7a2cfcd78f65d7a",
+      "shape": [
+        1500,
+        12
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "joint_power_w",
+      "nbytes": 108000,
+      "offset": 529600,
+      "sha256": "742d3d19876220b90a32b8c1cef31a2569a62829267adc054d1974b3bd5645a8",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "joint_q",
+      "nbytes": 144000,
+      "offset": 637600,
+      "sha256": "baf0dfd78b16c22ac36a93c10ee4e553d5fc75c3d6d8ed4df38c21cf6f1ae02d",
+      "shape": [
+        1500,
+        12
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "joint_qd",
+      "nbytes": 144000,
+      "offset": 781600,
+      "sha256": "75ac01f9ced130577fadb159ad5369b4fcd3d45ad4293398f0d2a16b53a96522",
+      "shape": [
+        1500,
+        12
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "joint_work_j",
+      "nbytes": 108000,
+      "offset": 925600,
+      "sha256": "cd82b260cbfd011d9697cb011cd5852c0d171a717f656063296f69780c791bc6",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "left_clearance_m",
+      "nbytes": 12000,
+      "offset": 1033600,
+      "sha256": "366a254092b1bee8d8e7267a299279e2098a9e373ebe12ba30f2e3e1f54f3c0a",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "left_wrench",
+      "nbytes": 72000,
+      "offset": 1045600,
+      "sha256": "4efffd0be1d512472afca35b852e6547c3b941820256040d02858b7ac170e4c8",
+      "shape": [
+        1500,
+        6
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "legal_plantar_active",
+      "nbytes": 12000,
+      "offset": 1117600,
+      "sha256": "cdf3b35a6e78e202aea3e9387941c72482db6c0b13f2b55f7eb9b73ebaba61c9",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "legal_plantar_detected",
+      "nbytes": 12000,
+      "offset": 1129600,
+      "sha256": "b59a513bdaacf1e259796747bb51af12afdc71b601848be171cf5acba911766c",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "moment_margin_nm",
+      "nbytes": 108000,
+      "offset": 1141600,
+      "sha256": "8f373da05967450ee99347d61f684a44b51e4c29a8885bcd611e1ffffced9f12",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_active_power_w",
+      "nbytes": 24000,
+      "offset": 1249600,
+      "sha256": "334cdafb2b4b192393d158863a1cd872e308d318774908fb5f3f74c644e25779",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_active_work_j",
+      "nbytes": 24000,
+      "offset": 1273600,
+      "sha256": "54e8ca09555898cf43aa8c0869a817c48cb9ea57f7a31cdf07362dd0959edd59",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_active_work_signed_j",
+      "nbytes": 24000,
+      "offset": 1297600,
+      "sha256": "54e8ca09555898cf43aa8c0869a817c48cb9ea57f7a31cdf07362dd0959edd59",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_gated",
+      "nbytes": 24000,
+      "offset": 1321600,
+      "sha256": "fd16f5d921f459171d7d1647ffa74517fc8eea1e06946aae4d7b55d0ba868662",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_passive_moment_nm",
+      "nbytes": 24000,
+      "offset": 1345600,
+      "sha256": "9f6b05b758e0f5e1a97db45964d72c5eee730cab1840757a2f6470a0e6c26fc4",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_passive_power_w",
+      "nbytes": 24000,
+      "offset": 1369600,
+      "sha256": "959f0d748c9b3a568381b32cf92b1a658082116956e13e50fb2ec87a9b864450",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_passive_reconstruction_residual_nm",
+      "nbytes": 12000,
+      "offset": 1393600,
+      "sha256": "ff6698a6e831ffcf47af2fed388ffc262f319e72b26cd140929d1e19b1246ad4",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_passive_work_j",
+      "nbytes": 24000,
+      "offset": 1405600,
+      "sha256": "4bdbe2cdb6335314db0da3f6df1c51a5433f287a5c93ee02c409b6403dae028e",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_passive_work_signed_j",
+      "nbytes": 24000,
+      "offset": 1429600,
+      "sha256": "2958566bf7fac220330d58203752c25117e34d45b445643ca8465809c5769bd6",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_total_power_w",
+      "nbytes": 24000,
+      "offset": 1453600,
+      "sha256": "cd8f42c158b1ca9d5df48e846dea92c6a91a5bdba10ea6c3f8d14735d82376fd",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_total_work_j",
+      "nbytes": 24000,
+      "offset": 1477600,
+      "sha256": "92a908b52c2b639be33daefbdacf7cbc1ea54cbf0a94b8dd69e9ee05f6bb5af8",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "mtp_total_work_signed_j",
+      "nbytes": 24000,
+      "offset": 1501600,
+      "sha256": "b60bbfea0f0744388931c15d00106b29189c23fa48d547867842ef3c3abd02d8",
+      "shape": [
+        1500,
+        2
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "nonplantar_floor_active",
+      "nbytes": 12000,
+      "offset": 1525600,
+      "sha256": "50b18e947a9ba75ecdd389a6579478b605a6e53450190df947888f3f0121b083",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "out_of_plane_fy_n",
+      "nbytes": 12000,
+      "offset": 1537600,
+      "sha256": "ff6698a6e831ffcf47af2fed388ffc262f319e72b26cd140929d1e19b1246ad4",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "out_of_plane_fy_over_fz",
+      "nbytes": 12000,
+      "offset": 1549600,
+      "sha256": "1ef9d5038f36b8450994145752fa5da283711554c2b81e7a355e4e1005a8c421",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "out_of_plane_mx_nm",
+      "nbytes": 12000,
+      "offset": 1561600,
+      "sha256": "f532136ce8f59c0cd85b10f4b7ae2a5ea27994af623157504c0e3f72f7dbd69f",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "out_of_plane_mx_over_fz_m",
+      "nbytes": 12000,
+      "offset": 1573600,
+      "sha256": "e375e988502e79313d1ae2338f4c0c2720d89c06a3e9f0b08f1d8eb9b43b8c75",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "out_of_plane_mz_nm",
+      "nbytes": 12000,
+      "offset": 1585600,
+      "sha256": "960986aa740bef0314751b462448ab3b6f79ae33e012df29aaebdc8b3986c455",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "out_of_plane_mz_over_fz_m",
+      "nbytes": 12000,
+      "offset": 1597600,
+      "sha256": "f2a40e61868ed0c4730f13589a878fd5270f649e3aec6c154074cdb671e1cbc2",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "phase_code",
+      "nbytes": 12000,
+      "offset": 1609600,
+      "sha256": "ad3cda067731d97854a83a94a4ef2b4736c3d98f845dcacc429f9e5586191b2d",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "object",
+      "encoding": "utf8_object_records_unit_separated",
+      "name": "phase_name",
+      "nbytes": 19098,
+      "offset": 1621600,
+      "sha256": "8399d6d46825305d72732ee885e3870e1e973472c6bb3cc331fe98411fd6f85b",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "power_margin_w",
+      "nbytes": 108000,
+      "offset": 1640698,
+      "sha256": "3f38b16bbc7dbd246b12aa991a9610f28f5152e30a6f426c963ebe824ad99bab",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "prohibited_active",
+      "nbytes": 12000,
+      "offset": 1748698,
+      "sha256": "50b18e947a9ba75ecdd389a6579478b605a6e53450190df947888f3f0121b083",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "prohibited_detected",
+      "nbytes": 12000,
+      "offset": 1760698,
+      "sha256": "50b18e947a9ba75ecdd389a6579478b605a6e53450190df947888f3f0121b083",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "quiet_samples",
+      "nbytes": 12000,
+      "offset": 1772698,
+      "sha256": "650590c836968ca33ad8da85267102908e586089442d711583ccfc5a53475b69",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "rate_margin_nm",
+      "nbytes": 108000,
+      "offset": 1784698,
+      "sha256": "38ec18dfdd4a0a50a9b4ebe1f38cf93b0db1fdb1f70fe357ac3efda2b9733ebd",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "right_clearance_m",
+      "nbytes": 12000,
+      "offset": 1892698,
+      "sha256": "8aa75f63e223ee8e28f0b6490fc9720f27b6b97333efbbfd98280a7ec640a71c",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "right_wrench",
+      "nbytes": 72000,
+      "offset": 1904698,
+      "sha256": "2e9c27fe56d682551ebc7be6670bd095c54e018290332807202c3ca4de9d14dc",
+      "shape": [
+        1500,
+        6
+      ]
+    },
+    {
+      "dtype": "object",
+      "encoding": "utf8_object_records_unit_separated",
+      "name": "saturation_stage",
+      "nbytes": 126953,
+      "offset": 1976698,
+      "sha256": "c476f64283bd92560345e8008ee2b4fa85dffdd4f00ba9d45e6e5dd50d34b41c",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "saturation_stage_code",
+      "nbytes": 108000,
+      "offset": 2103651,
+      "sha256": "e48fce62ddb091b091a32e80ae28761ab19f6b0a91cd7bb21143e7cf17b92f86",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "support_hull_area_m2",
+      "nbytes": 12000,
+      "offset": 2211651,
+      "sha256": "f103e1b1fd66850aa0bf471a790920b68c5393cdf8f60779fb4a3a2a225075ea",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "object",
+      "encoding": "utf8_object_records_unit_separated",
+      "name": "support_mode",
+      "nbytes": 14209,
+      "offset": 2223651,
+      "sha256": "564805643864626cf9dcfa1eb3998fb936d3dbb398f57cc3f569c6e88971f566",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "support_sagittal_margin_m",
+      "nbytes": 12000,
+      "offset": 2237860,
+      "sha256": "c149999d66004450fd16f54318625630c1d073faae8110584cbafd46f6ad43ee",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "symmetry_asymmetry_nm",
+      "nbytes": 12000,
+      "offset": 2249860,
+      "sha256": "a78efb804839309d2f8a893d24a4dc8ea33227c544e6e6e75d2dfd6cfeb20623",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "takeoff_candidate_index",
+      "nbytes": 12000,
+      "offset": 2261860,
+      "sha256": "f61b49c19496ec7d457f0b2b4d59b6770899cab314e42bdf7ceb2fe7142343cc",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "bool",
+      "encoding": "raw_little_endian",
+      "name": "takeoff_confirmed",
+      "nbytes": 1500,
+      "offset": 2273860,
+      "sha256": "f568e5fab5afffd6a9641941afa5f036c96e2d23dbbbfcac1c3267cc0381c7a0",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "time_s",
+      "nbytes": 12000,
+      "offset": 2275360,
+      "sha256": "91881a2ef7753b377f8fde653a71db6739b088089845c0c6f707d77291299176",
+      "shape": [
+        1500
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "torque_rate_nm_per_s",
+      "nbytes": 108000,
+      "offset": 2287360,
+      "sha256": "93fb0d28481c6ba9191f78d07748409556ed1f902fdce644f9138bec5729e0b8",
+      "shape": [
+        1500,
+        9
+      ]
+    },
+    {
+      "dtype": "float64",
+      "encoding": "raw_little_endian",
+      "name": "total_wrench",
+      "nbytes": 72000,
+      "offset": 2395360,
+      "sha256": "abef7303b58613f4e45076b2b97b625ebbedeb5f367ad6e022be96eb1ea6ee81",
+      "shape": [
+        1500,
+        6
+      ]
+    },
+    {
+      "dtype": "object",
+      "encoding": "utf8_object_records_unit_separated",
+      "name": "transition_reason",
+      "nbytes": 1904,
+      "offset": 2467360,
+      "sha256": "db81ffaead5ea78dd3811f0fa252aa36df7cdcdaba16aa8f4fc8b1d85116e05f",
+      "shape": [
+        1500
+      ]
+    }
+  ],
+  "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
+  "blob_sha256": "c708fd34fbdb5e755ee48c65328fd7ebf0d90343dd0e1b700fe8280f0b57aa35",
+  "byte_order": "little_endian_native_float64_and_bool",
+  "canonical_digest": "0c4b642f8d0438163ed4aee577ba617594181da7cb29602d791bb7bc15d8be65",
+  "reconstruction_note": "arrays are raw little-endian buffers concatenated in the declared offset order; dtypes and shapes are sufficient to reconstruct every native sample of the episode",
+  "schema_version": "1.0.0",
+  "total_bytes": 2469264
+}

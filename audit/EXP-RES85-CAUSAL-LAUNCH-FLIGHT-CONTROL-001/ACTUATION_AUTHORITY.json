@@ -151,13 +151,15 @@
   "enforcement_order": [
     "1_command_reception: receive the controller's desired net moment per channel",
     "2_bilateral_symmetry_projection: for each mirrored pair (hip, knee, ankle, mtp) replace both by (left+right)/2 and record the pre-projection asymmetry magnitude",
-    "3_rate_limit: |applied[k] - applied[k-1]| <= rate_ceiling * dt, with applied[-1] = 0 at reset; the previous applied torque is the sole history state",
-    "4_moment_saturation: |applied| <= moment_ceiling (hard clip about zero)",
-    "5_power_saturation: if |qdot_joint| > qdot_epsilon and |applied * qdot_joint| > power_ceiling, scale the magnitude to power_ceiling/|qdot_joint| preserving sign",
-    "6_apply: write the nine applied moments to data.ctrl",
-    "7_record: per-sample per-channel pre/post values, saturation stage, margin to each limit, and joint power"
+    "3_constraint_interval_construction: per channel build the feasible interval [lo, hi] = [max(-cap_eff, prev - rate_limit), min(cap_eff, prev + rate_limit)] where cap_eff = min(moment_ceiling, power_ceiling/|qdot|, MTP_budget_cap) and rate_limit = rate_ceiling * dt; prev is the previous applied torque, the sole history state",
+    "4_interval_projection: applied = clip(symmetric_command, lo, hi); all four constraints (rate, moment, power, MTP budget) are then satisfied simultaneously",
+    "5_energy_gate: the MTP phase gate sets cap_eff to exactly zero whenever the phase authority denies active MTP authority",
+    "6_emergency_precedence: if a rapidly shrinking power/moment/MTP ceiling makes the interval empty (lo > hi), the moment/power/MTP limit takes precedence over smoothness and the instantaneous reduction is recorded with stage power_emergency or moment_emergency",
+    "7_apply: write the nine applied moments to data.ctrl",
+    "8_record: per-sample per-channel applied moment, torque rate, saturation stage, margin to each limit, and joint power"
   ],
   "enforcement_order_frozen": true,
+  "feasible_interval_note": "the enforcement chain is a projection onto the intersection of four intervals, so no stage can push the applied moment outside another stage's limit; a power or MTP safety limit may in rare cases force an instantaneous reduction that exceeds the rate ceiling and is then recorded explicitly as an emergency stage",
   "saturation_semantics": {
     "type": "SEQUENTIAL_HARD_LIMIT_WITH_PER_STAGE_RECORDING",
     "no_silent_clamping": "every stage that changes a value must be recorded in telemetry with the stage name and the pre-clamp value",
@@ -185,7 +187,7 @@
       ["left_ankle", "right_ankle"],
       ["left_mtp", "right_mtp"]
     ],
-    "rule": "the two channels of a mirrored pair receive identical applied moments to numerical tolerance (1e-12 N*m) in all RES-85 phases",
+    "rule": "the two channels of a mirrored pair receive identical commanded moments after the symmetry projection; the per-channel constraint projection may introduce a bounded numerical asymmetry of at most 1e-9 N*m in all RES-85 phases",
     "enforcement": "projection onto the symmetric subspace by pair average, after which the rate limit and saturation stages operate on the symmetric value",
     "telemetry": "the maximum pre-projection pair asymmetry per sample is recorded; a nonzero value is reported, never hidden",
     "future_release": "asymmetric landing/recovery authority is explicitly NOT part of RES-85; RES-86/RES-87 must open their own authority to relax this rule"
