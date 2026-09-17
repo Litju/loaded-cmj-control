@@ -13,28 +13,42 @@
     "status": "FROZEN",
     "primary_reporting_method": "DIRECT_SIMULATOR_SYSTEM_COM",
     "elite_soccer_plus20_h2_hard_gate": "NOT_ESTABLISHED",
+    "elite_soccer_plus20_h2_target": "NOT_ESTABLISHED",
     "hard_gate_withheld_reason": [
       "no force-plate or bar/LVT study on file measures the same quantity as the direct simulator SYSTEM_COM span between the RES-84 occurrence and the in-flight apex crossing",
       "the human literature reports takeoff-to-apex or standing-to-apex flight-time and impulse-derived heights whose definitions differ from the simulator quantity",
       "no conversion with bounded uncertainty between SYSTEM_COM truth, force-plate impulse-momentum, flight-time and bar/LVT families has been established or calibrated for this Plant"
     ],
-    "anti_triviality_reference_only": {
+    "h_anti_triviality_floor": {
+      "symbol": "H_ANTI_TRIVIALITY_FLOOR",
       "value_m": 0.150,
-      "label": "HISTORICAL_ANTI_TRIVIALITY_NEGATIVE_CONTROL_ONLY",
-      "role_never": [
-        "not an elite-performance target",
-        "not a target band",
-        "not a performance floor to tune against",
-        "not a Plant or controller acceptance threshold"
+      "role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY",
+      "closure_rule": "H2 >= H_ANTI_TRIVIALITY_FLOOR is a minimum functional success condition for this task; a physically valid causal takeoff and flight below the floor is classified BELOW_FUNCTIONAL_TASK_FLOOR and cannot close the task",
+      "is_minimum_functional_success_condition": true,
+      "is_elite_performance_norm": false,
+      "is_optimization_target": false,
+      "is_expected_value": false,
+      "is_population_claim": false,
+      "explicit_statements": [
+        "0.150 m is NOT an elite-performance norm",
+        "0.150 m is NOT an optimization target",
+        "0.150 m IS a minimum functional success condition",
+        "controller development seeks the best physically valid solution under the frozen constraints, not the floor"
       ],
+      "diagnostic_scale_cross_check": {
+        "rule": "minimum ballistic vz corresponding to 0.150 m = sqrt(2*g*0.150) ~= 1.716 m/s",
+        "use": "mechanics cross-check only; direct SYSTEM_COM H2 is never replaced by a ballistic estimate"
+      },
       "permitted_uses": [
+        "hard functional non-triviality boundary for task closure",
         "named negative-control magnitude in deterministic checks",
-        "contextual illustration that a candidate outcome is non-trivial"
+        "mechanics cross-check scale for the minimum ballistic takeoff velocity"
       ]
     },
     "forbidden": [
       "elite +20 kg H2 hard gate",
       "single scalar H2 target",
+      "elite-performance norm derived from H_ANTI_TRIVIALITY_FLOOR",
       "bare 'jump height' label without a method qualifier"
     ]
   },
@@ -126,6 +140,7 @@
   "res85_reporting_requirements": {
     "must_report": [
       "DIRECT_SIMULATOR_SYSTEM_COM H2 (primary)",
+      "the H_ANTI_TRIVIALITY_FLOOR classification of the episode (ABOVE_FLOOR or BELOW_FUNCTIONAL_TASK_FLOOR)",
       "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ and its residual vs the primary (consistency)",
       "IMPULSE_DERIVED_TAKEOFF_VELOCITY and its velocity residual vs occurrence SYSTEM_COM vz (cross-check)",
       "FLIGHT_TIME_HEIGHT from the diagnostic comparator boundaries (report-only, if evaluable)",
@@ -133,13 +148,16 @@
     ],
     "must_not": [
       "declare an elite loaded-CMJ performance claim from any H2 value",
-      "gate task success on 0.150 m",
-      "report an unqualified 'jump height'"
+      "present H_ANTI_TRIVIALITY_FLOOR as an elite norm, expected value, target band or population claim",
+      "report an unqualified 'jump height'",
+      "close the task with an H2 below H_ANTI_TRIVIALITY_FLOOR"
     ]
   },
   "red_team_assertions": {
     "no_hidden_height_target": true,
     "no_elite_h2_hard_gate": true,
+    "no_elite_h2_target": true,
+    "functional_floor_is_declared": true,
     "method_separation_explicit": true,
     "conversion_refused": true
   },

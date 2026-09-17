@@ -12,15 +12,15 @@
       "detail": {
         "left": {
           "active_budget_j": 25.0,
-          "active_positive_work_j": 0.004570173217470871,
+          "active_positive_work_j": 0.27191709186763124,
           "total_budget_j": 40.0,
-          "total_positive_work_j": 0.004579242982703015
+          "total_positive_work_j": 0.6249202857321453
         },
         "right": {
           "active_budget_j": 25.0,
-          "active_positive_work_j": 0.004570173217470721,
+          "active_positive_work_j": 0.2719170918676281,
           "total_budget_j": 40.0,
-          "total_positive_work_j": 0.0045792429827027185
+          "total_positive_work_j": 0.6249202857327725
         }
       },
       "pass": true
@@ -28,16 +28,16 @@
     {
       "check": "AEI-1e_active_mtp_zero_after_takeoff_confirmation",
       "detail": {
-        "gated_samples": 2994
+        "gated_samples": 2990
       },
       "pass": true
     },
     {
       "check": "AEI-1f_ankle_positive_work_dominates_active_mtp",
       "detail": {
-        "active_mtp_positive_work_j": 0.004570173217470871,
+        "active_mtp_positive_work_j": 0.27191709186763124,
         "ankle_exceeds_active_mtp": true,
-        "ankle_positive_work_j": 24.236677168641254
+        "ankle_positive_work_j": 31.526090185592373
       },
       "pass": true
     }
@@ -45,38 +45,38 @@
   "energy_events": {
     "ledger_identity_left_residual_j": 0.0,
     "ledger_identity_right_residual_j": 0.0,
-    "left_active_positive_work_j": 0.004570173217470871,
-    "left_active_work_signed_j": 0.004570173217470871,
-    "left_passive_positive_work_j": 0.00021172834332302794,
-    "left_passive_work_signed_j": -0.1052155434975306,
-    "left_total_positive_work_j": 0.004579242982703015,
-    "left_total_work_signed_j": -0.10064537028005972,
-    "max_active_positive_work_j": 0.004570173217470871,
-    "right_active_positive_work_j": 0.004570173217470721,
-    "right_passive_positive_work_j": 0.00021172834332286737,
-    "right_total_positive_work_j": 0.0045792429827027185
+    "left_active_positive_work_j": 0.27191709186763124,
+    "left_active_work_signed_j": 0.27191709186763124,
+    "left_passive_positive_work_j": 0.5668563218385271,
+    "left_passive_work_signed_j": -21.631186700741903,
+    "left_total_positive_work_j": 0.6249202857321453,
+    "left_total_work_signed_j": -21.35926960887427,
+    "max_active_positive_work_j": 0.27191709186763124,
+    "right_active_positive_work_j": 0.2719170918676281,
+    "right_passive_positive_work_j": 0.5668563218391537,
+    "right_total_positive_work_j": 0.6249202857327725
   },
   "ledgers": {
     "left": {
       "active_budget_j": 25.0,
-      "active_positive_work_j": 0.004570173217470871,
+      "active_positive_work_j": 0.27191709186763124,
       "total_budget_j": 40.0,
-      "total_positive_work_j": 0.004579242982703015
+      "total_positive_work_j": 0.6249202857321453
     },
     "right": {
       "active_budget_j": 25.0,
-      "active_positive_work_j": 0.004570173217470721,
+      "active_positive_work_j": 0.2719170918676281,
       "total_budget_j": 40.0,
-      "total_positive_work_j": 0.0045792429827027185
+      "total_positive_work_j": 0.6249202857327725
     }
   },
-  "mtp_gated_samples": 2994,
+  "mtp_gated_samples": 2990,
   "schema_version": "1.0.0",
   "status": "PASS",
   "takeoff_dominance": {
-    "active_mtp_positive_work_j": 0.004570173217470871,
+    "active_mtp_positive_work_j": 0.27191709186763124,
     "ankle_exceeds_active_mtp": true,
-    "ankle_positive_work_j": 24.236677168641254
+    "ankle_positive_work_j": 31.526090185592373
   },
   "zero_passive_episode": false
 }

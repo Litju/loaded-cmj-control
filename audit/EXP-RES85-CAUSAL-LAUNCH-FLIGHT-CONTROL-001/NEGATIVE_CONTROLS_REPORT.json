@@ -163,8 +163,195 @@
         }
       },
       "pass": true
+    },
+    {
+      "check": "NC-08_authority_rate_and_moment_limits_hold",
+      "detail": {
+        "moment_ceiling": true,
+        "rate_from_reset": true
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-09_previous_applied_is_sole_history",
+      "detail": {
+        "step_index": 5001
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-10_bilateral_symmetry_projection_holds",
+      "detail": {
+        "applied_equal": true,
+        "asymmetry_nm": 80.0
+      },
+      "pass": true
+    },
+    {
+      "check": "zero_passive_active_work_within_budget",
+      "detail": {
+        "active_positive_work_j": 1.6178916717732605
+      },
+      "pass": true
+    },
+    {
+      "check": "zero_passive_unbounded_command_is_budget_gated",
+      "detail": {
+        "left_gated": true,
+        "left_j": 25.0,
+        "right_j": 25.0
+      },
+      "pass": true
+    },
+    {
+      "check": "zero_passive_episode_closes_or_reports_degradation",
+      "detail": {
+        "fault": null,
+        "phases": [
+          "STAND",
+          "COUNTERMOVEMENT",
+          "BRAKING",
+          "PROPULSION",
+          "TAKEOFF_CONFIRM",
+          "PROPULSION",
+          "TAKEOFF_CONFIRM",
+          "PROPULSION",
+          "TAKEOFF_CONFIRM",
+          "PROPULSION",
+          "TAKEOFF_CONFIRM",
+          "FLIGHT",
+          "LANDING_PREP"
+        ],
+        "status": "COMPLETED"
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-12_startup_support_dropout_as_accepted_occurrence_fails",
+      "detail": {
+        "disposition": "NOT_EVALUATED",
+        "mutated_index": 5,
+        "validator_failures": [
+          "ACCEPTED_CANDIDATE_MISMATCH",
+          "H2_ORIGIN_MISMATCH:666!=5",
+          "IMPULSE_ORIGIN_MISMATCH:666!=5",
+          "COMPARATOR_OFFSET_ORIGIN_MISMATCH:666!=5"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-13_top_level_occurrence_differs_from_h2_origin_fails",
+      "detail": {
+        "validator_failures": [
+          "ACCEPTED_CANDIDATE_MISMATCH",
+          "H2_ORIGIN_MISMATCH:666!=667",
+          "IMPULSE_ORIGIN_MISMATCH:666!=667",
+          "COMPARATOR_OFFSET_ORIGIN_MISMATCH:666!=667"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-14_comparator_offset_uses_rejected_occurrence_fails",
+      "detail": {
+        "mutated_index": 5,
+        "validator_failures": [
+          "COMPARATOR_OFFSET_ORIGIN_MISMATCH:5!=666"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-15_h2_just_below_functional_floor_fails",
+      "detail": {
+        "at": {
+          "ballistic_cross_check_vz_m_s": 1.7155174146594956,
+          "classification": "ABOVE_FLOOR",
+          "closure_pass": true,
+          "floor_role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY",
+          "h2_m": 0.15,
+          "h_anti_triviality_floor_m": 0.15,
+          "note": "H_ANTI_TRIVIALITY_FLOOR is a minimum functional success condition, not an elite norm and not an optimization target"
+        },
+        "below": {
+          "ballistic_cross_check_vz_m_s": 1.7155174146594956,
+          "classification": "BELOW_FUNCTIONAL_TASK_FLOOR",
+          "closure_pass": false,
+          "floor_role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY",
+          "h2_m": 0.149999999,
+          "h_anti_triviality_floor_m": 0.15,
+          "note": "H_ANTI_TRIVIALITY_FLOOR is a minimum functional success condition, not an elite norm and not an optimization target"
+        }
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-16_zero_passive_zero_active_case_not_replaced_by_active_command",
+      "detail": {
+        "hidden_case_detected": true,
+        "m1_active_total_j": 0.0
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-17_undeclared_slew_exceedance_fails",
+      "detail": {
+        "audit_failures": [
+          "UNDECLARED_SLEW_EXCEEDANCE:sample=0,channel=trunk_pelvis,exceedance=1"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-18_declared_safety_override_without_binding_bound_fails",
+      "detail": {
+        "audit_failures": [
+          "OVERRIDE_WITHOUT_BINDING_HARD_BOUND:sample=0,channel=trunk_pelvis,reason=moment_ceiling"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-19_mtp_active_work_is_negligible_fraction_of_joint_work",
+      "detail": {
+        "m0_ratio": 0.0010326298249116917,
+        "m1_active_total_j": 0.0
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-20_canonical_identity_audit_passes",
+      "detail": [],
+      "pass": true
+    },
+    {
+      "check": "NC-21_safety_override_audit_passes",
+      "detail": [],
+      "pass": true
+    },
+    {
+      "check": "NC-22_launch_joint_rom_audit_passes",
+      "detail": {
+        "audit": {
+          "criterion": "reference within frozen ROM; applied moment never drives past the frozen ROM; measured overshoot within the per-channel Plant soft-limit compliance envelope",
+          "failures": [],
+          "landing_window_note": "post-flight landing ROM is RES-86 scope, not judged here",
+          "measured_overshoot_within_plant_soft_limit_envelope": true,
+          "no_applied_moment_drives_past_frozen_rom": true,
+          "reference_within_frozen_rom": true,
+          "scope": "STAND_TO_ACCEPTED_OCCURRENCE",
+          "status": "PASS"
+        },
+        "mutated_failures": [
+          "MEASURED_OVERSHOOT_OUTSIDE_PLANT_ENVELOPE:left_ankle"
+        ]
+      },
+      "pass": true
     }
   ],
+  "legacy_status": "PASS",
+  "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
   "probes": {
     "NC-01_single_sample_dropout": {
       "candidate_rejections": [],
@@ -289,7 +476,83 @@
         ],
         "takeoff_confirmed": false
       }
+    },
+    "NC-08_authority_units": {
+      "moment_ceiling": true,
+      "rate_from_reset": true
+    },
+    "NC-10_symmetry": {
+      "applied_equal": true,
+      "asymmetry_nm": 80.0
+    },
+    "NC-11_zero_passive": {
+      "active_positive_work_max_j": 1.6178916717732605,
+      "status": "PASS"
+    },
+    "NC-12_startup_chatter_as_accepted": {
+      "disposition": "NOT_EVALUATED",
+      "mutated_index": 5,
+      "validator_failures": [
+        "ACCEPTED_CANDIDATE_MISMATCH",
+        "H2_ORIGIN_MISMATCH:666!=5",
+        "IMPULSE_ORIGIN_MISMATCH:666!=5",
+        "COMPARATOR_OFFSET_ORIGIN_MISMATCH:666!=5"
+      ]
+    },
+    "NC-13_occurrence_vs_h2_origin": {
+      "validator_failures": [
+        "ACCEPTED_CANDIDATE_MISMATCH",
+        "H2_ORIGIN_MISMATCH:666!=667",
+        "IMPULSE_ORIGIN_MISMATCH:666!=667",
+        "COMPARATOR_OFFSET_ORIGIN_MISMATCH:666!=667"
+      ]
+    },
+    "NC-14_comparator_offset_rejected": {
+      "mutated_index": 5,
+      "validator_failures": [
+        "COMPARATOR_OFFSET_ORIGIN_MISMATCH:5!=666"
+      ]
+    },
+    "NC-15_floor_boundary": {
+      "at": {
+        "ballistic_cross_check_vz_m_s": 1.7155174146594956,
+        "classification": "ABOVE_FLOOR",
+        "closure_pass": true,
+        "floor_role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY",
+        "h2_m": 0.15,
+        "h_anti_triviality_floor_m": 0.15,
+        "note": "H_ANTI_TRIVIALITY_FLOOR is a minimum functional success condition, not an elite norm and not an optimization target"
+      },
+      "below": {
+        "ballistic_cross_check_vz_m_s": 1.7155174146594956,
+        "classification": "BELOW_FUNCTIONAL_TASK_FLOOR",
+        "closure_pass": false,
+        "floor_role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY",
+        "h2_m": 0.149999999,
+        "h_anti_triviality_floor_m": 0.15,
+        "note": "H_ANTI_TRIVIALITY_FLOOR is a minimum functional success condition, not an elite norm and not an optimization target"
+      }
+    },
+    "NC-16_zero_passive_hidden": {
+      "hidden_case_detected": true,
+      "m1_active_total_j": 0.0
+    },
+    "NC-17_undeclared_slew_exceedance": {
+      "audit_failures": [
+        "UNDECLARED_SLEW_EXCEEDANCE:sample=0,channel=trunk_pelvis,exceedance=1"
+      ]
+    },
+    "NC-18_override_without_binding_bound": {
+      "audit_failures": [
+        "OVERRIDE_WITHOUT_BINDING_HARD_BOUND:sample=0,channel=trunk_pelvis,reason=moment_ceiling"
+      ]
+    },
+    "NC-19_mtp_ratio": {
+      "m0_ratio": 0.0010326298249116917,
+      "m1_active_total_j": 0.0
     }
   },
+  "res85c_status": "PASS",
+  "schema_version": "1.0.0",
   "status": "PASS"
 }

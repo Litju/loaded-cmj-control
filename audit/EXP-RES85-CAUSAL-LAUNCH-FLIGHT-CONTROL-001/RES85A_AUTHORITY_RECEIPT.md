@@ -86,3 +86,21 @@ This receipt freezes *authority*, not performance. It establishes no loaded-CMJ
 jump height, no elite comparison and no Plant capability claim. Achievement B
 implements and qualifies the causal controller under these limits; RES-86 owns
 landing capture and RES-87 owns recovery.
+
+---
+
+## RES-85C erratum (appended; not part of the Achievement-A record)
+
+The RES-85C Blocker-B correction supersedes the H2-floor framing used in
+section 3 of this Achievement-A record.  The current authority in this bundle
+(`METHOD_COMPARATOR_PANEL.json`) declares:
+
+* `H_ANTI_TRIVIALITY_FLOOR = 0.150 m` with role
+  `HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY`, i.e. a hard
+  minimum functional success condition (not an elite norm and not an
+  optimization target);
+* `ELITE_SOCCER_PLUS20_H2_HARD_GATE = NOT_ESTABLISHED` (unchanged);
+* `ELITE_SOCCER_PLUS20_H2_TARGET = NOT_ESTABLISHED` (restored).
+
+Everything else in this Achievement-A record is unchanged history.  See
+`RES85C_CORRECTION_RECEIPT.md` for the full correction.

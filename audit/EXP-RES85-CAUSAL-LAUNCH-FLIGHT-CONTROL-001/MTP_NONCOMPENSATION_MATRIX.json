@@ -1,0 +1,811 @@
+{
+  "case_results": {
+    "M0_nominal_passive_nominal_active": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 12.802598078878956,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18867197309831352,
+      "moment_ceiling_override_nm": null,
+      "mtp_active_positive_work_j": [
+        0.27191709186763124,
+        0.2719170918676281
+      ],
+      "mtp_active_total_positive_work_j": 0.5438341837352594,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 15.0,
+      "mtp_passive_positive_work_j": [
+        0.0036297808146988323,
+        0.0036297808146972485
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1318,
+        "mtp_phase_gate": 4
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0010326298249116917,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 666,
+      "takeoff_vz_m_s": 1.9503826924187873,
+      "total_positive_joint_work_j": 526.6496963534507,
+      "zero_passive": false
+    },
+    "M1_zero_passive_zero_active": {
+      "active_budget_override_j": 0.0,
+      "ankle_positive_work_j": 14.376047568246573,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.1770700421898903,
+      "moment_ceiling_override_nm": null,
+      "mtp_active_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_active_total_positive_work_j": 0.0,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 0.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1240,
+        "mtp_phase_gate": 8
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 623,
+      "takeoff_vz_m_s": 1.8894938229044478,
+      "total_positive_joint_work_j": 521.2194796846377,
+      "zero_passive": true
+    },
+    "M2_zero_passive_tight_active": {
+      "active_budget_override_j": 2.5,
+      "ankle_positive_work_j": 15.744543018724059,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18057090654359564,
+      "moment_ceiling_override_nm": null,
+      "mtp_active_positive_work_j": [
+        1.6178916717732603,
+        1.6178916717732605
+      ],
+      "mtp_active_total_positive_work_j": 3.2357833435465206,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 9.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1376,
+        "mtp_phase_gate": 30
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0054819312889644424,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 715,
+      "takeoff_vz_m_s": 1.9121823972714114,
+      "total_positive_joint_work_j": 590.2633894847253,
+      "zero_passive": true
+    },
+    "M3_zero_passive_nominal_active": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 15.744543018724059,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18057090654359564,
+      "moment_ceiling_override_nm": null,
+      "mtp_active_positive_work_j": [
+        1.6178916717732603,
+        1.6178916717732605
+      ],
+      "mtp_active_total_positive_work_j": 3.2357833435465206,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 9.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1376,
+        "mtp_phase_gate": 30
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0054819312889644424,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 715,
+      "takeoff_vz_m_s": 1.9121823972714114,
+      "total_positive_joint_work_j": 590.2633894847253,
+      "zero_passive": true
+    },
+    "SWEEP_active_budget_0.271917J": {
+      "active_budget_override_j": 0.27191709186763124,
+      "ankle_positive_work_j": 14.946874298625632,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18781836251514972,
+      "moment_ceiling_override_nm": null,
+      "mtp_active_positive_work_j": [
+        0.27191709186763124,
+        0.27191709186763124
+      ],
+      "mtp_active_total_positive_work_j": 0.5438341837352625,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 9.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1354,
+        "mtp_phase_gate": 10
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.001028258207082893,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 685,
+      "takeoff_vz_m_s": 1.941894740243363,
+      "total_positive_joint_work_j": 528.8887363010576,
+      "zero_passive": true
+    },
+    "SWEEP_active_budget_0J": {
+      "active_budget_override_j": 0.0,
+      "ankle_positive_work_j": 14.376047568246573,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.1770700421898903,
+      "moment_ceiling_override_nm": null,
+      "mtp_active_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_active_total_positive_work_j": 0.0,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 0.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1240,
+        "mtp_phase_gate": 8
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 623,
+      "takeoff_vz_m_s": 1.8894938229044478,
+      "total_positive_joint_work_j": 521.2194796846377,
+      "zero_passive": true
+    },
+    "SWEEP_active_budget_12.5J": {
+      "active_budget_override_j": 12.5,
+      "ankle_positive_work_j": 15.744543018724059,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18057090654359564,
+      "moment_ceiling_override_nm": null,
+      "mtp_active_positive_work_j": [
+        1.6178916717732603,
+        1.6178916717732605
+      ],
+      "mtp_active_total_positive_work_j": 3.2357833435465206,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 9.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1376,
+        "mtp_phase_gate": 30
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0054819312889644424,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 715,
+      "takeoff_vz_m_s": 1.9121823972714114,
+      "total_positive_joint_work_j": 590.2633894847253,
+      "zero_passive": true
+    },
+    "SWEEP_active_budget_2.5J": {
+      "active_budget_override_j": 2.5,
+      "ankle_positive_work_j": 15.744543018724059,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18057090654359564,
+      "moment_ceiling_override_nm": null,
+      "mtp_active_positive_work_j": [
+        1.6178916717732603,
+        1.6178916717732605
+      ],
+      "mtp_active_total_positive_work_j": 3.2357833435465206,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 9.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1376,
+        "mtp_phase_gate": 30
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0054819312889644424,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 715,
+      "takeoff_vz_m_s": 1.9121823972714114,
+      "total_positive_joint_work_j": 590.2633894847253,
+      "zero_passive": true
+    },
+    "SWEEP_active_budget_25J": {
+      "active_budget_override_j": 25.0,
+      "ankle_positive_work_j": 15.744543018724059,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18057090654359564,
+      "moment_ceiling_override_nm": null,
+      "mtp_active_positive_work_j": [
+        1.6178916717732603,
+        1.6178916717732605
+      ],
+      "mtp_active_total_positive_work_j": 3.2357833435465206,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 9.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1376,
+        "mtp_phase_gate": 30
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0054819312889644424,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 715,
+      "takeoff_vz_m_s": 1.9121823972714114,
+      "total_positive_joint_work_j": 590.2633894847253,
+      "zero_passive": true
+    },
+    "SWEEP_moment_normal_passive_0Nm": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 14.341987992171221,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.19901148878984198,
+      "moment_ceiling_override_nm": 0.0,
+      "mtp_active_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_active_total_positive_work_j": 0.0,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 0.0,
+      "mtp_passive_positive_work_j": [
+        0.00010517768763316205,
+        0.00010517768763323995
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 24,
+        "mtp_phase_gate": 4
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 618,
+      "takeoff_vz_m_s": 1.9954044864530134,
+      "total_positive_joint_work_j": 490.671456544682,
+      "zero_passive": false
+    },
+    "SWEEP_moment_normal_passive_22.5Nm": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 12.802598078878956,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18867197309831352,
+      "moment_ceiling_override_nm": 22.5,
+      "mtp_active_positive_work_j": [
+        0.27191709186763124,
+        0.2719170918676281
+      ],
+      "mtp_active_total_positive_work_j": 0.5438341837352594,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 15.0,
+      "mtp_passive_positive_work_j": [
+        0.0036297808146988323,
+        0.0036297808146972485
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1318,
+        "mtp_phase_gate": 4
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0010326298249116917,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 666,
+      "takeoff_vz_m_s": 1.9503826924187873,
+      "total_positive_joint_work_j": 526.6496963534507,
+      "zero_passive": false
+    },
+    "SWEEP_moment_normal_passive_45Nm": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 12.802598078878956,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18867197309831352,
+      "moment_ceiling_override_nm": 45.0,
+      "mtp_active_positive_work_j": [
+        0.27191709186763124,
+        0.2719170918676281
+      ],
+      "mtp_active_total_positive_work_j": 0.5438341837352594,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 15.0,
+      "mtp_passive_positive_work_j": [
+        0.0036297808146988323,
+        0.0036297808146972485
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1318,
+        "mtp_phase_gate": 4
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0010326298249116917,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 666,
+      "takeoff_vz_m_s": 1.9503826924187873,
+      "total_positive_joint_work_j": 526.6496963534507,
+      "zero_passive": false
+    },
+    "SWEEP_moment_normal_passive_60Nm": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 12.802598078878956,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18867197309831352,
+      "moment_ceiling_override_nm": 60.0,
+      "mtp_active_positive_work_j": [
+        0.27191709186763124,
+        0.2719170918676281
+      ],
+      "mtp_active_total_positive_work_j": 0.5438341837352594,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 15.0,
+      "mtp_passive_positive_work_j": [
+        0.0036297808146988323,
+        0.0036297808146972485
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1318,
+        "mtp_phase_gate": 4
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0010326298249116917,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 666,
+      "takeoff_vz_m_s": 1.9503826924187873,
+      "total_positive_joint_work_j": 526.6496963534507,
+      "zero_passive": false
+    },
+    "SWEEP_moment_zero_passive_0Nm": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 14.376047568246573,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.1770700421898903,
+      "moment_ceiling_override_nm": 0.0,
+      "mtp_active_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_active_total_positive_work_j": 0.0,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 0.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 40,
+        "mtp_phase_gate": 8
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 623,
+      "takeoff_vz_m_s": 1.8894938229044478,
+      "total_positive_joint_work_j": 521.2194796846377,
+      "zero_passive": true
+    },
+    "SWEEP_moment_zero_passive_22.5Nm": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 15.744543018724059,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18057090654359564,
+      "moment_ceiling_override_nm": 22.5,
+      "mtp_active_positive_work_j": [
+        1.6178916717732603,
+        1.6178916717732605
+      ],
+      "mtp_active_total_positive_work_j": 3.2357833435465206,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 9.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1376,
+        "mtp_phase_gate": 30
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0054819312889644424,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 715,
+      "takeoff_vz_m_s": 1.9121823972714114,
+      "total_positive_joint_work_j": 590.2633894847253,
+      "zero_passive": true
+    },
+    "SWEEP_moment_zero_passive_45Nm": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 15.744543018724059,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18057090654359564,
+      "moment_ceiling_override_nm": 45.0,
+      "mtp_active_positive_work_j": [
+        1.6178916717732603,
+        1.6178916717732605
+      ],
+      "mtp_active_total_positive_work_j": 3.2357833435465206,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 9.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1376,
+        "mtp_phase_gate": 30
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0054819312889644424,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 715,
+      "takeoff_vz_m_s": 1.9121823972714114,
+      "total_positive_joint_work_j": 590.2633894847253,
+      "zero_passive": true
+    },
+    "SWEEP_moment_zero_passive_60Nm": {
+      "active_budget_override_j": null,
+      "ankle_positive_work_j": 15.744543018724059,
+      "episode_status": "COMPLETED",
+      "fault": null,
+      "h2_m": 0.18057090654359564,
+      "moment_ceiling_override_nm": 60.0,
+      "mtp_active_positive_work_j": [
+        1.6178916717732603,
+        1.6178916717732605
+      ],
+      "mtp_active_total_positive_work_j": 3.2357833435465206,
+      "mtp_budget_binds": true,
+      "mtp_moment_max_abs_nm": 9.0,
+      "mtp_passive_positive_work_j": [
+        0.0,
+        0.0
+      ],
+      "mtp_stage_counts": {
+        "mtp_budget": 1376,
+        "mtp_phase_gate": 30
+      },
+      "phases": [
+        "STAND",
+        "COUNTERMOVEMENT",
+        "BRAKING",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "PROPULSION",
+        "TAKEOFF_CONFIRM",
+        "FLIGHT",
+        "LANDING_PREP"
+      ],
+      "qualitative_success": true,
+      "ratio_mtp_active_over_total_positive": 0.0054819312889644424,
+      "takeoff_confirmation": true,
+      "takeoff_occurrence_index": 715,
+      "takeoff_vz_m_s": 1.9121823972714114,
+      "total_positive_joint_work_j": 590.2633894847253,
+      "zero_passive": true
+    }
+  },
+  "controller_config": {
+    "a_brake_m_s2": 2.5,
+    "a_thrust_m_s2": 17.0,
+    "braking_trigger_margin_m": 0.02,
+    "contact_preload_m": 0.005,
+    "dt_s": 0.002,
+    "extension_rate_ff_gain": 0.5,
+    "joint_rom_barrier_gain": 800.0,
+    "joint_rom_margin_rad": 0.08,
+    "mtp_active_budget_j": null,
+    "mtp_moment_ceiling_nm": null,
+    "quiet_stand_samples": 125,
+    "reference_lag_max_m": 0.05,
+    "thrust_az_max_m_s2": 21.0,
+    "trunk_extend_frac": 0.4,
+    "trunk_kd": 30.0,
+    "trunk_kp": 240.0,
+    "trunk_lean_frac": 0.35,
+    "trunk_rom_barrier_gain": 2500.0,
+    "v_brake_trigger_m_s": -0.55,
+    "v_countermovement_cmd_m_s": -0.35
+  },
+  "declared_cases": [
+    "M0_nominal_passive_nominal_active",
+    "M1_zero_passive_zero_active",
+    "M2_zero_passive_tight_active",
+    "M3_zero_passive_nominal_active",
+    "SWEEP_active_budget_0J",
+    "SWEEP_active_budget_0.271917J",
+    "SWEEP_active_budget_2.5J",
+    "SWEEP_active_budget_12.5J",
+    "SWEEP_active_budget_25J",
+    "SWEEP_moment_normal_passive_0Nm",
+    "SWEEP_moment_zero_passive_0Nm",
+    "SWEEP_moment_normal_passive_22.5Nm",
+    "SWEEP_moment_zero_passive_22.5Nm",
+    "SWEEP_moment_normal_passive_45Nm",
+    "SWEEP_moment_zero_passive_45Nm",
+    "SWEEP_moment_normal_passive_60Nm",
+    "SWEEP_moment_zero_passive_60Nm"
+  ],
+  "h_anti_triviality_floor_m": 0.15,
+  "horizon_s": 2.0,
+  "linear_issue": "RES-85",
+  "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+  "observed_nominal_active_work_scale_j": 0.27191709186763124,
+  "required_conclusion": {
+    "conclusion": "the accepted launch does not depend on replacing removed passive MTP mechanics with large active toe work",
+    "m0_h2_retained_with_zero_passive": true,
+    "mtp_active_ratio_nominal": 0.0010326298249116917,
+    "nominal_h2_m": 0.18867197309831352,
+    "zero_passive_zero_active_feasible": true,
+    "zero_passive_zero_active_h2_m": 0.1770700421898903
+  },
+  "schema_version": "1.0.0",
+  "two_run_identity": {
+    "byte_identical": true,
+    "canonical_encoding": "json(indent=2, sort_keys=True) + trailing newline, report payload without the two_run_identity field",
+    "runs": 2,
+    "sha256": [
+      "2fe73c60e133422b979ae2042c7fc6d8aca46cfc30e50e2acc1019782ea8d2c0",
+      "2fe73c60e133422b979ae2042c7fc6d8aca46cfc30e50e2acc1019782ea8d2c0"
+    ]
+  }
+}

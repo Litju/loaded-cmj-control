@@ -1,0 +1,197 @@
+{
+  "channels": {
+    "left_ankle": {
+      "lower": {
+        "applied_moment_nm": -260.0,
+        "direction": "lower",
+        "extremum_rad": -2.3585451859099895,
+        "limit_rad": -0.959931,
+        "overshoot_rad": 1.3986141859099894,
+        "start_rad": -0.809931
+      },
+      "moment_ceiling_nm": 260.0,
+      "soft_limit_compliance_rad": 1.5332473681554835,
+      "upper": {
+        "applied_moment_nm": 260.0,
+        "direction": "upper",
+        "extremum_rad": 2.3186453681554835,
+        "limit_rad": 0.785398,
+        "overshoot_rad": 1.5332473681554835,
+        "start_rad": 0.635398
+      }
+    },
+    "left_hip": {
+      "lower": {
+        "applied_moment_nm": -330.0,
+        "direction": "lower",
+        "extremum_rad": -0.5570606119354556,
+        "limit_rad": -0.349066,
+        "overshoot_rad": 0.20799461193545565,
+        "start_rad": -0.199066
+      },
+      "moment_ceiling_nm": 330.0,
+      "soft_limit_compliance_rad": 0.282016205134501,
+      "upper": {
+        "applied_moment_nm": 330.0,
+        "direction": "upper",
+        "extremum_rad": 2.550944205134501,
+        "limit_rad": 2.268928,
+        "overshoot_rad": 0.282016205134501,
+        "start_rad": 2.118928
+      }
+    },
+    "left_knee": {
+      "lower": {
+        "applied_moment_nm": -380.0,
+        "direction": "lower",
+        "extremum_rad": -0.30182148798438224,
+        "limit_rad": 0.0,
+        "overshoot_rad": 0.30182148798438224,
+        "start_rad": 0.15
+      },
+      "moment_ceiling_nm": 380.0,
+      "soft_limit_compliance_rad": 0.30182148798438224,
+      "upper": {
+        "applied_moment_nm": 380.0,
+        "direction": "upper",
+        "extremum_rad": 2.5889878507314523,
+        "limit_rad": 2.443461,
+        "overshoot_rad": 0.14552685073145222,
+        "start_rad": 2.293461
+      }
+    },
+    "left_mtp": {
+      "lower": {
+        "applied_moment_nm": -45.0,
+        "direction": "lower",
+        "extremum_rad": -1.6301994393614043,
+        "limit_rad": -0.523599,
+        "overshoot_rad": 1.1066004393614044,
+        "start_rad": -0.373599
+      },
+      "moment_ceiling_nm": 45.0,
+      "soft_limit_compliance_rad": 1.1066004393614044,
+      "upper": {
+        "applied_moment_nm": 45.0,
+        "direction": "upper",
+        "extremum_rad": 1.7585572628377584,
+        "limit_rad": 1.570796,
+        "overshoot_rad": 0.1877612628377583,
+        "start_rad": 1.4207960000000002
+      }
+    },
+    "right_ankle": {
+      "lower": {
+        "applied_moment_nm": -260.0,
+        "direction": "lower",
+        "extremum_rad": -2.3585451859099913,
+        "limit_rad": -0.959931,
+        "overshoot_rad": 1.3986141859099912,
+        "start_rad": -0.809931
+      },
+      "moment_ceiling_nm": 260.0,
+      "soft_limit_compliance_rad": 1.5332473681554892,
+      "upper": {
+        "applied_moment_nm": 260.0,
+        "direction": "upper",
+        "extremum_rad": 2.3186453681554893,
+        "limit_rad": 0.785398,
+        "overshoot_rad": 1.5332473681554892,
+        "start_rad": 0.635398
+      }
+    },
+    "right_hip": {
+      "lower": {
+        "applied_moment_nm": -330.0,
+        "direction": "lower",
+        "extremum_rad": -0.5570606119354448,
+        "limit_rad": -0.349066,
+        "overshoot_rad": 0.20799461193544477,
+        "start_rad": -0.199066
+      },
+      "moment_ceiling_nm": 330.0,
+      "soft_limit_compliance_rad": 0.2820162051344961,
+      "upper": {
+        "applied_moment_nm": 330.0,
+        "direction": "upper",
+        "extremum_rad": 2.550944205134496,
+        "limit_rad": 2.268928,
+        "overshoot_rad": 0.2820162051344961,
+        "start_rad": 2.118928
+      }
+    },
+    "right_knee": {
+      "lower": {
+        "applied_moment_nm": -380.0,
+        "direction": "lower",
+        "extremum_rad": -0.3018214879843826,
+        "limit_rad": 0.0,
+        "overshoot_rad": 0.3018214879843826,
+        "start_rad": 0.15
+      },
+      "moment_ceiling_nm": 380.0,
+      "soft_limit_compliance_rad": 0.3018214879843826,
+      "upper": {
+        "applied_moment_nm": 380.0,
+        "direction": "upper",
+        "extremum_rad": 2.5889878507314523,
+        "limit_rad": 2.443461,
+        "overshoot_rad": 0.14552685073145222,
+        "start_rad": 2.293461
+      }
+    },
+    "right_mtp": {
+      "lower": {
+        "applied_moment_nm": -45.0,
+        "direction": "lower",
+        "extremum_rad": -1.6301994393614152,
+        "limit_rad": -0.523599,
+        "overshoot_rad": 1.106600439361415,
+        "start_rad": -0.373599
+      },
+      "moment_ceiling_nm": 45.0,
+      "soft_limit_compliance_rad": 1.106600439361415,
+      "upper": {
+        "applied_moment_nm": 45.0,
+        "direction": "upper",
+        "extremum_rad": 1.7585572628377584,
+        "limit_rad": 1.570796,
+        "overshoot_rad": 0.1877612628377583,
+        "start_rad": 1.4207960000000002
+      }
+    },
+    "trunk_pelvis": {
+      "lower": {
+        "applied_moment_nm": -220.0,
+        "direction": "lower",
+        "extremum_rad": -0.7899524615859983,
+        "limit_rad": -0.610865,
+        "overshoot_rad": 0.1790874615859983,
+        "start_rad": -0.46086499999999997
+      },
+      "moment_ceiling_nm": 220.0,
+      "soft_limit_compliance_rad": 0.17922014641857453,
+      "upper": {
+        "applied_moment_nm": 220.0,
+        "direction": "upper",
+        "extremum_rad": 0.7900851464185745,
+        "limit_rad": 0.610865,
+        "overshoot_rad": 0.17922014641857453,
+        "start_rad": 0.46086499999999997
+      }
+    }
+  },
+  "interpretation": "a driven joint may cross its declared ROM by at most this measured amount; the RES-85C feasibility check requires the launch measured overshoot to stay inside the per-channel envelope AND the controller posture reference to stay inside the declared ROM",
+  "linear_issue": "RES-85",
+  "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+  "probe": {
+    "integrator": "sealed Plant (MuJoCo 3.8.0 compiler defaults)",
+    "measurement_layer_used": false,
+    "moment": "channel frozen moment ceiling (ACTUATION_AUTHORITY.json)",
+    "start_offset_rad": 0.15,
+    "steps": 400
+  },
+  "purpose": "declared Plant soft-limit compliance envelope used by the RES-85C launch joint-ROM feasibility check",
+  "schema_version": "1.0.0",
+  "worst_case_soft_limit_compliance_rad": 1.5332473681554892
+}

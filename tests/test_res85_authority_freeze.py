@@ -79,10 +79,26 @@ def test_h2_authority_is_frozen_and_method_qualified():
     assert h2["definition"] == "SYSTEM_COM_z(APEX) - SYSTEM_COM_z(TAKEOFF_OCCURRENCE)"
     assert h2["origin_authority"] == "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1"
     assert h2["elite_soccer_plus20_h2_hard_gate"] == "NOT_ESTABLISHED"
-    ref = h2["anti_triviality_reference_only"]
-    assert ref["value_m"] == 0.150
-    assert ref["label"] == "HISTORICAL_ANTI_TRIVIALITY_NEGATIVE_CONTROL_ONLY"
-    assert "not an elite-performance target" in ref["role_never"]
+    assert h2["elite_soccer_plus20_h2_target"] == "NOT_ESTABLISHED"
+
+
+def test_functional_floor_is_hard_and_not_an_elite_norm():
+    panel = _authority("METHOD_COMPARATOR_PANEL.json")
+    floor = panel["h2_authority"]["h_anti_triviality_floor"]
+    assert floor["symbol"] == "H_ANTI_TRIVIALITY_FLOOR"
+    assert floor["value_m"] == 0.150
+    assert floor["role"] == "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY"
+    assert floor["is_minimum_functional_success_condition"] is True
+    assert floor["is_elite_performance_norm"] is False
+    assert floor["is_optimization_target"] is False
+    assert floor["is_expected_value"] is False
+    assert floor["is_population_claim"] is False
+    statements = " ".join(floor["explicit_statements"])
+    assert "NOT an elite-performance norm" in statements
+    assert "NOT an optimization target" in statements
+    assert "IS a minimum functional success condition" in statements
+    assert "H2 >= H_ANTI_TRIVIALITY_FLOOR" in floor["closure_rule"]
+    assert "1.716" in floor["diagnostic_scale_cross_check"]["rule"]
 
 
 def test_no_method_is_converted_into_a_single_target():
@@ -133,10 +149,25 @@ def test_v2_and_r001_values_are_not_imported():
 def test_enforcement_order_and_symmetry_are_frozen():
     auth = _authority("ACTUATION_AUTHORITY.json")
     assert auth["enforcement_order_frozen"] is True
-    assert auth["enforcement_order"][2].startswith("3_constraint_interval_construction")
+    assert auth["enforcement_order"][2].startswith("3_hard_safety_bound_construction")
     assert any("sole history state" in entry for entry in auth["enforcement_order"])
-    assert "projection onto the intersection of four intervals" in \
+    assert "projection onto the intersection of the hard-safety interval" in \
         auth["feasible_interval_note"]
+
+
+def test_actuation_rate_contract_is_coherent():
+    auth = _authority("ACTUATION_AUTHORITY.json")
+    rate = auth["torque_rate_semantics"]
+    assert rate["role"] == "NOMINAL_SLEW_BOUND"
+    assert rate["hard_ceiling_claim"] is False
+    assert auth["hard_safety_bounds_semantics"]["bounds"] == [
+        "moment_ceiling", "joint_power_ceiling", "mtp_energy_gate"]
+    assert auth["hard_safety_bounds_semantics"]["never_exceeded"] is True
+    assert "always wins" in auth["hard_safety_bounds_semantics"]["precedence"]
+    assert "exactly one binding hard constraint" in \
+        auth["hard_safety_bounds_semantics"]["attribution"]
+    assert "power_emergency" not in json.dumps(auth)
+    assert "moment_emergency" not in json.dumps(auth)
     assert auth["bilateral_symmetry_rules"]["nominal_mode"] == "ENFORCED_FOR_ALL_RES85_PHASES"
     assert auth["bilateral_symmetry_rules"]["mirrored_pairs"] == [
         ["left_hip", "right_hip"], ["left_knee", "right_knee"],
@@ -238,7 +269,11 @@ def test_source_provenance_pins_sealed_inputs():
 def test_receipt_matches_generated_report():
     text = (EVIDENCE_DIR / "RES85A_AUTHORITY_RECEIPT.md").read_text()
     assert "ELITE_SOCCER_PLUS20_H2_HARD_GATE = NOT_ESTABLISHED" in text
+    # the Achievement-A record is preserved verbatim as history ...
     assert "HISTORICAL_ANTI_TRIVIALITY_NEGATIVE_CONTROL_ONLY" in text
+    # ... with an explicit RES-85C erratum pointing at the restored floor
+    assert "RES-85C erratum" in text
+    assert "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY" in text
     assert "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d" in text
     assert "223b13fe5bc3b884c15750da6badd24c834cfec54a24a23338dfde25d1bcbeda" in text
     report = json.loads((EVIDENCE_DIR / "AUTHORITY_CHECK_REPORT.json").read_text())

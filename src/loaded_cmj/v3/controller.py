@@ -71,12 +71,34 @@ V_COUNTERMOVEMENT_CMD_M_S = -0.35
 A_BRAKE_M_S2 = 2.5
 V_BRAKE_TRIGGER_M_S = -0.55
 BRAKING_TRIGGER_MARGIN_M = 0.02
-A_THRUST_M_S2 = 8.0
+A_THRUST_M_S2 = 17.0
 THRUST_AZ_MIN_M_S2 = -4.0
-THRUST_AZ_MAX_M_S2 = 12.0
+THRUST_AZ_MAX_M_S2 = 21.0
 REFERENCE_LEAD_MAX_M = 0.02
 REFERENCE_LAG_MAX_M = 0.05
 REFERENCE_V_REF_MAX_M_S = 4.0
+
+# ---------------------------------------------------------------------------
+# RES-85C propulsion-contact engineering variables (declared, bounded, causal)
+#
+# Diagnosis (RES-85C propulsion-deficit report): during PROPULSION the leg
+# extension rate exceeded the family-consistent rate for the measured
+# SYSTEM_COM rise rate, so the foot progressively lost penetration, the
+# contact force collapsed and a premature support loss truncated the stroke
+# about 0.10 m below full extension.  The variables below let the sagittal
+# joint rates be slaved to the measured SYSTEM_COM velocity through the
+# calibrated plant pose family, keep the trunk inside its ROM instead of
+# reacting to the hip-extension moment, and keep a controlled foot preload.
+# ---------------------------------------------------------------------------
+EXTENSION_RATE_FF_GAIN = 0.5
+CONTACT_PRELOAD_M = 0.005
+TRUNK_LEAN_FRAC = 0.35
+TRUNK_EXTEND_FRAC = 0.40
+TRUNK_KP = 240.0
+TRUNK_KD = 30.0
+JOINT_ROM_MARGIN_RAD = 0.08
+JOINT_ROM_BARRIER_GAIN = 800.0
+TRUNK_ROM_BARRIER_GAIN = 2500.0
 
 STRUCTURAL_FLEXION_SAFETY_RAD = 0.05
 
@@ -128,6 +150,23 @@ class V3ControllerConfig:
     dt_s: float = M.NATIVE_DT_S
     quiet_stand_samples: int = QUIET_STAND_SAMPLES
     a_thrust_m_s2: float = A_THRUST_M_S2
+    thrust_az_max_m_s2: float = THRUST_AZ_MAX_M_S2
+    reference_lag_max_m: float = REFERENCE_LAG_MAX_M
+    extension_rate_ff_gain: float = EXTENSION_RATE_FF_GAIN
+    contact_preload_m: float = CONTACT_PRELOAD_M
+    trunk_lean_frac: float = TRUNK_LEAN_FRAC
+    trunk_extend_frac: float = TRUNK_EXTEND_FRAC
+    trunk_kp: float = TRUNK_KP
+    trunk_kd: float = TRUNK_KD
+    joint_rom_margin_rad: float = JOINT_ROM_MARGIN_RAD
+    joint_rom_barrier_gain: float = JOINT_ROM_BARRIER_GAIN
+    trunk_rom_barrier_gain: float = TRUNK_ROM_BARRIER_GAIN
+    v_countermovement_cmd_m_s: float = V_COUNTERMOVEMENT_CMD_M_S
+    a_brake_m_s2: float = A_BRAKE_M_S2
+    v_brake_trigger_m_s: float = V_BRAKE_TRIGGER_M_S
+    braking_trigger_margin_m: float = BRAKING_TRIGGER_MARGIN_M
+    mtp_active_budget_j: float | None = None
+    mtp_moment_ceiling_nm: float | None = None
 
 
 @dataclass(frozen=True)
@@ -177,7 +216,10 @@ class V3LaunchController:
                  config: V3ControllerConfig | None = None) -> None:
         self.plant = plant
         self.config = config or V3ControllerConfig()
-        self.actuation = V3ActuationAuthority(self.config.dt_s)
+        self.actuation = V3ActuationAuthority(
+            self.config.dt_s,
+            mtp_active_positive_work_budget_j=self.config.mtp_active_budget_j,
+            mtp_moment_ceiling_nm=self.config.mtp_moment_ceiling_nm)
         self._mj = mujoco.MjData(plant.model)
         self._joint_names = list(CHANNELS)
         self._dof = [int(plant.idx.vadr[name]) for name in self._joint_names]
@@ -197,6 +239,8 @@ class V3LaunchController:
         self._q_hold = np.zeros(N_CHANNELS, dtype=np.float64)
         self._pending_candidate: M.V3TakeoffOccurrence | None = None
         self._candidate_rejected: list[str] = []
+        self._candidate_history: list[dict[str, object]] = []
+        self._accepted_occurrence: M.V3TakeoffOccurrence | None = None
         self._takeoff_confirmed = False
         self._confirmation: M.V3TakeoffConfirmation | None = None
         self._prev_frame: M.V3NativeFrame | None = None
@@ -224,6 +268,18 @@ class V3LaunchController:
         )
         self._z_ref = z_stand
         self._q_hold = q0.copy()
+        # family-consistent joint rate per unit SYSTEM_COM rise rate: the
+        # sagittal extension rate that keeps the planted foot on the floor at
+        # the measured SYSTEM_COM vertical velocity (calibrated Plant geometry).
+        self._ds_dz_table = np.gradient(s_table, z_table)
+        self._s_depth_tracked = 0.0
+        # declared joint-ROM barrier arrays in the actuated channel order
+        self._rom_lo = np.asarray([
+            -np.inf if V3_JOINT_RANGES_RAD[name] is None else V3_JOINT_RANGES_RAD[name][0]
+            for name in self._joint_names], dtype=np.float64)
+        self._rom_hi = np.asarray([
+            np.inf if V3_JOINT_RANGES_RAD[name] is None else V3_JOINT_RANGES_RAD[name][1]
+            for name in self._joint_names], dtype=np.float64)
 
     # ------------------------------------------------------------------
     # plant-derived calibration (geometry only, no controller claim)
@@ -242,7 +298,11 @@ class V3LaunchController:
         return float(max(s - STRUCTURAL_FLEXION_SAFETY_RAD, 0.1))
 
     def _flexion_reference(self, s: float) -> np.ndarray:
-        return self.diag.q_stand + FLEXION_DIRECTION * float(s)
+        ref = self.diag.q_stand + FLEXION_DIRECTION * float(s)
+        depth = max(0.0, self._s_depth_tracked - float(s))
+        ref[0] = (ref[0] + self.config.trunk_lean_frac * float(s)
+                  - self.config.trunk_extend_frac * depth)
+        return ref
 
     def _calibrate_z_of_s(self, data: mujoco.MjData, q_stand: np.ndarray,
                           s_struct: float) -> tuple[np.ndarray, np.ndarray]:
@@ -278,8 +338,47 @@ class V3LaunchController:
         return float(np.interp(z_clamped, self.diag.z_table[::-1], self.diag.s_table[::-1]))
 
     def _q_ref_kinematic(self, z: float) -> np.ndarray:
-        s = float(np.clip(self._s_from_z(z), 0.0, self.diag.s_table[-1]))
+        s = float(np.clip(self._s_from_z(z - self.config.contact_preload_m),
+                          0.0, self.diag.s_table[-1]))
+        self._s_depth_tracked = max(self._s_depth_tracked, s)
         return self._flexion_reference(s)
+
+    def _family_rate_reference(self, z: float, vz: float,
+                               extending: bool = False) -> np.ndarray:
+        """Family-consistent sagittal joint rate for the measured COM rise.
+
+        ``dq_ref/dz`` is the calibrated Plant pose-family derivative; the trunk
+        channel follows the declared trunk-lean mapping.  Applied only through
+        the declared extension-rate feedforward gain.
+        """
+        z_clamped = float(np.clip(z, self.diag.z_table[-1], self.diag.z_table[0]))
+        ds_dz = float(np.interp(z_clamped, self.diag.z_table[::-1],
+                                self._ds_dz_table[::-1]))
+        rate_s = ds_dz * float(vz)
+        ref_rate = FLEXION_DIRECTION * rate_s
+        trunk_slope = self.config.trunk_lean_frac + (
+            self.config.trunk_extend_frac if extending else 0.0)
+        ref_rate[0] = ref_rate[0] + trunk_slope * rate_s
+        return ref_rate
+
+    def _rom_barrier(self, q: np.ndarray, desired: np.ndarray) -> np.ndarray:
+        """One-sided joint-ROM barrier on the measured actuated joint state.
+
+        Keeps every actuated Plant joint inside its frozen ROM with a declared
+        margin; the barrier is exactly zero in the interior of the ROM and only
+        opposes motion towards a limit, so it never supplies propulsion.
+        """
+        margin = float(self.config.joint_rom_margin_rad)
+        gain = np.full(N_CHANNELS, float(self.config.joint_rom_barrier_gain))
+        gain[0] = float(self.config.trunk_rom_barrier_gain)
+        out = desired.copy()
+        upper = self._rom_hi - margin
+        lower = self._rom_lo + margin
+        over = q > upper
+        under = q < lower
+        out[over] -= gain[over] * (q[over] - upper[over])
+        out[under] += gain[under] * (lower[under] - q[under])
+        return out
 
     def _joint_limit_margin(self, data: mujoco.MjData) -> np.ndarray:
         out = []
@@ -296,6 +395,21 @@ class V3LaunchController:
     def passive_reconstruction_residual_nm(self) -> float:
         """|Plant passive MTP generalised force - FM-09 reconstruction| (N*m)."""
         return float(getattr(self, "_passive_reconstruction_residual_nm", 0.0))
+
+    @property
+    def accepted_occurrence(self) -> M.V3TakeoffOccurrence | None:
+        """The unique controller-accepted TAKEOFF_OCCURRENCE (None if unconfirmed)."""
+        return self._accepted_occurrence
+
+    @property
+    def confirmation(self) -> M.V3TakeoffConfirmation | None:
+        """The last RES-84 confirmation evaluated by the phase machine."""
+        return self._confirmation
+
+    @property
+    def candidate_history(self) -> list[dict[str, object]]:
+        """Controller-side candidate dispositions (PENDING/ACCEPTED/REJECTED)."""
+        return [dict(entry) for entry in self._candidate_history]
 
     def _fault(self, reason: str) -> None:
         self._fault_reason = reason
@@ -363,8 +477,9 @@ class V3LaunchController:
                 self._enter_takeoff_confirm(frames, "SUPPORT_LOSS_DURING_COUNTERMOVEMENT")
             else:
                 budget = float(frame.com_world_m[2]) - self.diag.z_struct_min_m
-                d_stop = (vz * vz) / (2.0 * A_BRAKE_M_S2)
-                if d_stop >= budget - BRAKING_TRIGGER_MARGIN_M or vz <= V_BRAKE_TRIGGER_M_S:
+                d_stop = (vz * vz) / (2.0 * self.config.a_brake_m_s2)
+                if (d_stop >= budget - self.config.braking_trigger_margin_m
+                        or vz <= self.config.v_brake_trigger_m_s):
                     self._transition(V3Phase.BRAKING, "PREDICTIVE_BRAKING_TRIGGER")
 
         if self.phase == V3Phase.BRAKING:
@@ -396,7 +511,22 @@ class V3LaunchController:
         if not candidates:
             return
         self._pending_candidate = candidates[-1]
+        self._candidate_history.append({
+            "occurrence_index": int(candidates[-1].native_index),
+            "disposition": "PENDING",
+            "rejection_reason": None,
+            "source_phase": self.phase.value,
+            "entry_reason": reason,
+        })
         self._transition(V3Phase.TAKEOFF_CONFIRM, reason)
+
+    def _record_candidate_disposition(self, disposition: str,
+                                      rejection_reason: str | None) -> None:
+        for entry in reversed(self._candidate_history):
+            if entry["disposition"] == "PENDING":
+                entry["disposition"] = disposition
+                entry["rejection_reason"] = rejection_reason
+                return
 
     def _update_takeoff_confirm(self, frame: M.V3NativeFrame,
                                 frames: Sequence[M.V3NativeFrame]) -> None:
@@ -407,11 +537,15 @@ class V3LaunchController:
         self._confirmation = confirmation
         if confirmation.confirmed:
             self._takeoff_confirmed = True
+            self._accepted_occurrence = candidate
+            self._record_candidate_disposition("ACCEPTED", None)
             self._transition(V3Phase.FLIGHT, "RES84_TAKEOFF_CONFIRMATION")
             return
         failed = set(confirmation.failed_checks)
         if "no_legal_plantar_recontact" in failed or frame.legal_plantar_active > 0:
             self._candidate_rejected.append("LEGAL_RECONTACT_BEFORE_CONFIRMATION")
+            self._record_candidate_disposition("REJECTED",
+                                               "LEGAL_RECONTACT_BEFORE_CONFIRMATION")
             self._pending_candidate = None
             target = (V3Phase.PROPULSION
                       if float(frame.com_velocity_world_m_s[2]) > 0.0 else V3Phase.BRAKING)
@@ -419,9 +553,13 @@ class V3LaunchController:
             return
         if "no_prohibited_contact" in failed:
             self._candidate_rejected.append("PROHIBITED_CONTACT_DURING_CONFIRMATION")
+            self._record_candidate_disposition("REJECTED",
+                                                "PROHIBITED_CONTACT_DURING_CONFIRMATION")
             self._fault("PROHIBITED_CONTACT_DURING_CONFIRMATION")
         if confirmation.dwell is not None and confirmation.dwell.coverage_complete:
             self._candidate_rejected.append("CONFIRMATION_WINDOW_CLOSED_NO_LATCH")
+            self._record_candidate_disposition("REJECTED",
+                                                "CONFIRMATION_WINDOW_CLOSED_NO_LATCH")
 
     # ------------------------------------------------------------------
     # control law
@@ -493,28 +631,29 @@ class V3LaunchController:
                 az_des = -KZ_STAND * (z - self.diag.z_stand_m) - DZ_STAND * vz
             elif self.phase == V3Phase.COUNTERMOVEMENT:
                 self._v_ref = max(self._v_ref + A_COUNTERMOVEMENT_M_S2 * self.config.dt_s,
-                                  V_COUNTERMOVEMENT_CMD_M_S)
+                                  self.config.v_countermovement_cmd_m_s)
                 self._z_ref += self._v_ref * self.config.dt_s
-                self._z_ref = float(np.clip(self._z_ref, z - REFERENCE_LAG_MAX_M,
+                self._z_ref = float(np.clip(self._z_ref, z - self.config.reference_lag_max_m,
                                             z + REFERENCE_LEAD_MAX_M))
                 az_des = (A_COUNTERMOVEMENT_M_S2
                           + KZ_TRACK * (self._z_ref - z) + DZ_TRACK * (self._v_ref - vz))
             elif self.phase == V3Phase.BRAKING:
-                self._v_ref = min(self._v_ref + A_BRAKE_M_S2 * self.config.dt_s, 0.0)
+                self._v_ref = min(self._v_ref + self.config.a_brake_m_s2 * self.config.dt_s, 0.0)
                 self._z_ref += self._v_ref * self.config.dt_s
-                self._z_ref = float(np.clip(self._z_ref, z - REFERENCE_LAG_MAX_M,
+                self._z_ref = float(np.clip(self._z_ref, z - self.config.reference_lag_max_m,
                                             z + REFERENCE_LEAD_MAX_M))
-                az_des = (A_BRAKE_M_S2
+                az_des = (self.config.a_brake_m_s2
                           + KZ_TRACK * (self._z_ref - z) + DZ_TRACK * (self._v_ref - vz))
             elif self.phase == V3Phase.PROPULSION:
                 self._v_ref = min(self._v_ref + self.config.a_thrust_m_s2 * self.config.dt_s,
                                   REFERENCE_V_REF_MAX_M_S)
                 self._z_ref += self._v_ref * self.config.dt_s
-                self._z_ref = float(np.clip(self._z_ref, z - REFERENCE_LAG_MAX_M,
+                self._z_ref = float(np.clip(self._z_ref, z - self.config.reference_lag_max_m,
                                             z + REFERENCE_LEAD_MAX_M))
                 az_des = (self.config.a_thrust_m_s2
                           + KZ_TRACK * (self._z_ref - z) + DZ_TRACK * (self._v_ref - vz))
-            az_des = float(np.clip(az_des, THRUST_AZ_MIN_M_S2, THRUST_AZ_MAX_M_S2))
+            az_des = float(np.clip(az_des, THRUST_AZ_MIN_M_S2,
+                                   self.config.thrust_az_max_m_s2))
             fz_total = max(M.SYSTEM_MASS_KG * (M.GRAVITY_M_S2 + az_des), 0.0)
             fx_total = float(np.clip(M.SYSTEM_MASS_KG * ax_des,
                                      -FX_FRACTION_MAX * fz_total, FX_FRACTION_MAX * fz_total))
@@ -552,7 +691,22 @@ class V3LaunchController:
             q_ref = self._q_hold.copy()
 
         desired = self._virtual_joint_moments(data, fz_total, fx_total, clipped)
-        desired = desired - JOINT_KP * (q - q_ref) - JOINT_KD * qdot
+        # declared sagittal gains (the trunk carries its own declared gains so
+        # the hip-extension reaction cannot drive it past its ROM)
+        kp = JOINT_KP.copy()
+        kd = JOINT_KD.copy()
+        kp[0] = self.config.trunk_kp
+        kd[0] = self.config.trunk_kd
+        # extension-rate feedforward: penalize sagittal joint rates that differ
+        # from the calibrated family-consistent rate for the measured COM rise
+        # (the foot cannot outrun the SYSTEM_COM and lose contact)
+        s_now = self._s_from_z(z - self.config.contact_preload_m)
+        extending = s_now < self._s_depth_tracked - 1.0e-9
+        rate_ref = (self._family_rate_reference(z, vz, extending)
+                    * self.config.extension_rate_ff_gain
+                    if self.phase in SUPPORTED_PHASES else np.zeros(N_CHANNELS))
+        desired = desired - kp * (q - q_ref) - kd * (qdot - rate_ref)
+        desired = self._rom_barrier(q, desired)
 
         mtp_q = (float(data.qpos[plant.idx.qadr["left_mtp"]]),
                  float(data.qpos[plant.idx.qadr["right_mtp"]]))
@@ -615,14 +769,24 @@ class V3LaunchController:
             "control_law": {
                 "quiet_stand_samples": QUIET_STAND_SAMPLES,
                 "a_countermovement_m_s2": A_COUNTERMOVEMENT_M_S2,
-                "v_countermovement_cmd_m_s": V_COUNTERMOVEMENT_CMD_M_S,
-                "a_brake_m_s2": A_BRAKE_M_S2,
-                "v_brake_trigger_m_s": V_BRAKE_TRIGGER_M_S,
-                "braking_trigger_margin_m": BRAKING_TRIGGER_MARGIN_M,
-                "a_thrust_m_s2": A_THRUST_M_S2,
-                "thrust_az_bounds_m_s2": [THRUST_AZ_MIN_M_S2, THRUST_AZ_MAX_M_S2],
+                "a_brake_m_s2": self.config.a_brake_m_s2,
+                "v_brake_trigger_m_s": self.config.v_brake_trigger_m_s,
+                "braking_trigger_margin_m": self.config.braking_trigger_margin_m,
+                "v_countermovement_cmd_m_s": self.config.v_countermovement_cmd_m_s,
+                "a_thrust_m_s2": self.config.a_thrust_m_s2,
+                "thrust_az_bounds_m_s2": [THRUST_AZ_MIN_M_S2,
+                                          self.config.thrust_az_max_m_s2],
                 "reference_lead_max_m": REFERENCE_LEAD_MAX_M,
-                "reference_lag_max_m": REFERENCE_LAG_MAX_M,
+                "reference_lag_max_m": self.config.reference_lag_max_m,
+                "extension_rate_ff_gain": self.config.extension_rate_ff_gain,
+                "contact_preload_m": self.config.contact_preload_m,
+                "trunk_lean_frac": self.config.trunk_lean_frac,
+                "trunk_extend_frac": self.config.trunk_extend_frac,
+                "joint_rom_margin_rad": self.config.joint_rom_margin_rad,
+                "joint_rom_barrier_gain": self.config.joint_rom_barrier_gain,
+                "trunk_rom_barrier_gain": self.config.trunk_rom_barrier_gain,
+                "trunk_kp": self.config.trunk_kp,
+                "trunk_kd": self.config.trunk_kd,
                 "joint_kp": [float(v) for v in JOINT_KP],
                 "joint_kd": [float(v) for v in JOINT_KD],
                 "fx_fraction_max": FX_FRACTION_MAX,

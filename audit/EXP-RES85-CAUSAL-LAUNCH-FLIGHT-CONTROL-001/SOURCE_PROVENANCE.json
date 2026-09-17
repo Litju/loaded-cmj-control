@@ -24,10 +24,10 @@
   },
   "authority_files": {
     "METHOD_COMPARATOR_PANEL.json": {
-      "sha256": "41d541981dfdee8c5f71097906e6324c361747d82ac7d7f30d3d6e50b578414c"
+      "sha256": "5bc8d20b1296cf9236f8be51f155020c33231adc333dac32762cd2ed8fda174f"
     },
     "ACTUATION_AUTHORITY.json": {
-      "sha256": "c3cfc81917d2ec384af8b3181d78592b96172a166d05e6fc808236f81e1db20f"
+      "sha256": "d4474a6c8f3082e4aa4b9107ba547eecac7bf5efd7bce9ad7289feb21e5096ed"
     },
     "MTP_ENERGY_AUTHORITY.json": {
       "sha256": "89b5fe14ef1ada9b2a60343be039c0950e0d1cd06afc2fbcfa4325727c3b44fc"
@@ -37,8 +37,8 @@
     }
   },
   "git": {
-    "head_at_authoring": "8f1f21716a875738e0751d91e4717b8fce30812e",
-    "tree_at_authoring": "30608b55f990142507718e6fe05d9ad18cff26fd"
+    "head_at_authoring": "e487369f6861d9c9bc27f9f3d92b981fb3684293",
+    "tree_at_authoring": "5a88417d3a352ec87fee498e8a548575f19d3e0f"
   },
   "import_boundary": {
     "plant_constants_imported_from": "loaded_cmj.v3.constants",

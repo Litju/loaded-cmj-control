@@ -1,0 +1,35 @@
+{
+  "accepted_candidate_entries": [
+    {
+      "confirmation_result": {
+        "confirmation_sample": 691,
+        "confirmation_time_s": 1.3820000000000001,
+        "confirmed": true,
+        "failed_checks": []
+      },
+      "disposition": "ACCEPTED",
+      "occurrence": {
+        "com_vz_m_s": 1.9503826924187873,
+        "last_support_index": 665,
+        "native_index": 666,
+        "time_s": 1.332
+      },
+      "rejection_reason": null,
+      "source_phase": "PROPULSION"
+    }
+  ],
+  "accepted_occurrence_index": 666,
+  "candidate_disposition_counts": {
+    "ACCEPTED": 1,
+    "NOT_EVALUATED": 3,
+    "REJECTED": 1
+  },
+  "candidate_history_length": 5,
+  "comparator_offset_origin_index": 666,
+  "confirmation_occurrence_index": 666,
+  "failures": [],
+  "h2_origin_occurrence_index": 666,
+  "impulse_origin_occurrence_index": 666,
+  "schema_version": "1.0.0",
+  "status": "PASS"
+}

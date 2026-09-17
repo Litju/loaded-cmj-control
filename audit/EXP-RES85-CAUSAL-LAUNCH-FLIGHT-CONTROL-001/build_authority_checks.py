@@ -52,6 +52,7 @@ R001_FORBIDDEN_LITERALS = (
     "1.21446", "1.22743",
 )
 V2_TORQUE_LITERALS = ("250.0", "300.0", "200.0")
+WITHDRAWN_HEIGHT_LITERALS = ("0.20 m", "0.28", "0.35", "0.40")
 
 
 def sha256_file(path: Path) -> str:
@@ -93,13 +94,29 @@ def method_comparator_checks() -> dict[str, Any]:
            h2["origin_authority"] == "LCMJ_RES84_V3_MEASUREMENT_CONTACT_AUTHORITY_V1")
     _check(checks, "elite_h2_hard_gate_not_established",
            h2["elite_soccer_plus20_h2_hard_gate"] == "NOT_ESTABLISHED")
-    _check(checks, "anti_triviality_is_reference_only",
-           h2["anti_triviality_reference_only"]["value_m"] == 0.150
-           and h2["anti_triviality_reference_only"]["label"]
-           == "HISTORICAL_ANTI_TRIVIALITY_NEGATIVE_CONTROL_ONLY")
-    forbidden = " ".join(h2["anti_triviality_reference_only"]["role_never"])
-    _check(checks, "anti_triviality_never_a_target",
-           "not an elite-performance target" in forbidden and "not a target band" in forbidden)
+    _check(checks, "elite_h2_target_not_established",
+           h2["elite_soccer_plus20_h2_target"] == "NOT_ESTABLISHED")
+    floor = h2["h_anti_triviality_floor"]
+    _check(checks, "functional_floor_value_declared",
+           floor["symbol"] == "H_ANTI_TRIVIALITY_FLOOR" and floor["value_m"] == 0.150)
+    _check(checks, "functional_floor_role_declared",
+           floor["role"] == "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY")
+    _check(checks, "functional_floor_is_minimum_success_condition",
+           floor["is_minimum_functional_success_condition"] is True
+           and "minimum functional success condition" in floor["closure_rule"])
+    _check(checks, "functional_floor_is_not_elite_norm_or_target",
+           floor["is_elite_performance_norm"] is False
+           and floor["is_optimization_target"] is False
+           and floor["is_expected_value"] is False
+           and floor["is_population_claim"] is False)
+    statements = " ".join(floor["explicit_statements"])
+    _check(checks, "functional_floor_explicitly_negates_elite_framing",
+           "NOT an elite-performance norm" in statements
+           and "NOT an optimization target" in statements
+           and "IS a minimum functional success condition" in statements)
+    _check(checks, "functional_floor_ballistic_cross_check_declared",
+           "1.716" in floor["diagnostic_scale_cross_check"]["rule"]
+           and "never replaced" in floor["diagnostic_scale_cross_check"]["use"])
     methods = {m["method_id"] for m in panel["methods"]}
     _check(checks, "four_method_families_separated",
            methods == {
@@ -114,11 +131,19 @@ def method_comparator_checks() -> dict[str, Any]:
     _check(checks, "cross_method_conversion_refused",
            panel["conversion_policy"]["cross_method_conversion_status"] == "NOT_ESTABLISHED"
            and panel["conversion_policy"]["single_target_conversion"] == "PROHIBITED")
+    must_not = panel["res85_reporting_requirements"]["must_not"]
     _check(checks, "method_qualified_reporting_required",
-           panel["res85_reporting_requirements"]["must_not"]
-           == ["declare an elite loaded-CMJ performance claim from any H2 value",
-               "gate task success on 0.150 m",
-               "report an unqualified 'jump height'"])
+           not any("gate task success on 0.150 m" in item for item in must_not)
+           and any("elite norm" in item for item in must_not)
+           and any("close the task with an H2 below H_ANTI_TRIVIALITY_FLOOR" in item
+                   for item in must_not)
+           and any("unqualified 'jump height'" in item for item in must_not))
+    must_report = " ".join(panel["res85_reporting_requirements"]["must_report"])
+    _check(checks, "floor_classification_is_reported",
+           "H_ANTI_TRIVIALITY_FLOOR classification" in must_report)
+    _check(checks, "no_elite_h2_target_asserted",
+           panel["red_team_assertions"]["no_elite_h2_target"] is True
+           and panel["red_team_assertions"]["functional_floor_is_declared"] is True)
     bar = [m for m in panel["methods"] if m["method_id"] == "BAR_LVT_DISPLACEMENT_VELOCITY"][0]
     _check(checks, "bar_lvt_bias_documented",
            any("overestimation" in b for b in bar["known_biases"]))
@@ -168,9 +193,28 @@ def actuation_checks() -> dict[str, Any]:
            auth["enforcement_order_frozen"] is True and len(order) == 8)
     _check(checks, "previous_applied_torque_is_sole_history",
            any("sole history state" in entry for entry in order))
-    _check(checks, "feasible_interval_projection_declared",
+    _check(checks, "safe_interval_projection_declared",
            "feasible_interval_note" in auth
-           and "projection onto the intersection of four intervals" in auth["feasible_interval_note"])
+           and "projection onto the intersection of the hard-safety interval" in auth["feasible_interval_note"])
+    # RES-85C coherent actuation contract: nominal slew bound + hard safety bounds
+    rate_sem = auth["torque_rate_semantics"]
+    _check(checks, "torque_rate_is_nominal_slew_bound",
+           rate_sem["role"] == "NOMINAL_SLEW_BOUND"
+           and rate_sem["hard_ceiling_claim"] is False
+           and auth["torque_rate_semantics"]["primary_authority"] == "NOMINAL_SLEW_BOUND")
+    _check(checks, "hard_safety_bounds_declared",
+           auth["hard_safety_bounds_semantics"]["bounds"]
+           == ["moment_ceiling", "joint_power_ceiling", "mtp_energy_gate"]
+           and auth["hard_safety_bounds_semantics"]["never_exceeded"] is True
+           and "always wins" in auth["hard_safety_bounds_semantics"]["precedence"])
+    _check(checks, "safety_override_attribution_declared",
+           "exactly one binding hard constraint"
+           in auth["hard_safety_bounds_semantics"]["attribution"]
+           and "violated nominal slew margin" in rate_sem["override_rule"]
+           and ("never reported as nominal-slew compliant" in order[5]
+                or "never reported as nominal-slew compliant" in rate_sem["override_rule"]))
+    _check(checks, "no_emergency_precedence_over_hard_bound",
+           "power_emergency" not in json.dumps(auth) and "moment_emergency" not in json.dumps(auth))
     _check(checks, "no_activation_filter",
            auth["torque_rate_semantics"]["activation_smoothing_secondary"].startswith("none"))
     _check(checks, "power_enforcement_declared",
@@ -340,7 +384,7 @@ def redteam_checks() -> dict[str, Any]:
                                                                  "ceilings": ceilings})
 
     # hidden height targets
-    target_tokens = ("height_target", "h2_target", "H2_TARGET", "performance_floor",
+    target_tokens = ("height_target", "performance_floor",
                      "target_band", "jump_height_target")
     panel_scan = panel_text.replace('"no_hidden_height_target": true', "")
     hidden = [f"{name}:{tok}" for name, text in other_texts.items() for tok in target_tokens
@@ -348,14 +392,20 @@ def redteam_checks() -> dict[str, Any]:
     hidden += [f"METHOD_COMPARATOR_PANEL.json:{tok}" for tok in target_tokens
                if tok in panel_scan]
     _check(checks, "no_hidden_height_targets", not hidden, hidden)
-    occurrences = panel_text.count("0.150")
-    _check(checks, "anti_triviality_literal_only_in_panel",
-           occurrences == 2
-           and '"value_m": 0.150' in panel_text
-           and "gate task success on 0.150 m" in panel_text
-           and all("0.150" not in t for t in other_texts.values()),
-           {"occurrences": occurrences,
-            "note": "exactly two: the labelled anti-triviality reference value and its must_not prohibition"})
+    withdrawn = [f"{name}:{lit}" for name, text in
+                 [("METHOD_COMPARATOR_PANEL.json", panel_text)] + list(other_texts.items())
+                 for lit in WITHDRAWN_HEIGHT_LITERALS if lit in text]
+    _check(checks, "no_withdrawn_height_targets", not withdrawn, withdrawn)
+    _check(checks, "functional_floor_is_declared_not_hidden",
+           '"symbol": "H_ANTI_TRIVIALITY_FLOOR"' in panel_text
+           and '"role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY"' in panel_text
+           and '"is_minimum_functional_success_condition": true' in panel_text
+           and '"is_elite_performance_norm": false' in panel_text
+           and '"is_optimization_target": false' in panel_text,
+           {"panel_has_floor_symbol": "H_ANTI_TRIVIALITY_FLOOR" in panel_text})
+    _check(checks, "floor_literal_not_in_control_authorities",
+           all("0.150" not in t for t in other_texts.values()),
+           [n for n, t in other_texts.items() if "0.150" in t])
     _check(checks, "no_0150_in_control_authorities",
            all("0.150" not in t for t in other_texts.values()),
            [n for n, t in other_texts.items() if "0.150" in t])

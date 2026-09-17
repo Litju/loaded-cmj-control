@@ -160,6 +160,10 @@ class V3LaunchTelemetry:
     out_of_plane_fy_over_fz: np.ndarray
     out_of_plane_mx_over_fz_m: np.ndarray
     out_of_plane_mz_over_fz_m: np.ndarray
+    posture_reference_rad: np.ndarray
+    safety_override: np.ndarray
+    safety_override_reason: np.ndarray
+    nominal_slew_exceedance_nm_per_s: np.ndarray
 
     def arrays(self) -> dict[str, np.ndarray]:
         return {name: getattr(self, name) for name in self.__dataclass_fields__}
@@ -202,6 +206,7 @@ class V3LaunchEpisode:
     phases_visited: list[str]
     fault: str | None = None
     warnings: list[str] = field(default_factory=list)
+    diagnostics: dict[str, float] = field(default_factory=dict)
 
 
 # ===========================================================================
@@ -227,7 +232,9 @@ def _empty_telemetry() -> dict[str, list]:
         "cop_clamped", "az_des_m_s2", "quiet_samples", "takeoff_candidate_index",
         "takeoff_confirmed", "out_of_plane_fy_n", "out_of_plane_mx_nm",
         "out_of_plane_mz_nm", "out_of_plane_fy_over_fz", "out_of_plane_mx_over_fz_m",
-        "out_of_plane_mz_over_fz_m",
+        "out_of_plane_mz_over_fz_m", "posture_reference_rad",
+        "safety_override", "safety_override_reason",
+        "nominal_slew_exceedance_nm_per_s",
     ]
     return {name: [] for name in fields}
 
@@ -370,6 +377,12 @@ def run_launch_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
         log["out_of_plane_fy_over_fz"].append(float(snapshot.out_of_plane.fy_over_fz))
         log["out_of_plane_mx_over_fz_m"].append(float(snapshot.out_of_plane.mx_over_fz_m))
         log["out_of_plane_mz_over_fz_m"].append(float(snapshot.out_of_plane.mz_over_fz_m))
+        log["posture_reference_rad"].append(np.asarray(step.q_ref))
+        log["safety_override"].append(np.asarray(step.actuation.safety_override))
+        log["safety_override_reason"].append(
+            np.asarray(step.actuation.safety_override_reason))
+        log["nominal_slew_exceedance_nm_per_s"].append(
+            np.asarray(step.actuation.nominal_slew_exceedance_nm_per_s))
 
         data.ctrl[:] = applied
         mujoco.mj_step(model, data)
@@ -380,6 +393,14 @@ def run_launch_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
     events = extract_events(frames, controller, telemetry)
     if controller._pending_candidate is not None and not controller._takeoff_confirmed:
         warnings.append("TAKEOFF_CONFIRM_UNRESOLVED_AT_HORIZON")
+    diagnostics = {
+        "z_stand_m": float(controller.diag.z_stand_m),
+        "z_struct_min_m": float(controller.diag.z_struct_min_m),
+        "descent_budget_m": float(controller.diag.descent_budget_m),
+        "s_struct": float(controller.diag.s_struct),
+    }
+    if fault is not None:
+        diagnostics["fault_step_index"] = float(controller._step_index)
     return V3LaunchEpisode(
         status=status,
         frames=frames,
@@ -389,6 +410,7 @@ def run_launch_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
         phases_visited=phases_visited,
         fault=fault,
         warnings=warnings,
+        diagnostics=diagnostics,
     )
 
 
@@ -396,11 +418,11 @@ def _stack(name: str, values: list) -> np.ndarray:
     if not values:
         if name in ("phase_name", "transition_reason", "cop_validity", "support_mode"):
             return np.asarray([], dtype=object)
-        if name in ("saturation_stage",):
+        if name in ("saturation_stage", "safety_override_reason"):
             return np.asarray([], dtype=object)
         return np.zeros((0,), dtype=np.float64)
     if name in ("phase_name", "transition_reason", "cop_validity", "support_mode",
-                "saturation_stage"):
+                "saturation_stage", "safety_override_reason"):
         try:
             return np.asarray(values, dtype=object)
         except ValueError:
@@ -409,6 +431,8 @@ def _stack(name: str, values: list) -> np.ndarray:
     if first.ndim == 0:
         if name in ("cop_clamped", "takeoff_confirmed", "mtp_gated"):
             return np.asarray(values, dtype=np.bool_)
+        if name == "safety_override":
+            return np.asarray(values, dtype=np.bool_)
         return np.asarray(values, dtype=np.float64)
     return np.asarray(values, dtype=np.float64)
 
@@ -416,11 +440,8 @@ def _stack(name: str, values: list) -> np.ndarray:
 # ===========================================================================
 # event extraction (RES-84 primitives only)
 # ===========================================================================
-def extract_events(frames: Sequence[M.V3NativeFrame], controller: V3LaunchController,
-                   telemetry: V3LaunchTelemetry) -> dict[str, Any]:
-    events: dict[str, Any] = {}
-    occurrence = M.detect_takeoff_occurrence(frames) if frames else None
-    events["takeoff_occurrence"] = None if occurrence is None else {
+def _occurrence_payload(occurrence: M.V3TakeoffOccurrence) -> dict[str, Any]:
+    return {
         "valid": occurrence.valid,
         "time_s": occurrence.occurrence_time_s,
         "native_index": occurrence.native_index,
@@ -434,11 +455,133 @@ def extract_events(frames: Sequence[M.V3NativeFrame], controller: V3LaunchContro
         "right_clearance_m": occurrence.right_clearance_m,
         "reason": occurrence.reason,
     }
-    confirmation = controller._confirmation
-    if confirmation is None and occurrence is not None and occurrence.valid and frames:
-        confirmation = M.confirm_takeoff(frames, occurrence)
+
+
+NO_ACCEPTED_OCCURRENCE_REASON = "NO_CONTROLLER_ACCEPTED_OCCURRENCE_TAKEOFF_NOT_CONFIRMED"
+
+
+def takeoff_candidate_history(frames: Sequence[M.V3NativeFrame],
+                              controller: V3LaunchController) -> list[dict[str, Any]]:
+    """Complete, auditable candidate history (no candidate may disappear).
+
+    Every ACTIVE legal plantar support -> zero support transition found by the
+    RES-84 scanner appears exactly once with its source phase, disposition,
+    rejection reason and confirmation result.  The controller's own accepted /
+    rejected candidates carry the controller disposition; candidates that were
+    never escalated to TAKEOFF_CONFIRM are explicitly ``NOT_EVALUATED``.
+    """
+    dispositions = {int(entry["occurrence_index"]): entry
+                    for entry in controller.candidate_history}
+    accepted = controller.accepted_occurrence
+    accepted_index = None if accepted is None else accepted.native_index
+    history: list[dict[str, Any]] = []
+    for candidate in M.scan_takeoff_candidates(frames):
+        index = int(candidate.native_index)
+        record = dispositions.get(index)
+        confirmation = M.confirm_takeoff(frames, candidate)
+        if accepted_index is not None and index == accepted_index:
+            disposition, reason, source_phase = "ACCEPTED", None, (
+                None if record is None else record.get("source_phase"))
+        elif record is not None:
+            disposition = str(record.get("disposition"))
+            reason = record.get("rejection_reason")
+            source_phase = record.get("source_phase")
+            if disposition == "PENDING":
+                disposition, reason = "NOT_EVALUATED", "HORIZON_ENDED_WHILE_PENDING"
+        else:
+            disposition, reason, source_phase = (
+                "NOT_EVALUATED", "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM", None)
+        history.append({
+            "occurrence": {
+                "native_index": index,
+                "time_s": candidate.occurrence_time_s,
+                "last_support_index": candidate.last_support_index,
+                "com_vz_m_s": (None if candidate.com_velocity_world_m_s is None
+                               else candidate.com_velocity_world_m_s[2]),
+            },
+            "source_phase": source_phase,
+            "disposition": disposition,
+            "rejection_reason": reason,
+            "confirmation_result": {
+                "confirmed": confirmation.confirmed,
+                "failed_checks": list(confirmation.failed_checks),
+                "confirmation_sample": confirmation.confirmation_sample,
+                "confirmation_time_s": confirmation.confirmation_time_s,
+            },
+        })
+    return history
+
+
+def occurrence_identity_failures(report: dict[str, Any]) -> list[str]:
+    """Deterministic identity validator for the exported episode report.
+
+    Fails closed when the top-level accepted occurrence, the confirmation, the
+    H2 origin, the impulse cross-check origin or the diagnostic-comparator
+    offset origin disagree, when no accepted occurrence exists although a
+    confirmation is claimed, or when a rejected candidate is used as an origin.
+    """
+    failures: list[str] = []
+    occurrence = report.get("takeoff_occurrence") or {}
+    confirmation = report.get("takeoff_confirmation") or {}
+    apex = report.get("apex_h2") or {}
+    impulse = report.get("impulse_cross_check") or {}
+    comparator = report.get("diagnostic_comparator") or {}
+    accepted = occurrence.get("native_index")
+    if not occurrence.get("valid") or accepted is None:
+        if confirmation.get("confirmed"):
+            failures.append("CONFIRMATION_WITHOUT_ACCEPTED_OCCURRENCE")
+        return failures
+    history = report.get("takeoff_candidate_history") or []
+    accepted_entries = [h for h in history if h.get("disposition") == "ACCEPTED"]
+    if len(accepted_entries) != 1:
+        failures.append(f"ACCEPTED_CANDIDATE_COUNT:{len(accepted_entries)}")
+    for entry in accepted_entries:
+        if int(entry["occurrence"]["native_index"]) != int(accepted):
+            failures.append("ACCEPTED_CANDIDATE_MISMATCH")
+    rejected = {int(h["occurrence"]["native_index"]) for h in history
+                if h.get("disposition") == "REJECTED"}
+    if int(accepted) in rejected:
+        failures.append("REJECTED_CANDIDATE_USED_AS_ACCEPTED_OCCURRENCE")
+    if confirmation.get("confirmed"):
+        if confirmation.get("confirmation_sample") is None:
+            failures.append("ACCEPTED_OCCURRENCE_WITHOUT_CONFIRMATION_SAMPLE")
+        for label, other in (("H2_ORIGIN", apex.get("origin_occurrence_index")),
+                             ("IMPULSE_ORIGIN", impulse.get("occurrence_index")),
+                             ("COMPARATOR_OFFSET_ORIGIN",
+                              comparator.get("offset_origin_index"))):
+            if other is None:
+                failures.append(f"{label}_MISSING")
+            elif int(other) != int(accepted):
+                failures.append(f"{label}_MISMATCH:{other}!={accepted}")
+        if apex.get("evaluable") and apex.get("h2_support_m") is None:
+            failures.append("H2_NOT_COMPUTED")
+    return failures
+
+
+def extract_events(frames: Sequence[M.V3NativeFrame], controller: V3LaunchController,
+                   telemetry: V3LaunchTelemetry) -> dict[str, Any]:
+    events: dict[str, Any] = {}
+    accepted = controller.accepted_occurrence
+    # The unique accepted top-level TAKEOFF_OCCURRENCE is the candidate the
+    # controller-confirmed launch actually used.  A raw first support-to-zero
+    # transition (e.g. startup contact chatter) is never exported here; it
+    # remains visible in TAKEOFF_CANDIDATE_HISTORY.
+    if accepted is not None:
+        occurrence: M.V3TakeoffOccurrence | None = accepted
+        events["takeoff_occurrence"] = _occurrence_payload(accepted)
+    else:
+        occurrence = None
+        events["takeoff_occurrence"] = {
+            "valid": False,
+            "time_s": None,
+            "native_index": None,
+            "reason": NO_ACCEPTED_OCCURRENCE_REASON,
+        }
+    events["takeoff_candidate_history"] = takeoff_candidate_history(frames, controller)
+    confirmation = controller.confirmation
     events["takeoff_confirmation"] = None if confirmation is None else {
         "confirmed": confirmation.confirmed,
+        "accepted_occurrence_index": (None if accepted is None else accepted.native_index),
         "checks": [{"check": n, "pass": ok, "detail": d} for n, ok, d in confirmation.checks],
         "failed_checks": list(confirmation.failed_checks),
         "confirmation_sample": confirmation.confirmation_sample,
@@ -454,6 +597,7 @@ def extract_events(frames: Sequence[M.V3NativeFrame], controller: V3LaunchContro
             "status": result.status,
             "triggered": result.triggered,
             "invalid": result.invalid,
+            "offset_origin_index": occurrence.native_index,
             "onset_time_s": result.onset_time_s,
             "onset_offset_s": result.onset_offset_s,
             "confirmation_time_s": result.confirmation_time_s,
@@ -471,6 +615,7 @@ def extract_events(frames: Sequence[M.V3NativeFrame], controller: V3LaunchContro
         apex = M.detect_apex(frames, confirmation)
         events["apex_h2"] = {
             "evaluable": apex.evaluable,
+            "origin_occurrence_index": confirmation.occurrence.native_index,
             "apex_time_s": apex.apex_time_s,
             "com_z_apex_m": apex.com_z_apex_m,
             "com_z_takeoff_m": apex.com_z_takeoff_m,
@@ -504,8 +649,10 @@ def extract_events(frames: Sequence[M.V3NativeFrame], controller: V3LaunchContro
             "rule": "LEFT_RECTANGLE_INTEGRATOR_CONSISTENT",
         }
     else:
-        events["apex_h2"] = {"evaluable": False, "reason": "TAKEOFF_NOT_CONFIRMED"}
-        events["impulse_cross_check"] = {"evaluable": False}
+        events["apex_h2"] = {"evaluable": False, "origin_occurrence_index": None,
+                             "reason": "TAKEOFF_NOT_CONFIRMED"}
+        events["impulse_cross_check"] = {"evaluable": False,
+                                         "occurrence_index": None}
 
     claim_end = None
     for i in range(len(telemetry.index)):
@@ -560,12 +707,15 @@ def extract_events(frames: Sequence[M.V3NativeFrame], controller: V3LaunchContro
 
 __all__ = [
     "DEFAULT_HORIZON_S",
+    "NO_ACCEPTED_OCCURRENCE_REASON",
     "PHASE_INDEX",
     "V3LaunchEpisode",
     "V3LaunchTelemetry",
     "V3RuntimeError",
     "V3_LAUNCH_RUNTIME_AUTHORITY_ID",
     "extract_events",
+    "occurrence_identity_failures",
     "run_launch_episode",
     "settle_standing_stance",
+    "takeoff_candidate_history",
 ]

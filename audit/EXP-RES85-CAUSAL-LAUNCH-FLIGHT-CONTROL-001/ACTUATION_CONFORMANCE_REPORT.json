@@ -1,7 +1,7 @@
 {
   "checks": [
     {
-      "check": "moment_ceiling_never_exceeded",
+      "check": "hard_moment_ceiling_never_exceeded",
       "detail": {
         "ceilings": [
           220.0,
@@ -16,61 +16,20 @@
         ],
         "max_applied_nm": [
           220.0,
-          175.5991092112227,
-          175.5991092112227,
-          264.6238029997173,
-          264.6238029997173,
-          50.23073279289831,
-          50.23073279289831,
-          9.0,
-          9.0
+          142.42206771371013,
+          142.42206771371013,
+          353.3330706569493,
+          353.3330706569493,
+          92.36577584021637,
+          92.36577584021637,
+          15.0,
+          15.0
         ]
       },
       "pass": true
     },
     {
-      "check": "torque_rate_ceiling_respected_except_declared_emergencies",
-      "detail": {
-        "ceilings": [
-          3000.0,
-          6000.0,
-          6000.0,
-          8000.0,
-          8000.0,
-          6000.0,
-          6000.0,
-          1500.0,
-          1500.0
-        ],
-        "declared_emergency_channel_samples": 10,
-        "emergency_samples": [
-          3,
-          711,
-          712,
-          713,
-          714,
-          715,
-          716,
-          774,
-          775
-        ],
-        "max_rate_nm_per_s": [
-          13995.96448360416,
-          6000.000000000007,
-          6000.000000000007,
-          8000.0,
-          8000.0,
-          6000.0,
-          6000.0,
-          4500.0,
-          4500.0
-        ],
-        "violating_channel_samples": 10
-      },
-      "pass": true
-    },
-    {
-      "check": "joint_power_ceiling_never_exceeded",
+      "check": "hard_power_ceiling_never_exceeded",
       "detail": {
         "ceilings": [
           600.0,
@@ -85,117 +44,115 @@
         ],
         "max_power_w": [
           600.0,
-          1592.595189811025,
-          1592.5951898110159,
+          878.7597684593119,
+          878.759768459416,
+          1700.0,
           1700.0000000000002,
-          1700.0000000000002,
-          166.84112946103573,
-          166.8411294610947,
-          1.9161458585525266,
-          1.9161458585524618
+          1100.0,
+          1100.0,
+          98.44859731287245,
+          98.44859731287207
         ]
+      },
+      "pass": true
+    },
+    {
+      "check": "nominal_slew_exceedance_zero_unless_safety_override",
+      "detail": {
+        "declared_override_channel_samples": 22,
+        "max_exceedance_nm_per_s": 16488.5842240879,
+        "undeclared_channel_samples": 0
       },
       "pass": true
     },
     {
       "check": "bilateral_applied_symmetry_within_tolerance",
       "detail": {
-        "max_pair_asymmetry_nm": 3.637978807091713e-12,
+        "max_pair_asymmetry_nm": 8.120792927002185e-11,
         "tolerance_nm": 1e-09
       },
       "pass": true
     },
     {
-      "check": "phase_handoffs_respect_authority",
+      "check": "phase_handoffs_do_not_create_hidden_slew_violations",
       "detail": {
         "handoff_samples": [
-          145,
-          566,
-          653,
-          734,
-          735,
-          755,
-          757,
-          760,
-          761,
-          767,
-          792,
-          808
+          202,
+          517,
+          587,
+          658,
+          659,
+          666,
+          691,
+          766
         ]
       },
       "pass": true
     }
   ],
-  "emergency_samples": [
-    3,
-    711,
-    712,
-    713,
-    714,
-    715,
-    716,
-    774,
-    775
-  ],
   "handoff_samples": [
-    145,
-    566,
-    653,
-    734,
-    735,
-    755,
-    757,
-    760,
-    761,
-    767,
-    792,
-    808
+    202,
+    517,
+    587,
+    658,
+    659,
+    666,
+    691,
+    766
+  ],
+  "hard_safety_bounds": [
+    "moment_ceiling",
+    "joint_power_ceiling",
+    "mtp_energy_gate"
   ],
   "max_applied_nm": [
     220.0,
-    175.5991092112227,
-    175.5991092112227,
-    264.6238029997173,
-    264.6238029997173,
-    50.23073279289831,
-    50.23073279289831,
-    9.0,
-    9.0
+    142.42206771371013,
+    142.42206771371013,
+    353.3330706569493,
+    353.3330706569493,
+    92.36577584021637,
+    92.36577584021637,
+    15.0,
+    15.0
   ],
-  "max_bilateral_asymmetry_nm": 3.637978807091713e-12,
+  "max_bilateral_asymmetry_nm": 8.120792927002185e-11,
   "max_joint_power_w": [
     600.0,
-    1592.595189811025,
-    1592.5951898110159,
+    878.7597684593119,
+    878.759768459416,
+    1700.0,
     1700.0000000000002,
-    1700.0000000000002,
-    166.84112946103573,
-    166.8411294610947,
-    1.9161458585525266,
-    1.9161458585524618
+    1100.0,
+    1100.0,
+    98.44859731287245,
+    98.44859731287207
   ],
-  "max_pre_projection_asymmetry_nm": 2.539479737606598e-11,
   "max_rate_nm_per_s": [
-    13995.96448360416,
-    6000.000000000007,
-    6000.000000000007,
-    8000.0,
-    8000.0,
-    6000.0,
-    6000.0,
-    4500.0,
-    4500.0
+    14708.677805947758,
+    6000.000000000004,
+    6000.000000000004,
+    24488.584224087375,
+    24488.5842240879,
+    12997.065361437364,
+    12997.065361477968,
+    7500.0,
+    7500.0
   ],
+  "safety_override_channel_samples": 22,
+  "safety_override_samples": 17,
   "saturation_stage_counts": {
-    "moment": 22,
-    "mtp_budget": 1514,
-    "mtp_phase_gate": 1478,
-    "none": 1413,
-    "power": 43,
-    "power_emergency": 10,
-    "rate": 176,
-    "symmetry": 8844
+    "moment": 34,
+    "mtp_budget": 1318,
+    "mtp_phase_gate": 1670,
+    "none": 1189,
+    "power": 95,
+    "rate": 572,
+    "safety_override_joint_power_ceiling": 20,
+    "safety_override_mtp_phase_gate": 2,
+    "symmetry": 8600
   },
   "schema_version": "1.0.0",
-  "status": "PASS"
+  "status": "PASS",
+  "torque_rate_role": "NOMINAL_SLEW_BOUND"
 }

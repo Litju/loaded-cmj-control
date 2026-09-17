@@ -1,0 +1,325 @@
+{
+  "accepted_occurrence_index": 666,
+  "ankle_mtp_rocker_timing": {
+    "ankle_angle_at_occurrence_rad": 0.2299253823843839,
+    "ankle_angle_at_reversal_rad": 0.5360813921944966,
+    "ankle_peak_dorsiflexion_rad": 0.5369714459257702,
+    "ankle_peak_plantarflexion_rad": -0.05984371392172286,
+    "mtp_angle_at_occurrence_rad": 0.013206498223297291,
+    "mtp_angle_at_reversal_rad": -0.0018257185285471328,
+    "mtp_peak_dorsiflexion_rad": 0.07548017021316028,
+    "note": "rocker timing from the frozen sagittal joint state; no local contact re-definition"
+  },
+  "cop_clamp_samples_launch": 20,
+  "episode_status": "COMPLETED",
+  "fault": null,
+  "h2_m": 0.18867197309831352,
+  "hard_power_cap_occupancy_samples_launch": {
+    "left_ankle": 0,
+    "left_hip": 0,
+    "left_knee": 29,
+    "left_mtp": 0,
+    "right_ankle": 0,
+    "right_hip": 0,
+    "right_knee": 29,
+    "right_mtp": 0,
+    "trunk_pelvis": 19
+  },
+  "joint_limit_margins_min_launch": {
+    "left_ankle": 0.24842655407422987,
+    "left_hip": 0.33383779048316936,
+    "left_knee": 0.0,
+    "left_mtp": 0.5217582086119177,
+    "right_ankle": 0.24842655407422953,
+    "right_hip": 0.3338377904831696,
+    "right_knee": 0.0,
+    "right_mtp": 0.5217582086119178,
+    "trunk_pelvis": -0.06260283789041221
+  },
+  "joint_work_by_phase": {
+    "BRAKING": {
+      "posterior_left_ankle": 0.42204675904802996,
+      "posterior_left_hip": 0.40908249760262444,
+      "posterior_left_knee": -15.73098550589762,
+      "posterior_left_mtp": 0.0,
+      "posterior_right_ankle": 0.4220467590480213,
+      "posterior_right_hip": 0.4090824976026245,
+      "posterior_right_knee": -15.730985505897555,
+      "posterior_right_mtp": 0.0,
+      "posterior_trunk_pelvis": -6.423479321356359
+    },
+    "COUNTERMOVEMENT": {
+      "posterior_left_ankle": 4.193704788153433,
+      "posterior_left_hip": 0.305577352790912,
+      "posterior_left_knee": -80.02796544968247,
+      "posterior_left_mtp": 0.0,
+      "posterior_right_ankle": 4.193704788153396,
+      "posterior_right_hip": 0.30557735279092757,
+      "posterior_right_knee": -80.02796544968245,
+      "posterior_right_mtp": 0.0,
+      "posterior_trunk_pelvis": 0.7509566634043319
+    },
+    "FLIGHT": {
+      "posterior_left_ankle": -0.49860985379518286,
+      "posterior_left_hip": -13.110955485979312,
+      "posterior_left_knee": -31.101134173155675,
+      "posterior_left_mtp": 0.0,
+      "posterior_right_ankle": -0.4986098537948462,
+      "posterior_right_hip": -13.110955485979371,
+      "posterior_right_knee": -31.101134173155867,
+      "posterior_right_mtp": 0.0,
+      "posterior_trunk_pelvis": 2.618906612585523
+    },
+    "LANDING_PREP": {
+      "posterior_left_ankle": -22.377000634219144,
+      "posterior_left_hip": -36.355100453824505,
+      "posterior_left_knee": -48.419083397919614,
+      "posterior_left_mtp": 0.0,
+      "posterior_right_ankle": -22.37700063410128,
+      "posterior_right_hip": -36.355100453786,
+      "posterior_right_knee": -48.41908339828306,
+      "posterior_right_mtp": 0.0,
+      "posterior_trunk_pelvis": 0.37358605396192957
+    },
+    "PROPULSION": {
+      "posterior_left_ankle": -1.3509074872180549,
+      "posterior_left_hip": 1.2904495341622522,
+      "posterior_left_knee": 22.96597113360066,
+      "posterior_left_mtp": 0.0,
+      "posterior_right_ankle": -1.3509074872182045,
+      "posterior_right_hip": 1.2904495341622477,
+      "posterior_right_knee": 22.965971133600664,
+      "posterior_right_mtp": 0.0,
+      "posterior_trunk_pelvis": 7.732954432051651
+    },
+    "STAND": {
+      "posterior_left_ankle": -2.7460627360551166,
+      "posterior_left_hip": -1.1438452837061988,
+      "posterior_left_knee": 1.0513770240323317,
+      "posterior_left_mtp": 0.27191709186763124,
+      "posterior_right_ankle": -2.74606273605486,
+      "posterior_right_hip": -1.143845283706204,
+      "posterior_right_knee": 1.0513770240321763,
+      "posterior_right_mtp": 0.2719170918676281,
+      "posterior_trunk_pelvis": -0.47207075973980395
+    },
+    "TAKEOFF_CONFIRM": {
+      "posterior_left_ankle": -0.947303683324381,
+      "posterior_left_hip": -3.4200663763508286,
+      "posterior_left_knee": 3.870516271316969,
+      "posterior_left_mtp": 0.0,
+      "posterior_right_ankle": -0.9473036833243342,
+      "posterior_right_hip": -3.420066376350826,
+      "posterior_right_knee": 3.870516271316866,
+      "posterior_right_mtp": 0.0,
+      "posterior_trunk_pelvis": -1.526537781400405
+    }
+  },
+  "posture_reference_margins_min_launch": {
+    "left_ankle": 0.06468613198532569,
+    "left_hip": 0.349066,
+    "left_knee": 0.0,
+    "left_mtp": 0.523599,
+    "right_ankle": 0.06468613198532569,
+    "right_hip": 0.349066,
+    "right_knee": 0.0,
+    "right_mtp": 0.523599,
+    "trunk_pelvis": 0.10636669238972796
+  },
+  "safety_override_samples_launch": 9,
+  "saturation_stage_occupancy_launch": {
+    "mtp_budget": 1318,
+    "mtp_phase_gate": 4,
+    "none": 557,
+    "power": 67,
+    "rate": 247,
+    "safety_override_joint_power_ceiling": 10,
+    "safety_override_mtp_phase_gate": 2,
+    "symmetry": 3798
+  },
+  "schema_version": "1.0.0",
+  "structural_countermovement_budget": {
+    "budget_m": 0.21908418869200108,
+    "used_fraction": 0.872497827897342,
+    "used_m": 0.19115047876042235,
+    "z_stand_m": 1.169842557230165,
+    "z_struct_min_m": 0.9507583685381639
+  },
+  "support_mode_transitions_launch": [
+    {
+      "from": "BILATERAL",
+      "sample": 5,
+      "to": "NONE"
+    },
+    {
+      "from": "NONE",
+      "sample": 6,
+      "to": "BILATERAL"
+    },
+    {
+      "from": "BILATERAL",
+      "sample": 658,
+      "to": "NONE"
+    },
+    {
+      "from": "NONE",
+      "sample": 659,
+      "to": "BILATERAL"
+    },
+    {
+      "from": "BILATERAL",
+      "sample": 666,
+      "to": "NONE"
+    }
+  ],
+  "system_com_vz_by_event": {
+    "accepted_occurrence": {
+      "com_z_m": 1.163115100709766,
+      "sample": 666,
+      "vz_m_s": 1.9503826924187873
+    },
+    "countermovement_minimum": {
+      "com_z_m": 0.9770822335136562,
+      "sample": 586,
+      "vz_m_s": -0.003450612554790465
+    },
+    "propulsion_entry": {
+      "com_z_m": 0.9770857230232372,
+      "sample": 587,
+      "vz_m_s": 0.0017444359367437643
+    },
+    "provisional_support_losses": [
+      {
+        "com_z_m": 1.170110170243779,
+        "disposition": "NOT_EVALUATED",
+        "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+        "sample": 5,
+        "vz_m_s": 0.016563165065571133
+      },
+      {
+        "com_z_m": 1.1318038806784982,
+        "disposition": "REJECTED",
+        "rejection_reason": "LEGAL_RECONTACT_BEFORE_CONFIRMATION",
+        "sample": 658,
+        "vz_m_s": 1.9979680959109656
+      },
+      {
+        "com_z_m": 0.6510628009940941,
+        "disposition": "NOT_EVALUATED",
+        "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+        "sample": 964,
+        "vz_m_s": -1.2617084555638292
+      },
+      {
+        "com_z_m": 0.6403998162361408,
+        "disposition": "NOT_EVALUATED",
+        "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+        "sample": 969,
+        "vz_m_s": -0.9825041209137557
+      }
+    ],
+    "quiet_stand": {
+      "com_z_m": 1.1682327122740785,
+      "sample": 201,
+      "vz_m_s": -0.0011309576709362785
+    },
+    "upward_reversal": {
+      "com_z_m": 0.9770857230232372,
+      "sample": 587,
+      "vz_m_s": 0.0017444359367437643
+    }
+  },
+  "takeoff_vz_m_s": 1.9503826924187873,
+  "vertical_impulse_by_phase": [
+    {
+      "delta_vz_m_s": -0.10602020360673574,
+      "duration_s": 0.404,
+      "first_sample": 0,
+      "last_sample": 201,
+      "mean_total_fz_n": 945.2052644612899,
+      "peak_total_fz_n": 1649.2314684788212,
+      "phase": "STAND",
+      "vertical_impulse_n_s": -10.496000157066838
+    },
+    {
+      "delta_vz_m_s": -0.4311247027997303,
+      "duration_s": 0.63,
+      "first_sample": 202,
+      "last_sample": 516,
+      "mean_total_fz_n": 903.4742489501217,
+      "peak_total_fz_n": 981.4012078750161,
+      "phase": "COUNTERMOVEMENT",
+      "vertical_impulse_n_s": -42.6813455771733
+    },
+    {
+      "delta_vz_m_s": 0.39759113823906905,
+      "duration_s": 0.1399999999999999,
+      "first_sample": 517,
+      "last_sample": 586,
+      "mean_total_fz_n": 1256.0218616013312,
+      "peak_total_fz_n": 1320.5113074500425,
+      "phase": "BRAKING",
+      "vertical_impulse_n_s": 39.361522685667836
+    },
+    {
+      "delta_vz_m_s": 1.9915675554278893,
+      "duration_s": 0.14200000000000013,
+      "first_sample": 587,
+      "last_sample": 657,
+      "mean_total_fz_n": 2364.3804348458048,
+      "peak_total_fz_n": 2881.4611662944026,
+      "phase": "PROPULSION",
+      "vertical_impulse_n_s": 197.16518798736104
+    },
+    {
+      "delta_vz_m_s": 0.0,
+      "duration_s": 0.002,
+      "first_sample": 658,
+      "last_sample": 658,
+      "mean_total_fz_n": 0.0,
+      "peak_total_fz_n": 0.0,
+      "phase": "TAKEOFF_CONFIRM",
+      "vertical_impulse_n_s": 0.0
+    },
+    {
+      "delta_vz_m_s": -0.027519526090928812,
+      "duration_s": 0.01400000000000001,
+      "first_sample": 659,
+      "last_sample": 665,
+      "mean_total_fz_n": 724.4308974524541,
+      "peak_total_fz_n": 1193.5236568362548,
+      "phase": "PROPULSION",
+      "vertical_impulse_n_s": -2.7244330830019523
+    },
+    {
+      "delta_vz_m_s": -0.47088000000000013,
+      "duration_s": 0.050000000000000044,
+      "first_sample": 666,
+      "last_sample": 690,
+      "mean_total_fz_n": 0.0,
+      "peak_total_fz_n": 0.0,
+      "phase": "TAKEOFF_CONFIRM",
+      "vertical_impulse_n_s": -46.617120000000014
+    },
+    {
+      "delta_vz_m_s": -1.4518799999999992,
+      "duration_s": 0.1499999999999999,
+      "first_sample": 691,
+      "last_sample": 765,
+      "mean_total_fz_n": 0.0,
+      "peak_total_fz_n": 0.0,
+      "phase": "FLIGHT",
+      "vertical_impulse_n_s": -143.73611999999991
+    },
+    {
+      "delta_vz_m_s": 0.004524472156205924,
+      "duration_s": 1.4680000000000002,
+      "first_sample": 766,
+      "last_sample": 1499,
+      "mean_total_fz_n": 60.91845360087817,
+      "peak_total_fz_n": 998.4879421272196,
+      "phase": "LANDING_PREP",
+      "vertical_impulse_n_s": 0.44792274346438643
+    }
+  ]
+}

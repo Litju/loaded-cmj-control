@@ -72,7 +72,27 @@ MTP_TOTAL_POSITIVE_WORK_BUDGET_J = 40.0
 MTP_LATE_ACTIVE_FRACTION = 0.5
 
 STAGE_NAMES = ("none", "symmetry", "rate", "moment", "power", "mtp_budget",
-               "mtp_phase_gate", "power_emergency", "moment_emergency")
+               "mtp_phase_gate", "safety_override_moment_ceiling",
+               "safety_override_joint_power_ceiling",
+               "safety_override_mtp_energy_gate",
+               "safety_override_mtp_phase_gate")
+
+# ---------------------------------------------------------------------------
+# RES-85C coherent actuation contract
+#
+#   torque-rate limit          = NOMINAL_SLEW_BOUND (smoothness, not safety)
+#   moment / power / MTP gate  = HARD_SAFETY_BOUNDS  (never exceeded)
+#
+# A hard safety bound always wins.  When a changing hard bound makes the
+# slew-feasible interval empty the instantaneous reduction is recorded as an
+# explicit SAFETY_OVERRIDE carrying the single binding hard constraint and the
+# violated nominal slew margin; a sample inside a safety override is never
+# reported as compliant with the nominal slew bound.
+# ---------------------------------------------------------------------------
+TORQUE_RATE_ROLE = "NOMINAL_SLEW_BOUND"
+HARD_SAFETY_BOUNDS = ("moment_ceiling", "joint_power_ceiling", "mtp_energy_gate")
+SAFETY_OVERRIDE_REASONS = ("moment_ceiling", "joint_power_ceiling",
+                           "mtp_energy_gate", "mtp_phase_gate")
 
 LATE_PHASES = ("PROPULSION", "TAKEOFF_CONFIRM", "FLIGHT", "LANDING_PREP")
 
@@ -112,6 +132,9 @@ class V3AppliedTorque:
     symmetry_projected: bool
     mtp_active_applied_nm: tuple[float, float]
     mtp_gated: tuple[bool, bool]
+    safety_override: tuple[bool, ...] = ()
+    safety_override_reason: tuple[str, ...] = ()
+    nominal_slew_exceedance_nm_per_s: tuple[float, ...] = ()
 
     def as_array(self) -> np.ndarray:
         return np.asarray(self.applied_nm, dtype=np.float64)
@@ -131,12 +154,50 @@ def plant_mtp_passive_moment_nm(q_rad: Sequence[float], qdot_rad_s: Sequence[flo
 class V3ActuationAuthority:
     """The single V3 actuation-authority layer for the nine motor channels."""
 
-    def __init__(self, dt_s: float) -> None:
+    def __init__(self, dt_s: float, *,
+                 mtp_active_positive_work_budget_j: float | None = None,
+                 mtp_total_positive_work_budget_j: float | None = None,
+                 mtp_moment_ceiling_nm: float | None = None,
+                 mtp_power_ceiling_w: float | None = None) -> None:
         dt = float(dt_s)
         if not np.isfinite(dt) or dt <= 0.0:
             raise V3ActuationError(f"dt_s must be positive and finite, got {dt_s!r}")
         self.dt_s = dt
+        # Declared sensitivity overrides (RES-85C Blocker D).  ``None`` keeps the
+        # sealed authority values exactly; a value here is an explicitly
+        # declared experiment and is recorded in the authority record.
+        self._active_budget_override = mtp_active_positive_work_budget_j
+        self._total_budget_override = mtp_total_positive_work_budget_j
+        self._mtp_moment_override = mtp_moment_ceiling_nm
+        self._mtp_power_override = mtp_power_ceiling_w
+        for name, value in (("mtp_active_positive_work_budget_j",
+                             self._active_budget_override),
+                            ("mtp_total_positive_work_budget_j",
+                             self._total_budget_override),
+                            ("mtp_moment_ceiling_nm", self._mtp_moment_override),
+                            ("mtp_power_ceiling_w", self._mtp_power_override)):
+            if value is not None and (not np.isfinite(value) or value < 0.0):
+                raise V3ActuationError(f"{name} override must be finite and >= 0, got {value!r}")
         self.reset()
+
+    @property
+    def effective_mtp_active_budget_j(self) -> float:
+        return (MTP_ACTIVE_POSITIVE_WORK_BUDGET_J if self._active_budget_override is None
+                else float(self._active_budget_override))
+
+    @property
+    def effective_mtp_total_budget_j(self) -> float:
+        return (MTP_TOTAL_POSITIVE_WORK_BUDGET_J if self._total_budget_override is None
+                else float(self._total_budget_override))
+
+    @property
+    def sensitivity_overrides(self) -> dict[str, float | None]:
+        return {
+            "mtp_active_positive_work_budget_j": self._active_budget_override,
+            "mtp_total_positive_work_budget_j": self._total_budget_override,
+            "mtp_moment_ceiling_nm": self._mtp_moment_override,
+            "mtp_power_ceiling_w": self._mtp_power_override,
+        }
 
     # ------------------------------------------------------------------
     # lifecycle
@@ -231,10 +292,19 @@ class V3ActuationAuthority:
         # ------------------------------------------------------------------
         rate_limit = RATE_CEILING_NM_PER_S * dt
         effective_qdot = np.where(np.abs(qdot) > QDDOT_EPSILON_RAD_PER_S, qdot, 1.0)
+        power_ceiling = POWER_CEILING_W.copy()
+        if self._mtp_power_override is not None:
+            for idx in MTP_CHANNEL_INDICES:
+                power_ceiling[idx] = float(self._mtp_power_override)
         power_cap_nm = np.where(np.abs(qdot) > QDDOT_EPSILON_RAD_PER_S,
-                                POWER_CEILING_W / np.abs(effective_qdot),
+                                power_ceiling / np.abs(effective_qdot),
                                 np.inf)
         moment_cap_nm = MOMENT_CEILING_NM.copy()
+        if self._mtp_moment_override is not None:
+            for idx in MTP_CHANNEL_INDICES:
+                moment_cap_nm[idx] = float(self._mtp_moment_override)
+        mtp_cap_nm = np.full(N_CHANNELS, np.inf, dtype=np.float64)
+        mtp_cap_reason = ["mtp_energy_gate"] * N_CHANNELS
         effective_cap_nm = np.minimum(moment_cap_nm, power_cap_nm)
 
         if isinstance(mtp_active_allowed, bool):
@@ -248,18 +318,21 @@ class V3ActuationAuthority:
         late_phase = phase in LATE_PHASES
         for foot, idx in enumerate(MTP_CHANNEL_INDICES):
             entry = ledger[foot]
-            active_budget = MTP_ACTIVE_POSITIVE_WORK_BUDGET_J * (
+            active_budget = self.effective_mtp_active_budget_j * (
                 MTP_LATE_ACTIVE_FRACTION if late_phase else 1.0)
             remaining_active = max(active_budget - entry.active_positive_work_j, 0.0)
-            remaining_total = max(MTP_TOTAL_POSITIVE_WORK_BUDGET_J - entry.total_positive_work_j, 0.0)
+            remaining_total = max(self.effective_mtp_total_budget_j
+                                  - entry.total_positive_work_j, 0.0)
             mtp_exhausted[foot] = bool(remaining_active <= WORK_TOLERANCE_J
                                        or remaining_total <= WORK_TOLERANCE_J)
             if not allowed_pair[foot]:
-                effective_cap_nm[idx] = 0.0
+                mtp_cap_nm[idx] = 0.0
+                mtp_cap_reason[idx] = "mtp_phase_gate"
                 gated[foot] = True
                 stage[idx] = "mtp_phase_gate"
             elif entry.active_gated or mtp_exhausted[foot]:
-                effective_cap_nm[idx] = 0.0
+                mtp_cap_nm[idx] = 0.0
+                mtp_cap_reason[idx] = "mtp_energy_gate"
                 gated[foot] = True
                 stage[idx] = "mtp_budget"
             else:
@@ -270,25 +343,36 @@ class V3ActuationAuthority:
                         abs(effective_qdot[idx]) * dt)
                 if budget_cap < effective_cap_nm[idx]:
                     effective_cap_nm[idx] = budget_cap
+                    mtp_cap_nm[idx] = budget_cap
                     mtp_cap_binding[foot] = True
+            effective_cap_nm[idx] = min(effective_cap_nm[idx], mtp_cap_nm[idx])
 
         lo = np.maximum(-effective_cap_nm, self._previous_applied - rate_limit)
         hi = np.minimum(effective_cap_nm, self._previous_applied + rate_limit)
-        emergency = lo > hi
+        safety_override = lo > hi
         applied = np.clip(symmetric, lo, hi)
-        if np.any(emergency):
-            applied = np.where(emergency, np.clip(self._previous_applied,
-                                                  -effective_cap_nm, effective_cap_nm),
+        if np.any(safety_override):
+            applied = np.where(safety_override, np.clip(self._previous_applied,
+                                                        -effective_cap_nm, effective_cap_nm),
                                applied)
+
+        override_reason = [""] * N_CHANNELS
+        override_active = [bool(v) for v in safety_override]
+        for idx in range(N_CHANNELS):
+            if not override_active[idx]:
+                continue
+            candidates = (("moment_ceiling", float(moment_cap_nm[idx])),
+                          ("joint_power_ceiling", float(power_cap_nm[idx])),
+                          (str(mtp_cap_reason[idx]), float(mtp_cap_nm[idx])))
+            override_reason[idx] = min(candidates, key=lambda item: item[1])[0]
 
         for idx in range(N_CHANNELS):
             pre_stage = str(stage[idx])
             at_cap = abs(applied[idx]) >= effective_cap_nm[idx] - 1.0e-12
             at_rate = abs(applied[idx] - self._previous_applied[idx]) >= rate_limit[idx] - 1.0e-12
             is_mtp = idx in MTP_CHANNEL_INDICES
-            if emergency[idx]:
-                stage[idx] = "power_emergency" if power_cap_nm[idx] < moment_cap_nm[idx] \
-                    else "moment_emergency"
+            if override_active[idx]:
+                stage[idx] = "safety_override_" + override_reason[idx]
             elif at_cap and effective_cap_nm[idx] < np.inf:
                 if pre_stage in ("mtp_phase_gate", "mtp_budget"):
                     stage[idx] = pre_stage
@@ -304,6 +388,9 @@ class V3ActuationAuthority:
                 stage[idx] = "none"
         moment_margin = MOMENT_CEILING_NM - np.abs(applied)
         power_margin = POWER_CEILING_W - np.abs(applied * qdot)
+        slew_exceedance = np.maximum(
+            np.abs(applied - self._previous_applied) / dt - RATE_CEILING_NM_PER_S, 0.0)
+        slew_exceedance = np.where(safety_override, slew_exceedance, 0.0)
 
         # ------------------------------------------------------------------
         # 6. MTP energy ledger update from the applied moment
@@ -316,10 +403,11 @@ class V3ActuationAuthority:
             active_power = tau * qd
             total_power = active_power + passive_moment * qd
             total_exceeded_by_passive = entry.total_budget_exceeded_by_passive
+            total_budget = self.effective_mtp_total_budget_j
             if max(total_power, 0.0) * dt > max(
-                    MTP_TOTAL_POSITIVE_WORK_BUDGET_J - entry.total_positive_work_j, 0.0) + WORK_TOLERANCE_J:
+                    total_budget - entry.total_positive_work_j, 0.0) + WORK_TOLERANCE_J:
                 if max(passive_moment * qd, 0.0) >= max(
-                        MTP_TOTAL_POSITIVE_WORK_BUDGET_J - entry.total_positive_work_j, 0.0) / dt:
+                        total_budget - entry.total_positive_work_j, 0.0) / dt:
                     total_exceeded_by_passive = True
             ledger[foot] = V3MtpLedgerEntry(
                 active_positive_work_j=entry.active_positive_work_j + max(active_power, 0.0) * dt,
@@ -349,14 +437,16 @@ class V3ActuationAuthority:
             mtp_active_applied_nm=(float(applied[MTP_CHANNEL_INDICES[0]]),
                                    float(applied[MTP_CHANNEL_INDICES[1]])),
             mtp_gated=(bool(gated[0]), bool(gated[1])),
+            safety_override=tuple(bool(v) for v in override_active),
+            safety_override_reason=tuple(str(v) for v in override_reason),
+            nominal_slew_exceedance_nm_per_s=tuple(float(v) for v in slew_exceedance),
         )
         return applied, record, (ledger[0], ledger[1])
 
     # ------------------------------------------------------------------
     # introspection / evidence surface
     # ------------------------------------------------------------------
-    @staticmethod
-    def authority_record() -> dict[str, object]:
+    def authority_record(self) -> dict[str, object]:
         return {
             "authority_id": V3_ACTUATION_AUTHORITY_ID,
             "bundle": V3_ACTUATION_AUTHORITY_BUNDLE,
@@ -369,11 +459,23 @@ class V3ActuationAuthority:
             "symmetry_tolerance_nm": SYMMETRY_TOLERANCE_NM,
             "symmetry_mode": "ENFORCED_FOR_ALL_RES85_PHASES",
             "mtp_budgets": {
-                "active_positive_work_j": MTP_ACTIVE_POSITIVE_WORK_BUDGET_J,
-                "total_positive_work_j": MTP_TOTAL_POSITIVE_WORK_BUDGET_J,
+                "active_positive_work_j": self.effective_mtp_active_budget_j,
+                "total_positive_work_j": self.effective_mtp_total_budget_j,
                 "late_active_fraction": MTP_LATE_ACTIVE_FRACTION,
+                "sealed_active_positive_work_j": MTP_ACTIVE_POSITIVE_WORK_BUDGET_J,
+                "sealed_total_positive_work_j": MTP_TOTAL_POSITIVE_WORK_BUDGET_J,
+                "declared_sensitivity_overrides": self.sensitivity_overrides,
             },
             "mtp_energy_authority_id": V3_MTP_ENERGY_AUTHORITY_ID,
+            "torque_rate_role": TORQUE_RATE_ROLE,
+            "hard_safety_bounds": list(HARD_SAFETY_BOUNDS),
+            "safety_override_reasons": list(SAFETY_OVERRIDE_REASONS),
+            "safety_override_semantics": (
+                "a hard safety bound always wins; an empty slew-feasible "
+                "intersection is recorded as an explicit safety override with "
+                "the single binding hard constraint and the violated nominal "
+                "slew margin; an override sample is never reported as compliant "
+                "with the nominal slew bound"),
             "stages": list(STAGE_NAMES),
             "qdot_epsilon_rad_per_s": QDDOT_EPSILON_RAD_PER_S,
             "plant_passive_prior": {

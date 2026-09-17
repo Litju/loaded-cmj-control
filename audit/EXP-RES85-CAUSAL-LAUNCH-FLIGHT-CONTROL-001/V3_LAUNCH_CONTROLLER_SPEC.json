@@ -1,4 +1,5 @@
 {
+  "accepted_occurrence_rule": "the unique accepted top-level TAKEOFF_OCCURRENCE is the controller-confirmed candidate; every other support-to-zero transition remains visible in takeoff_candidate_history",
   "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
   "consumed_measurement_primitives": [
     "native_frame",
@@ -38,6 +39,11 @@
         "left_mtp",
         "right_mtp"
       ],
+      "hard_safety_bounds": [
+        "moment_ceiling",
+        "joint_power_ceiling",
+        "mtp_energy_gate"
+      ],
       "mirrored_pairs": [
         [
           1,
@@ -69,7 +75,15 @@
       ],
       "mtp_budgets": {
         "active_positive_work_j": 25.0,
+        "declared_sensitivity_overrides": {
+          "mtp_active_positive_work_budget_j": null,
+          "mtp_moment_ceiling_nm": null,
+          "mtp_power_ceiling_w": null,
+          "mtp_total_positive_work_budget_j": null
+        },
         "late_active_fraction": 0.5,
+        "sealed_active_positive_work_j": 25.0,
+        "sealed_total_positive_work_j": 40.0,
         "total_positive_work_j": 40.0
       },
       "mtp_energy_authority_id": "LCMJ_RES85_MTP_ENERGY_AUTHORITY_V1",
@@ -102,6 +116,13 @@
         1500.0,
         1500.0
       ],
+      "safety_override_reasons": [
+        "moment_ceiling",
+        "joint_power_ceiling",
+        "mtp_energy_gate",
+        "mtp_phase_gate"
+      ],
+      "safety_override_semantics": "a hard safety bound always wins; an empty slew-feasible intersection is recorded as an explicit safety override with the single binding hard constraint and the violated nominal slew margin; an override sample is never reported as compliant with the nominal slew bound",
       "stages": [
         "none",
         "symmetry",
@@ -110,19 +131,24 @@
         "power",
         "mtp_budget",
         "mtp_phase_gate",
-        "power_emergency",
-        "moment_emergency"
+        "safety_override_moment_ceiling",
+        "safety_override_joint_power_ceiling",
+        "safety_override_mtp_energy_gate",
+        "safety_override_mtp_phase_gate"
       ],
       "symmetry_mode": "ENFORCED_FOR_ALL_RES85_PHASES",
-      "symmetry_tolerance_nm": 1e-09
+      "symmetry_tolerance_nm": 1e-09,
+      "torque_rate_role": "NOMINAL_SLEW_BOUND"
     },
     "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_CONTROLLER_V1",
     "control_law": {
       "a_brake_m_s2": 2.5,
       "a_countermovement_m_s2": -1.0,
-      "a_thrust_m_s2": 8.0,
+      "a_thrust_m_s2": 17.0,
       "braking_trigger_margin_m": 0.02,
+      "contact_preload_m": 0.005,
       "cop_hull_margin_m": 0.005,
+      "extension_rate_ff_gain": 0.5,
       "fx_fraction_max": 0.4,
       "joint_kd": [
         6.0,
@@ -146,6 +172,8 @@
         4.0,
         4.0
       ],
+      "joint_rom_barrier_gain": 800.0,
+      "joint_rom_margin_rad": 0.08,
       "landing_prep_flexion": 0.5,
       "quiet_stand_samples": 125,
       "reference_lag_max_m": 0.05,
@@ -153,8 +181,13 @@
       "structural_flexion_safety_rad": 0.05,
       "thrust_az_bounds_m_s2": [
         -4.0,
-        12.0
+        21.0
       ],
+      "trunk_extend_frac": 0.4,
+      "trunk_kd": 30.0,
+      "trunk_kp": 240.0,
+      "trunk_lean_frac": 0.35,
+      "trunk_rom_barrier_gain": 2500.0,
       "v_brake_trigger_m_s": -0.55,
       "v_countermovement_cmd_m_s": -0.35
     },
@@ -177,12 +210,32 @@
       "PROPULSION"
     ]
   },
-  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "correction": {
+    "blockers": [
+      "A_accepted_takeoff_identity",
+      "B_functional_floor_authority",
+      "C_actuation_rate_contract",
+      "D_mtp_non_compensation"
+    ],
+    "correction_id": "RES-85C",
+    "entry_head": "e487369f6861d9c9bc27f9f3d92b981fb3684293",
+    "entry_tree": "5a88417d3a352ec87fee498e8a548575f19d3e0f",
+    "previous_evidence_seal_sha256": "235a40e7a2a2b07ea483f2352b0765315b7f43b2343b3297461a0754b024b50e"
+  },
+  "functional_floor": {
+    "is_elite_performance_norm": false,
+    "is_minimum_functional_success_condition": true,
+    "is_optimization_target": false,
+    "role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY",
+    "symbol": "H_ANTI_TRIVIALITY_FLOOR",
+    "value_m": 0.15
+  },
+  "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
   "modules": {
-    "actuation.py": "f315aededdbd8af48fbf3b1d3badfd99bfaa70acfaed440f489bab4ec3e439a3",
+    "actuation.py": "e58ebb7938b6525433c2984f1423a34ee58078547c1841d821715a0318f67c0c",
     "constants.py": "1f756f412d3ce8f2fecbae6af5e72fae5e0b3e92f185a96b96da7dcd0c4a20fb",
-    "controller.py": "75d068452b9f53ccd4fb339aea036f485b4870c4c9a38883d3d5c936d7b853e3",
-    "launch_runtime.py": "1618da0520445ac9b56c18b062706ea7ce6f774f13492c438ed2e1eb81e08b88",
+    "controller.py": "de598f7f1c1d77fb60737d84b23e862e82b683b75d956ecaf889a52719d5014b",
+    "launch_runtime.py": "c3a59b21c4b52d550689ac4c3b0702d69a5846c21a1487fb3fb51f6a8d7a26e0",
     "measurement.py": "6198765cb7fdf5deeffaf726bc10e2ebf12fe03b16a62487302126e06a92a689",
     "plant.py": "d861f45607a36fb9bf6597682e509c8adf2acc90e9717ce114b76a2e0dcd87e9"
   },

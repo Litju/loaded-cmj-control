@@ -1,14 +1,19 @@
 {
   "artifact_sha256": {
-    "conformance": "e69da6dacc8749926ba574c836fb547194335e810f2981f372236552b72df44f",
-    "episode_report": "eb730011b86ffdb2363020b178a58936584e783fd2e578fbce1ab29a7e5e4f0d",
-    "mtp_report": "96d0c4f20b17e475dbc622c922f904d726fb6d52fac627d554dccf11491ea8f4",
-    "negative": "ff0174c3f4d78b3c016829f9eefb2a3283c8d8ab6c0c3ddf7dfc8d5211b088d3",
-    "receipt": "054b681a61ce5fe411d46884d0384ca509ec188f8d7ca1d02da0384454774083",
-    "spec": "04b88a41e504ac46315b97d95c250bdccc3c5bd927a9629f56a9842af79b50dc",
-    "telemetry_blob_sha256": "7aa7999b736d92f537595b18651c87f002e2e939ba722b847d9de999527cb3ee",
-    "telemetry_manifest": "b755f43f333c43a0b9dbca23b0f28620040b0fae4ecc388ec866380859bff883",
-    "zero_passive": "02c0c46b3a096be8e0b0afd6021546a345a9a9b762bdc56fba59ec5fa0251fab"
+    "conformance": "923b420ca9d2050770a44f0f67c9d381497d56301e9b542c84ec1af067f83655",
+    "correction_receipt": "d562f7dcc2d2c79178e757e0d2364176a6b9643d67fbe5dc3a23803c554d0433",
+    "deficit": "91f8da9f0c3b2b7085fd1da0e9cd5d1bbd946d73b0cf5da6f49f6097be754f7b",
+    "episode_report": "2082a9a7d047afc04c78a2209db79d03f714e0f1882adc164ef468c517459ea3",
+    "identity_audit": "d1b341f17a35517f41b84bb148ab62115324104cbe538a475fcd02a368bea3dd",
+    "mtp_report": "87885fd1b7842c4319191e60bbb2a8fb573f364d5970c6b629159b90f70e7585",
+    "negative": "8f0173e4dfa947c2cf06585045792b5dabdc77fc4c4e0adf4c2374250e8d1f0f",
+    "override_audit": "3bf45a0c071d5d5105e6c4de2c91ff2254fca68e56018ae22eca6f9b1a5e97b8",
+    "pre_correction": "73c672f1be3208dda76b527d0b4d0ef816aa5a7c656f5839b30956964a8daa80",
+    "receipt": "967a7449d71cb5f9bd3fcb19f2a7aa3cd977595ce567066c61362887a2ca4e01",
+    "spec": "06464610cc0c7ce68b5442a0f975ca66c78aa3c2ce5721b507fe13c6e2ec6ed9",
+    "telemetry_blob_sha256": "9a85ab73dd1dfb5ceba4029c53b546265016c737ad41b614f42b05b0acdb6e64",
+    "telemetry_manifest": "e79e8e26bd8753a45ba6e99081fe5c54b1d85b84e2e9e6e2f95dd84efadd7c70",
+    "zero_passive": "c30e7b249b93ad72c1bef975dff3e8c4b1a876d667d41bf3dd7840218a8691ff"
   },
   "checks": [
     {
@@ -19,9 +24,17 @@
     {
       "check": "telemetry_blob_sha256_identical",
       "detail": [
-        "c708fd34fbdb5e755ee48c65328fd7ebf0d90343dd0e1b700fe8280f0b57aa35",
-        "c708fd34fbdb5e755ee48c65328fd7ebf0d90343dd0e1b700fe8280f0b57aa35"
+        "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12",
+        "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12"
       ],
+      "pass": true
+    },
+    {
+      "check": "determinism_blob_matches_written_bundle",
+      "detail": {
+        "determinism_telemetry_blob_sha256": "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12",
+        "written_manifest_blob_sha256": "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12"
+      },
       "pass": true
     }
   ],
@@ -29,13 +42,21 @@
     "sealed_at_utc",
     "postcommit sidecar",
     "git HEAD-at-authoring fields",
-    "external bundle path"
+    "external bundle path",
+    "PROPULSION_SEARCH.json (separate declared search artifact with its own two-run byte-identity check)",
+    "MTP_NONCOMPENSATION_MATRIX.json (separate declared matrix artifact with its own two-run byte-identity check)",
+    "JOINT_ROM_SOFT_LIMIT_PROBE.json (Plant property probe, deterministic script)"
   ],
   "identity_domain": [
     "conformance",
+    "correction_receipt",
+    "deficit",
     "episode_report",
+    "identity_audit",
     "mtp_report",
     "negative",
+    "override_audit",
+    "pre_correction",
     "receipt",
     "spec",
     "telemetry_blob_sha256",
@@ -43,5 +64,6 @@
     "zero_passive"
   ],
   "schema_version": "1.0.0",
-  "status": "PASS"
+  "status": "PASS",
+  "telemetry_blob_sha256": "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12"
 }

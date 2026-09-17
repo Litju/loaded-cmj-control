@@ -1,201 +1,286 @@
 {
-  "schema_version": "1.0.0",
   "authority_id": "LCMJ_RES85_ACTUATION_AUTHORITY_V1",
-  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
-  "linear_issue": "RES-85",
-  "plant_authority": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
-  "plant_xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
-  "ctrl_semantics": {
-    "channel_meaning": "ctrl[i] is the physical net joint moment in N*m applied about joint i (gear = 1)",
-    "applies_to": "the nine motor actuators of the sealed V3 Plant only",
-    "no_plant_mutation": "the authority is enforced in the control layer; the Plant XML, solver, contact parameters and passive MTP prior are never modified",
-    "no_external_force": "no qfrc_applied / xfrc_applied / state override is permitted"
+  "bilateral_symmetry_rules": {
+    "enforcement": "projection onto the symmetric subspace by pair average, after which the rate limit and saturation stages operate on the symmetric value",
+    "future_release": "asymmetric landing/recovery authority is explicitly NOT part of RES-85; RES-86/RES-87 must open their own authority to relax this rule",
+    "mirrored_pairs": [
+      [
+        "left_hip",
+        "right_hip"
+      ],
+      [
+        "left_knee",
+        "right_knee"
+      ],
+      [
+        "left_ankle",
+        "right_ankle"
+      ],
+      [
+        "left_mtp",
+        "right_mtp"
+      ]
+    ],
+    "nominal_mode": "ENFORCED_FOR_ALL_RES85_PHASES",
+    "rule": "the two channels of a mirrored pair receive identical commanded moments after the symmetry projection; the per-channel constraint projection may introduce a bounded numerical asymmetry of at most 1e-9 N*m in all RES-85 phases",
+    "telemetry": "the maximum pre-projection pair asymmetry per sample is recorded; a nonzero value is reported, never hidden"
   },
   "channels": [
     {
       "channel": "trunk_pelvis",
-      "joint": "trunk_pelvis",
-      "plant": "HAT relative to pelvis",
-      "moment_ceiling_nm": 220.0,
-      "power_ceiling_w": 600.0,
-      "torque_rate_ceiling_nm_per_s": 3000.0,
-      "sign_convention": "positive = sagittal flexion direction of the joint coordinate",
-      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "evidence_class": "DYNAMIC_LOADED_CMJ_CONTEXT + STRUCTURAL_LOAD_PATH",
+      "joint": "trunk_pelvis",
       "justification": "The trunk/HAT carries the 20 kg bar through a rigid attachment; trunk-pelvis flexion torque during loaded countermovement and propulsion is bounded well below the hip channel because the bar is held rigidly and no arm swing exists. The ceiling is set above the largest trunk moment observed in deterministic Plant probes of the declared postures and is capped below the hip ceiling.",
+      "moment_ceiling_nm": 220.0,
+      "notes": "No V2 value is imported; V2 used a 250 N*m lumbar ceiling for a different plant.",
+      "plant": "HAT relative to pelvis",
+      "power_ceiling_w": 600.0,
+      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "sensitivity_role": "low-sensitivity posture channel; scaled in the authority sweep but not a performance driver",
-      "sensitivity_values": [132.0, 220.0, 308.0],
-      "notes": "No V2 value is imported; V2 used a 250 N*m lumbar ceiling for a different plant."
+      "sensitivity_values": [
+        132.0,
+        220.0,
+        308.0
+      ],
+      "sign_convention": "positive = sagittal flexion direction of the joint coordinate",
+      "torque_rate_ceiling_nm_per_s": 3000.0
     },
     {
       "channel": "left_hip",
-      "joint": "left_hip",
-      "plant": "left thigh relative to pelvis",
-      "moment_ceiling_nm": 330.0,
-      "power_ceiling_w": 1600.0,
-      "torque_rate_ceiling_nm_per_s": 6000.0,
-      "sign_convention": "positive = hip flexion direction of the joint coordinate (axis 0 -1 0)",
-      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "evidence_class": "DYNAMIC_CMJ_INVERSE_DYNAMICS (primary) + ISOKINETIC_CONTEXT_ONLY (secondary, not used as a constant)",
+      "joint": "left_hip",
       "justification": "Hip extension is a primary contributor to loaded-CMJ propulsion in inverse-dynamics literature; dynamic peak hip extension moments of order 2-4 N*m/kg body mass are reported for athletic countermovement tasks, giving an interval of roughly 160-320 N*m for a 79 kg athlete. The ceiling is placed at the upper edge of that dynamic interval with a sensitivity band; it is an engineering authority cap, not a physiological claim.",
+      "moment_ceiling_nm": 330.0,
+      "notes": "No V2 value is imported; V2 used a 250 N*m hip ceiling.",
+      "plant": "left thigh relative to pelvis",
+      "power_ceiling_w": 1600.0,
+      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "sensitivity_role": "primary propulsion channel; moment, power and rate ceilings all swept",
-      "sensitivity_values": [198.0, 330.0, 462.0],
-      "notes": "No V2 value is imported; V2 used a 250 N*m hip ceiling."
+      "sensitivity_values": [
+        198.0,
+        330.0,
+        462.0
+      ],
+      "sign_convention": "positive = hip flexion direction of the joint coordinate (axis 0 -1 0)",
+      "torque_rate_ceiling_nm_per_s": 6000.0
     },
     {
       "channel": "right_hip",
-      "joint": "right_hip",
-      "plant": "right thigh relative to pelvis",
-      "moment_ceiling_nm": 330.0,
-      "power_ceiling_w": 1600.0,
-      "torque_rate_ceiling_nm_per_s": 6000.0,
-      "sign_convention": "positive = hip flexion direction of the joint coordinate (axis 0 -1 0)",
-      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "evidence_class": "DYNAMIC_CMJ_INVERSE_DYNAMICS (primary) + ISOKINETIC_CONTEXT_ONLY (secondary, not used as a constant)",
+      "joint": "right_hip",
       "justification": "Mirror of left_hip; identical by the frozen bilateral-symmetry rule.",
+      "moment_ceiling_nm": 330.0,
+      "notes": "Bilateral symmetry is enforced by the actuation layer, not assumed from the controller.",
+      "plant": "right thigh relative to pelvis",
+      "power_ceiling_w": 1600.0,
+      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "sensitivity_role": "primary propulsion channel; swept identically with left_hip",
-      "sensitivity_values": [198.0, 330.0, 462.0],
-      "notes": "Bilateral symmetry is enforced by the actuation layer, not assumed from the controller."
+      "sensitivity_values": [
+        198.0,
+        330.0,
+        462.0
+      ],
+      "sign_convention": "positive = hip flexion direction of the joint coordinate (axis 0 -1 0)",
+      "torque_rate_ceiling_nm_per_s": 6000.0
     },
     {
       "channel": "left_knee",
-      "joint": "left_knee",
-      "plant": "left shank relative to left thigh",
-      "moment_ceiling_nm": 380.0,
-      "power_ceiling_w": 1700.0,
-      "torque_rate_ceiling_nm_per_s": 8000.0,
-      "sign_convention": "positive = knee flexion direction of the joint coordinate (axis 0 1 0)",
-      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "evidence_class": "DYNAMIC_CMJ_INVERSE_DYNAMICS (primary) + ISOKINETIC_CONTEXT_ONLY (secondary, not used as a constant)",
+      "joint": "left_knee",
       "justification": "Knee extension is the strongest single contributor in CMJ inverse dynamics; peak knee extension moments of order 2-4.5 N*m/kg are reported, and knee joint power in the concentric phase reaches roughly 15-25 W/kg in trained males, giving ~1200-2000 W for 79 kg. The ceiling is placed at the upper edge of the dynamic interval with a sensitivity band.",
+      "moment_ceiling_nm": 380.0,
+      "notes": "No V2 value is imported; V2 used a 300 N*m knee ceiling.",
+      "plant": "left shank relative to left thigh",
+      "power_ceiling_w": 1700.0,
+      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "sensitivity_role": "primary propulsion channel; moment, power and rate ceilings all swept",
-      "sensitivity_values": [228.0, 380.0, 532.0],
-      "notes": "No V2 value is imported; V2 used a 300 N*m knee ceiling."
+      "sensitivity_values": [
+        228.0,
+        380.0,
+        532.0
+      ],
+      "sign_convention": "positive = knee flexion direction of the joint coordinate (axis 0 1 0)",
+      "torque_rate_ceiling_nm_per_s": 8000.0
     },
     {
       "channel": "right_knee",
-      "joint": "right_knee",
-      "plant": "right shank relative to right thigh",
-      "moment_ceiling_nm": 380.0,
-      "power_ceiling_w": 1700.0,
-      "torque_rate_ceiling_nm_per_s": 8000.0,
-      "sign_convention": "positive = knee flexion direction of the joint coordinate (axis 0 1 0)",
-      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "evidence_class": "DYNAMIC_CMJ_INVERSE_DYNAMICS (primary) + ISOKINETIC_CONTEXT_ONLY (secondary, not used as a constant)",
+      "joint": "right_knee",
       "justification": "Mirror of left_knee; identical by the frozen bilateral-symmetry rule.",
+      "moment_ceiling_nm": 380.0,
+      "notes": "Bilateral symmetry is enforced by the actuation layer, not assumed from the controller.",
+      "plant": "right shank relative to right thigh",
+      "power_ceiling_w": 1700.0,
+      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "sensitivity_role": "primary propulsion channel; swept identically with left_knee",
-      "sensitivity_values": [228.0, 380.0, 532.0],
-      "notes": "Bilateral symmetry is enforced by the actuation layer, not assumed from the controller."
+      "sensitivity_values": [
+        228.0,
+        380.0,
+        532.0
+      ],
+      "sign_convention": "positive = knee flexion direction of the joint coordinate (axis 0 1 0)",
+      "torque_rate_ceiling_nm_per_s": 8000.0
     },
     {
       "channel": "left_ankle",
-      "joint": "left_ankle",
-      "plant": "left hindfoot relative to left shank",
-      "moment_ceiling_nm": 260.0,
-      "power_ceiling_w": 1100.0,
-      "torque_rate_ceiling_nm_per_s": 6000.0,
-      "sign_convention": "negative = plantarflexion direction of the joint coordinate; positive = dorsiflexion (axis 0 -1 0)",
-      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "evidence_class": "DYNAMIC_CMJ_INVERSE_DYNAMICS (primary) + ISOKINETIC_CONTEXT_ONLY (secondary, not used as a constant)",
+      "joint": "left_ankle",
       "justification": "Ankle plantarflexion net moments in CMJ inverse dynamics are of order 1.5-3 N*m/kg with peak ankle power roughly 10-15 W/kg in trained males. Ceiling at the upper edge of the dynamic interval; the MTP channel is separately bounded so the ankle ceiling is not circumvented through the toe.",
+      "moment_ceiling_nm": 260.0,
+      "notes": "No V2 value is imported; V2 used a 200 N*m ankle ceiling.",
+      "plant": "left hindfoot relative to left shank",
+      "power_ceiling_w": 1100.0,
+      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "sensitivity_role": "primary takeoff channel; moment, power and rate ceilings all swept",
-      "sensitivity_values": [156.0, 260.0, 364.0],
-      "notes": "No V2 value is imported; V2 used a 200 N*m ankle ceiling."
+      "sensitivity_values": [
+        156.0,
+        260.0,
+        364.0
+      ],
+      "sign_convention": "negative = plantarflexion direction of the joint coordinate; positive = dorsiflexion (axis 0 -1 0)",
+      "torque_rate_ceiling_nm_per_s": 6000.0
     },
     {
       "channel": "right_ankle",
-      "joint": "right_ankle",
-      "plant": "right hindfoot relative to right shank",
-      "moment_ceiling_nm": 260.0,
-      "power_ceiling_w": 1100.0,
-      "torque_rate_ceiling_nm_per_s": 6000.0,
-      "sign_convention": "negative = plantarflexion direction of the joint coordinate; positive = dorsiflexion (axis 0 -1 0)",
-      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "evidence_class": "DYNAMIC_CMJ_INVERSE_DYNAMICS (primary) + ISOKINETIC_CONTEXT_ONLY (secondary, not used as a constant)",
+      "joint": "right_ankle",
       "justification": "Mirror of left_ankle; identical by the frozen bilateral-symmetry rule.",
+      "moment_ceiling_nm": 260.0,
+      "notes": "Bilateral symmetry is enforced by the actuation layer, not assumed from the controller.",
+      "plant": "right hindfoot relative to right shank",
+      "power_ceiling_w": 1100.0,
+      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "sensitivity_role": "primary takeoff channel; swept identically with left_ankle",
-      "sensitivity_values": [156.0, 260.0, 364.0],
-      "notes": "Bilateral symmetry is enforced by the actuation layer, not assumed from the controller."
+      "sensitivity_values": [
+        156.0,
+        260.0,
+        364.0
+      ],
+      "sign_convention": "negative = plantarflexion direction of the joint coordinate; positive = dorsiflexion (axis 0 -1 0)",
+      "torque_rate_ceiling_nm_per_s": 6000.0
     },
     {
       "channel": "left_mtp",
-      "joint": "left_mtp",
-      "plant": "left toe relative to left forefoot",
-      "moment_ceiling_nm": 45.0,
-      "power_ceiling_w": 120.0,
-      "torque_rate_ceiling_nm_per_s": 1500.0,
-      "sign_convention": "positive = MTP dorsiflexion direction of the joint coordinate (axis 0 -1 0)",
-      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "evidence_class": "DYNAMIC_PUSH_OFF_MTP_MOMENT (primary) + TOE_FLEXOR_CAPACITY (secondary)",
+      "joint": "left_mtp",
       "justification": "Measured external MTP moments during push-off are of order 6-14 N*m, and calculated maximal intrinsic toe-flexor moments are 4-7 N*m at the first MTP. The active channel ceiling is set at approximately three times the measured external dynamic moment, far below the value that would let the toe become a primary takeoff energy source. The passive FM-09 prior (k = 25 N*m/rad) is NOT part of this ceiling.",
+      "moment_ceiling_nm": 45.0,
+      "notes": "Active MTP energetics are additionally governed by MTP_ENERGY_AUTHORITY.json, which is the controlling anti-energy-injection rule.",
+      "plant": "left toe relative to left forefoot",
+      "power_ceiling_w": 120.0,
+      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "sensitivity_role": "bounded auxiliary channel; must never dominate takeoff energetics; swept including the zero-active case",
-      "sensitivity_values": [0.0, 22.5, 45.0, 60.0],
-      "notes": "Active MTP energetics are additionally governed by MTP_ENERGY_AUTHORITY.json, which is the controlling anti-energy-injection rule."
+      "sensitivity_values": [
+        0.0,
+        22.5,
+        45.0,
+        60.0
+      ],
+      "sign_convention": "positive = MTP dorsiflexion direction of the joint coordinate (axis 0 -1 0)",
+      "torque_rate_ceiling_nm_per_s": 1500.0
     },
     {
       "channel": "right_mtp",
-      "joint": "right_mtp",
-      "plant": "right toe relative to right forefoot",
-      "moment_ceiling_nm": 45.0,
-      "power_ceiling_w": 120.0,
-      "torque_rate_ceiling_nm_per_s": 1500.0,
-      "sign_convention": "positive = MTP dorsiflexion direction of the joint coordinate (axis 0 -1 0)",
-      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "evidence_class": "DYNAMIC_PUSH_OFF_MTP_MOMENT (primary) + TOE_FLEXOR_CAPACITY (secondary)",
+      "joint": "right_mtp",
       "justification": "Mirror of left_mtp; identical by the frozen bilateral-symmetry rule.",
+      "moment_ceiling_nm": 45.0,
+      "notes": "Bilateral symmetry is enforced by the actuation layer, not assumed from the controller.",
+      "plant": "right toe relative to right forefoot",
+      "power_ceiling_w": 120.0,
+      "provenance_class": "ENGINEERING_NOMINAL_WITH_SENSITIVITY",
       "sensitivity_role": "bounded auxiliary channel; swept identically with left_mtp",
-      "sensitivity_values": [0.0, 22.5, 45.0, 60.0],
-      "notes": "Bilateral symmetry is enforced by the actuation layer, not assumed from the controller."
+      "sensitivity_values": [
+        0.0,
+        22.5,
+        45.0,
+        60.0
+      ],
+      "sign_convention": "positive = MTP dorsiflexion direction of the joint coordinate (axis 0 -1 0)",
+      "torque_rate_ceiling_nm_per_s": 1500.0
     }
   ],
+  "ctrl_semantics": {
+    "applies_to": "the nine motor actuators of the sealed V3 Plant only",
+    "channel_meaning": "ctrl[i] is the physical net joint moment in N*m applied about joint i (gear = 1)",
+    "no_external_force": "no qfrc_applied / xfrc_applied / state override is permitted",
+    "no_plant_mutation": "the authority is enforced in the control layer; the Plant XML, solver, contact parameters and passive MTP prior are never modified"
+  },
   "enforcement_order": [
     "1_command_reception: receive the controller's desired net moment per channel",
     "2_bilateral_symmetry_projection: for each mirrored pair (hip, knee, ankle, mtp) replace both by (left+right)/2 and record the pre-projection asymmetry magnitude",
-    "3_constraint_interval_construction: per channel build the feasible interval [lo, hi] = [max(-cap_eff, prev - rate_limit), min(cap_eff, prev + rate_limit)] where cap_eff = min(moment_ceiling, power_ceiling/|qdot|, MTP_budget_cap) and rate_limit = rate_ceiling * dt; prev is the previous applied torque, the sole history state",
-    "4_interval_projection: applied = clip(symmetric_command, lo, hi); all four constraints (rate, moment, power, MTP budget) are then satisfied simultaneously",
-    "5_energy_gate: the MTP phase gate sets cap_eff to exactly zero whenever the phase authority denies active MTP authority",
-    "6_emergency_precedence: if a rapidly shrinking power/moment/MTP ceiling makes the interval empty (lo > hi), the moment/power/MTP limit takes precedence over smoothness and the instantaneous reduction is recorded with stage power_emergency or moment_emergency",
+    "3_hard_safety_bound_construction: per channel construct the HARD_SAFETY_BOUNDS interval [-cap_hard, cap_hard] with cap_hard = min(moment_ceiling, power_ceiling/|qdot|, MTP_energy_gate_cap); hard safety bounds are never exceeded",
+    "4_nominal_slew_bound_construction: per channel construct the NOMINAL_SLEW_BOUND interval [prev - rate_ceiling*dt, prev + rate_ceiling*dt]; prev is the previous applied torque, the sole history state",
+    "5_interval_projection: applied = clip(symmetric_command, lo, hi) with [lo, hi] the intersection of the hard-safety and nominal-slew intervals; the sample is nominal-slew compliant",
+    "6_safety_override: if a changing hard safety bound makes the intersection empty (lo > hi) the hard safety bound wins; the instantaneous reduction is recorded as an explicit safety override carrying the single binding hard constraint (moment_ceiling | joint_power_ceiling | mtp_energy_gate | mtp_phase_gate) and the violated nominal slew margin; an override sample is never reported as nominal-slew compliant",
     "7_apply: write the nine applied moments to data.ctrl",
-    "8_record: per-sample per-channel applied moment, torque rate, saturation stage, margin to each limit, and joint power"
+    "8_record: per-sample per-channel applied moment, torque rate, saturation stage, safety-override flag/reason, nominal slew exceedance, margin to each hard limit, and joint power"
   ],
   "enforcement_order_frozen": true,
-  "feasible_interval_note": "the enforcement chain is a projection onto the intersection of four intervals, so no stage can push the applied moment outside another stage's limit; a power or MTP safety limit may in rare cases force an instantaneous reduction that exceeds the rate ceiling and is then recorded explicitly as an emergency stage",
-  "saturation_semantics": {
-    "type": "SEQUENTIAL_HARD_LIMIT_WITH_PER_STAGE_RECORDING",
-    "no_silent_clamping": "every stage that changes a value must be recorded in telemetry with the stage name and the pre-clamp value",
-    "margin_convention": "margin = limit - |value| at the exit of that stage; negative margin is impossible by construction and a non-negative margin is recorded",
-    "never_reverses_sign": "rate, moment and power stages never change the sign of the commanded moment"
+  "external_evidence": [
+    {
+      "id": "van Soest 1985 PMID 4079733",
+      "use": "dynamic hip/ankle net torques and ankle power in two-legged versus one-legged countermovement jumps"
+    },
+    {
+      "id": "McErlain-Naylor 2014 PMID 24875041",
+      "use": "CMJ peak lower-limb joint torque and power determinants; concentric knee extension rate of torque development"
+    },
+    {
+      "id": "Shinchi 2024 PMID 38742268",
+      "use": "elite male CMJ peak hip torque/power and knee angular velocity correlation"
+    },
+    {
+      "id": "Williams 2022 power-load joint level",
+      "use": "joint-level power load profiles in CMJ"
+    },
+    {
+      "id": "PMC3406365 toe flexor force capacity",
+      "use": "measured external MTP moments 6.3-14.2 N*m in the push-off"
+    },
+    {
+      "id": "ScienceDirect S0958259213000266 toe flexion strength",
+      "use": "calculated maximal MTP flexion moments 4.27-6.84 N*m (1st MTP)"
+    },
+    {
+      "id": "Anjo 2022 PLOS ONE MTP jumping",
+      "use": "MTP joint mechanical role in the take-off phase of human jumping"
+    },
+    {
+      "id": "Osawa 2018 PMC5989739",
+      "use": "voluntary knee extension peak rate of torque development context only"
+    }
+  ],
+  "feasible_interval_note": "the enforcement chain is a projection onto the intersection of the hard-safety interval (moment/power/MTP energy) and the nominal-slew interval around the previous applied moment. A hard safety bound always wins: when it shrinks faster than the nominal slew can follow, the empty intersection is recorded as an explicit SAFETY_OVERRIDE naming the single binding hard constraint and the violated nominal slew margin. Hard moment, hard power and hard MTP energy limits are never exceeded; nominal slew exceedance is exactly zero on every sample that is not a declared safety override.",
+  "forbidden_imports": {
+    "isokinetic_maxima_as_dynamic_constants": "PROHIBITED",
+    "r001_values": "no R001-derived controller, load or timing value is imported",
+    "v2_torque_limits": "V2_TORQUE_LIMITS_NM (lumbar 250 / hip 250 / knee 300 / ankle 200) is explicitly NOT imported"
   },
-  "torque_rate_semantics": {
-    "primary_authority": "TORQUE_RATE_CEILING",
-    "activation_smoothing_secondary": "none: no filter, no activation state, no low-pass; the rate limiter is the only smoothing and it is a hard inequality, not a filter",
-    "first_sample_rule": "at reset the previous applied torque is exactly zero; the first command is therefore rate-limited from zero",
-    "phase_handoff_continuity": "the previous-applied-torque history is owned solely by the actuation layer and persists across all controller phase handoffs; no phase may reset or bypass it"
+  "hard_safety_bounds_semantics": {
+    "attribution": "every safety override is attributable to exactly one binding hard constraint",
+    "bounds": [
+      "moment_ceiling",
+      "joint_power_ceiling",
+      "mtp_energy_gate"
+    ],
+    "moment_ceiling_abs": "the hard net-moment ceiling is enforced on the applied moment every sample",
+    "mtp_energy_gate": "the MTP active/total positive-work gates are enforced as hard caps and set the MTP cap to exactly zero when exhausted or phase-denied",
+    "never_exceeded": true,
+    "power_ceiling_abs": "the hard |tau*qdot| joint-power ceiling is enforced every sample where |qdot| > qdot_epsilon",
+    "precedence": "a hard safety bound always wins over the nominal slew bound"
   },
   "joint_power_semantics": {
+    "below_epsilon": "no power saturation is applied below qdot_epsilon because the power product is numerically meaningless there; the moment ceiling still applies",
     "definition": "p_j = applied_moment_j * qdot_joint_j (signed instantaneous mechanical power at the joint)",
     "enforcement": "HARD_CEILING_ON_ABS_POWER when the joint angular velocity is materially non-zero",
-    "qdot_epsilon_rad_per_s": 1.0e-6,
-    "below_epsilon": "no power saturation is applied below qdot_epsilon because the power product is numerically meaningless there; the moment ceiling still applies",
+    "qdot_epsilon_rad_per_s": 1e-06,
     "rationale": "prevents unbounded instantaneous mechanical power at any channel while leaving the necessarily discontinuous sign region unfiltered"
   },
-  "bilateral_symmetry_rules": {
-    "nominal_mode": "ENFORCED_FOR_ALL_RES85_PHASES",
-    "mirrored_pairs": [
-      ["left_hip", "right_hip"],
-      ["left_knee", "right_knee"],
-      ["left_ankle", "right_ankle"],
-      ["left_mtp", "right_mtp"]
-    ],
-    "rule": "the two channels of a mirrored pair receive identical commanded moments after the symmetry projection; the per-channel constraint projection may introduce a bounded numerical asymmetry of at most 1e-9 N*m in all RES-85 phases",
-    "enforcement": "projection onto the symmetric subspace by pair average, after which the rate limit and saturation stages operate on the symmetric value",
-    "telemetry": "the maximum pre-projection pair asymmetry per sample is recorded; a nonzero value is reported, never hidden",
-    "future_release": "asymmetric landing/recovery authority is explicitly NOT part of RES-85; RES-86/RES-87 must open their own authority to relax this rule"
-  },
-  "unilateral_independence": {
-    "sides_can_be_independently_loaded": true,
-    "note": "the Plant may load one foot more than the other; the authority enforces symmetric *commands*, not symmetric *force*"
-  },
+  "linear_issue": "RES-85",
+  "mission": "RES85_REBUILD_CAUSAL_LOADED_CMJ_LAUNCH_FLIGHT_CONTROL_001",
+  "plant_authority": "LCMJ_RES95_ELITE_SOCCER_PLANT_MODEL_AUTHORITY_V1",
+  "plant_xml_sha256": "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d",
   "provenance_classes_used": [
     "DYNAMIC_CMJ_INVERSE_DYNAMICS",
     "DYNAMIC_PUSH_OFF_MTP_MOMENT",
@@ -203,27 +288,34 @@
     "ISOKINETIC_CONTEXT_ONLY",
     "ENGINEERING_NOMINAL_WITH_SENSITIVITY"
   ],
-  "external_evidence": [
-    {"id": "van Soest 1985 PMID 4079733", "use": "dynamic hip/ankle net torques and ankle power in two-legged versus one-legged countermovement jumps"},
-    {"id": "McErlain-Naylor 2014 PMID 24875041", "use": "CMJ peak lower-limb joint torque and power determinants; concentric knee extension rate of torque development"},
-    {"id": "Shinchi 2024 PMID 38742268", "use": "elite male CMJ peak hip torque/power and knee angular velocity correlation"},
-    {"id": "Williams 2022 power-load joint level", "use": "joint-level power load profiles in CMJ"},
-    {"id": "PMC3406365 toe flexor force capacity", "use": "measured external MTP moments 6.3-14.2 N*m in the push-off"},
-    {"id": "ScienceDirect S0958259213000266 toe flexion strength", "use": "calculated maximal MTP flexion moments 4.27-6.84 N*m (1st MTP)"},
-    {"id": "Anjo 2022 PLOS ONE MTP jumping", "use": "MTP joint mechanical role in the take-off phase of human jumping"},
-    {"id": "Osawa 2018 PMC5989739", "use": "voluntary knee extension peak rate of torque development context only"}
-  ],
-  "forbidden_imports": {
-    "v2_torque_limits": "V2_TORQUE_LIMITS_NM (lumbar 250 / hip 250 / knee 300 / ankle 200) is explicitly NOT imported",
-    "r001_values": "no R001-derived controller, load or timing value is imported",
-    "isokinetic_maxima_as_dynamic_constants": "PROHIBITED"
-  },
   "red_team_assertions": {
+    "dynamic_evidence_primary": true,
+    "every_safety_override_attributable": true,
+    "every_scalar_has_provenance_class": true,
+    "no_asymmetric_nominal_control": true,
     "no_copied_v2_values": true,
     "no_r001_values": true,
-    "every_scalar_has_provenance_class": true,
-    "unsupported_scalars_are_engineering_nominal_with_sensitivity": true,
-    "dynamic_evidence_primary": true,
-    "no_asymmetric_nominal_control": true
+    "torque_rate_not_claimed_hard": true,
+    "unsupported_scalars_are_engineering_nominal_with_sensitivity": true
+  },
+  "saturation_semantics": {
+    "margin_convention": "margin = limit - |value| at the exit of that stage; negative margin is impossible by construction and a non-negative margin is recorded",
+    "never_reverses_sign": "rate, moment and power stages never change the sign of the commanded moment",
+    "no_silent_clamping": "every stage that changes a value must be recorded in telemetry with the stage name and the pre-clamp value",
+    "type": "SEQUENTIAL_HARD_LIMIT_WITH_PER_STAGE_RECORDING"
+  },
+  "schema_version": "1.0.0",
+  "torque_rate_semantics": {
+    "activation_smoothing_secondary": "none: no filter, no activation state, no low-pass; the nominal slew bound is the only smoothing and it is enforced as a nominal inequality, not a filter",
+    "first_sample_rule": "at reset the previous applied torque is exactly zero; the first command is therefore slew-limited from zero",
+    "hard_ceiling_claim": false,
+    "override_rule": "a nominal slew exceedance exists only on a sample carrying an explicit safety override; the override reason names exactly one binding hard constraint and the violated nominal slew margin is recorded per channel as the positive slew exceedance magnitude",
+    "phase_handoff_continuity": "the previous-applied-torque history is owned solely by the actuation layer and persists across all controller phase handoffs; no phase may reset or bypass it; a handoff itself never creates a slew exceedance because the interval is built around the persisted previous applied torque",
+    "primary_authority": "NOMINAL_SLEW_BOUND",
+    "role": "NOMINAL_SLEW_BOUND"
+  },
+  "unilateral_independence": {
+    "note": "the Plant may load one foot more than the other; the authority enforces symmetric *commands*, not symmetric *force*",
+    "sides_can_be_independently_loaded": true
   }
 }

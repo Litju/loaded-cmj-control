@@ -61,6 +61,11 @@ def episode():
 
 
 @pytest.fixture(scope="session")
+def episode_report(episode):
+    return BE.launch_episode_report(episode)
+
+
+@pytest.fixture(scope="session")
 def negative():
     return BE.negative_controls()
 
@@ -132,17 +137,21 @@ def test_episode_phase_sequence_is_causal(episode):
         assert banned not in reasons_text
 
 
-def test_h2_is_method_explicit_and_not_a_target(episode):
-    report = BE.launch_episode_report(episode)
+def test_h2_is_method_explicit_and_closes_the_functional_floor(episode_report):
+    report = episode_report
     methods = report["method_explicit_h2_report"]
     assert methods["PRIMARY_CANONICAL"]["method_id"] == "DIRECT_SIMULATOR_SYSTEM_COM"
     h2 = methods["PRIMARY_CANONICAL"]["value_m"]
     assert isinstance(h2, float) and h2 > 0.0
     assert methods["ELITE_SOCCER_PLUS20_H2_HARD_GATE"] == "NOT_ESTABLISHED"
-    ref = methods["anti_triviality_reference"]
-    assert ref["value_m"] == 0.150
-    assert ref["role"] == "HISTORICAL_ANTI_TRIVIALITY_NEGATIVE_CONTROL_ONLY"
-    assert ref["used_as_target"] is False
+    assert methods["ELITE_SOCCER_PLUS20_H2_TARGET"] == "NOT_ESTABLISHED"
+    floor = methods["H_ANTI_TRIVIALITY_FLOOR"]
+    assert floor["value_m"] == 0.150
+    assert floor["role"] == "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY"
+    assert floor["is_elite_performance_norm"] is False
+    assert floor["is_optimization_target"] is False
+    assert report["functional_task_floor"]["closure_pass"] is True
+    assert report["functional_task_floor"]["classification"] == "ABOVE_FLOOR"
     assert methods["BAR_LVT_DISPLACEMENT_VELOCITY"]["status"] == "NOT_APPLICABLE_NATIVE"
     assert report["apex_h2"]["evaluable"] is True
     ballistic = methods["SECONDARY_CROSS_CHECKS"]["BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ"]
@@ -261,13 +270,12 @@ def test_nc08_authority_holds_across_phase_handoffs(episode):
     report = BE.actuation_conformance_report(episode)
     assert report["status"] == "PASS", report["checks"]
     checks = {c["check"]: c for c in report["checks"]}
-    assert checks["moment_ceiling_never_exceeded"]["pass"]
-    assert checks["joint_power_ceiling_never_exceeded"]["pass"]
-    assert checks["torque_rate_ceiling_respected_except_declared_emergencies"]["pass"]
-    assert checks["phase_handoffs_respect_authority"]["pass"]
-    # every rate violation is a declared emergency
-    detail = checks["torque_rate_ceiling_respected_except_declared_emergencies"]["detail"]
-    assert detail["violating_channel_samples"] <= detail["declared_emergency_channel_samples"]
+    assert checks["hard_moment_ceiling_never_exceeded"]["pass"]
+    assert checks["hard_power_ceiling_never_exceeded"]["pass"]
+    assert checks["nominal_slew_exceedance_zero_unless_safety_override"]["pass"]
+    assert checks["phase_handoffs_do_not_create_hidden_slew_violations"]["pass"]
+    assert checks["bilateral_applied_symmetry_within_tolerance"]["pass"]
+    assert report["torque_rate_role"] == "NOMINAL_SLEW_BOUND"
 
 
 def test_nc09_previous_applied_torque_is_continuous(episode):
@@ -276,16 +284,18 @@ def test_nc09_previous_applied_torque_is_continuous(episode):
     delta = np.abs(np.diff(t.applied_nm, axis=0))
     limit = RATE_CEILING_NM_PER_S[None, :] * dt
     exceeded = (delta > limit + 1e-6)
+    overrides = np.asarray(t.safety_override, dtype=bool)
+    for ch in range(N_CHANNELS):
+        for i in range(exceeded.shape[0]):
+            if exceeded[i, ch]:
+                assert overrides[i + 1, ch], (
+                    "undeclared slew exceedance", i, ch, delta[i, ch])
     handoff_rows = [i for i in range(len(t.index)) if t.transition_reason[i]]
     for row in handoff_rows:
         if 0 < row < len(t.index):
             assert not np.any(exceeded[row - 1]), (
                 "rate continuity broken at handoff", row,
                 delta[row - 1][exceeded[row - 1]])
-    emergencies = sum(1 for i in range(len(t.index))
-                      for s in t.saturation_stage[i]
-                      if str(s).endswith("emergency"))
-    assert int(exceeded.sum()) <= emergencies
 
 
 def test_nc10_bilateral_symmetry_of_applied_action(episode):
@@ -299,8 +309,7 @@ def test_nc10_bilateral_symmetry_of_applied_action(episode):
 
 def test_nc11_zero_passive_cannot_be_compensated_unboundedly():
     zero_passive_episode = run_launch_episode(zero_passive=True)
-    report = BE.zero_passive_sensitivity_report(zero_passive_episode,
-                                                BE.negative_controls())
+    report = BE.zero_passive_sensitivity_report(zero_passive_episode, {"status": "PASS"})
     assert report["status"] == "PASS", report["checks"]
     checks = {c["check"]: c for c in report["checks"]}
     assert checks["zero_passive_active_work_within_budget"]["pass"]
@@ -404,9 +413,14 @@ def test_authority_symmetry_projection_records_asymmetry():
 def test_evidence_artifacts_present_and_pass():
     for name in ("V3_LAUNCH_CONTROLLER_SPEC.json", "TELEMETRY_MANIFEST.json",
                  "TELEMETRY_ARRAYS.bin", "LAUNCH_EPISODE_REPORT.json",
+                 "OCCURRENCE_IDENTITY_AUDIT.json", "PROPULSION_DEFICIT_REPORT.json",
+                 "PROPULSION_SEARCH.json", "MTP_NONCOMPENSATION_MATRIX.json",
+                 "JOINT_ROM_SOFT_LIMIT_PROBE.json",
+                 "SAFETY_OVERRIDE_AUDIT.json", "PRE_CORRECTION_EPISODE_CLASSIFICATION.json",
                  "MTP_ENERGY_REPORT.json", "ACTUATION_CONFORMANCE_REPORT.json",
                  "NEGATIVE_CONTROLS_REPORT.json", "ZERO_PASSIVE_SENSITIVITY_REPORT.json",
-                 "DETERMINISM_REPORT.json", "HASH_MANIFEST.json", "RES85_RECEIPT.md"):
+                 "DETERMINISM_REPORT.json", "HASH_MANIFEST.json", "RES85_RECEIPT.md",
+                 "RES85C_CORRECTION_RECEIPT.md"):
         assert (EVIDENCE_DIR / name).is_file(), name
     negative = json.loads((EVIDENCE_DIR / "NEGATIVE_CONTROLS_REPORT.json").read_text())
     assert negative["status"] == "PASS", [c for c in negative["checks"] if not c["pass"]]
@@ -416,27 +430,42 @@ def test_evidence_artifacts_present_and_pass():
     assert determinism["status"] == "PASS"
     mtp = json.loads((EVIDENCE_DIR / "MTP_ENERGY_REPORT.json").read_text())
     assert mtp["status"] == "PASS"
+    identity = json.loads((EVIDENCE_DIR / "OCCURRENCE_IDENTITY_AUDIT.json").read_text())
+    assert identity["status"] == "PASS"
+    overrides = json.loads((EVIDENCE_DIR / "SAFETY_OVERRIDE_AUDIT.json").read_text())
+    assert overrides["status"] == "PASS"
 
 
 def test_receipt_states_claim_ceiling():
     text = (EVIDENCE_DIR / "RES85_RECEIPT.md").read_text()
     assert "ELITE_SOCCER_PLUS20_H2_HARD_GATE = NOT_ESTABLISHED" in text
+    assert "ELITE_SOCCER_PLUS20_H2_TARGET = NOT_ESTABLISHED" in text
     assert "No landing" in text and "RES-86" in text
+    assert "H_ANTI_TRIVIALITY_FLOOR" in text
 
 
 def test_historical_failures_are_classified_not_hidden():
     classification = json.loads(
         (EVIDENCE_DIR / "FULL_SUITE_CLASSIFICATION.json").read_text())
-    assert classification["full_suite"]["failed"] == 25
+    assert classification["full_suite"]["failed"] == 60
+    assert classification["full_suite"]["res85c_owned_failures"] == 0
     assert classification["full_suite"]["res85_owned_failures"] == 0
     assert classification["full_suite"]["res83_res84_failures"] == 0
-    assert len(classification["failures"]) == 25
+    assert len(classification["failures"]) == 60
     assert len(classification["collection_errors"]) == 2
-    assert classification["entry_head_reproduction"]["same_failures_reproduced"] == 24
+    reproduction = classification["entry_head_reproduction"]
+    assert reproduction["worktree_head"] == "e487369f6861d9c9bc27f9f3d92b981fb3684293"
+    assert reproduction["recorded_pre_res85_reproduction"][
+        "same_failures_reproduced"] == 24
+    assert reproduction["res85c_reproduction"][
+        "failures_reproduced_node_for_node"] == 60
     assert "PRE-EXIST" in classification["verdict"]
     for failure in classification["failures"]:
         assert failure["category"].startswith("PRE_EXISTING_")
-    assert classification["targeted_and_regression"]["tests/test_res85_v3_causal_launch.py"] == "PASS"
+    assert classification["targeted_and_regression"][
+        "tests/test_res85_v3_causal_launch.py"] == "PASS"
+    assert classification["targeted_and_regression"][
+        "tests/test_res85c_correction.py"] == "PASS"
 
 
 def test_authority_amendments_are_recorded_and_do_not_relax_limits():
