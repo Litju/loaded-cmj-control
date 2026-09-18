@@ -38,6 +38,7 @@ from loaded_cmj.v3.landing_authority import (  # noqa: E402
     dwell_confirmed,
     dwell_requirements,
     landing_acceptance_authority,
+    latency_requirements,
     validate_authority,
 )
 from loaded_cmj.v3.landing_metrics import (  # noqa: E402
@@ -70,20 +71,41 @@ def test_frozen_dwells_and_vertical_rates():
 
 
 # ---------------------------------------------------------------------------
-# A3: physical-time dwell semantics
+# A3: physical-time dwell semantics (D_EST latency bound, D_BL sustain)
 # ---------------------------------------------------------------------------
 def test_dwell_requirements_are_physical_time_intervals():
     assert V3_DWELL_SEMANTICS == "PHYSICAL_TIME"
     assert V3_DWELL_DT_NOMINAL_S == 0.002
     assert D_EST_S == D_BL_S == 0.050
-    for requirements in (D_EST_REQUIREMENTS, D_BL_REQUIREMENTS):
-        assert requirements["DWELL_TYPE"] == "PHYSICAL_TIME"
-        assert requirements["REQUIRED_INTERVALS"] == 25
-        assert requirements["REQUIRED_TRUE_SAMPLES_INCLUSIVE"] == 26
-        assert requirements["RUNTIME_AUTHORITY"] == "t_current - t_onset >= DURATION_S"
-        assert requirements["SAMPLE_COUNT_ROLE"] == "DIAGNOSTIC_ONLY"
+    # D_EST is a latency bound: maximum diagnostic intervals, no true samples.
+    assert D_EST_REQUIREMENTS["DWELL_TYPE"] == "PHYSICAL_TIME_LATENCY_BOUND"
+    assert D_EST_REQUIREMENTS["MAX_INTERVALS"] == 25
+    assert D_EST_REQUIREMENTS["SAMPLE_COUNT_ROLE"] == \
+        "NO_REQUIRED_TRUE_SAMPLES_FOR_LATENCY_BOUND"
+    assert D_EST_REQUIREMENTS["SEMANTICS"] == \
+        "t_bilateral_established - t_first_contact <= DURATION_S"
+    assert "REQUIRED_TRUE_SAMPLES_INCLUSIVE" not in D_EST_REQUIREMENTS
+    # D_BL is the actual bilateral-loaded sustain dwell.
+    assert D_BL_REQUIREMENTS["DWELL_TYPE"] == "PHYSICAL_TIME"
+    assert D_BL_REQUIREMENTS["REQUIRED_INTERVALS"] == 25
+    assert D_BL_REQUIREMENTS["REQUIRED_TRUE_SAMPLES_INCLUSIVE"] == 26
+    assert D_BL_REQUIREMENTS["RUNTIME_AUTHORITY"] == "t_current - t_onset >= DURATION_S"
+    assert D_BL_REQUIREMENTS["SAMPLE_COUNT_ROLE"] == "DIAGNOSTIC_ONLY"
     assert dwell_requirements(0.050, 0.001)["REQUIRED_INTERVALS"] == 50
     assert dwell_requirements(0.050, 0.001)["REQUIRED_TRUE_SAMPLES_INCLUSIVE"] == 51
+    assert latency_requirements(0.050, 0.001)["MAX_INTERVALS"] == 50
+
+
+def test_d_est_latency_bound_semantics():
+    from loaded_cmj.v3.landing_authority import establishment_latency_satisfied
+
+    # establishment at first contact passes; 24 intervals (0.048 s) passes
+    assert establishment_latency_satisfied(1.582, 1.582) is True
+    assert establishment_latency_satisfied(1.582, 1.582 + 0.048) is True
+    # the 25-interval boundary (0.050 s) is the latency limit and may pass
+    assert establishment_latency_satisfied(1.582, 1.582 + 0.050) is True
+    # 26 intervals (0.052 s) exceeds the latency bound and must not pass
+    assert establishment_latency_satisfied(1.582, 1.582 + 0.052) is False
 
 
 def test_dwell_negative_control_24_intervals_must_not_confirm():
@@ -106,14 +128,17 @@ def test_authority_dwell_section_declares_negative_controls():
     dwells = landing_acceptance_authority()["dwells"]
     assert dwells["DT_NOMINAL_S"] == 0.002
     assert dwells["DWELL_TYPE"] == "PHYSICAL_TIME"
-    assert dwells["D_EST"]["REQUIRED_INTERVALS"] == 25
-    assert dwells["D_EST"]["REQUIRED_TRUE_SAMPLES_INCLUSIVE"] == 26
+    assert dwells["D_EST"]["MAX_INTERVALS"] == 25
+    assert "REQUIRED_TRUE_SAMPLES_INCLUSIVE" not in dwells["D_EST"]
+    assert dwells["D_EST"]["SEMANTICS"] == \
+        "t_bilateral_established - t_first_contact <= DURATION_S"
     assert dwells["D_BL"]["REQUIRED_INTERVALS"] == 25
     assert dwells["D_BL"]["REQUIRED_TRUE_SAMPLES_INCLUSIVE"] == 26
     controls = dwells["negative_controls"]
-    assert controls["24_INTERVALS_0P048_S"] == "MUST_NOT_CONFIRM"
-    assert controls["25_INTERVALS_0P050_S"] == \
+    assert controls["D_BL_24_INTERVALS_0P048_S"] == "MUST_NOT_CONFIRM"
+    assert controls["D_BL_25_INTERVALS_0P050_S"] == \
         "BOUNDARY_MAY_CONFIRM_IF_ALL_OTHER_GATES_PASS"
+    assert controls["D_EST_26_INTERVALS_0P052_S"] == "MUST_NOT_PASS_LATENCY_BOUND"
     assert "native_samples_at_nominal_dt" not in dwells
     assert validate_authority() == []
 

@@ -73,12 +73,69 @@ def dwell_requirements(duration_s: float, dt_s: float = V3_DWELL_DT_NOMINAL_S) -
     }
 
 
+def _exact_nanoseconds(seconds: float, *, field: str) -> int:
+    value = Fraction(float(seconds)).limit_denominator(V3_DWELL_NANOSECONDS_PER_SECOND)
+    scaled = value * V3_DWELL_NANOSECONDS_PER_SECOND
+    if scaled.denominator != 1:
+        raise ValueError(f"{field}={seconds!r} is not exact at integer-nanosecond resolution")
+    return int(scaled)
+
+
 def dwell_confirmed(onset_time_s: float, current_time_s: float, duration_s: float) -> bool:
-    """Runtime physical-time authority: ``t_current - t_onset >= D``."""
-    return float(current_time_s) - float(onset_time_s) >= float(duration_s)
+    """Runtime physical-time authority: ``t_current - t_onset >= D``.
+
+    Elapsed physical time is evaluated with exact integer nanoseconds, never
+    with a raw floating comparison, so a nominal-dt boundary sample is exact.
+    """
+    elapsed_ns = (_exact_nanoseconds(current_time_s, field="current_time_s")
+                  - _exact_nanoseconds(onset_time_s, field="onset_time_s"))
+    return elapsed_ns >= _exact_nanoseconds(duration_s, field="duration_s")
 
 
-D_EST_REQUIREMENTS = dwell_requirements(D_EST_S)
+def latency_requirements(duration_s: float, dt_s: float = V3_DWELL_DT_NOMINAL_S) -> dict:
+    """Exact physical-time *latency bound* requirement on a native grid.
+
+    ``D_EST`` is an establishment latency bound, not a sustain dwell:
+    ``t_bilateral_established - t_first_contact <= D_EST``.  The maximum
+    diagnostic interval count at nominal dt is ``ceil(D / dt)`` (25 at
+    dt = 0.002 s); there is deliberately **no** required true-sample count for
+    a latency bound.  Values are computed with exact integer nanoseconds.
+    """
+    duration_ns = Fraction(float(duration_s)).limit_denominator(V3_DWELL_NANOSECONDS_PER_SECOND)
+    dt_ns = Fraction(float(dt_s)).limit_denominator(V3_DWELL_NANOSECONDS_PER_SECOND)
+    duration_scaled = duration_ns * V3_DWELL_NANOSECONDS_PER_SECOND
+    dt_scaled = dt_ns * V3_DWELL_NANOSECONDS_PER_SECOND
+    if duration_scaled.denominator != 1 or dt_scaled.denominator != 1:
+        raise ValueError("latency duration/dt not exact at integer-nanosecond resolution")
+    duration_ns_int = int(duration_scaled)
+    dt_ns_int = int(dt_scaled)
+    if dt_ns_int <= 0 or duration_ns_int <= 0:
+        raise ValueError("latency duration/dt must be positive")
+    return {
+        "DURATION_S": float(duration_s),
+        "DT_NOMINAL_S": float(dt_s),
+        "MAX_INTERVALS": -(-duration_ns_int // dt_ns_int),
+        "SEMANTICS": "t_bilateral_established - t_first_contact <= DURATION_S",
+        "SAMPLE_COUNT_ROLE": "NO_REQUIRED_TRUE_SAMPLES_FOR_LATENCY_BOUND",
+        "DWELL_TYPE": "PHYSICAL_TIME_LATENCY_BOUND",
+    }
+
+
+def establishment_latency_satisfied(t_first_contact_s: float, t_bilateral_established_s: float,
+                                    duration_s: float = D_EST_S) -> bool:
+    """Runtime D_EST authority: establishment within ``D_EST`` of first contact.
+
+    Evaluated with exact integer nanoseconds so the 25-interval boundary at
+    nominal dt is exact and a floating-point representation error can never
+    fail a compliant establishment.
+    """
+    elapsed_ns = (_exact_nanoseconds(t_bilateral_established_s,
+                                     field="t_bilateral_established_s")
+                  - _exact_nanoseconds(t_first_contact_s, field="t_first_contact_s"))
+    return elapsed_ns <= _exact_nanoseconds(duration_s, field="duration_s")
+
+
+D_EST_REQUIREMENTS = latency_requirements(D_EST_S)
 D_BL_REQUIREMENTS = dwell_requirements(D_BL_S)
 
 # RES-85D sealed strict structural-ROM comparison semantics.
@@ -160,7 +217,9 @@ def landing_acceptance_authority() -> dict:
             "E8_FIRST_CONTACT_RES82_MAPPING": "RES-82 LANDING_FIRST_CONTACT (contract E9)",
             "E9_BILATERAL_ESTABLISHED": (
                 "first native sample after E8_FIRST_CONTACT where both feet have legal "
-                "plantar contact rows and both feet carry Fz > F_thr"
+                "plantar contact rows and both feet carry Fz > F_thr; it must occur "
+                "within the D_EST latency bound (t_established - t_first_contact <= 0.050 s, "
+                "a latency bound and never a sustain dwell)"
             ),
             "E10_IMPACT_ABSORPTION": (
                 "bilateral established then both feet loaded sustained for D_BL with "
@@ -179,18 +238,25 @@ def landing_acceptance_authority() -> dict:
             "DT_NOMINAL_S": V3_DWELL_DT_NOMINAL_S,
             "DWELL_TYPE": V3_DWELL_SEMANTICS,
             "semantics": (
-                "D_EST is the allowance from E8_FIRST_CONTACT to bilateral "
-                "establishment; D_BL is the bilateral-loaded sustain dwell that "
-                "confirms E10.  They are separate quantities and one value is "
-                "never reused for the other.  Both are PHYSICAL_TIME dwells: the "
-                "runtime authority is t_current - t_onset >= D, never a sample "
-                "count.  The inclusive true-sample count is diagnostic only."
+                "D_EST is a latency bound, not a sustain dwell: bilateral "
+                "establishment must occur within D_EST of first contact "
+                "(t_bilateral_established - t_first_contact <= D_EST, maximum "
+                "diagnostic interval count 25 at nominal dt, and NO required "
+                "true-sample count).  D_BL is the actual bilateral-loaded "
+                "sustain dwell that confirms E10: the predicate remains "
+                "continuously true for >= D_BL (25 elapsed intervals / 26 "
+                "inclusive true samples at nominal dt).  Both are PHYSICAL_TIME "
+                "quantities: the runtime authority is elapsed physical time, "
+                "never a sample count, and the inclusive true-sample count is "
+                "diagnostic only.  One value is never reused for the other."
             ),
             "D_EST": D_EST_REQUIREMENTS,
             "D_BL": D_BL_REQUIREMENTS,
             "negative_controls": {
-                "24_INTERVALS_0P048_S": "MUST_NOT_CONFIRM",
-                "25_INTERVALS_0P050_S": "BOUNDARY_MAY_CONFIRM_IF_ALL_OTHER_GATES_PASS",
+                "D_EST_25_INTERVALS_0P050_S": "BOUNDARY_ESTABLISHMENT_MAY_PASS",
+                "D_EST_26_INTERVALS_0P052_S": "MUST_NOT_PASS_LATENCY_BOUND",
+                "D_BL_24_INTERVALS_0P048_S": "MUST_NOT_CONFIRM",
+                "D_BL_25_INTERVALS_0P050_S": "BOUNDARY_MAY_CONFIRM_IF_ALL_OTHER_GATES_PASS",
             },
         },
         "vertical_rates": {
@@ -376,13 +442,23 @@ def validate_authority(authority: dict | None = None) -> list[str]:
         if not isinstance(requirements, dict):
             failures.append(f"DWELL_REQUIREMENTS_MISSING:{label}")
             continue
-        if requirements.get("REQUIRED_INTERVALS") != expected["REQUIRED_INTERVALS"]:
-            failures.append(f"DWELL_REQUIRED_INTERVALS_NOT_FROZEN:{label}")
-        if requirements.get("REQUIRED_TRUE_SAMPLES_INCLUSIVE") != \
-                expected["REQUIRED_TRUE_SAMPLES_INCLUSIVE"]:
-            failures.append(f"DWELL_REQUIRED_SAMPLES_NOT_FROZEN:{label}")
-        if requirements.get("SAMPLE_COUNT_ROLE") != "DIAGNOSTIC_ONLY":
-            failures.append(f"DWELL_SAMPLE_COUNT_NOT_DIAGNOSTIC:{label}")
+        if label == "D_EST":
+            if requirements.get("MAX_INTERVALS") != expected["MAX_INTERVALS"]:
+                failures.append("D_EST_MAX_INTERVALS_NOT_FROZEN")
+            if requirements.get("SEMANTICS") != expected["SEMANTICS"]:
+                failures.append("D_EST_SEMANTICS_NOT_LATENCY_BOUND")
+            if requirements.get("SAMPLE_COUNT_ROLE") != expected["SAMPLE_COUNT_ROLE"]:
+                failures.append("D_EST_MUST_NOT_REQUIRE_TRUE_SAMPLES")
+            if "REQUIRED_TRUE_SAMPLES_INCLUSIVE" in requirements:
+                failures.append("D_EST_FALSE_REQUIRED_TRUE_SAMPLES")
+        else:
+            if requirements.get("REQUIRED_INTERVALS") != expected["REQUIRED_INTERVALS"]:
+                failures.append(f"DWELL_REQUIRED_INTERVALS_NOT_FROZEN:{label}")
+            if requirements.get("REQUIRED_TRUE_SAMPLES_INCLUSIVE") != \
+                    expected["REQUIRED_TRUE_SAMPLES_INCLUSIVE"]:
+                failures.append(f"DWELL_REQUIRED_SAMPLES_NOT_FROZEN:{label}")
+            if requirements.get("SAMPLE_COUNT_ROLE") != "DIAGNOSTIC_ONLY":
+                failures.append(f"DWELL_SAMPLE_COUNT_NOT_DIAGNOSTIC:{label}")
     if payload["vertical_rates"]["V_DESC_M_S"] != 0.10 or payload["vertical_rates"]["V_ABS_TAIL_M_S"] != 0.05:
         failures.append("VERTICAL_RATE_VALUES_NOT_FROZEN")
     if payload["physical_gates"]["chatter_transitions_max"] != 8:
@@ -426,7 +502,9 @@ __all__ = [
     "authority_sha256",
     "dwell_confirmed",
     "dwell_requirements",
+    "establishment_latency_satisfied",
     "landing_acceptance_authority",
+    "latency_requirements",
     "structural_rom_violation",
     "validate_authority",
 ]

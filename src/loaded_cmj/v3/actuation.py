@@ -94,7 +94,12 @@ HARD_SAFETY_BOUNDS = ("moment_ceiling", "joint_power_ceiling", "mtp_energy_gate"
 SAFETY_OVERRIDE_REASONS = ("moment_ceiling", "joint_power_ceiling",
                            "mtp_energy_gate", "mtp_phase_gate")
 
-LATE_PHASES = ("PROPULSION", "TAKEOFF_CONFIRM", "FLIGHT", "LANDING_PREP")
+# The RES-86 landing phases are classified in the same LATE class as the
+# RES-85 LANDING_PREP: the late active-MTP fraction (0.5) applies unchanged and
+# no ceiling, budget or rate value is altered.  This is the conservative
+# reading of the frozen MTP energy authority for the downstream landing.
+LATE_PHASES = ("PROPULSION", "TAKEOFF_CONFIRM", "FLIGHT", "LANDING_PREP",
+               "IMPACT_ABSORPTION", "LANDING_CAPTURE", "E10_CONFIRMED")
 
 PLANT_MTP_STIFFNESS_NM_PER_RAD = 25.0
 PLANT_MTP_DAMPING_NMS_PER_RAD = 2.0
@@ -151,6 +156,38 @@ def plant_mtp_passive_moment_nm(q_rad: Sequence[float], qdot_rad_s: Sequence[flo
     return float(left), float(right)
 
 
+@dataclass(frozen=True)
+class V3ActuationState:
+    """Validated snapshot of the actuation-authority history state.
+
+    The authority owns exactly two history quantities: the previous applied
+    moment per channel (the sole torque-rate history) and the per-foot MTP
+    energy ledger.  The step counter is carried for evidence only.  A snapshot
+    can be restored onto this or another authority instance so that the
+    RES-85 -> RES-86 handoff and every exact branch replay continue the same
+    rate-limit and MTP-budget history with no reset and no hidden zeroing.
+    """
+
+    previous_applied_nm: tuple[float, ...]
+    mtp_ledger: tuple[V3MtpLedgerEntry, V3MtpLedgerEntry]
+    step_index: int
+
+    def validate(self) -> list[str]:
+        failures: list[str] = []
+        if len(self.previous_applied_nm) != N_CHANNELS:
+            failures.append("PREVIOUS_APPLIED_SHAPE")
+        elif not np.all(np.isfinite(np.asarray(self.previous_applied_nm, dtype=np.float64))):
+            failures.append("PREVIOUS_APPLIED_NON_FINITE")
+        for foot, entry in enumerate(self.mtp_ledger):
+            for name in ("active_positive_work_j", "total_positive_work_j"):
+                value = float(getattr(entry, name))
+                if not np.isfinite(value) or value < 0.0:
+                    failures.append(f"MTP_LEDGER_FOOT_{foot}_{name.upper()}")
+        if self.step_index < 0:
+            failures.append("STEP_INDEX_NEGATIVE")
+        return failures
+
+
 class V3ActuationAuthority:
     """The single V3 actuation-authority layer for the nine motor channels."""
 
@@ -205,6 +242,8 @@ class V3ActuationAuthority:
     def reset(self) -> None:
         self._previous_applied = np.zeros(N_CHANNELS, dtype=np.float64)
         self._step_index = 0
+        self._mtp_ledger: tuple[V3MtpLedgerEntry, V3MtpLedgerEntry] = (
+            V3MtpLedgerEntry(), V3MtpLedgerEntry())
 
     @property
     def previous_applied(self) -> np.ndarray:
@@ -214,6 +253,31 @@ class V3ActuationAuthority:
     @property
     def step_index(self) -> int:
         return self._step_index
+
+    @property
+    def internal_mtp_ledger(self) -> tuple[V3MtpLedgerEntry, V3MtpLedgerEntry]:
+        """The authority-held MTP ledger (mirrors the returned ledger)."""
+        return (self._mtp_ledger[0], self._mtp_ledger[1])
+
+    # ------------------------------------------------------------------
+    # exact history snapshot / restore (RES-85 -> RES-86 handoff + branches)
+    # ------------------------------------------------------------------
+    def snapshot_state(self) -> V3ActuationState:
+        """Capture the complete history state (no reset, no zeroing)."""
+        return V3ActuationState(
+            previous_applied_nm=tuple(float(v) for v in self._previous_applied),
+            mtp_ledger=(self._mtp_ledger[0], self._mtp_ledger[1]),
+            step_index=int(self._step_index),
+        )
+
+    def restore_state(self, state: V3ActuationState) -> None:
+        """Restore a validated snapshot exactly (fail closed when malformed)."""
+        failures = state.validate()
+        if failures:
+            raise V3ActuationError("invalid actuation state: " + "; ".join(failures))
+        self._previous_applied = np.asarray(state.previous_applied_nm, dtype=np.float64).copy()
+        self._mtp_ledger = (state.mtp_ledger[0], state.mtp_ledger[1])
+        self._step_index = int(state.step_index)
 
     # ------------------------------------------------------------------
     # the single entry point
@@ -422,6 +486,7 @@ class V3ActuationAuthority:
         rate_margin = rate_limit - np.abs(applied - self._previous_applied)
         self._previous_applied = applied.copy()
         self._step_index += 1
+        self._mtp_ledger = (ledger[0], ledger[1])
 
         record = V3AppliedTorque(
             commanded_nm=tuple(float(v) for v in commanded),
@@ -506,6 +571,7 @@ __all__ = [
     "SYMMETRY_TOLERANCE_NM",
     "V3ActuationAuthority",
     "V3ActuationError",
+    "V3ActuationState",
     "V3AppliedTorque",
     "V3MtpLedgerEntry",
     "V3_ACTUATION_AUTHORITY_BUNDLE",
