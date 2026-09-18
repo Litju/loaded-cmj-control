@@ -25,12 +25,45 @@ The active-set signature canonicalises the row ordering before hashing, so two
 equivalent active sets recorded in different buffer order produce the same
 signature, while any material change to a contact, a prohibited contact, a
 constraint row type/id/state/force or a Jacobian row changes it.
+
+Two identities are deliberately separated:
+
+``RES86_ACTIVE_SET_SIGNATURE_V1`` (exact numerical evidence fingerprint)
+    Backward-compatible exact evidence identity.  It hashes continuously
+    varying quantities (contact distance/position/frame/force, EFC
+    pos/vel/force/margin/KBIP/D/aref/b and the Jacobian rows) together with
+    the sample/interval identity.  It answers "is this the same numerical
+    evidence?", never "is this the same contact mode?".
+
+``RES86_CONTACT_MODE_SIGNATURE_V1`` (contact mode identity)
+    Discrete contact/constraint mode identity for local derivative
+    eligibility.  It encodes only discrete structure: the normalized contact
+    geom pair, contact class, side, plantar region, contact dimension, the
+    active/legal-plantar/prohibited booleans, the per-side legal support and
+    prohibited-present support descriptor, and the EFC type/state with a
+    stable semantic constraint identity (canonical semantic contact identity
+    for contact constraints, never the raw contact-buffer index) plus row
+    multiplicities.  Sample index, time, branch/interval identity, distances,
+    positions, frames, forces and every numerical Jacobian/EFC value are
+    excluded.
+
+Frozen future derivative rule (declared here, not implemented in RES-86A1;
+RES-86B owns deterministic epsilon shrink/refinement):
+
+* a CENTRAL difference is allowed only when
+  ``MODE(nominal) == MODE(+epsilon) == MODE(-epsilon)``;
+* when only one side matches the nominal mode, CENTRAL is FORBIDDEN and the
+  one-sided same-mode difference is the candidate;
+* when neither side matches, the derivative is
+  ``UNAVAILABLE_AT_CURRENT_EPSILON``;
+* incompatible modes are never averaged.
 """
 
 from __future__ import annotations
 
 import hashlib
 import struct
+from collections import Counter
 from dataclasses import dataclass
 from typing import Sequence
 
@@ -42,6 +75,29 @@ from loaded_cmj.v3.plant import model_xml
 
 V3_ACTIVE_SET_CAPTURE_AUTHORITY_ID = "LCMJ_RES86_V3_ACTIVE_SET_CAPTURE_V1"
 V3_ACTIVE_SET_SIGNATURE_VERSION = "RES86_ACTIVE_SET_SIGNATURE_V1"
+V3_EXACT_EVIDENCE_FINGERPRINT_VERSION = V3_ACTIVE_SET_SIGNATURE_VERSION
+V3_CONTACT_MODE_SIGNATURE_VERSION = "RES86_CONTACT_MODE_SIGNATURE_V1"
+
+# Frozen future derivative rule (RES-86B implements the epsilon refinement).
+DERIVATIVE_CENTRAL_ALLOWED = "CENTRAL_ALLOWED_SAME_MODE_BOTH_SIDES"
+DERIVATIVE_ONE_SIDED_SAME_MODE = "ONE_SIDED_SAME_MODE_CANDIDATE"
+DERIVATIVE_UNAVAILABLE = "DERIVATIVE_UNAVAILABLE_AT_CURRENT_EPSILON"
+
+
+def derivative_eligibility(mode_nominal: str, mode_plus: str, mode_minus: str) -> str:
+    """Frozen mode-compatibility rule for a local derivative candidate.
+
+    Returns one of :data:`DERIVATIVE_CENTRAL_ALLOWED`,
+    :data:`DERIVATIVE_ONE_SIDED_SAME_MODE` or :data:`DERIVATIVE_UNAVAILABLE`.
+    A central difference is never taken across incompatible contact modes.
+    """
+    plus_same = mode_plus == mode_nominal
+    minus_same = mode_minus == mode_nominal
+    if plus_same and minus_same:
+        return DERIVATIVE_CENTRAL_ALLOWED
+    if plus_same or minus_same:
+        return DERIVATIVE_ONE_SIDED_SAME_MODE
+    return DERIVATIVE_UNAVAILABLE
 
 CONTACT_CONSTRAINT_TYPES: tuple[int, ...] = (
     int(mujoco.mjtConstraint.mjCNSTR_CONTACT_FRICTIONLESS),
@@ -347,12 +403,13 @@ class V3ActiveSetTables:
 
     def branch_signature(self, start_sample: int, end_sample: int, *,
                          branch_id: str, executed_interval_id: str) -> str:
-        """Signature over the executed landing-branch interval ``[start, end]``.
+        """Exact numerical evidence fingerprint over ``[start, end]``.
 
-        Includes the sample domain identity (branch id, executed interval id,
-        start/end sample and time, authority/model identity) plus every native
-        sample's canonical active-set signature, so changing one contact, one
-        constraint row or the executed interval changes the signature.
+        ``RES86_ACTIVE_SET_SIGNATURE_V1`` (backward-compatible).  Includes the
+        sample domain identity (branch id, executed interval id, start/end
+        sample and time, authority/model identity) plus every native sample's
+        canonical active-set signature, so changing one contact, one
+        constraint row or the executed interval changes the fingerprint.
         """
         if not 0 <= start_sample <= end_sample < self.sample_count:
             raise V3ActiveSetCaptureError("signature interval outside the captured stream")
@@ -372,6 +429,109 @@ class V3ActiveSetTables:
         for sample in range(int(start_sample), int(end_sample) + 1):
             digest.update(struct.pack("<q", int(self.sample_index[sample])))
             digest.update(bytes.fromhex(self.sample_signature(sample)))
+        return digest.hexdigest()
+
+    # ------------------------------------------------------------------
+    # contact-mode identity (discrete structure only)
+    # ------------------------------------------------------------------
+    def _contact_mode_descriptor(self, row: int) -> tuple:
+        """Discrete semantic descriptor of one contact row (no numerics)."""
+        geom = (int(self.contact_geom0_id[row]), int(self.contact_geom1_id[row]))
+        return (
+            tuple(sorted(geom)),
+            int(self.contact_class[row]),
+            int(self.contact_side[row]),
+            int(self.contact_region[row]),
+            int(self.contact_dim[row]),
+            bool(self.contact_active[row]),
+            bool(self.contact_legal_active[row]),
+            bool(self.contact_prohibited[row]),
+        )
+
+    def contact_mode_descriptors(self, sample: int) -> list[tuple]:
+        lo, hi = int(self.contact_offsets[sample]), int(self.contact_offsets[sample + 1])
+        return [self._contact_mode_descriptor(row) for row in range(lo, hi)]
+
+    def support_mode_descriptor(self, sample: int) -> tuple[bool, bool, bool]:
+        """(left legal support active, right legal support active, prohibited)."""
+        lo, hi = int(self.contact_offsets[sample]), int(self.contact_offsets[sample + 1])
+        left = right = prohibited = False
+        for row in range(lo, hi):
+            if int(self.contact_legal_active[row]):
+                side = int(self.contact_side[row])
+                if side == 0:
+                    left = True
+                elif side == 1:
+                    right = True
+            if int(self.contact_prohibited[row]):
+                prohibited = True
+        return (left, right, prohibited)
+
+    def constraint_mode_descriptors(self, sample: int) -> list[tuple]:
+        """Discrete descriptor of every EFC row of one sample.
+
+        Contact-constraint rows are associated with their canonical semantic
+        contact identity (descriptor plus within-contact row ordinal), never
+        with the raw contact-buffer index.  Non-contact rows use the stable
+        ``(type, id)`` constraint identity.
+        """
+        lo_c, hi_c = int(self.contact_offsets[sample]), int(self.contact_offsets[sample + 1])
+        lo_e, hi_e = int(self.efc_offsets[sample]), int(self.efc_offsets[sample + 1])
+        contact_identity: dict[int, tuple] = {}
+        for row in range(lo_c, hi_c):
+            address = int(self.contact_efc_address[row])
+            nrows = int(self.contact_efc_nrows[row])
+            if address < 0 or nrows <= 0:
+                continue
+            descriptor = self._contact_mode_descriptor(row)
+            for ordinal in range(nrows):
+                contact_identity[address + ordinal] = (descriptor, ordinal)
+        descriptors: list[tuple] = []
+        for row in range(lo_e, hi_e):
+            efc_type = int(self.efc_type[row])
+            state = int(self.efc_state[row])
+            identity = contact_identity.get(row - lo_e)
+            if efc_type not in CONTACT_CONSTRAINT_TYPES or identity is None:
+                identity = ("CONSTRAINT", efc_type, int(self.efc_id[row]))
+            descriptors.append((efc_type, state, identity))
+        return descriptors
+
+    def sample_mode_signature(self, sample: int) -> str:
+        """Discrete contact/constraint mode identity of one native sample.
+
+        Encodes only discrete structure (contact descriptors with
+        multiplicity, the support-mode descriptor and constraint descriptors
+        with multiplicity).  Sample index, time, distances, positions, frames,
+        forces and every numerical EFC/Jacobian value are excluded.
+        """
+        digest = hashlib.sha256()
+        digest.update(V3_CONTACT_MODE_SIGNATURE_VERSION.encode("utf-8"))
+        digest.update(b"|SUPPORT|")
+        for flag in self.support_mode_descriptor(sample):
+            digest.update(b"1" if flag else b"0")
+        digest.update(b"|CONTACTS|")
+        contacts = Counter(self.contact_mode_descriptors(sample))
+        for descriptor, count in sorted(contacts.items(), key=lambda item: repr(item[0])):
+            digest.update(repr((descriptor, int(count))).encode("utf-8"))
+        digest.update(b"|CONSTRAINTS|")
+        constraints = Counter(self.constraint_mode_descriptors(sample))
+        for descriptor, count in sorted(constraints.items(), key=lambda item: repr(item[0])):
+            digest.update(repr((descriptor, int(count))).encode("utf-8"))
+        return digest.hexdigest()
+
+    def branch_mode_signature(self, start_sample: int, end_sample: int) -> str:
+        """Contact-mode identity over an inclusive native sample interval.
+
+        The mode identity deliberately excludes the sample index, time and the
+        branch/interval identity: two intervals occupy the same mode when
+        their ordered per-sample mode signatures agree.
+        """
+        if not 0 <= start_sample <= end_sample < self.sample_count:
+            raise V3ActiveSetCaptureError("mode signature interval outside the captured stream")
+        digest = hashlib.sha256()
+        digest.update(V3_CONTACT_MODE_SIGNATURE_VERSION.encode("utf-8"))
+        for sample in range(int(start_sample), int(end_sample) + 1):
+            digest.update(bytes.fromhex(self.sample_mode_signature(sample)))
         return digest.hexdigest()
 
 
@@ -565,11 +725,17 @@ def decode_tables_to_arrays(tables: V3ActiveSetTables, sample: int) -> dict[str,
 __all__ = [
     "ActiveSetRecorder",
     "CONTACT_CONSTRAINT_TYPES",
+    "DERIVATIVE_CENTRAL_ALLOWED",
+    "DERIVATIVE_ONE_SIDED_SAME_MODE",
+    "DERIVATIVE_UNAVAILABLE",
     "V3_ACTIVE_SET_CAPTURE_AUTHORITY_ID",
     "V3_ACTIVE_SET_SIGNATURE_VERSION",
+    "V3_CONTACT_MODE_SIGNATURE_VERSION",
+    "V3_EXACT_EVIDENCE_FINGERPRINT_VERSION",
     "V3ActiveSetCaptureError",
     "V3ActiveSetTables",
     "capture_active_set",
     "contact_class_code",
     "decode_tables_to_arrays",
+    "derivative_eligibility",
 ]

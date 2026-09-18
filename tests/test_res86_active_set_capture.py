@@ -244,3 +244,188 @@ def test_stream_capture_is_not_a_live_memory_view(pressed_state):
     assert np.array_equal(tables.efc_rows(0)["jacobian"].ravel(), first_j)
     assert np.array_equal(tables.efc_rows(0)["kbip"], first_kbip)
     assert not np.array_equal(tables.efc_rows(0)["jacobian"], tables.efc_rows(1)["jacobian"])
+
+
+# ---------------------------------------------------------------------------
+# A2: exact evidence fingerprint vs contact-mode identity
+# ---------------------------------------------------------------------------
+from loaded_cmj.v3.active_set_capture import (  # noqa: E402
+    DERIVATIVE_CENTRAL_ALLOWED,
+    DERIVATIVE_ONE_SIDED_SAME_MODE,
+    DERIVATIVE_UNAVAILABLE,
+    V3_ACTIVE_SET_SIGNATURE_VERSION,
+    V3_CONTACT_MODE_SIGNATURE_VERSION,
+    V3_EXACT_EVIDENCE_FINGERPRINT_VERSION,
+    derivative_eligibility,
+)
+
+HISTORICAL_EXACT_BRANCH_FINGERPRINT = \
+    "cea0ff7c92c7f10f0b168e67ba1758b97720557ce8a8eda2eb1710391a4a4cf1"
+
+
+def _exact(tables) -> str:
+    return tables.branch_signature(0, 0, branch_id=BRANCH_ID, executed_interval_id=INTERVAL_ID)
+
+
+def _mode(tables) -> str:
+    return tables.sample_mode_signature(0)
+
+
+def test_fingerprint_and_mode_versions_are_separate():
+    assert V3_EXACT_EVIDENCE_FINGERPRINT_VERSION == V3_ACTIVE_SET_SIGNATURE_VERSION == \
+        "RES86_ACTIVE_SET_SIGNATURE_V1"
+    assert V3_CONTACT_MODE_SIGNATURE_VERSION == "RES86_CONTACT_MODE_SIGNATURE_V1"
+    assert V3_EXACT_EVIDENCE_FINGERPRINT_VERSION != V3_CONTACT_MODE_SIGNATURE_VERSION
+
+
+def test_identical_state_has_same_exact_and_same_mode(tables):
+    assert _exact(tables) == _exact(tables)
+    assert _mode(tables) == _mode(tables)
+
+
+def test_tiny_contact_distance_perturbation_exact_different_mode_same(tables):
+    dist = tables.contact_dist.copy()
+    dist[0] += 1.0e-12
+    mutated = dataclasses.replace(tables, contact_dist=dist)
+    assert _exact(mutated) != _exact(tables)
+    assert _mode(mutated) == _mode(tables)
+
+
+def test_tiny_force_perturbation_exact_different_mode_same(tables):
+    force = tables.contact_force6.copy()
+    force[0, 2] += 1.0e-12
+    mutated = dataclasses.replace(tables, contact_force6=force)
+    assert _exact(mutated) != _exact(tables)
+    assert _mode(mutated) == _mode(tables)
+
+
+def test_tiny_efc_jacobian_perturbation_exact_different_mode_same(tables):
+    jac = tables.efc_jacobian.copy()
+    jac[0, 0] += 1.0e-12
+    mutated = dataclasses.replace(tables, efc_jacobian=jac)
+    assert _exact(mutated) != _exact(tables)
+    assert _mode(mutated) == _mode(tables)
+
+
+def test_contact_geom_identity_change_mode_different(tables):
+    geom = tables.contact_geom1_id.copy()
+    geom[0] += 1
+    mutated = dataclasses.replace(tables, contact_geom1_id=geom)
+    assert _mode(mutated) != _mode(tables)
+
+
+def test_legal_to_prohibited_mode_different(tables):
+    contact_class = tables.contact_class.copy()
+    prohibited = tables.contact_prohibited.copy()
+    legal = tables.contact_legal_active.copy()
+    contact_class[0] = 1
+    prohibited[0] = True
+    legal[0] = False
+    mutated = dataclasses.replace(tables, contact_class=contact_class,
+                                  contact_prohibited=prohibited,
+                                  contact_legal_active=legal)
+    assert _mode(mutated) != _mode(tables)
+
+
+def test_support_side_loss_mode_different(tables):
+    legal = tables.contact_legal_active.copy()
+    side = tables.contact_side.copy()
+    target = int(np.nonzero(side == 1)[0][0])
+    legal[target] = False
+    mutated = dataclasses.replace(tables, contact_legal_active=legal)
+    assert _mode(mutated) != _mode(tables)
+
+
+def test_efc_type_change_mode_different(tables):
+    efc_type = tables.efc_type.copy()
+    efc_type[0] = int(mujoco.mjtConstraint.mjCNSTR_LIMIT_JOINT)
+    mutated = dataclasses.replace(tables, efc_type=efc_type)
+    assert _mode(mutated) != _mode(tables)
+
+
+def test_efc_state_change_mode_different(tables):
+    efc_state = tables.efc_state.copy()
+    efc_state[0] = 0
+    mutated = dataclasses.replace(tables, efc_state=efc_state)
+    assert _mode(mutated) != _mode(tables)
+
+
+def test_contact_multiplicity_change_mode_different(tables):
+    contact_offsets = tables.contact_offsets.copy()
+    ncon = tables.ncon.copy()
+    fields = {name: getattr(tables, name) for name in tables.__dataclass_fields__}
+    for name in ("contact_id", "contact_geom0_id", "contact_geom1_id", "contact_class",
+                 "contact_side", "contact_region", "contact_dist", "contact_pos",
+                 "contact_frame", "contact_efc_address", "contact_dim", "contact_efc_nrows",
+                 "contact_force6", "contact_normal_force", "contact_active",
+                 "contact_legal_active", "contact_prohibited"):
+        array = np.asarray(getattr(tables, name))
+        fields[name] = np.concatenate([array, array[-1:]])
+    contact_offsets[1] = contact_offsets[1] + 1
+    ncon[0] = ncon[0] + 1
+    fields["contact_offsets"] = contact_offsets
+    fields["ncon"] = ncon
+    mutated = dataclasses.replace(tables, **fields)
+    assert _mode(mutated) != _mode(tables)
+
+
+def test_equivalent_contact_row_permutation_mode_same(tables):
+    lo, hi = int(tables.contact_offsets[0]), int(tables.contact_offsets[1])
+    order = np.arange(hi - lo)
+    rng = np.random.default_rng(0)
+    rng.shuffle(order)
+    fields = {name: getattr(tables, name) for name in tables.__dataclass_fields__}
+    for name in ("contact_id", "contact_geom0_id", "contact_geom1_id", "contact_class",
+                 "contact_side", "contact_region", "contact_dist", "contact_pos",
+                 "contact_frame", "contact_efc_address", "contact_dim", "contact_efc_nrows",
+                 "contact_force6", "contact_normal_force", "contact_active",
+                 "contact_legal_active", "contact_prohibited"):
+        array = np.asarray(getattr(tables, name)).copy()
+        array[:hi - lo] = array[:hi - lo][order]
+        fields[name] = array
+    mutated = dataclasses.replace(tables, **fields)
+    assert _mode(mutated) == _mode(tables)
+
+
+def test_equivalent_efc_row_permutation_mode_same(tables):
+    lo, hi = int(tables.efc_offsets[0]), int(tables.efc_offsets[1])
+    order = np.arange(hi - lo)
+    rng = np.random.default_rng(1)
+    rng.shuffle(order)
+    fields = {name: getattr(tables, name) for name in tables.__dataclass_fields__}
+    for name in ("efc_type", "efc_id", "efc_state", "efc_pos", "efc_vel", "efc_force",
+                 "efc_margin", "efc_aref", "efc_b", "efc_d", "efc_kbip",
+                 "efc_frictionloss", "efc_jacobian"):
+        array = np.asarray(getattr(tables, name)).copy()
+        array[:hi - lo] = array[:hi - lo][order]
+        fields[name] = array
+    mutated = dataclasses.replace(tables, **fields)
+    assert _mode(mutated) == _mode(tables)
+
+
+def test_historical_exact_branch_fingerprint_unchanged():
+    from loaded_cmj.v3.active_set_capture import V3ActiveSetTables
+    bundle = (TASK_ROOT.parent / "loaded-cmj-control-evidence" /
+              "EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001")
+    tables_npz = bundle / "branch" / "contact_efc_tables.npz"
+    if not tables_npz.exists():
+        pytest.skip("sealed RES-86A tables bundle not present")
+    import json
+
+    arrays = {name: np.load(tables_npz)[name] for name in np.load(tables_npz).files}
+    manifest = json.loads((bundle / "branch" / "contact_efc_tables_manifest.json").read_text())
+    tables = V3ActiveSetTables(model_sha256=manifest["model_sha256"],
+                               nq=12, nv=12, nu=9, na=0, **arrays)
+    assert tables.canonical_digest() == \
+        "49229f6c4b2b0b2b8fda562eec088be2800fccfeb37431452fe66d5a0f895833"
+    assert tables.branch_signature(
+        790, 1499, branch_id="RES86_BRANCH_PRE_TOUCHDOWN_SAMPLE_790",
+        executed_interval_id="NATIVE_SAMPLES_790_1499") == \
+        HISTORICAL_EXACT_BRANCH_FINGERPRINT
+
+
+def test_derivative_eligibility_rule_is_frozen():
+    assert derivative_eligibility("M", "M", "M") == DERIVATIVE_CENTRAL_ALLOWED
+    assert derivative_eligibility("M", "M", "X") == DERIVATIVE_ONE_SIDED_SAME_MODE
+    assert derivative_eligibility("M", "X", "M") == DERIVATIVE_ONE_SIDED_SAME_MODE
+    assert derivative_eligibility("M", "X", "X") == DERIVATIVE_UNAVAILABLE

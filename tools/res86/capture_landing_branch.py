@@ -1041,6 +1041,7 @@ def stage_execute(bundle: Path) -> dict:
     })
     write_json(bundle / "recorder" / "active_set_signature.json", {
         "signature_version": "RES86_ACTIVE_SET_SIGNATURE_V1",
+        "signature_role": "EXACT_NUMERICAL_EVIDENCE_FINGERPRINT",
         "branch_id": BRANCH_ID,
         "executed_interval_id": EXECUTED_INTERVAL_ID,
         "interval_samples": [PRE_TOUCHDOWN_SAMPLE, TOTAL_NATIVE_SAMPLES - 1],
@@ -1048,6 +1049,13 @@ def stage_execute(bundle: Path) -> dict:
         "baseline_interval_id": "NATIVE_SAMPLES_791_1499",
         "baseline_signature": baseline_signature,
         "recomputation_identical": True,
+        "contact_mode_signature": {
+            "signature_version": "RES86_CONTACT_MODE_SIGNATURE_V1",
+            "branch_mode_signature": tables.branch_mode_signature(
+                PRE_TOUCHDOWN_SAMPLE, TOTAL_NATIVE_SAMPLES - 1),
+            "baseline_mode_signature": tables.branch_mode_signature(
+                E8_SAMPLE, TOTAL_NATIVE_SAMPLES - 1),
+        },
     })
     write_json(bundle / "baseline" / "continuation_negative_control.json", baseline)
     write_json(bundle / "metrics.json", {
@@ -1130,10 +1138,19 @@ def stage_execute(bundle: Path) -> dict:
         },
         "active_set_signature": {
             "signature_version": "RES86_ACTIVE_SET_SIGNATURE_V1",
+            "signature_role": "EXACT_NUMERICAL_EVIDENCE_FINGERPRINT",
             "branch_id": BRANCH_ID,
             "executed_interval_id": EXECUTED_INTERVAL_ID,
             "branch_signature": branch_signature,
             "baseline_signature": baseline_signature,
+        },
+        "contact_mode_signature": {
+            "signature_version": "RES86_CONTACT_MODE_SIGNATURE_V1",
+            "signature_role": "DISCRETE_CONTACT_CONSTRAINT_MODE_IDENTITY",
+            "branch_mode_signature": tables.branch_mode_signature(
+                PRE_TOUCHDOWN_SAMPLE, TOTAL_NATIVE_SAMPLES - 1),
+            "baseline_mode_signature": tables.branch_mode_signature(
+                E8_SAMPLE, TOTAL_NATIVE_SAMPLES - 1),
         },
     }
     write_json(bundle / "branch_capture_summary.json", summary)

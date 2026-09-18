@@ -155,6 +155,21 @@ def test_branch_signature_matches_tracked_summary(capture):
     assert signature == SUMMARY["active_set_signature"]["branch_signature"]
 
 
+def test_exact_fingerprint_role_and_mode_signature_are_declared(capture):
+    summary = SUMMARY["active_set_signature"]
+    assert summary["signature_version"] == "RES86_ACTIVE_SET_SIGNATURE_V1"
+    tables = capture["tables"]
+    exact = tables.branch_signature(
+        PRE_TOUCHDOWN_SAMPLE, TOTAL_NATIVE_SAMPLES - 1,
+        branch_id=summary["branch_id"], executed_interval_id=summary["executed_interval_id"])
+    mode = tables.branch_mode_signature(PRE_TOUCHDOWN_SAMPLE, TOTAL_NATIVE_SAMPLES - 1)
+    baseline_mode = tables.branch_mode_signature(E8_SAMPLE, TOTAL_NATIVE_SAMPLES - 1)
+    assert exact != mode
+    assert mode != baseline_mode
+    assert tables.sample_mode_signature(PRE_TOUCHDOWN_SAMPLE) != \
+        tables.sample_mode_signature(E8_SAMPLE)
+
+
 def test_instrumented_capture_equals_canonical_runtime(capture, canonical):
     identity = compare_run_a_to_run_b(capture, canonical)
     assert identity["status"] == "PASS", [c for c in identity["checks"] if not c["identical"]]
