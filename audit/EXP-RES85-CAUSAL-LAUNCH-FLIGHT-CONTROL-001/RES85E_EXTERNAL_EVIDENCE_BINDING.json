@@ -1,0 +1,53 @@
+{
+  "canonical_h2_support_m": 0.16021398534364972,
+  "claim_end_index": 791,
+  "evidence_archive_bytes": 3046578,
+  "evidence_archive_path": "/home/litju/Projects/loaded-cmj-control-evidence/EXP-RES85E-RES85D-V2-EVIDENCE-DELIVERY-001.tar.gz",
+  "evidence_archive_sha256": "fe54d7f1eff49ed2d3b01dc4137962beb91e88382c910e29ddfd148067b21ac5",
+  "evidence_bundle_directory": "/home/litju/Projects/loaded-cmj-control-evidence/EXP-RES85E-RES85D-V2-EVIDENCE-DELIVERY-001",
+  "evidence_file_count": 73,
+  "experiment_spec_path": "/home/litju/Projects/loaded-cmj-control-evidence/EXP-RES85E-RES85D-V2-EVIDENCE-DELIVERY-001/experiment_spec.json",
+  "experiment_spec_sha256": "5505c47af9c686f7aaca82cc89920a1a915edd82b29fd0e32a59d571904e9c31",
+  "experiments": [
+    {
+      "experiment_id": "EXP-RES85E-RES85D-V2-EVIDENCE-DELIVERY-001",
+      "experiment_spec_sha256": "5505c47af9c686f7aaca82cc89920a1a915edd82b29fd0e32a59d571904e9c31",
+      "role": "qualification execution + independent metric/event recomputation + delivery bundle"
+    },
+    {
+      "experiment_id": "EXP-RES85E-PIPELINE-SELFVERIFICATION-AND-REPRODUCTION-METADATA-002",
+      "experiment_spec_sha256": "7d10865a078f5b3d3629f94160d1f7d64182a9387f8fa746de0e547ac134df1a",
+      "role": "EVIDENCE_CONTRACT \u00a712/\u00a714 nonzero-branch pipeline self-verification and \u00a77 reproduction metadata completion"
+    }
+  ],
+  "frozen_science_head": "b46735b9e0ee23532b988ddcb1169a67518e9a6a",
+  "frozen_science_tree": "ca6b7daf0f635b8719ba06e87330c61dc21209d4",
+  "global_min_structural_rom_margin_rad": 0.0,
+  "linear_issue": "RES-85",
+  "manifest_canonical_sha256": "678fd09ab5823b776461e2ce6246e60113caae1343865645ef21c49a4f25fcf8",
+  "manifest_file_sha256": "8dbe009d11b4294a1da95bea9c9bb18a262ed04b1d1c001811d9c173c8eb8512",
+  "manifest_path": "/home/litju/Projects/loaded-cmj-control-evidence/EXP-RES85E-RES85D-V2-EVIDENCE-DELIVERY-001/manifest.json",
+  "mission": "RES85E_EVIDENCE_CONTRACT_V2_REQUALIFICATION_AND_DELIVERY_001",
+  "note": "v2.0.0 delivery bundle for the already-qualified RES-85D controller; no controller science, Plant, measurement, actuation, event or threshold change. Serialized science HEAD remains b46735b9e0ee23532b988ddcb1169a67518e9a6a.",
+  "raw_traces_in_source_repository": false,
+  "raw_traces_location": "/home/litju/Projects/loaded-cmj-control-evidence/EXP-RES85E-RES85D-V2-EVIDENCE-DELIVERY-001",
+  "reproduction_end_time": "2026-09-18T03:23:01Z",
+  "reproduction_identical": true,
+  "reproduction_result_path": "/home/litju/Projects/loaded-cmj-control-evidence/EXP-RES85E-RES85D-V2-EVIDENCE-DELIVERY-001/reproduction.json",
+  "schema_version": "1.0.0",
+  "self_verification_branch_time_s": 0.2,
+  "self_verification_identical": true,
+  "state_vector_sha256": "2a129a97e94061fe040a560b39f8f4297b9ac36265bae2dd053df0715b5d6812",
+  "takeoff_confirmation_index": 637,
+  "takeoff_occurrence_index": 612,
+  "targeted_test_counts": {
+    "collected": 222,
+    "failed": 0,
+    "passed": 222,
+    "skipped": 0
+  },
+  "trunk_max_rad": 0.5422164233170099,
+  "verification_checks": 26,
+  "verification_log_path": "/home/litju/Projects/loaded-cmj-control-evidence/EXP-RES85E-RES85D-V2-EVIDENCE-DELIVERY-001.VERIFICATION.json",
+  "verification_status": "PASS"
+}
