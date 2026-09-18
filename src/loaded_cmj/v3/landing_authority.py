@@ -81,6 +81,24 @@ def dwell_confirmed(onset_time_s: float, current_time_s: float, duration_s: floa
 D_EST_REQUIREMENTS = dwell_requirements(D_EST_S)
 D_BL_REQUIREMENTS = dwell_requirements(D_BL_S)
 
+# RES-85D sealed strict structural-ROM comparison semantics.
+V3_STRUCTURAL_ROM_TOLERANCE_RAD = 1e-9
+V3_STRUCTURAL_ROM_TOLERANCE_ROLE = "FLOATING_POINT_EQUALITY_ONLY_NOT_ANATOMICAL_ROM"
+
+
+def structural_rom_violation(q_rad: float, lower_rad: float, upper_rad: float, *,
+                             tolerance_rad: float = V3_STRUCTURAL_ROM_TOLERANCE_RAD) -> bool:
+    """Inherited RES-85D strict structural-ROM comparison.
+
+    A coordinate is a violation only when it lies outside
+    ``[lower - tolerance, upper + tolerance]``.  Equality with a bound passes,
+    a value inside the 1e-9 floating-point comparison tolerance passes, and a
+    material overshoot beyond the tolerance fails.  The tolerance is never
+    added anatomical ROM.
+    """
+    return bool(float(q_rad) < float(lower_rad) - float(tolerance_rad)
+                or float(q_rad) > float(upper_rad) + float(tolerance_rad))
+
 RES82_BUNDLE = "audit/EXP-RES82-SUCCESSOR-SCIENTIFIC-TASK-CONTRACT-001"
 RES82_LANDING_CONTRACT = f"{RES82_BUNDLE}/LANDING_BALANCE_RECOVERY_CONTRACT.json"
 RES82_EVENT_CONTRACT = f"{RES82_BUNDLE}/EVENT_CONTRACT_E1_E12.json"
@@ -250,7 +268,14 @@ def landing_acceptance_authority() -> dict:
         "structural_rom": {
             "authority": "loaded_cmj.v3.constants.V3_JOINT_RANGES_RAD (frozen RES-83/RES-95 Plant ROM)",
             "scope": "every bounded joint coordinate, every native sample of the branch scope",
-            "tolerance_rad": 0.0,
+            "tolerance_rad": V3_STRUCTURAL_ROM_TOLERANCE_RAD,
+            "tolerance_role": V3_STRUCTURAL_ROM_TOLERANCE_ROLE,
+            "inherits": (
+                "RES-85D strict structural-ROM comparison semantics "
+                "(audit/EXP-RES85-CAUSAL-LAUNCH-FLIGHT-CONTROL-001); the joint "
+                "ranges themselves are unchanged and the tolerance is never "
+                "added anatomical ROM"
+            ),
         },
         "actuation_authority": {
             "authority": "LCMJ_RES85_ACTUATION_AUTHORITY_V1 (loaded_cmj.v3.actuation.V3ActuationAuthority)",
@@ -372,6 +397,11 @@ def validate_authority(authority: dict | None = None) -> list[str]:
             failures.append(f"FALSE_CLOSURE:{gate}")
     if payload["sensitivity_predeclaration"]["status"] != "PREDECLARED_NOT_EXECUTED_IN_RES86A":
         failures.append("SENSITIVITY_STATUS_MISMATCH")
+    structural_rom = payload.get("structural_rom", {})
+    if structural_rom.get("tolerance_rad") != V3_STRUCTURAL_ROM_TOLERANCE_RAD:
+        failures.append("STRUCTURAL_ROM_TOLERANCE_NOT_INHERITED_RES85D")
+    if structural_rom.get("tolerance_role") != V3_STRUCTURAL_ROM_TOLERANCE_ROLE:
+        failures.append("STRUCTURAL_ROM_TOLERANCE_ROLE_MISMATCH")
     return failures
 
 
@@ -390,10 +420,13 @@ __all__ = [
     "V3_LANDING_AUTHORITY_CLASS",
     "V3_LANDING_AUTHORITY_ID",
     "V3_LANDING_AUTHORITY_VERSION",
+    "V3_STRUCTURAL_ROM_TOLERANCE_RAD",
+    "V3_STRUCTURAL_ROM_TOLERANCE_ROLE",
     "authority_canonical_bytes",
     "authority_sha256",
     "dwell_confirmed",
     "dwell_requirements",
     "landing_acceptance_authority",
+    "structural_rom_violation",
     "validate_authority",
 ]

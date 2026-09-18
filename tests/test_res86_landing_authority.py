@@ -207,3 +207,51 @@ def test_authority_implements_res82_artifacts():
     assert implements["res82_landing_contract"].endswith("LANDING_BALANCE_RECOVERY_CONTRACT.json")
     assert "L4-T8" in implements["res82_gates_implemented"]
     assert set(implements["od_decisions_carried"]) == {"OD-04", "OD-08", "OD-10"}
+
+
+# ---------------------------------------------------------------------------
+# A4: structural-ROM tolerance inheritance (RES-85D semantics)
+# ---------------------------------------------------------------------------
+from loaded_cmj.v3.landing_authority import (  # noqa: E402
+    V3_STRUCTURAL_ROM_TOLERANCE_RAD,
+    V3_STRUCTURAL_ROM_TOLERANCE_ROLE,
+    structural_rom_violation,
+)
+
+
+def test_structural_rom_tolerance_inherits_res85d():
+    assert V3_STRUCTURAL_ROM_TOLERANCE_RAD == 1e-9
+    assert V3_STRUCTURAL_ROM_TOLERANCE_ROLE == \
+        "FLOATING_POINT_EQUALITY_ONLY_NOT_ANATOMICAL_ROM"
+    rom = landing_acceptance_authority()["structural_rom"]
+    assert rom["tolerance_rad"] == 1e-9
+    assert rom["tolerance_role"] == "FLOATING_POINT_EQUALITY_ONLY_NOT_ANATOMICAL_ROM"
+    assert "RES-85D" in rom["inherits"]
+    assert validate_authority() == []
+
+
+def test_structural_rom_tolerance_controls_upper_and_lower_bounds():
+    lo, hi = -0.610865, 0.610865
+    # q == bound passes; within the 1e-9 comparison tolerance passes
+    for bound in (lo, hi):
+        assert structural_rom_violation(bound, lo, hi) is False
+        assert structural_rom_violation(bound + 5e-10, lo, hi) is False
+        assert structural_rom_violation(bound - 5e-10, lo, hi) is False
+    # material overshoot beyond the tolerance fails on each side
+    assert structural_rom_violation(lo - 2e-9, lo, hi) is True
+    assert structural_rom_violation(hi + 2e-9, lo, hi) is True
+    assert structural_rom_violation(lo - 1e-3, lo, hi) is True
+    assert structural_rom_violation(hi + 1e-3, lo, hi) is True
+
+
+def test_structural_rom_tolerance_is_not_anatomical_rom():
+    lo, hi = 0.0, 2.443461
+    assert structural_rom_violation(hi + 0.001, lo, hi) is True
+    assert structural_rom_violation(lo - 0.001, lo, hi) is True
+
+
+def test_tracked_structural_rom_authority_matches_module():
+    tracked = json.loads(AUTHORITY_JSON.read_text())["structural_rom"]
+    assert tracked["tolerance_rad"] == V3_STRUCTURAL_ROM_TOLERANCE_RAD
+    assert tracked["tolerance_role"] == V3_STRUCTURAL_ROM_TOLERANCE_ROLE
+    assert tracked["tolerance_rad"] != 0.0

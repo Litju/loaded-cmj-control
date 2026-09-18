@@ -111,6 +111,16 @@ def test_toe_first_first_contact_is_legal(capture):
 # ---------------------------------------------------------------------------
 # 3. baseline failure is reproduced
 # ---------------------------------------------------------------------------
+def test_structural_rom_report_inherits_res85d_tolerance(capture, baseline):
+    from loaded_cmj.v3.landing_authority import V3_STRUCTURAL_ROM_TOLERANCE_RAD
+
+    rom = baseline["structural_rom"]
+    assert rom["tolerance_rad"] == V3_STRUCTURAL_ROM_TOLERANCE_RAD == 1e-9
+    assert rom["tolerance_role"] == "FLOATING_POINT_EQUALITY_ONLY_NOT_ANATOMICAL_ROM"
+    assert rom["first_violation_sample"] == 950
+    assert rom["channels"]["trunk_pelvis"]["violation_count"] > 0
+
+
 def test_baseline_failure_reproduced(capture, baseline):
     assert baseline["e8_first_contact_sample"] == 791
     assert baseline["first_prohibited_contact_sample"] == 928

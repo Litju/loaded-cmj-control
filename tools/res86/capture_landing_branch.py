@@ -60,6 +60,7 @@ from loaded_cmj.v3.controller import (  # noqa: E402
 )
 from loaded_cmj.v3.landing_authority import (  # noqa: E402
     D_BL_S,
+    V3_STRUCTURAL_ROM_TOLERANCE_RAD,
     authority_sha256,
     landing_acceptance_authority,
     validate_authority,
@@ -507,7 +508,13 @@ def compare_first_contact_to_sealed_trace(run_a: dict) -> dict:
 # ===========================================================================
 # baseline negative-control evaluation
 # ===========================================================================
-def structural_rom_report(run_a: dict) -> dict:
+def structural_rom_report(run_a: dict, *,
+                          tolerance_rad: float = V3_STRUCTURAL_ROM_TOLERANCE_RAD) -> dict:
+    """Structural-ROM audit inheriting the sealed RES-85D comparison semantics.
+
+    ``tolerance_rad = 1e-9`` is floating-point equality only, never added
+    anatomical ROM; the joint ranges themselves are unchanged.
+    """
     qpos = np.asarray(run_a["telemetry"]["joint_q"], dtype=np.float64)
     start = E8_SAMPLE
     report = {}
@@ -518,7 +525,8 @@ def structural_rom_report(run_a: dict) -> dict:
             continue
         column = qpos[:, C.V3_JOINT_NAMES.index(name)]
         lo, hi = float(rng[0]), float(rng[1])
-        violations = np.nonzero((column[start:] < lo - 1e-12) | (column[start:] > hi + 1e-12))[0]
+        violations = np.nonzero((column[start:] < lo - tolerance_rad)
+                                | (column[start:] > hi + tolerance_rad))[0]
         report[name] = {
             "range_rad": [lo, hi],
             "min_rad": float(column[start:].min()),
@@ -535,6 +543,8 @@ def structural_rom_report(run_a: dict) -> dict:
                 first_violation = sample
     return {
         "scope": "inclusive native window [E8_FIRST_CONTACT, end of stream]",
+        "tolerance_rad": float(tolerance_rad),
+        "tolerance_role": "FLOATING_POINT_EQUALITY_ONLY_NOT_ANATOMICAL_ROM",
         "first_violation_sample": first_violation,
         "channels": report,
     }
