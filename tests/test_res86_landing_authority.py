@@ -17,6 +17,8 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
+
 TASK_ROOT = Path(__file__).resolve().parents[1]
 SRC = TASK_ROOT / "src"
 if str(SRC) not in sys.path:
@@ -24,11 +26,22 @@ if str(SRC) not in sys.path:
 
 from loaded_cmj.v3 import constants as C  # noqa: E402
 from loaded_cmj.v3.landing_authority import (  # noqa: E402
+    D_BL_REQUIREMENTS,
+    D_BL_S,
+    D_EST_REQUIREMENTS,
+    D_EST_S,
+    V3_DWELL_DT_NOMINAL_S,
+    V3_DWELL_SEMANTICS,
     V3_LANDING_AUTHORITY_CLASS,
     V3_LANDING_AUTHORITY_ID,
     authority_sha256,
+    dwell_confirmed,
+    dwell_requirements,
     landing_acceptance_authority,
     validate_authority,
+)
+from loaded_cmj.v3.landing_metrics import (  # noqa: E402
+    material_reflight_intervals,
 )
 
 AUDIT_DIR = TASK_ROOT / "audit" / "EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001"
@@ -54,6 +67,73 @@ def test_frozen_dwells_and_vertical_rates():
     assert authority["dwells"]["D_BL_S"] == 0.050
     assert authority["vertical_rates"]["V_DESC_M_S"] == 0.10
     assert authority["vertical_rates"]["V_ABS_TAIL_M_S"] == 0.05
+
+
+# ---------------------------------------------------------------------------
+# A3: physical-time dwell semantics
+# ---------------------------------------------------------------------------
+def test_dwell_requirements_are_physical_time_intervals():
+    assert V3_DWELL_SEMANTICS == "PHYSICAL_TIME"
+    assert V3_DWELL_DT_NOMINAL_S == 0.002
+    assert D_EST_S == D_BL_S == 0.050
+    for requirements in (D_EST_REQUIREMENTS, D_BL_REQUIREMENTS):
+        assert requirements["DWELL_TYPE"] == "PHYSICAL_TIME"
+        assert requirements["REQUIRED_INTERVALS"] == 25
+        assert requirements["REQUIRED_TRUE_SAMPLES_INCLUSIVE"] == 26
+        assert requirements["RUNTIME_AUTHORITY"] == "t_current - t_onset >= DURATION_S"
+        assert requirements["SAMPLE_COUNT_ROLE"] == "DIAGNOSTIC_ONLY"
+    assert dwell_requirements(0.050, 0.001)["REQUIRED_INTERVALS"] == 50
+    assert dwell_requirements(0.050, 0.001)["REQUIRED_TRUE_SAMPLES_INCLUSIVE"] == 51
+
+
+def test_dwell_negative_control_24_intervals_must_not_confirm():
+    dt = 0.002
+    samples = 25
+    assert dwell_confirmed(0.0, (samples - 1) * dt, 0.050) is False
+    assert (samples - 1) == 24
+    assert (samples - 1) * dt == 0.048
+
+
+def test_dwell_boundary_25_intervals_may_confirm():
+    dt = 0.002
+    samples = 26
+    assert dwell_confirmed(0.0, (samples - 1) * dt, 0.050) is True
+    assert (samples - 1) == 25
+    assert (samples - 1) * dt == 0.050
+
+
+def test_authority_dwell_section_declares_negative_controls():
+    dwells = landing_acceptance_authority()["dwells"]
+    assert dwells["DT_NOMINAL_S"] == 0.002
+    assert dwells["DWELL_TYPE"] == "PHYSICAL_TIME"
+    assert dwells["D_EST"]["REQUIRED_INTERVALS"] == 25
+    assert dwells["D_EST"]["REQUIRED_TRUE_SAMPLES_INCLUSIVE"] == 26
+    assert dwells["D_BL"]["REQUIRED_INTERVALS"] == 25
+    assert dwells["D_BL"]["REQUIRED_TRUE_SAMPLES_INCLUSIVE"] == 26
+    controls = dwells["negative_controls"]
+    assert controls["24_INTERVALS_0P048_S"] == "MUST_NOT_CONFIRM"
+    assert controls["25_INTERVALS_0P050_S"] == \
+        "BOUNDARY_MAY_CONFIRM_IF_ALL_OTHER_GATES_PASS"
+    assert "native_samples_at_nominal_dt" not in dwells
+    assert validate_authority() == []
+
+
+def test_material_reflight_uses_physical_time_not_sample_count():
+    dt = 0.002
+    support = np.zeros(60, dtype=bool)
+    support[:10] = True
+    support[10:35] = False   # 25 inclusive samples = 24 intervals = 0.048 s
+    support[35:] = True
+    times = np.arange(60, dtype=np.float64) * dt
+    assert material_reflight_intervals(
+        support, 0, sample_times_s=times, min_duration_s=0.050) == []
+    support = np.zeros(61, dtype=bool)
+    support[:10] = True
+    support[10:36] = False   # 26 inclusive samples = 25 intervals = 0.050 s
+    support[36:] = True
+    times = np.arange(61, dtype=np.float64) * dt
+    assert material_reflight_intervals(
+        support, 0, sample_times_s=times, min_duration_s=0.050) == [(10, 35)]
 
 
 def test_frozen_e10_point_in_time_limits():

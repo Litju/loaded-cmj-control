@@ -20,6 +20,7 @@ sum over every non-world body (including the jointless 20 kg external load).
 
 from __future__ import annotations
 
+from fractions import Fraction
 from typing import Sequence
 
 import mujoco
@@ -28,6 +29,16 @@ import numpy as np
 from loaded_cmj.v3 import measurement as M
 
 V3_LANDING_METRICS_AUTHORITY_ID = "LCMJ_RES86_V3_LANDING_METRICS_V1"
+
+_NANOSECONDS_PER_SECOND = 1_000_000_000
+
+
+def _exact_nanoseconds(seconds: float, *, field: str) -> int:
+    value = Fraction(float(seconds)).limit_denominator(_NANOSECONDS_PER_SECOND)
+    scaled = value * _NANOSECONDS_PER_SECOND
+    if scaled.denominator != 1:
+        raise ValueError(f"{field}={seconds!r} is not exact at integer-nanosecond resolution")
+    return int(scaled)
 
 
 def centroidal_angular_momentum_world(model: mujoco.MjModel, data: mujoco.MjData,
@@ -99,15 +110,30 @@ def support_free_intervals(support: np.ndarray, start_index: int) -> list[tuple[
     return intervals
 
 
-def material_reflight_intervals(support: np.ndarray, start_index: int,
-                                min_samples: int) -> list[tuple[int, int]]:
-    """Support-free intervals whose length is at least ``min_samples``.
+def material_reflight_intervals(support: np.ndarray, start_index: int, *,
+                                sample_times_s: Sequence[float],
+                                min_duration_s: float) -> list[tuple[int, int]]:
+    """Support-free intervals whose physical duration is at least ``min_duration_s``.
 
     The declared material-reflight threshold in the RES-86 authority is the
-    bilateral-establishment dwell ``D_BL``; shorter losses are chatter.
+    bilateral-establishment dwell ``D_BL`` (PHYSICAL_TIME semantics).  The
+    duration of a support-free run ``[a, b]`` follows the single RES-82/84
+    physical-time convention already used by the dwell primitive: elapsed time
+    from the first sample of the run to its last sample, ``t[b] - t[a]``.  A
+    run of 25 inclusive samples is 24 intervals (0.048 s) and is NOT material;
+    a run of 26 inclusive samples is 25 intervals (0.050 s) and is the
+    boundary.  Shorter losses are chatter; a sample count is never the
+    authority.
     """
-    return [(a, b) for a, b in support_free_intervals(support, start_index)
-            if (b - a + 1) >= int(min_samples)]
+    times = np.asarray(sample_times_s, dtype=np.float64)
+    min_ns = _exact_nanoseconds(min_duration_s, field="min_duration_s")
+    intervals: list[tuple[int, int]] = []
+    for a, b in support_free_intervals(support, start_index):
+        start_ns = _exact_nanoseconds(float(times[a]), field=f"sample_times_s[{a}]")
+        end_ns = _exact_nanoseconds(float(times[b]), field=f"sample_times_s[{b}]")
+        if end_ns - start_ns >= min_ns:
+            intervals.append((a, b))
+    return intervals
 
 
 __all__ = [

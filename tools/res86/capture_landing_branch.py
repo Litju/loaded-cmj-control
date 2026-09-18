@@ -59,6 +59,7 @@ from loaded_cmj.v3.controller import (  # noqa: E402
     V3LaunchController,
 )
 from loaded_cmj.v3.landing_authority import (  # noqa: E402
+    D_BL_S,
     authority_sha256,
     landing_acceptance_authority,
     validate_authority,
@@ -564,7 +565,9 @@ def baseline_negative_control(run_a: dict) -> dict:
     ]
     support_losses = [k for k in support_transitions if support[k - 1] and not support[k]]
     intervals = support_free_intervals(support, E8_SAMPLE)
-    reflights = material_reflight_intervals(support, E8_SAMPLE, int(round(0.050 / PHYSICS_DT_S)))
+    reflights = material_reflight_intervals(
+        support, E8_SAMPLE, sample_times_s=np.asarray(t["time_s"], dtype=np.float64),
+        min_duration_s=D_BL_S)
     rom = structural_rom_report(run_a)
     return {
         "scope": "RES-85 LANDING_PREP continuation (negative control; no tuning)",
@@ -595,18 +598,21 @@ def baseline_negative_control(run_a: dict) -> dict:
             "max_abs_hy_kg_m2_s": float(np.abs(hy[E8_SAMPLE:]).max()),
         },
         "structural_rom": rom,
-        "gate_outcomes_against_res86_authority": gate_outcomes(penetration, com_vx, hy, fz,
-                                                               prohibited_detected, support),
+        "gate_outcomes_against_res86_authority": gate_outcomes(
+            penetration, com_vx, hy, fz, prohibited_detected, support,
+            np.asarray(t["time_s"], dtype=np.float64)),
     }
 
 
-def gate_outcomes(penetration, com_vx, hy, fz, prohibited_detected, support) -> dict:
+def gate_outcomes(penetration, com_vx, hy, fz, prohibited_detected, support,
+                  sample_times_s) -> dict:
     authority = landing_acceptance_authority()
     physical = authority["physical_gates"]
     window = authority["first_contact_to_E10_window"]
     pre = slice(E8_SAMPLE, TOTAL_NATIVE_SAMPLES)
     chatter = chatter_transition_count(support, E8_SAMPLE)
-    reflights = material_reflight_intervals(support, E8_SAMPLE, int(round(0.050 / PHYSICS_DT_S)))
+    reflights = material_reflight_intervals(
+        support, E8_SAMPLE, sample_times_s=sample_times_s, min_duration_s=D_BL_S)
     outcomes = {
         "L4-G2_no_prohibited_or_fall_contact": bool(np.count_nonzero(prohibited_detected) == 0),
         "L4-G4_max_penetration_m_within_limit": bool(

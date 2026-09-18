@@ -26,12 +26,60 @@ from __future__ import annotations
 
 import hashlib
 import json
+from fractions import Fraction
 
 from loaded_cmj.v3 import constants as C
 
 V3_LANDING_AUTHORITY_ID = "LCMJ_RES86_V3_LANDING_ACCEPTANCE_AUTHORITY_V1"
 V3_LANDING_AUTHORITY_VERSION = "1.0.0"
 V3_LANDING_AUTHORITY_CLASS = "OWNER_ENGINEERING_TASK_BOUND_WITH_SENSITIVITY"
+
+# RES-82 PHYSICAL_TIME dwell semantics (controlling convention).
+V3_DWELL_SEMANTICS = "PHYSICAL_TIME"
+V3_DWELL_DT_NOMINAL_S = 0.002
+D_EST_S = 0.050
+D_BL_S = 0.050
+V3_DWELL_NANOSECONDS_PER_SECOND = 1_000_000_000
+
+
+def dwell_requirements(duration_s: float, dt_s: float = V3_DWELL_DT_NOMINAL_S) -> dict:
+    """Exact physical-time dwell requirement on a native grid.
+
+    ``REQUIRED_INTERVALS = K_D = ceil(D / dt)`` and
+    ``REQUIRED_TRUE_SAMPLES_INCLUSIVE = K_D + 1`` (the onset sample plus one
+    sample per interval).  The sample count is diagnostic only; the runtime
+    authority is ``t_current - t_onset >= D``.  Values are computed with exact
+    integer nanoseconds, never with floating ``ceil``.
+    """
+    duration_ns = Fraction(float(duration_s)).limit_denominator(V3_DWELL_NANOSECONDS_PER_SECOND)
+    dt_ns = Fraction(float(dt_s)).limit_denominator(V3_DWELL_NANOSECONDS_PER_SECOND)
+    duration_scaled = duration_ns * V3_DWELL_NANOSECONDS_PER_SECOND
+    dt_scaled = dt_ns * V3_DWELL_NANOSECONDS_PER_SECOND
+    if duration_scaled.denominator != 1 or dt_scaled.denominator != 1:
+        raise ValueError("dwell duration/dt not exact at integer-nanosecond resolution")
+    duration_ns_int = int(duration_scaled)
+    dt_ns_int = int(dt_scaled)
+    if dt_ns_int <= 0 or duration_ns_int <= 0:
+        raise ValueError("dwell duration/dt must be positive")
+    required_intervals = -(-duration_ns_int // dt_ns_int)
+    return {
+        "DURATION_S": float(duration_s),
+        "DT_NOMINAL_S": float(dt_s),
+        "REQUIRED_INTERVALS": required_intervals,
+        "REQUIRED_TRUE_SAMPLES_INCLUSIVE": required_intervals + 1,
+        "RUNTIME_AUTHORITY": "t_current - t_onset >= DURATION_S",
+        "SAMPLE_COUNT_ROLE": "DIAGNOSTIC_ONLY",
+        "DWELL_TYPE": V3_DWELL_SEMANTICS,
+    }
+
+
+def dwell_confirmed(onset_time_s: float, current_time_s: float, duration_s: float) -> bool:
+    """Runtime physical-time authority: ``t_current - t_onset >= D``."""
+    return float(current_time_s) - float(onset_time_s) >= float(duration_s)
+
+
+D_EST_REQUIREMENTS = dwell_requirements(D_EST_S)
+D_BL_REQUIREMENTS = dwell_requirements(D_BL_S)
 
 RES82_BUNDLE = "audit/EXP-RES82-SUCCESSOR-SCIENTIFIC-TASK-CONTRACT-001"
 RES82_LANDING_CONTRACT = f"{RES82_BUNDLE}/LANDING_BALANCE_RECOVERY_CONTRACT.json"
@@ -108,15 +156,24 @@ def landing_acceptance_authority() -> dict:
             "E12_STABLE_RECOVERY": "RES-82 E12; deferred to RES-87",
         },
         "dwells": {
-            "D_EST_S": 0.050,
-            "D_BL_S": 0.050,
+            "D_EST_S": D_EST_S,
+            "D_BL_S": D_BL_S,
+            "DT_NOMINAL_S": V3_DWELL_DT_NOMINAL_S,
+            "DWELL_TYPE": V3_DWELL_SEMANTICS,
             "semantics": (
                 "D_EST is the allowance from E8_FIRST_CONTACT to bilateral "
                 "establishment; D_BL is the bilateral-loaded sustain dwell that "
                 "confirms E10.  They are separate quantities and one value is "
-                "never reused for the other."
+                "never reused for the other.  Both are PHYSICAL_TIME dwells: the "
+                "runtime authority is t_current - t_onset >= D, never a sample "
+                "count.  The inclusive true-sample count is diagnostic only."
             ),
-            "native_samples_at_nominal_dt": {"D_EST": 25, "D_BL": 25},
+            "D_EST": D_EST_REQUIREMENTS,
+            "D_BL": D_BL_REQUIREMENTS,
+            "negative_controls": {
+                "24_INTERVALS_0P048_S": "MUST_NOT_CONFIRM",
+                "25_INTERVALS_0P050_S": "BOUNDARY_MAY_CONFIRM_IF_ALL_OTHER_GATES_PASS",
+            },
         },
         "vertical_rates": {
             "V_DESC_M_S": 0.10,
@@ -285,6 +342,22 @@ def validate_authority(authority: dict | None = None) -> list[str]:
     dwells = payload["dwells"]
     if dwells["D_EST_S"] != 0.050 or dwells["D_BL_S"] != 0.050:
         failures.append("DWELL_VALUES_NOT_FROZEN")
+    if dwells.get("DT_NOMINAL_S") != V3_DWELL_DT_NOMINAL_S:
+        failures.append("DWELL_DT_NOT_FROZEN")
+    if dwells.get("DWELL_TYPE") != V3_DWELL_SEMANTICS:
+        failures.append("DWELL_TYPE_NOT_PHYSICAL_TIME")
+    for label, expected in (("D_EST", D_EST_REQUIREMENTS), ("D_BL", D_BL_REQUIREMENTS)):
+        requirements = dwells.get(label)
+        if not isinstance(requirements, dict):
+            failures.append(f"DWELL_REQUIREMENTS_MISSING:{label}")
+            continue
+        if requirements.get("REQUIRED_INTERVALS") != expected["REQUIRED_INTERVALS"]:
+            failures.append(f"DWELL_REQUIRED_INTERVALS_NOT_FROZEN:{label}")
+        if requirements.get("REQUIRED_TRUE_SAMPLES_INCLUSIVE") != \
+                expected["REQUIRED_TRUE_SAMPLES_INCLUSIVE"]:
+            failures.append(f"DWELL_REQUIRED_SAMPLES_NOT_FROZEN:{label}")
+        if requirements.get("SAMPLE_COUNT_ROLE") != "DIAGNOSTIC_ONLY":
+            failures.append(f"DWELL_SAMPLE_COUNT_NOT_DIAGNOSTIC:{label}")
     if payload["vertical_rates"]["V_DESC_M_S"] != 0.10 or payload["vertical_rates"]["V_ABS_TAIL_M_S"] != 0.05:
         failures.append("VERTICAL_RATE_VALUES_NOT_FROZEN")
     if payload["physical_gates"]["chatter_transitions_max"] != 8:
@@ -304,15 +377,23 @@ def validate_authority(authority: dict | None = None) -> list[str]:
 
 __all__ = [
     "BW_N",
+    "D_BL_REQUIREMENTS",
+    "D_BL_S",
+    "D_EST_REQUIREMENTS",
+    "D_EST_S",
     "RES82_BUNDLE",
     "RES82_EVENT_CONTRACT",
     "RES82_LANDING_CONTRACT",
     "RES82_OWNER_DECISIONS",
+    "V3_DWELL_DT_NOMINAL_S",
+    "V3_DWELL_SEMANTICS",
     "V3_LANDING_AUTHORITY_CLASS",
     "V3_LANDING_AUTHORITY_ID",
     "V3_LANDING_AUTHORITY_VERSION",
     "authority_canonical_bytes",
     "authority_sha256",
+    "dwell_confirmed",
+    "dwell_requirements",
     "landing_acceptance_authority",
     "validate_authority",
 ]
