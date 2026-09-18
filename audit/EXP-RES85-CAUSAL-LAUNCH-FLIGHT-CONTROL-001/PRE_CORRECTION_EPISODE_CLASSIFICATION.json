@@ -11,6 +11,7 @@
     "extension_rate_ff_gain": 0.0,
     "joint_rom_barrier_gain": 0.0,
     "joint_rom_margin_rad": 0.03,
+    "joint_rom_velocity_gain": 0.0,
     "mtp_active_budget_j": null,
     "mtp_moment_ceiling_nm": null,
     "quiet_stand_samples": 125,
@@ -20,7 +21,9 @@
     "trunk_kd": 6.0,
     "trunk_kp": 40.0,
     "trunk_lean_frac": 0.0,
-    "trunk_rom_barrier_gain": 0.0,
+    "trunk_rom_guard_margin_rad": 0.03,
+    "trunk_rom_position_gain": 0.0,
+    "trunk_rom_velocity_gain": 0.0,
     "v_brake_trigger_m_s": -0.55,
     "v_countermovement_cmd_m_s": -0.35
   },
@@ -31,12 +34,15 @@
       "extension_rate_ff_gain": 0.0,
       "joint_rom_barrier_gain": 0.0,
       "joint_rom_margin_rad": 0.03,
+      "joint_rom_velocity_gain": 0.0,
       "thrust_az_max_m_s2": 12.0,
       "trunk_extend_frac": 0.0,
       "trunk_kd": 6.0,
       "trunk_kp": 40.0,
       "trunk_lean_frac": 0.0,
-      "trunk_rom_barrier_gain": 0.0
+      "trunk_rom_guard_margin_rad": 0.03,
+      "trunk_rom_position_gain": 0.0,
+      "trunk_rom_velocity_gain": 0.0
     },
     "rule": "all RES-85C engineering terms neutral: the ENTRY controller behaviour is reproduced exactly"
   },

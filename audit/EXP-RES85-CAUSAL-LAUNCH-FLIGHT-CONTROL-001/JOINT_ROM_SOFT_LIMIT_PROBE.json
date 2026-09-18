@@ -181,9 +181,10 @@
       }
     }
   },
-  "interpretation": "a driven joint may cross its declared ROM by at most this measured amount; the RES-85C feasibility check requires the launch measured overshoot to stay inside the per-channel envelope AND the controller posture reference to stay inside the declared ROM",
+  "interpretation": "a driven joint may penetrate its soft limit by at most this measured numerical amount under the frozen channel moment ceiling; this is a solver/Plant property only.  It is NOT a human-valid qualification criterion: RES-85D requires every measured coordinate to stay inside the frozen structural envelope with a 1e-9 floating-point tolerance regardless of this envelope",
   "linear_issue": "RES-85",
-  "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+  "mission": "RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001",
+  "not_structural_acceptance_authority": true,
   "probe": {
     "integrator": "sealed Plant (MuJoCo 3.8.0 compiler defaults)",
     "measurement_layer_used": false,
@@ -191,7 +192,8 @@
     "start_offset_rad": 0.15,
     "steps": 400
   },
-  "purpose": "declared Plant soft-limit compliance envelope used by the RES-85C launch joint-ROM feasibility check",
+  "purpose": "numerical solver diagnostic: measured per-channel MuJoCo soft-limit compliance envelope of the sealed Plant; never structural acceptance authority",
+  "role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
   "schema_version": "1.0.0",
   "worst_case_soft_limit_compliance_rad": 1.5332473681554892
 }

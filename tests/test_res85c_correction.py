@@ -337,25 +337,58 @@ def test_corrected_episode_h2_is_direct_system_com_and_above_floor(episode, repo
 # ---------------------------------------------------------------------------
 # launch joint-ROM audit and two-run artifact identity
 # ---------------------------------------------------------------------------
-def test_launch_joint_rom_audit_passes(report):
+def test_res85c_predecessor_strict_rom_is_fail_on_trunk_upper_bound():
+    """RES-85C is immutable history, adjudicated here by the RES-85D strict rule.
+
+    The predecessor canonical trajectory violates the frozen structural trunk
+    ROM; it was accepted only through the predecessor soft-limit compliance
+    envelope, which RES-85D demotes to a numerical solver diagnostic.
+    """
+    predecessor = json.loads(
+        (EVIDENCE_DIR / "RES85C_PREDECESSOR_STRICT_ROM.json").read_text())
+    assert predecessor["predecessor_head"] == \
+        "ffc98526bd2b0da76dbef50891415ebdb345a1fd"
+    audit = predecessor["strict_structural_rom_audit"]
+    assert audit["status"] == "FAIL"
+    assert "STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper" in audit["failures"]
+    trunk = audit["channels"]["trunk_pelvis"]
+    assert trunk["max_measured_rad"] > trunk["rom_upper_rad"]
+    assert trunk["measured_overshoot_rad"] > 0.0
+    assert audit["global_min_structural_rom_margin_rad"] < -1e-9
+    # the historical RES-85C receipt is preserved byte-for-byte
+    text = (EVIDENCE_DIR / "RES85C_CORRECTION_RECEIPT.md").read_text()
+    assert "235a40e7a2a2b07ea483f2352b0765315b7f43b2343b3297461a0754b024b50e" in text
+
+
+def test_current_trajectory_passes_strict_structural_rom(report):
+    """RES-85D: the measured frozen structural ROM is the acceptance authority.
+
+    The MuJoCo soft-limit probe envelope is a numerical diagnostic only; the
+    canonical measured trajectory must stay inside the frozen envelope with a
+    1e-9 floating-point comparison tolerance.
+    """
     rom = report["joint_rom_audit"]
     assert rom["status"] == "PASS", rom["failures"]
     assert rom["failures"] == []
-    assert rom["reference_within_frozen_rom"] is True
-    assert rom["no_applied_moment_drives_past_frozen_rom"] is True
-    assert rom["measured_overshoot_within_plant_soft_limit_envelope"] is True
+    assert rom["authority"] == "FROZEN_HUMAN_STRUCTURAL_ENVELOPE_V3_JOINT_RANGES_RAD"
+    assert rom["solver_soft_limit_probe_role"] == \
+        "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY_NOT_STRUCTURAL_ACCEPTANCE_AUTHORITY"
+    assert rom["global_min_structural_rom_margin_rad"] >= -1e-9
     for name, channel in rom["channels"].items():
-        assert channel["measured_overshoot_rad"] <= \
-            channel["plant_soft_limit_envelope_rad"] + 1e-9, name
+        assert channel["min_rom_margin_rad"] >= -1e-9, name
+        assert channel["min_measured_rad"] >= channel["rom_lower_rad"] - 1e-9, name
+        assert channel["max_measured_rad"] <= channel["rom_upper_rad"] + 1e-9, name
+        assert channel["solver_soft_limit_diagnostic_role"] == \
+            "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY"
 
 
-def test_joint_rom_audit_fails_closed_outside_envelope(report):
+def test_strict_rom_validator_fails_closed_on_measured_violation(report):
     audit = json.loads(json.dumps(report["joint_rom_audit"]))
     name = sorted(audit["channels"])[0]
-    envelope = audit["channels"][name]["plant_soft_limit_envelope_rad"]
-    audit["channels"][name]["measured_overshoot_rad"] = envelope + 1.0
+    audit["channels"][name]["max_measured_rad"] = \
+        float(audit["channels"][name]["rom_upper_rad"]) + 1.0e-6
     failures = BE.joint_rom_audit_failures(audit)
-    assert any("MEASURED_OVERSHOOT_OUTSIDE_PLANT_ENVELOPE" in f for f in failures)
+    assert any("MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM" in f for f in failures)
 
 
 def test_search_and_mtp_matrix_record_two_run_byte_identity():

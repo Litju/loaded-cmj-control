@@ -190,7 +190,7 @@
     {
       "check": "zero_passive_active_work_within_budget",
       "detail": {
-        "active_positive_work_j": 1.6178916717732605
+        "active_positive_work_j": 0.6178095141941742
       },
       "pass": true
     },
@@ -215,10 +215,6 @@
           "TAKEOFF_CONFIRM",
           "PROPULSION",
           "TAKEOFF_CONFIRM",
-          "PROPULSION",
-          "TAKEOFF_CONFIRM",
-          "PROPULSION",
-          "TAKEOFF_CONFIRM",
           "FLIGHT",
           "LANDING_PREP"
         ],
@@ -233,9 +229,9 @@
         "mutated_index": 5,
         "validator_failures": [
           "ACCEPTED_CANDIDATE_MISMATCH",
-          "H2_ORIGIN_MISMATCH:666!=5",
-          "IMPULSE_ORIGIN_MISMATCH:666!=5",
-          "COMPARATOR_OFFSET_ORIGIN_MISMATCH:666!=5"
+          "H2_ORIGIN_MISMATCH:612!=5",
+          "IMPULSE_ORIGIN_MISMATCH:612!=5",
+          "COMPARATOR_OFFSET_ORIGIN_MISMATCH:612!=5"
         ]
       },
       "pass": true
@@ -245,9 +241,9 @@
       "detail": {
         "validator_failures": [
           "ACCEPTED_CANDIDATE_MISMATCH",
-          "H2_ORIGIN_MISMATCH:666!=667",
-          "IMPULSE_ORIGIN_MISMATCH:666!=667",
-          "COMPARATOR_OFFSET_ORIGIN_MISMATCH:666!=667"
+          "H2_ORIGIN_MISMATCH:612!=613",
+          "IMPULSE_ORIGIN_MISMATCH:612!=613",
+          "COMPARATOR_OFFSET_ORIGIN_MISMATCH:612!=613"
         ]
       },
       "pass": true
@@ -257,7 +253,7 @@
       "detail": {
         "mutated_index": 5,
         "validator_failures": [
-          "COMPARATOR_OFFSET_ORIGIN_MISMATCH:5!=666"
+          "COMPARATOR_OFFSET_ORIGIN_MISMATCH:5!=612"
         ]
       },
       "pass": true
@@ -315,7 +311,7 @@
     {
       "check": "NC-19_mtp_active_work_is_negligible_fraction_of_joint_work",
       "detail": {
-        "m0_ratio": 0.0010326298249116917,
+        "m0_ratio": 0.0014469610529035438,
         "m1_active_total_j": 0.0
       },
       "pass": true
@@ -331,27 +327,111 @@
       "pass": true
     },
     {
-      "check": "NC-22_launch_joint_rom_audit_passes",
+      "check": "NC-22C_strict_structural_rom_audit_passes",
       "detail": {
         "audit": {
-          "criterion": "reference within frozen ROM; applied moment never drives past the frozen ROM; measured overshoot within the per-channel Plant soft-limit compliance envelope",
+          "authority": "FROZEN_HUMAN_STRUCTURAL_ENVELOPE_V3_JOINT_RANGES_RAD",
+          "claim_end_reason": "FIRST_LEGAL_PLANTAR_RECONTACT_AFTER_FLIGHT",
+          "claim_end_sample": 791,
+          "criterion": "measured q_j(t) stays within [lower_j - tolerance, upper_j + tolerance] for every bounded actuated joint and every native sample in the RES-85 claim domain; the tolerance is floating-point equality only, never added anatomical ROM",
           "failures": [],
-          "landing_window_note": "post-flight landing ROM is RES-86 scope, not judged here",
-          "measured_overshoot_within_plant_soft_limit_envelope": true,
-          "no_applied_moment_drives_past_frozen_rom": true,
-          "reference_within_frozen_rom": true,
-          "scope": "STAND_TO_ACCEPTED_OCCURRENCE",
-          "status": "PASS"
+          "global_min_structural_rom_margin_rad": 0.0,
+          "schema_version": "1.0.0",
+          "scope": "FIRST_NATIVE_SAMPLE_THROUGH_RES85_CLAIM_END",
+          "solver_soft_limit_probe_note": "JOINT_ROM_SOFT_LIMIT_PROBE.json describes MuJoCo solver penetration/compliance behaviour only; it may not enlarge the human/structural joint ROM and no PASS depends on it",
+          "solver_soft_limit_probe_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY_NOT_STRUCTURAL_ACCEPTANCE_AUTHORITY",
+          "status": "PASS",
+          "tolerance_rad": 1e-09
         },
         "mutated_failures": [
-          "MEASURED_OVERSHOOT_OUTSIDE_PLANT_ENVELOPE:left_ankle"
+          "MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:left_ankle"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-22_measured_trunk_beyond_upper_bound_fails",
+      "detail": {
+        "injected_q_rad": 0.610866,
+        "validator_failures": [
+          "STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper",
+          "MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:trunk_pelvis",
+          "GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_BELOW_TOLERANCE"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-23_reference_inside_but_measured_outside_fails",
+      "detail": {
+        "reference_inside_rom": true,
+        "validator_failures": [
+          "STRUCTURAL_ROM_VIOLATION:left_knee:lower",
+          "MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:left_knee",
+          "GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_BELOW_TOLERANCE"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-24_measured_outside_rom_inside_probe_envelope_fails",
+      "detail": {
+        "injected_q_rad": 0.7004750732092873,
+        "inside_probe_envelope": true,
+        "probe_envelope_rad": 0.17922014641857453,
+        "validator_failures": [
+          "STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper",
+          "MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:trunk_pelvis",
+          "GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_BELOW_TOLERANCE"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-25_rom_guard_never_drives_farther_outside",
+      "detail": {
+        "mutant_guard_direction": "POSITIVE_FEEDBACK_OUTWARD_UNSTABLE",
+        "mutant_guard_failures": 1940,
+        "real_guard_failures": []
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-26_strict_rom_correction_below_functional_floor_fails_closure",
+      "detail": {
+        "config": {
+          "trunk_rom_guard_margin_rad": 0.15
+        },
+        "floor_closure": {
+          "ballistic_cross_check_vz_m_s": 1.7155174146594956,
+          "classification": "BELOW_FUNCTIONAL_TASK_FLOOR",
+          "closure_pass": false,
+          "floor_role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY",
+          "h2_m": 0.13183074954842566,
+          "h_anti_triviality_floor_m": 0.15,
+          "note": "H_ANTI_TRIVIALITY_FLOOR is a minimum functional success condition, not an elite norm and not an optimization target"
+        },
+        "h2_m": 0.13183074954842566,
+        "strict_rom_status": "PASS"
+      },
+      "pass": true
+    },
+    {
+      "check": "NC-27_boundary_within_tolerance_passes",
+      "detail": {
+        "boundary_failures": [],
+        "boundary_status": "PASS",
+        "over_tolerance_failures": [
+          "STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper",
+          "MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:trunk_pelvis",
+          "GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_BELOW_TOLERANCE"
         ]
       },
       "pass": true
     }
   ],
   "legacy_status": "PASS",
-  "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+  "mission": "RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001",
   "probes": {
     "NC-01_single_sample_dropout": {
       "candidate_rejections": [],
@@ -486,7 +566,7 @@
       "asymmetry_nm": 80.0
     },
     "NC-11_zero_passive": {
-      "active_positive_work_max_j": 1.6178916717732605,
+      "active_positive_work_max_j": 0.6178095141941742,
       "status": "PASS"
     },
     "NC-12_startup_chatter_as_accepted": {
@@ -494,23 +574,23 @@
       "mutated_index": 5,
       "validator_failures": [
         "ACCEPTED_CANDIDATE_MISMATCH",
-        "H2_ORIGIN_MISMATCH:666!=5",
-        "IMPULSE_ORIGIN_MISMATCH:666!=5",
-        "COMPARATOR_OFFSET_ORIGIN_MISMATCH:666!=5"
+        "H2_ORIGIN_MISMATCH:612!=5",
+        "IMPULSE_ORIGIN_MISMATCH:612!=5",
+        "COMPARATOR_OFFSET_ORIGIN_MISMATCH:612!=5"
       ]
     },
     "NC-13_occurrence_vs_h2_origin": {
       "validator_failures": [
         "ACCEPTED_CANDIDATE_MISMATCH",
-        "H2_ORIGIN_MISMATCH:666!=667",
-        "IMPULSE_ORIGIN_MISMATCH:666!=667",
-        "COMPARATOR_OFFSET_ORIGIN_MISMATCH:666!=667"
+        "H2_ORIGIN_MISMATCH:612!=613",
+        "IMPULSE_ORIGIN_MISMATCH:612!=613",
+        "COMPARATOR_OFFSET_ORIGIN_MISMATCH:612!=613"
       ]
     },
     "NC-14_comparator_offset_rejected": {
       "mutated_index": 5,
       "validator_failures": [
-        "COMPARATOR_OFFSET_ORIGIN_MISMATCH:5!=666"
+        "COMPARATOR_OFFSET_ORIGIN_MISMATCH:5!=612"
       ]
     },
     "NC-15_floor_boundary": {
@@ -548,11 +628,68 @@
       ]
     },
     "NC-19_mtp_ratio": {
-      "m0_ratio": 0.0010326298249116917,
+      "m0_ratio": 0.0014469610529035438,
       "m1_active_total_j": 0.0
+    },
+    "NC-22_measured_trunk_beyond_upper_bound": {
+      "injected_q_rad": 0.610866,
+      "validator_failures": [
+        "STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper",
+        "MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:trunk_pelvis",
+        "GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_BELOW_TOLERANCE"
+      ]
+    },
+    "NC-23_reference_inside_actual_outside": {
+      "reference_inside_rom": true,
+      "validator_failures": [
+        "STRUCTURAL_ROM_VIOLATION:left_knee:lower",
+        "MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:left_knee",
+        "GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_BELOW_TOLERANCE"
+      ]
+    },
+    "NC-24_outside_rom_inside_probe_envelope": {
+      "injected_q_rad": 0.7004750732092873,
+      "inside_probe_envelope": true,
+      "probe_envelope_rad": 0.17922014641857453,
+      "validator_failures": [
+        "STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper",
+        "MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:trunk_pelvis",
+        "GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_BELOW_TOLERANCE"
+      ]
+    },
+    "NC-25_guard_direction_property": {
+      "mutant_guard_direction": "POSITIVE_FEEDBACK_OUTWARD_UNSTABLE",
+      "mutant_guard_failures": 1940,
+      "real_guard_failures": []
+    },
+    "NC-26_strict_rom_but_below_floor": {
+      "config": {
+        "trunk_rom_guard_margin_rad": 0.15
+      },
+      "floor_closure": {
+        "ballistic_cross_check_vz_m_s": 1.7155174146594956,
+        "classification": "BELOW_FUNCTIONAL_TASK_FLOOR",
+        "closure_pass": false,
+        "floor_role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY",
+        "h2_m": 0.13183074954842566,
+        "h_anti_triviality_floor_m": 0.15,
+        "note": "H_ANTI_TRIVIALITY_FLOOR is a minimum functional success condition, not an elite norm and not an optimization target"
+      },
+      "h2_m": 0.13183074954842566,
+      "strict_rom_status": "PASS"
+    },
+    "NC-27_boundary_within_tolerance": {
+      "boundary_failures": [],
+      "boundary_status": "PASS",
+      "over_tolerance_failures": [
+        "STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper",
+        "MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:trunk_pelvis",
+        "GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_BELOW_TOLERANCE"
+      ]
     }
   },
   "res85c_status": "PASS",
+  "res85d_status": "PASS",
   "schema_version": "1.0.0",
   "status": "PASS"
 }

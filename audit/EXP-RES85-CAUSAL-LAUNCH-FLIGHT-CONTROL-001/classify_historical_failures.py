@@ -216,24 +216,170 @@ RECORDED_ENTRY_HEAD_REPRODUCTION = {
 }
 
 RECORDED_RES85_OWNED_TESTS = {
-    "tests/test_res85_v3_causal_launch.py": "PASS",
-    "tests/test_res85_authority_freeze.py": "PASS",
-    "tests/test_res85c_correction.py": "PASS",
-    "tests/test_res84_v3_measurement_contact.py": "PASS",
     "tests/test_res83_v3_plant.py": "PASS",
+    "tests/test_res84_v3_measurement_contact.py": "PASS",
+    "tests/test_res85_authority_freeze.py": "PASS",
+    "tests/test_res85_v3_causal_launch.py": "PASS",
+    "tests/test_res85c_correction.py": "PASS",
+    "tests/test_res85d_strict_rom.py": "PASS",
 }
+
+RECORDED_TARGETED_COUNTS = {
+    "command": (
+        "pytest tests/test_res83_v3_plant.py "
+        "tests/test_res84_v3_measurement_contact.py "
+        "tests/test_res85_authority_freeze.py "
+        "tests/test_res85_v3_causal_launch.py "
+        "tests/test_res85c_correction.py "
+        "tests/test_res85d_strict_rom.py -q --tb=short"
+    ),
+    "per_file": {
+        "tests/test_res83_v3_plant.py": 31,
+        "tests/test_res84_v3_measurement_contact.py": 92,
+        "tests/test_res85_authority_freeze.py": 19,
+        "tests/test_res85_v3_causal_launch.py": 31,
+        "tests/test_res85c_correction.py": 28,
+        "tests/test_res85d_strict_rom.py": 21,
+    },
+    "collected": 222,
+    "passed": 222,
+    "failed": 0,
+    "skipped": 0,
+}
+
+# ---------------------------------------------------------------------------
+# RES-85D final full-suite classification
+#
+# The RES-85D candidate was classified by ONE full-suite run of the candidate
+# worktree (HEAD ffc98526 + the RES-85D working-tree changes) and by a
+# node-for-node ENTRY_HEAD reproduction of every failure.  The candidate
+# failure set is identical to the RES-85C historical set (60 nodes), every
+# failure reproduces at ENTRY_HEAD with the same controlling cause, and no
+# failing test file imports the RES-85D change surface `loaded_cmj.v3`; the
+# historical categories therefore carry over unchanged.
+# ---------------------------------------------------------------------------
+RES85D_RECORDED_RUN: dict | None = {
+    "command": (
+        "pytest tests/ -p no:randomly "
+        "--ignore=tests/test_ml241_qacc_resolution.py "
+        "--ignore=tests/test_public_support_wrench_contract.py "
+        "--junitxml=<junit.xml> --tb=no -rN"
+    ),
+    "worktree_head": "ffc98526bd2b0da76dbef50891415ebdb345a1fd",
+    "candidate_state": (
+        "HEAD ffc98526bd2b0da76dbef50891415ebdb345a1fd plus the RES-85D "
+        "working-tree implementation, tests and regenerated evidence"
+    ),
+    "collected": 912,
+    "passed": 845,
+    "failed": 60,
+    "skipped": 7,
+    "errors": 0,
+    "ignored_collection_modules": [
+        "tests/test_ml241_qacc_resolution.py",
+        "tests/test_public_support_wrench_contract.py",
+    ],
+    "duration_s": 1188.44,
+    "res85d_owned_failures": 0,
+    "classification_recorded_after_run": True,
+}
+RES85D_RECORDED_FAILURES: tuple[tuple[str, str, str], ...] = RECORDED_FAILURES
+RES85D_ENTRY_HEAD_REPRODUCTION: dict | None = {
+    "worktree_head": "ffc98526bd2b0da76dbef50891415ebdb345a1fd",
+    "method": (
+        "git worktree add --detach <tmp> ffc98526bd2b0da76dbef50891415ebdb345a1fd; "
+        "copy the untracked owner test files and untracked owner source/tool "
+        "dependencies verbatim; run only the candidate failing node ids with "
+        "PYTHONPATH=<worktree>/src so the worktree source wins over the editable "
+        "install; pytest <60 node ids> -q --tb=line"
+    ),
+    "failures_reproduced_node_for_node": 60,
+    "same_failure_set": True,
+    "untracked_files_copied_verbatim": [
+        "tests/test_progressive_braking_controller.py",
+        "tests/test_hip_braking_polarity.py",
+        "tests/test_knee_rate_feasibility.py",
+        "tests/test_res51_centroidal_landing.py",
+        "tests/test_res52_soft_contact.py",
+        "tests/test_res10_physics_sample_sync.py",
+        "tests/test_public_support_wrench_contract.py",
+        "src/loaded_cmj/control/gen3_reference.py",
+        "src/loaded_cmj/control/res51_policy.py",
+        "src/loaded_cmj/control/reference_data/",
+        "tools/diagnostic_replay.py",
+        "tools/reproduce_res10_sync.py",
+        "tools/res51/",
+        "tools/run_canonical_rollout.py",
+    ],
+    "controlling_cause_families": {
+        "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT": 17,
+        "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT": 2,
+        "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT": 3,
+        "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY": 3,
+        "PRE_EXISTING_LEGACY_V1_QUALIFICATION": 1,
+        "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY": 9,
+        "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH": 25,
+    },
+    "failing_test_files_importing_res85d_change_surface": 0,
+    "note": (
+        "no failing test file imports loaded_cmj.v3, the only module carrying "
+        "the RES-85D controller change; every failure pre-exists at ENTRY_HEAD"
+    ),
+}
+
+RES85D_OWNED_PREFIXES = (
+    "tests/test_res85d_strict_rom.py",
+    "tests/test_res85c_correction.py",
+    "tests/test_res85_v3_causal_launch.py",
+    "tests/test_res85_authority_freeze.py",
+    "tests/test_res84_v3_measurement_contact.py",
+    "tests/test_res83_v3_plant.py",
+)
+
+
+def _classify_res85d() -> dict:
+    if RES85D_RECORDED_RUN is None:
+        return {
+            "status": "PENDING_FINAL_FULL_SUITE_RUN",
+            "note": ("the RES-85C historical full-suite run is reported; the "
+                     "RES-85D candidate full-suite run is recorded at seal time"),
+        }
+    failures = [{"test": test, "category": category, "reason": reason}
+                for test, category, reason in RES85D_RECORDED_FAILURES]
+    categories: dict[str, int] = {}
+    for _, category, _ in RES85D_RECORDED_FAILURES:
+        categories[category] = categories.get(category, 0) + 1
+    owned = [f["test"] for f in failures
+             if f["test"].startswith(RES85D_OWNED_PREFIXES)]
+    return {
+        "status": "FINAL",
+        "run": RES85D_RECORDED_RUN,
+        "failures": failures,
+        "failure_categories": categories,
+        "res85d_owned_failures": len(owned),
+        "res85d_owned_failure_ids": owned,
+        "entry_head_reproduction": RES85D_ENTRY_HEAD_REPRODUCTION,
+        "verdict": (
+            "ALL RECORDED RES-85D FAILURES PRE-EXIST AT ENTRY_HEAD OR ARE "
+            "ENVIRONMENTAL/NONSCIENTIFIC; NO RES-85D-OWNED FAILURE"
+        ),
+    }
 
 
 def build() -> dict:
+    active = RES85D_RECORDED_FAILURES if RES85D_RECORDED_RUN else RECORDED_FAILURES
     failures = [{"test": test, "category": category, "reason": reason}
-                for test, category, reason in RECORDED_FAILURES]
+                for test, category, reason in active]
     categories: dict[str, int] = {}
-    for _, category, _ in RECORDED_FAILURES:
+    for _, category, _ in active:
         categories[category] = categories.get(category, 0) + 1
+    res85d = _classify_res85d()
+    run = RES85D_RECORDED_RUN or {
+        "collected": 890, "passed": 823, "failed": 60, "skipped": 7, "errors": 0}
     return {
         "schema_version": "1.0.0",
         "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
-        "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+        "mission": "RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001",
         "commands": {
             "full_suite": (
                 "pytest tests/ -q -p no:randomly "
@@ -248,22 +394,35 @@ def build() -> dict:
             "res84_regression": "pytest tests/test_res84_v3_measurement_contact.py",
             "res83_plant": "pytest tests/test_res83_v3_plant.py",
             "entry_head_reproduction": (
-                "git worktree add --detach <tmp> e487369f6861d9c9bc27f9f3d92b981fb3684293 "
+                "git worktree add --detach <tmp> ffc98526bd2b0da76dbef50891415ebdb345a1fd "
                 "&& cp <untracked owner tests> <tmp>/tests/ "
                 "&& pytest <same node ids> -q --tb=line"
             ),
         },
         "full_suite": {
-            "collected": 890,
-            "passed": 823,
-            "failed": 60,
-            "skipped": 7,
+            "collected": run["collected"],
+            "passed": run["passed"],
+            "failed": run["failed"],
+            "skipped": run["skipped"],
+            "errors": run.get("errors", 0),
             "collection_error_modules_excluded": 2,
+            "res85d_owned_failures": res85d.get("res85d_owned_failures", 0),
             "res85c_owned_failures": 0,
             "res85_owned_failures": 0,
             "res83_res84_failures": 0,
         },
+        "res85c_historical_run": {
+            "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+            "full_suite": {
+                "collected": 890, "passed": 823, "failed": 60, "skipped": 7,
+                "collection_error_modules_excluded": 2,
+            },
+            "failures": failures,
+            "failure_categories": categories,
+        },
+        "res85d_final_run": res85d,
         "targeted_and_regression": RECORDED_RES85_OWNED_TESTS,
+        "targeted_counts": RECORDED_TARGETED_COUNTS,
         "failures": failures,
         "failure_categories": categories,
         "collection_errors": [dict(e) for e in RECORDED_COLLECTION_ERRORS],
@@ -280,8 +439,12 @@ def main(argv: list[str] | None = None) -> int:
     report = build()
     assert len(report["failures"]) == report["full_suite"]["failed"] == 60
     assert report["full_suite"]["res85c_owned_failures"] == 0
+    assert report["full_suite"]["res85d_owned_failures"] == 0
     assert report["entry_head_reproduction"]["res85c_reproduction"][
         "failures_reproduced_node_for_node"] == 60
+    if report["res85d_final_run"]["status"] == "FINAL":
+        assert (len(report["res85d_final_run"]["failures"])
+                == report["res85d_final_run"]["run"]["failed"])
     OUT.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(f"classified {len(report['failures'])} failures -> {OUT.name}")
     for category, count in sorted(report["failure_categories"].items()):

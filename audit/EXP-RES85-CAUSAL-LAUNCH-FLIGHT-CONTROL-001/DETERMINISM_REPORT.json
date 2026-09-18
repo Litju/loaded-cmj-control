@@ -1,19 +1,20 @@
 {
   "artifact_sha256": {
-    "conformance": "923b420ca9d2050770a44f0f67c9d381497d56301e9b542c84ec1af067f83655",
-    "correction_receipt": "d562f7dcc2d2c79178e757e0d2364176a6b9643d67fbe5dc3a23803c554d0433",
-    "deficit": "91f8da9f0c3b2b7085fd1da0e9cd5d1bbd946d73b0cf5da6f49f6097be754f7b",
-    "episode_report": "2082a9a7d047afc04c78a2209db79d03f714e0f1882adc164ef468c517459ea3",
-    "identity_audit": "d1b341f17a35517f41b84bb148ab62115324104cbe538a475fcd02a368bea3dd",
-    "mtp_report": "87885fd1b7842c4319191e60bbb2a8fb573f364d5970c6b629159b90f70e7585",
-    "negative": "8f0173e4dfa947c2cf06585045792b5dabdc77fc4c4e0adf4c2374250e8d1f0f",
-    "override_audit": "3bf45a0c071d5d5105e6c4de2c91ff2254fca68e56018ae22eca6f9b1a5e97b8",
-    "pre_correction": "73c672f1be3208dda76b527d0b4d0ef816aa5a7c656f5839b30956964a8daa80",
-    "receipt": "967a7449d71cb5f9bd3fcb19f2a7aa3cd977595ce567066c61362887a2ca4e01",
-    "spec": "06464610cc0c7ce68b5442a0f975ca66c78aa3c2ce5721b507fe13c6e2ec6ed9",
-    "telemetry_blob_sha256": "9a85ab73dd1dfb5ceba4029c53b546265016c737ad41b614f42b05b0acdb6e64",
-    "telemetry_manifest": "e79e8e26bd8753a45ba6e99081fe5c54b1d85b84e2e9e6e2f95dd84efadd7c70",
-    "zero_passive": "c30e7b249b93ad72c1bef975dff3e8c4b1a876d667d41bf3dd7840218a8691ff"
+    "conformance": "d24a40da034bf860de5a9aab4df7d07d8bf03b077c6549c04e38f3ed3ca43407",
+    "deficit": "a8d03c67f5c7884ba7e2e31371a74efd6aa02fe567f1aea891e404eeaf9878b4",
+    "episode_report": "dfec0cb76afd4986c2e6fc0fb7d8190635a22a923f3b5933a5a2473a4194f154",
+    "identity_audit": "12dff26511753b82a753fdb64f02d06f6537280cce816d6447abf0c35b4554c4",
+    "mtp_report": "71bac9150abf874c9f8539946bca295c0bdb3c0f62e00292f376bcea6898fc3f",
+    "negative": "97f787845bf16e5b6e74368bc52ca0fb62dfa92becc0455cef607953ef7b6d65",
+    "override_audit": "fdc1b312de7b1a95edabeb338adbb7e0e13b28cbb2c3b3977105f32ef1841604",
+    "pre_correction": "0b9ebebfb039c48b188773830a703a2ce294ea64f2786425787151bf327355cf",
+    "predecessor": "0dbea8d7540b6d46e4f2aa27917afb9b3e9b1512a4626d3a673f8f44c57abb5f",
+    "spec": "fa0cf14b59df13c5357b86ccc93491dd0d4cdd3149ceea489c4c415c9b98cfb9",
+    "strict_rom": "3242c9c8bc355791fb3e3052b65cc4e3f1c4bead754218cf1803a0a055b1cae8",
+    "strict_rom_receipt": "00bafca4b2673514c959942af0aff480b803256c01deed7cb459d5bbfb85cdcb",
+    "telemetry_blob_sha256": "24cf90b17e65f03ba0f3cca389264f787a233a159a5eb8afacae6e1f25c5a070",
+    "telemetry_manifest": "2282d86e4d03672b71b38d5fa6c29d4b9a87acbb45ddbcc980340e4c6666a9b8",
+    "zero_passive": "ace5c157eff8c595eff7f83c5eed274e9fdc1bfbb79c8917944ef0e9c5095f44"
   },
   "checks": [
     {
@@ -24,16 +25,16 @@
     {
       "check": "telemetry_blob_sha256_identical",
       "detail": [
-        "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12",
-        "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12"
+        "2944bdf78888e694905f9bdbafc60f393a0a304f7d6dc6fa3aa1e1e512fb670b",
+        "2944bdf78888e694905f9bdbafc60f393a0a304f7d6dc6fa3aa1e1e512fb670b"
       ],
       "pass": true
     },
     {
       "check": "determinism_blob_matches_written_bundle",
       "detail": {
-        "determinism_telemetry_blob_sha256": "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12",
-        "written_manifest_blob_sha256": "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12"
+        "determinism_telemetry_blob_sha256": "2944bdf78888e694905f9bdbafc60f393a0a304f7d6dc6fa3aa1e1e512fb670b",
+        "written_manifest_blob_sha256": "2944bdf78888e694905f9bdbafc60f393a0a304f7d6dc6fa3aa1e1e512fb670b"
       },
       "pass": true
     }
@@ -43,13 +44,13 @@
     "postcommit sidecar",
     "git HEAD-at-authoring fields",
     "external bundle path",
-    "PROPULSION_SEARCH.json (separate declared search artifact with its own two-run byte-identity check)",
+    "PROPULSION_SEARCH.json (RES-85C declared search artifact with its own two-run byte-identity check)",
+    "STRICT_ROM_SEARCH.json (RES-85D declared search artifact with its own two-run byte-identity check)",
     "MTP_NONCOMPENSATION_MATRIX.json (separate declared matrix artifact with its own two-run byte-identity check)",
-    "JOINT_ROM_SOFT_LIMIT_PROBE.json (Plant property probe, deterministic script)"
+    "JOINT_ROM_SOFT_LIMIT_PROBE.json (Plant property probe, deterministic script; numerical solver diagnostic only)"
   ],
   "identity_domain": [
     "conformance",
-    "correction_receipt",
     "deficit",
     "episode_report",
     "identity_audit",
@@ -57,13 +58,16 @@
     "negative",
     "override_audit",
     "pre_correction",
-    "receipt",
+    "predecessor",
     "spec",
+    "strict_rom",
+    "strict_rom_receipt",
     "telemetry_blob_sha256",
     "telemetry_manifest",
     "zero_passive"
   ],
+  "mission": "RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001",
   "schema_version": "1.0.0",
   "status": "PASS",
-  "telemetry_blob_sha256": "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12"
+  "telemetry_blob_sha256": "2944bdf78888e694905f9bdbafc60f393a0a304f7d6dc6fa3aa1e1e512fb670b"
 }

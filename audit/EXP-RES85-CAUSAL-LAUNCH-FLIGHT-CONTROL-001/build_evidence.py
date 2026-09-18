@@ -1,14 +1,16 @@
-"""RES-85 / RES-85C — build the causal launch/flight control evidence bundle.
+"""RES-85D — strict structural ROM reconciliation and final reseal.
 
 Authority: LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1
-Mission:   RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001
+Mission:   RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001
 
-Writes every deterministic scientific artifact of the regenerated RES-85 bundle
-(the RES-85C correction of BLOCKER A..D):
+Writes every deterministic scientific artifact of the regenerated RES-85
+bundle after the RES-85D strict structural-ROM correction:
 
     V3_LAUNCH_CONTROLLER_SPEC.json
     TELEMETRY_MANIFEST.json + TELEMETRY_ARRAYS.bin
     LAUNCH_EPISODE_REPORT.json
+    STRICT_STRUCTURAL_ROM_AUDIT.json
+    RES85C_PREDECESSOR_STRICT_ROM.json
     OCCURRENCE_IDENTITY_AUDIT.json
     PROPULSION_DEFICIT_REPORT.json
     MTP_ENERGY_REPORT.json
@@ -19,8 +21,12 @@ Writes every deterministic scientific artifact of the regenerated RES-85 bundle
     PRE_CORRECTION_EPISODE_CLASSIFICATION.json
     DETERMINISM_REPORT.json
     HASH_MANIFEST.json
-    RES85_RECEIPT.md
-    RES85C_CORRECTION_RECEIPT.md
+    RES85D_STRICT_ROM_RECEIPT.md
+
+The RES-85C receipts (``RES85_RECEIPT.md`` and ``RES85C_CORRECTION_RECEIPT.md``)
+are preserved byte-for-byte; the RES-85C episode is *not* silently rewritten and
+is audited here as ``RES85C_PREDECESSOR_STRICT_ROM.json`` (strict structural ROM
+FAIL on trunk_pelvis).
 
 Run:  python3 build_evidence.py            # build twice and compare identity
       python3 build_evidence.py --once     # debug escape: build once
@@ -31,6 +37,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -83,14 +90,20 @@ from loaded_cmj.v3.launch_runtime import (  # noqa: E402
 STATUS_PASS = "PASS"
 STATUS_FAIL = "FAIL"
 
+MISSION_ID = "RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001"
+RES85_ENTRY_HEAD = "e487369f6861d9c9bc27f9f3d92b981fb3684293"
+RES85_ENTRY_TREE = "5a88417d3a352ec87fee498e8a548575f19d3e0f"
+RES85C_HEAD = "ffc98526bd2b0da76dbef50891415ebdb345a1fd"
+RES85C_TREE = "612b0b8a667b32ef8f217e4aed569e5c2832ff84"
 RES83_PLANT_XML_SHA256 = "eca5760fbd5d93e7e99ae657287e94560a996e8b888f9e65d6155cb2c6d91e2d"
 RES84_EVIDENCE_SEAL_SHA256 = "223b13fe5bc3b884c15750da6badd24c834cfec54a24a23338dfde25d1bcbeda"
 PREVIOUS_RES85_EVIDENCE_SEAL_SHA256 = (
     "235a40e7a2a2b07ea483f2352b0765315b7f43b2343b3297461a0754b024b50e")
-ENTRY_HEAD = "e487369f6861d9c9bc27f9f3d92b981fb3684293"
-ENTRY_TREE = "5a88417d3a352ec87fee498e8a548575f19d3e0f"
+ENTRY_HEAD = RES85C_HEAD
+ENTRY_TREE = RES85C_TREE
 H_ANTI_TRIVIALITY_FLOOR_M = 0.150
 FLOOR_BALLISTIC_VZ_MAX_M_S = (2.0 * 9.81 * H_ANTI_TRIVIALITY_FLOOR_M) ** 0.5
+STRICT_ROM_TOLERANCE_RAD = 1.0e-9
 
 ENTRY_EQUIVALENT_OVERRIDES: dict[str, float] = {
     "extension_rate_ff_gain": 0.0,
@@ -101,7 +114,10 @@ ENTRY_EQUIVALENT_OVERRIDES: dict[str, float] = {
     "trunk_kd": 6.0,
     "joint_rom_margin_rad": 0.03,
     "joint_rom_barrier_gain": 0.0,
-    "trunk_rom_barrier_gain": 0.0,
+    "joint_rom_velocity_gain": 0.0,
+    "trunk_rom_guard_margin_rad": 0.03,
+    "trunk_rom_position_gain": 0.0,
+    "trunk_rom_velocity_gain": 0.0,
     "a_thrust_m_s2": 8.0,
     "thrust_az_max_m_s2": 12.0,
 }
@@ -111,6 +127,8 @@ ARTIFACT_FILES = (
     "TELEMETRY_MANIFEST.json",
     "TELEMETRY_ARRAYS.bin",
     "LAUNCH_EPISODE_REPORT.json",
+    "STRICT_STRUCTURAL_ROM_AUDIT.json",
+    "RES85C_PREDECESSOR_STRICT_ROM.json",
     "OCCURRENCE_IDENTITY_AUDIT.json",
     "PROPULSION_DEFICIT_REPORT.json",
     "MTP_ENERGY_REPORT.json",
@@ -122,11 +140,14 @@ ARTIFACT_FILES = (
     "PROPULSION_SEARCH.json",
     "MTP_NONCOMPENSATION_MATRIX.json",
     "JOINT_ROM_SOFT_LIMIT_PROBE.json",
+    "STRICT_ROM_SEARCH.json",
     "DETERMINISM_REPORT.json",
     "AUTHORITY_CHECK_REPORT.json",
     "SOURCE_PROVENANCE.json",
+    "FULL_SUITE_CLASSIFICATION.json",
     "RES85_RECEIPT.md",
     "RES85C_CORRECTION_RECEIPT.md",
+    "RES85D_STRICT_ROM_RECEIPT.md",
 )
 
 CHANNEL_QPOS = None
@@ -138,6 +159,17 @@ def channel_qpos_indices() -> list[int]:
         plant = P.V3Plant()
         CHANNEL_QPOS = [int(plant.idx.qadr[name]) for name in CHANNELS]
     return CHANNEL_QPOS
+
+
+CHANNEL_DOF = None
+
+
+def channel_dof_indices() -> list[int]:
+    global CHANNEL_DOF
+    if CHANNEL_DOF is None:
+        plant = P.V3Plant()
+        CHANNEL_DOF = [int(plant.idx.vadr[name]) for name in CHANNELS]
+    return CHANNEL_DOF
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -618,20 +650,221 @@ def res85c_negative_controls(episode, report: dict[str, Any],
     # NC-21: the plateau check — the winner configuration is reproducible
     _check(checks, "NC-21_safety_override_audit_passes",
            override_audit["status"] == STATUS_PASS, override_audit["failures"])
-    # NC-22: the launch joint-ROM audit passes (reference, drive and Plant
-    # soft-limit envelope) and fails closed when an overshoot leaves the envelope
+    # NC-22C (RES-85C control, retained with the strict criterion): the launch
+    # structural-ROM audit passes and the strict validator fails closed when a
+    # measured extremum leaves the frozen envelope
     rom = report.get("joint_rom_audit") or {}
     mutated_rom = json.loads(json.dumps(rom))
     first_channel = sorted(mutated_rom["channels"])[0]
-    mutated_rom["channels"][first_channel]["measured_overshoot_rad"] = (
-        mutated_rom["channels"][first_channel]["plant_soft_limit_envelope_rad"] + 1.0)
-    mutated_failures = joint_rom_audit_failures(mutated_rom)
-    _check(checks, "NC-22_launch_joint_rom_audit_passes",
+    upper = float(mutated_rom["channels"][first_channel]["rom_upper_rad"])
+    mutated_rom["channels"][first_channel]["max_measured_rad"] = upper + 1.0e-6
+    mutated_failures = strict_structural_rom_failures(mutated_rom)
+    _check(checks, "NC-22C_strict_structural_rom_audit_passes",
            rom.get("status") == STATUS_PASS
-           and joint_rom_audit_failures(rom) == []
-           and any("OUTSIDE_PLANT_ENVELOPE" in f for f in mutated_failures),
+           and strict_structural_rom_failures(rom) == []
+           and any("MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM" in f
+                   or "STRUCTURAL_ROM_VIOLATION" in f for f in mutated_failures),
            {"audit": {k: v for k, v in rom.items() if k != "channels"},
             "mutated_failures": mutated_failures})
+    return {"status": _status(checks), "checks": checks, "probes": probes}
+
+
+def rom_guard_direction_failures(guard, states, rom_lo, rom_hi) -> list[str]:
+    """NC-25 direction property: a ROM guard must never drive a joint farther
+    outside the nearest frozen structural limit.
+
+    For every probed ``(q, qdot)`` state the guard's moment correction is
+    compared with the outward direction of the nearest violated bound: beyond
+    the upper bound a positive guard correction is outward propulsion, below
+    the lower bound a negative one is.
+    """
+    failures: list[str] = []
+    desired = np.zeros(N_CHANNELS)
+    for name in CHANNELS:
+        rng = V3_JOINT_RANGES_RAD[name]
+        if rng is None:
+            continue
+        lo, hi = float(rng[0]), float(rng[1])
+        c = CHANNELS.index(name)
+        for q_value, qdot_value in states:
+            q = np.zeros(N_CHANNELS)
+            qd = np.zeros(N_CHANNELS)
+            q[c] = q_value
+            qd[c] = qdot_value
+            delta = float(guard(q, qd, desired)[c])
+            if q_value > hi + rom_hi and delta > 0.0:
+                failures.append(
+                    f"OUTWARD_TORQUE_BEYOND_UPPER:{name}:q={q_value!r}:qdot={qdot_value!r}")
+            if q_value < lo - rom_lo and delta < 0.0:
+                failures.append(
+                    f"OUTWARD_TORQUE_BELOW_LOWER:{name}:q={q_value!r}:qdot={qdot_value!r}")
+    return failures
+
+
+def res85d_negative_controls(episode, report: dict[str, Any],
+                             runner=None) -> dict[str, Any]:
+    """RES-85D negative controls NC-22..NC-27 (strict structural ROM)."""
+    checks: list[dict[str, Any]] = []
+    probes: dict[str, Any] = {}
+    t = episode.telemetry
+    claim_end = episode.events.get("res85_claim_end")
+    if claim_end is None:
+        _check(checks, "NC-22_measured_trunk_beyond_upper_bound_fails", False,
+               "claim end absent")
+        return {"status": _status(checks), "checks": checks, "probes": probes}
+    end = int(claim_end["sample"]) + 1
+    q = np.asarray(t.joint_q[:end], dtype=np.float64)[:, channel_qpos_indices()]
+    qd = np.asarray(t.joint_qd[:end], dtype=np.float64)[:, channel_dof_indices()]
+    tau = np.asarray(t.applied_nm[:end], dtype=np.float64)
+    ref = np.asarray(t.posture_reference_rad[:end], dtype=np.float64)
+    phases = np.asarray(t.phase_name[:end], dtype=object)
+    samples = np.asarray(t.index[:end], dtype=np.float64)
+    times = np.asarray(t.time_s[:end], dtype=np.float64)
+
+    def audit(q_measured):
+        return strict_structural_rom_audit_arrays(
+            q_measured=q_measured, qdot=qd, applied_nm=tau, q_ref=ref,
+            phase_name=phases, sample_index=samples, time_s=times,
+            claim_end_sample=int(claim_end["sample"]),
+            claim_end_reason=str(claim_end["reason"]))
+
+    trunk_lo, trunk_hi = V3_JOINT_RANGES_RAD["trunk_pelvis"]
+    # NC-22: measured trunk_pelvis = upper bound + 1e-6 must FAIL
+    mutated = q.copy()
+    mutated[-1, 0] = float(trunk_hi) + 1.0e-6
+    failures_22 = strict_structural_rom_failures(audit(mutated))
+    probes["NC-22_measured_trunk_beyond_upper_bound"] = {
+        "injected_q_rad": float(trunk_hi) + 1.0e-6,
+        "validator_failures": failures_22,
+    }
+    _check(checks, "NC-22_measured_trunk_beyond_upper_bound_fails",
+           any("STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper" in f
+               for f in failures_22),
+           probes["NC-22_measured_trunk_beyond_upper_bound"])
+
+    # NC-23: posture reference inside ROM but actual q outside ROM must FAIL
+    mutated = q.copy()
+    knee_col = CHANNELS.index("left_knee")
+    mutated[-1, knee_col] = float(V3_JOINT_RANGES_RAD["left_knee"][0]) - 5.0e-2
+    ref_ok = True
+    for c, name in enumerate(CHANNELS):
+        rng = V3_JOINT_RANGES_RAD[name]
+        if rng is None:
+            continue
+        ref_ok &= bool(np.all(ref[:, c] >= float(rng[0]) - 1e-9)
+                       and np.all(ref[:, c] <= float(rng[1]) + 1e-9))
+    failures_23 = strict_structural_rom_failures(audit(mutated))
+    probes["NC-23_reference_inside_actual_outside"] = {
+        "reference_inside_rom": ref_ok,
+        "validator_failures": failures_23,
+    }
+    _check(checks, "NC-23_reference_inside_but_measured_outside_fails",
+           ref_ok and any("STRUCTURAL_ROM_VIOLATION:left_knee:lower" in f
+                          for f in failures_23),
+           probes["NC-23_reference_inside_actual_outside"])
+
+    # NC-24: actual q outside ROM but inside the MuJoCo soft-limit probe
+    # envelope must still FAIL (the envelope is not acceptance authority)
+    probe = _load_json(HERE / "JOINT_ROM_SOFT_LIMIT_PROBE.json")
+    envelope = float(probe["channels"]["trunk_pelvis"]
+                     ["soft_limit_compliance_rad"])
+    injected = float(trunk_hi) + 0.5 * envelope
+    mutated = q.copy()
+    mutated[-1, 0] = injected
+    failures_24 = strict_structural_rom_failures(audit(mutated))
+    probes["NC-24_outside_rom_inside_probe_envelope"] = {
+        "probe_envelope_rad": envelope,
+        "injected_q_rad": injected,
+        "inside_probe_envelope": bool(injected <= float(trunk_hi) + envelope + 1e-9),
+        "validator_failures": failures_24,
+    }
+    _check(checks, "NC-24_measured_outside_rom_inside_probe_envelope_fails",
+           bool(injected <= float(trunk_hi) + envelope + 1e-9)
+           and any("STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper" in f
+                   for f in failures_24),
+           probes["NC-24_outside_rom_inside_probe_envelope"])
+
+    # NC-25: a guard that itself commands torque farther outside the nearest
+    # structural limit must FAIL; the shipped guard must never do so.
+    #
+    # The mutant is deliberately signed as positive feedback about the
+    # protected coordinate (``desired + 1000 * q``): near an upper bound it
+    # drives the measured coordinate farther outward, near a lower bound it
+    # drives it farther below, so the sign-safety detector must reject it.  The
+    # opposite sign (``desired - 1000 * q``) is a restoring spring and would
+    # not exercise the detector at all.
+    plant, data, controller = _probe_env()
+    real_states = []
+    for name in CHANNELS:
+        rng = V3_JOINT_RANGES_RAD[name]
+        if rng is None:
+            continue
+        lo, hi = float(rng[0]), float(rng[1])
+        for offset in (0.2, 1e-6, 0.0, -1e-6, -0.2):
+            for qdot_value in (-2.0, -0.2, 0.0, 0.2, 2.0):
+                real_states.append((lo + offset, qdot_value))
+                real_states.append((hi + offset, qdot_value))
+    real_failures = rom_guard_direction_failures(
+        controller._rom_guard, real_states, 0.0, 0.0)
+
+    def outward_mutant(guard_q, guard_qd, guard_desired):
+        out = guard_desired.copy()
+        return out + 1000.0 * guard_q
+
+    mutant_failures = rom_guard_direction_failures(
+        outward_mutant, real_states, 0.0, 0.0)
+    probes["NC-25_guard_direction_property"] = {
+        "real_guard_failures": real_failures,
+        "mutant_guard_failures": len(mutant_failures),
+        "mutant_guard_direction": "POSITIVE_FEEDBACK_OUTWARD_UNSTABLE",
+    }
+    _check(checks, "NC-25_rom_guard_never_drives_farther_outside",
+           real_failures == [] and len(mutant_failures) > 0,
+           probes["NC-25_guard_direction_property"])
+
+    # NC-26: a strict-ROM-valid controller whose H2 is below the functional
+    # floor must fail RES-85 closure (re-executed declared alternative config)
+    if runner is not None:
+        alternative = runner()
+        alternative_rom = alternative["strict_rom_status"]
+        alternative_h2 = alternative["h2_m"]
+        closure = floor_closure(alternative_h2)
+        probes["NC-26_strict_rom_but_below_floor"] = {
+            "config": alternative["config"],
+            "strict_rom_status": alternative_rom,
+            "h2_m": alternative_h2,
+            "floor_closure": closure,
+        }
+        _check(checks, "NC-26_strict_rom_correction_below_functional_floor_fails_closure",
+               alternative_rom == STATUS_PASS
+               and alternative_h2 is not None
+               and float(alternative_h2) < H_ANTI_TRIVIALITY_FLOOR_M
+               and closure["closure_pass"] is False,
+               probes["NC-26_strict_rom_but_below_floor"])
+    else:
+        _check(checks, "NC-26_strict_rom_correction_below_functional_floor_fails_closure",
+               False, "no runner supplied")
+
+    # NC-27: all strict-ROM conditions pass at exactly the structural boundary
+    # inside only the 1e-9 floating comparison tolerance
+    mutated = q.copy()
+    mutated[-1, 0] = float(trunk_hi)
+    boundary_audit = audit(mutated)
+    boundary_failures = strict_structural_rom_failures(boundary_audit)
+    over = q.copy()
+    over[-1, 0] = float(trunk_hi) + 2.0e-9
+    over_failures = strict_structural_rom_failures(audit(over))
+    probes["NC-27_boundary_within_tolerance"] = {
+        "boundary_status": boundary_audit["status"],
+        "boundary_failures": boundary_failures,
+        "over_tolerance_failures": over_failures,
+    }
+    _check(checks, "NC-27_boundary_within_tolerance_passes",
+           boundary_audit["status"] == STATUS_PASS
+           and boundary_failures == []
+           and any("STRUCTURAL_ROM_VIOLATION:trunk_pelvis:upper" in f
+                   for f in over_failures),
+           probes["NC-27_boundary_within_tolerance"])
     return {"status": _status(checks), "checks": checks, "probes": probes}
 
 
@@ -781,89 +1014,305 @@ def _phase_runs(telemetry) -> list[tuple[str, int, int]]:
     return runs
 
 
-def joint_rom_audit(episode) -> dict[str, Any]:
-    """Controller-attributable launch joint-ROM audit (STAND -> occurrence).
+def strict_structural_rom_audit_arrays(
+    *,
+    q_measured: np.ndarray,
+    qdot: np.ndarray,
+    applied_nm: np.ndarray,
+    q_ref: np.ndarray,
+    phase_name: np.ndarray,
+    sample_index: np.ndarray,
+    time_s: np.ndarray,
+    claim_end_sample: int,
+    claim_end_reason: str,
+    tolerance_rad: float = STRICT_ROM_TOLERANCE_RAD,
+) -> dict[str, Any]:
+    """Strict structural-ROM audit over native measured joint coordinates.
 
-    Declared criterion (``JOINT_ROM_SOFT_LIMIT_PROBE.json``):
+    The frozen human structural envelope (``V3_JOINT_RANGES_RAD``) is the only
+    acceptance authority.  For every bounded actuated joint and every native
+    sample from the first sample through ``RES85_CLAIM_END`` (the first legal
+    plantar recontact after the qualified flight) the invariant is
 
-    * the controller posture reference stays inside the frozen human-valid ROM;
-    * the applied moment never drives a measured joint further past a frozen
-      limit;
-    * the measured launch overshoot stays inside the measured per-channel Plant
-      soft-limit compliance envelope (a Plant property, not a controller
-      budget).
+        lower_j - tolerance <= q_j(t) <= upper_j + tolerance
 
-    The post-flight landing window is RES-86 scope and is not judged here.
+    with ``tolerance_rad = 1e-9`` used *only* for floating-point equality.  It
+    is not added anatomical ROM.  The solver soft-limit compliance probe is a
+    Plant property and is reported here strictly as
+    ``NUMERICAL_SOLVER_DIAGNOSTIC_ONLY``; no PASS depends on it.
     """
-    t = episode.telemetry
-    events = episode.events
-    occurrence = events.get("takeoff_occurrence") or {}
-    k = occurrence.get("native_index")
-    end = len(t.index) if k is None else int(k) + 1
-    probe = _load_json(HERE / "JOINT_ROM_SOFT_LIMIT_PROBE.json")
-    envelopes = {name: float(value["soft_limit_compliance_rad"])
-                 for name, value in probe["channels"].items()}
-    q_meas = np.asarray(t.joint_q[:end][:, channel_qpos_indices()], dtype=np.float64)
-    q_ref = np.asarray(t.posture_reference_rad[:end], dtype=np.float64)
-    applied = np.asarray(t.applied_nm[:end], dtype=np.float64)
+    end = int(claim_end_sample) + 1
+    if end <= 0 or end > len(q_measured):
+        raise ValueError(
+            f"claim end sample {claim_end_sample!r} outside the native stream")
+    q = np.asarray(q_measured[:end], dtype=np.float64)
+    qd = np.asarray(qdot[:end], dtype=np.float64)
+    tau = np.asarray(applied_nm[:end], dtype=np.float64)
+    ref = np.asarray(q_ref[:end], dtype=np.float64)
+    phases = np.asarray(phase_name[:end], dtype=object)
+    samples = np.asarray(sample_index[:end], dtype=np.float64)
+    times = np.asarray(time_s[:end], dtype=np.float64)
+    try:
+        probe = _load_json(HERE / "JOINT_ROM_SOFT_LIMIT_PROBE.json")
+    except FileNotFoundError:
+        probe = {"channels": {}}
+    diagnostic_envelopes = {
+        name: float(value.get("soft_limit_compliance_rad", 0.0))
+        for name, value in probe.get("channels", {}).items()}
     channels: dict[str, Any] = {}
-    reference_ok = True
-    drive_ok = True
-    envelope_ok = True
+    failures: list[str] = []
+    global_min = float("inf")
     for c, name in enumerate(CHANNELS):
         rng = V3_JOINT_RANGES_RAD[name]
         if rng is None:
             continue
         lo, hi = float(rng[0]), float(rng[1])
-        q = q_meas[:, c]
-        reference_ok &= bool(np.all((q_ref[:, c] >= lo - 1e-9)
-                                    & (q_ref[:, c] <= hi + 1e-9)))
-        drive_ok &= not bool(np.any(((q > hi) & (applied[:, c] > 1e-9))
-                                    | ((q < lo) & (applied[:, c] < -1e-9))))
-        overshoot = float(max(np.max(q - hi), np.max(lo - q), 0.0))
-        envelope = envelopes[name]
-        envelope_ok &= bool(overshoot <= envelope + 1e-9)
-        channels[name] = {
+        column = q[:, c]
+        lower_margin = float(np.min(column - lo))
+        upper_margin = float(np.min(hi - column))
+        min_margin = min(lower_margin, upper_margin)
+        global_min = min(global_min, min_margin)
+        i_lo = int(np.argmin(column - lo))
+        i_hi = int(np.argmin(hi - column))
+        worst_side = "lower" if lower_margin <= upper_margin else "upper"
+        i_worst = i_lo if worst_side == "lower" else i_hi
+        overshoot = float(max(np.max(column - hi), np.max(lo - column), 0.0))
+        channel_pass = bool(min_margin >= -tolerance_rad)
+        if not channel_pass:
+            side = "lower" if min_margin == lower_margin else "upper"
+            failures.append(f"STRUCTURAL_ROM_VIOLATION:{name}:{side}")
+        channel = {
             "rom_lower_rad": lo,
             "rom_upper_rad": hi,
-            "min_measured_rad": float(np.min(q)),
-            "max_measured_rad": float(np.max(q)),
+            "min_measured_rad": float(np.min(column)),
+            "max_measured_rad": float(np.max(column)),
+            "lower_margin_rad": lower_margin,
+            "upper_margin_rad": upper_margin,
+            "min_rom_margin_rad": min_margin,
             "measured_overshoot_rad": overshoot,
-            "plant_soft_limit_envelope_rad": envelope,
-            "within_envelope": bool(overshoot <= envelope + 1e-9),
+            "solver_soft_limit_diagnostic_rad": diagnostic_envelopes.get(name),
+            "solver_soft_limit_diagnostic_role":
+                "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+            "lower_extreme": {
+                "native_sample": int(samples[i_lo]),
+                "time_s": float(times[i_lo]),
+                "phase": str(phases[i_lo]),
+                "q_measured_rad": float(column[i_lo]),
+                "qdot_rad_s": float(qd[i_lo, c]),
+                "applied_nm": float(tau[i_lo, c]),
+                "posture_reference_rad": float(ref[i_lo, c]),
+                "margin_rad": float(column[i_lo] - lo),
+            },
+            "upper_extreme": {
+                "native_sample": int(samples[i_hi]),
+                "time_s": float(times[i_hi]),
+                "phase": str(phases[i_hi]),
+                "q_measured_rad": float(column[i_hi]),
+                "qdot_rad_s": float(qd[i_hi, c]),
+                "applied_nm": float(tau[i_hi, c]),
+                "posture_reference_rad": float(ref[i_hi, c]),
+                "margin_rad": float(hi - column[i_hi]),
+            },
+            "worst_side": worst_side,
+            "worst_native_sample": int(samples[i_worst]),
+            "worst_phase": str(phases[i_worst]),
+            "qdot_at_worst_rad_s": float(qd[i_worst, c]),
+            "applied_nm_at_worst": float(tau[i_worst, c]),
+            "posture_reference_at_worst_rad": float(ref[i_worst, c]),
+            "status": STATUS_PASS if channel_pass else STATUS_FAIL,
         }
+        channels[name] = channel
     audit = {
-        "scope": "STAND_TO_ACCEPTED_OCCURRENCE",
-        "criterion": ("reference within frozen ROM; applied moment never drives "
-                      "past the frozen ROM; measured overshoot within the "
-                      "per-channel Plant soft-limit compliance envelope"),
-        "reference_within_frozen_rom": bool(reference_ok),
-        "no_applied_moment_drives_past_frozen_rom": bool(drive_ok),
-        "measured_overshoot_within_plant_soft_limit_envelope": bool(envelope_ok),
+        "schema_version": "1.0.0",
+        "authority": "FROZEN_HUMAN_STRUCTURAL_ENVELOPE_V3_JOINT_RANGES_RAD",
+        "scope": "FIRST_NATIVE_SAMPLE_THROUGH_RES85_CLAIM_END",
+        "claim_end_sample": int(claim_end_sample),
+        "claim_end_reason": claim_end_reason,
+        "tolerance_rad": tolerance_rad,
+        "criterion": (
+            "measured q_j(t) stays within [lower_j - tolerance, upper_j + "
+            "tolerance] for every bounded actuated joint and every native "
+            "sample in the RES-85 claim domain; the tolerance is floating-point "
+            "equality only, never added anatomical ROM"),
+        "solver_soft_limit_probe_role": (
+            "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY_NOT_STRUCTURAL_ACCEPTANCE_AUTHORITY"),
+        "solver_soft_limit_probe_note": (
+            "JOINT_ROM_SOFT_LIMIT_PROBE.json describes MuJoCo solver "
+            "penetration/compliance behaviour only; it may not enlarge the "
+            "human/structural joint ROM and no PASS depends on it"),
+        "global_min_structural_rom_margin_rad": global_min,
         "channels": channels,
-        "landing_window_note": "post-flight landing ROM is RES-86 scope, not judged here",
+        "failures": failures,
     }
-    audit["failures"] = joint_rom_audit_failures(audit)
-    audit["status"] = STATUS_PASS if not audit["failures"] else STATUS_FAIL
+    audit["status"] = STATUS_PASS if not failures else STATUS_FAIL
     return audit
 
 
-def joint_rom_audit_failures(audit: dict[str, Any]) -> list[str]:
-    """Fail-closed validator for the launch joint-ROM audit record."""
+def strict_structural_rom_audit(episode) -> dict[str, Any]:
+    """Strict structural-ROM audit of one native episode."""
+    t = episode.telemetry
+    claim_end = episode.events.get("res85_claim_end")
+    if claim_end is None:
+        return {
+            "schema_version": "1.0.0",
+            "scope": "FIRST_NATIVE_SAMPLE_THROUGH_RES85_CLAIM_END",
+            "claim_end_sample": None,
+            "claim_end_reason": None,
+            "tolerance_rad": STRICT_ROM_TOLERANCE_RAD,
+            "criterion": "measured q within the frozen structural envelope",
+            "global_min_structural_rom_margin_rad": None,
+            "channels": {},
+            "failures": ["RES85_CLAIM_END_ABSENT"],
+            "status": STATUS_FAIL,
+        }
+    return strict_structural_rom_audit_arrays(
+        q_measured=np.asarray(t.joint_q, dtype=np.float64)[:, channel_qpos_indices()],
+        qdot=np.asarray(t.joint_qd, dtype=np.float64)[:, channel_dof_indices()],
+        applied_nm=np.asarray(t.applied_nm, dtype=np.float64),
+        q_ref=np.asarray(t.posture_reference_rad, dtype=np.float64),
+        phase_name=np.asarray(t.phase_name, dtype=object),
+        sample_index=np.asarray(t.index, dtype=np.float64),
+        time_s=np.asarray(t.time_s, dtype=np.float64),
+        claim_end_sample=int(claim_end["sample"]),
+        claim_end_reason=str(claim_end["reason"]),
+    )
+
+
+def strict_structural_rom_failures(audit: dict[str, Any]) -> list[str]:
+    """Fail-closed validator for the strict structural-ROM audit record.
+
+    The validator is total: it recomputes the verdict from the reported
+    per-channel margins and measured extrema (never from a stored PASS field)
+    and additionally refuses to accept an audit that claims a PASS while a
+    measured extremum lies outside the frozen envelope.
+    """
     failures: list[str] = []
-    if not audit.get("reference_within_frozen_rom"):
-        failures.append("REFERENCE_OUTSIDE_FROZEN_ROM")
-    if not audit.get("no_applied_moment_drives_past_frozen_rom"):
-        failures.append("APPLIED_MOMENT_DRIVES_PAST_FROZEN_ROM")
     channels = audit.get("channels") or {}
     if not channels:
         failures.append("NO_ROM_CHANNELS")
+        return failures
+    tolerance = float(audit.get("tolerance_rad", STRICT_ROM_TOLERANCE_RAD))
+    global_min = audit.get("global_min_structural_rom_margin_rad")
+    if global_min is None or not np.isfinite(float(global_min)):
+        failures.append("GLOBAL_ROM_MARGIN_UNDEFINED")
     for name, channel in sorted(channels.items()):
-        overshoot = float(channel.get("measured_overshoot_rad", 0.0))
-        envelope = float(channel.get("plant_soft_limit_envelope_rad", 0.0))
-        if overshoot > envelope + 1e-9:
-            failures.append(f"MEASURED_OVERSHOOT_OUTSIDE_PLANT_ENVELOPE:{name}")
+        lower = float(channel.get("lower_margin_rad", float("-inf")))
+        upper = float(channel.get("upper_margin_rad", float("-inf")))
+        margin = float(channel.get("min_rom_margin_rad", min(lower, upper)))
+        if margin < -tolerance:
+            side = "lower" if margin == lower else "upper"
+            failures.append(f"STRUCTURAL_ROM_VIOLATION:{name}:{side}")
+        min_measured = float(channel.get("min_measured_rad", 0.0))
+        max_measured = float(channel.get("max_measured_rad", 0.0))
+        if (min_measured < float(channel.get("rom_lower_rad", -np.inf)) - tolerance
+                or max_measured > float(channel.get("rom_upper_rad", np.inf)) + tolerance):
+            failures.append(f"MEASURED_EXTREMUM_OUTSIDE_FROZEN_ROM:{name}")
+    if global_min is not None and np.isfinite(float(global_min)) \
+            and float(global_min) < -tolerance:
+        failures.append("GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_BELOW_TOLERANCE")
     return failures
+
+
+def joint_rom_audit(episode) -> dict[str, Any]:
+    """Compatibility alias: the launch joint-ROM audit is the strict audit."""
+    return strict_structural_rom_audit(episode)
+
+
+def joint_rom_audit_failures(audit: dict[str, Any]) -> list[str]:
+    """Compatibility alias for the strict structural-ROM validator."""
+    return strict_structural_rom_failures(audit)
+
+
+# ===========================================================================
+# RES-85C predecessor strict-ROM regression (read from immutable git history)
+# ===========================================================================
+RES85_BUNDLE_REL = "audit/EXP-RES85-CAUSAL-LAUNCH-FLIGHT-CONTROL-001"
+
+
+def _git_show(commit: str, path: str) -> bytes:
+    """Read one immutable blob from the repository history (fail closed)."""
+    proc = subprocess.run(["git", "-C", str(REPO), "show", f"{commit}:{path}"],
+                          capture_output=True)
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"git show {commit}:{path} failed: {proc.stderr.decode('utf-8', 'replace')}")
+    return proc.stdout
+
+
+def reconstruct_telemetry_arrays(manifest: dict[str, Any],
+                                 blob: bytes) -> dict[str, np.ndarray]:
+    """Reconstruct the native arrays of a sealed telemetry blob."""
+    arrays: dict[str, np.ndarray] = {}
+    for entry in manifest["arrays"]:
+        raw = blob[int(entry["offset"]):int(entry["offset"]) + int(entry["nbytes"])]
+        dtype = str(entry["dtype"])
+        shape = tuple(int(v) for v in entry["shape"])
+        if dtype == "object":
+            values = raw.split(b"\x1f")
+            arrays[entry["name"]] = np.asarray(
+                [value.decode("utf-8") for value in values], dtype=object)
+        else:
+            arrays[entry["name"]] = np.frombuffer(raw, dtype=dtype).reshape(shape)
+    return arrays
+
+
+def res85c_predecessor_strict_rom() -> dict[str, Any]:
+    """Audit the RES-85C canonical trajectory against strict structural ROM.
+
+    The predecessor native telemetry is read from the immutable git blobs at
+    ``RES85C_HEAD`` (never from the mutable worktree copy, which this mission
+    regenerates).  The strict structural-ROM checker is the same code used for
+    the RES-85D qualification, so the regression is a re-executed computation,
+    not a stored verdict.
+    """
+    manifest = json.loads(_git_show(
+        RES85C_HEAD, f"{RES85_BUNDLE_REL}/TELEMETRY_MANIFEST.json"))
+    blob = _git_show(RES85C_HEAD, f"{RES85_BUNDLE_REL}/TELEMETRY_ARRAYS.bin")
+    previous = json.loads(_git_show(
+        RES85C_HEAD, f"{RES85_BUNDLE_REL}/LAUNCH_EPISODE_REPORT.json"))
+    digest = hashlib.sha256(blob).hexdigest()
+    if digest != manifest["blob_sha256"]:
+        raise RuntimeError("RES-85C predecessor telemetry blob digest mismatch")
+    arrays = reconstruct_telemetry_arrays(manifest, blob)
+    claim_end = previous["res85_claim_end"]
+    audit = strict_structural_rom_audit_arrays(
+        q_measured=np.asarray(arrays["joint_q"], dtype=np.float64)[
+            :, channel_qpos_indices()],
+        qdot=np.asarray(arrays["joint_qd"], dtype=np.float64)[
+            :, channel_dof_indices()],
+        applied_nm=np.asarray(arrays["applied_nm"], dtype=np.float64),
+        q_ref=np.asarray(arrays["posture_reference_rad"], dtype=np.float64),
+        phase_name=np.asarray(arrays["phase_name"], dtype=object),
+        sample_index=np.asarray(arrays["index"], dtype=np.float64),
+        time_s=np.asarray(arrays["time_s"], dtype=np.float64),
+        claim_end_sample=int(claim_end["sample"]),
+        claim_end_reason=str(claim_end["reason"]),
+    )
+    trunk = audit["channels"]["trunk_pelvis"]
+    return {
+        "schema_version": "1.0.0",
+        "mission": MISSION_ID,
+        "predecessor_head": RES85C_HEAD,
+        "predecessor_tree": RES85C_TREE,
+        "source": ("immutable git blobs at RES85C_HEAD: TELEMETRY_MANIFEST.json, "
+                   "TELEMETRY_ARRAYS.bin, LAUNCH_EPISODE_REPORT.json"),
+        "telemetry_blob_sha256": digest,
+        "previous_h2_m": previous["apex_h2"].get("h2_support_m"),
+        "previous_takeoff_vz_m_s": previous["apex_h2"].get("takeoff_vz_m_s"),
+        "previous_occurrence": previous["takeoff_occurrence"].get("native_index"),
+        "previous_confirmation": (
+            None if previous.get("takeoff_confirmation") is None
+            else previous["takeoff_confirmation"].get("confirmation_sample")),
+        "previous_claim_end_sample": int(claim_end["sample"]),
+        "strict_structural_rom_audit": audit,
+        "regression_conclusion": (
+            "the RES-85C canonical trajectory FAILS strict structural ROM: "
+            f"trunk_pelvis measured max {trunk['max_measured_rad']!r} rad exceeds "
+            f"the frozen upper bound {trunk['rom_upper_rad']!r} rad; the "
+            "trajectory was previously accepted only through the "
+            "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY soft-limit compliance envelope, "
+            "which is not structural authority"),
+    }
 
 
 def launch_episode_report(episode) -> dict[str, Any]:
@@ -887,7 +1336,7 @@ def launch_episode_report(episode) -> dict[str, Any]:
     report = {
         "schema_version": "1.0.0",
         "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
-        "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+        "mission": MISSION_ID,
         "episode_status": episode.status,
         "fault": episode.fault,
         "warnings": episode.warnings,
@@ -912,7 +1361,7 @@ def launch_episode_report(episode) -> dict[str, Any]:
         "diagnostic_comparator": comparator,
         "apex_h2": H2,
         "functional_task_floor": floor_closure(h2_value),
-        "joint_rom_audit": joint_rom_audit(episode),
+        "joint_rom_audit": strict_structural_rom_audit(episode),
         "impulse_cross_check": events["impulse_cross_check"],
         "res85_claim_end": events["res85_claim_end"],
         "method_explicit_h2_report": {
@@ -1165,11 +1614,23 @@ def actuation_conformance_report(episode) -> dict[str, Any]:
                              "max_exceedance_nm_per_s": (float(exceedance.max())
                                                          if exceedance.size else 0.0)})
     asym = 0.0
+    post_claim_asym = 0.0
+    claim_end = episode.events.get("res85_claim_end")
+    end = len(t.index) if claim_end is None else int(claim_end["sample"]) + 1
     if len(t.index):
         for i, j in MIRRORED_PAIRS:
-            asym = max(asym, float(np.abs(t.applied_nm[:, i] - t.applied_nm[:, j]).max()))
+            asym = max(asym, float(np.abs(t.applied_nm[:end, i]
+                                          - t.applied_nm[:end, j]).max()))
+            if end < len(t.index):
+                post_claim_asym = max(
+                    post_claim_asym,
+                    float(np.abs(t.applied_nm[end:, i] - t.applied_nm[end:, j]).max()))
     _check(checks, "bilateral_applied_symmetry_within_tolerance", asym <= 1e-9,
-           {"max_pair_asymmetry_nm": asym, "tolerance_nm": 1e-9})
+           {"max_pair_asymmetry_nm": asym, "tolerance_nm": 1e-9,
+            "scope": "FIRST_NATIVE_SAMPLE_THROUGH_RES85_CLAIM_END",
+            "post_claim_landing_window_asymmetry_nm": post_claim_asym,
+            "post_claim_note": ("post-claim landing capture is RES-86 scope; the "
+                                "post-claim asymmetry is reported as a diagnostic")})
     handoff_indices = [int(t.index[i]) for i in range(len(t.index))
                        if t.transition_reason[i]]
     handoff_ok = True
@@ -1200,6 +1661,7 @@ def actuation_conformance_report(episode) -> dict[str, Any]:
                               if len(t.index) > 1 else [0.0] * N_CHANNELS),
         "max_joint_power_w": [float(v) for v in max_power],
         "max_bilateral_asymmetry_nm": asym,
+        "max_post_claim_asymmetry_nm": post_claim_asym,
         "saturation_stage_counts": stage_counts,
         "handoff_samples": handoff_indices,
         "safety_override_channel_samples": declared,
@@ -1267,8 +1729,8 @@ def pre_correction_episode_classification() -> dict[str, Any]:
     return {
         "schema_version": "1.0.0",
         "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
-        "entry_head": ENTRY_HEAD,
-        "entry_tree": ENTRY_TREE,
+        "entry_head": RES85_ENTRY_HEAD,
+        "entry_tree": RES85_ENTRY_TREE,
         "previous_res85_evidence_seal_sha256": PREVIOUS_RES85_EVIDENCE_SEAL_SHA256,
         "controller_config": {field: getattr(config, field)
                               for field in config.__dataclass_fields__},
@@ -1377,6 +1839,7 @@ def build_all() -> dict[str, Any]:
         zero_passive=True)
     pre_correction = pre_correction_episode_classification()
     report = launch_episode_report(corrected_episode)
+    strict_rom = report["joint_rom_audit"]
     identity_audit = occurrence_identity_audit(report)
     deficit = propulsion_deficit_report(corrected_episode)
     override_audit = safety_override_audit(corrected_episode)
@@ -1387,15 +1850,35 @@ def build_all() -> dict[str, Any]:
     negative = negative_controls(zero_passive_episode)
     negative_c = res85c_negative_controls(corrected_episode, report, identity_audit,
                                           override_audit, mtp_matrix)
+    predecessor = res85c_predecessor_strict_rom()
+
+    def below_floor_runner() -> dict[str, Any]:
+        """Strict-ROM-valid declared alternative whose H2 is below the floor."""
+        alternative_config = replace(
+            V3ControllerConfig(), trunk_rom_guard_margin_rad=0.15)
+        episode = run_launch_episode(controller_config=alternative_config)
+        alternative_audit = strict_structural_rom_audit(episode)
+        return {
+            "config": {"trunk_rom_guard_margin_rad": 0.15},
+            "strict_rom_status": alternative_audit["status"],
+            "h2_m": episode.events["apex_h2"].get("h2_support_m"),
+        }
+
+    negative_d = res85d_negative_controls(corrected_episode, report,
+                                          runner=below_floor_runner)
     negative_all = {
         "schema_version": "1.0.0",
-        "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+        "mission": MISSION_ID,
         "status": STATUS_PASS if (negative["status"] == STATUS_PASS
-                                  and negative_c["status"] == STATUS_PASS) else STATUS_FAIL,
-        "checks": negative["checks"] + negative_c["checks"],
-        "probes": {**negative["probes"], **negative_c["probes"]},
+                                  and negative_c["status"] == STATUS_PASS
+                                  and negative_d["status"] == STATUS_PASS)
+        else STATUS_FAIL,
+        "checks": negative["checks"] + negative_c["checks"] + negative_d["checks"],
+        "probes": {**negative["probes"], **negative_c["probes"],
+                   **negative_d["probes"]},
         "legacy_status": negative["status"],
         "res85c_status": negative_c["status"],
+        "res85d_status": negative_d["status"],
     }
     telemetry_manifest, telemetry_blob = telemetry_artifacts(corrected_episode)
 
@@ -1406,14 +1889,22 @@ def build_all() -> dict[str, Any]:
     spec = {
         "schema_version": "1.0.0",
         "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
-        "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+        "mission": MISSION_ID,
         "correction": {
-            "correction_id": "RES-85C",
+            "correction_id": "RES-85D",
             "entry_head": ENTRY_HEAD,
             "entry_tree": ENTRY_TREE,
             "previous_evidence_seal_sha256": PREVIOUS_RES85_EVIDENCE_SEAL_SHA256,
-            "blockers": ["A_accepted_takeoff_identity", "B_functional_floor_authority",
-                         "C_actuation_rate_contract", "D_mtp_non_compensation"],
+            "defect": (
+                "the RES-85C canonical trajectory measured trunk_pelvis "
+                "0.6734678378904122 rad, exceeding the frozen +0.610865 rad "
+                "structural upper bound; it was accepted only through the "
+                "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY soft-limit compliance envelope"),
+            "correction": (
+                "state-causal POSITION_GUARD + OUTWARD_VELOCITY_BRAKING "
+                "structural-ROM guard over the whole RES-85 claim domain; the "
+                "solver soft-limit probe is retained as numerical diagnostic "
+                "only and no PASS depends on its penetration envelope"),
         },
         "controller": controller.authority_record(),
         "modules": {
@@ -1428,6 +1919,17 @@ def build_all() -> dict[str, Any]:
         "res83_sealed_plant_xml_sha256": RES83_PLANT_XML_SHA256,
         "res84_measurement_authority_id": M.V3_MEASUREMENT_AUTHORITY_ID,
         "res84_evidence_seal_sha256": RES84_EVIDENCE_SEAL_SHA256,
+        "strict_structural_rom": {
+            "authority": "FROZEN_HUMAN_STRUCTURAL_ENVELOPE_V3_JOINT_RANGES_RAD",
+            "domain": "FIRST_NATIVE_SAMPLE_THROUGH_RES85_CLAIM_END",
+            "tolerance_rad": STRICT_ROM_TOLERANCE_RAD,
+            "tolerance_role": "FLOATING_POINT_EQUALITY_ONLY_NOT_ANATOMICAL_ROM",
+            "global_min_structural_rom_margin_rad":
+                strict_rom["global_min_structural_rom_margin_rad"],
+            "status": strict_rom["status"],
+            "solver_soft_limit_probe_role":
+                "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY_NOT_STRUCTURAL_ACCEPTANCE_AUTHORITY",
+        },
         "phase_order": [p.value for p in PHASE_ORDER],
         "supported_phases": [p.value for p in SUPPORTED_PHASES],
         "consumed_measurement_primitives": [
@@ -1456,6 +1958,8 @@ def build_all() -> dict[str, Any]:
         "episode": corrected_episode,
         "zero_passive_episode": zero_passive_episode,
         "episode_report": report,
+        "strict_rom": strict_rom,
+        "predecessor": predecessor,
         "identity_audit": identity_audit,
         "deficit": deficit,
         "pre_correction": pre_correction,
@@ -1467,320 +1971,208 @@ def build_all() -> dict[str, Any]:
         "mtp_matrix": mtp_matrix,
         "telemetry_manifest": telemetry_manifest,
         "telemetry_blob": telemetry_blob,
-        "receipt": receipt(corrected_episode, report, conformance, negative_all, mtp,
-                           override_audit),
-        "correction_receipt": correction_receipt(corrected_episode, report, identity_audit,
-                                                 conformance, override_audit, negative_all,
-                                                 pre_correction, mtp_matrix, deficit),
+        "strict_rom_receipt": res85d_receipt(
+            corrected_episode, report, strict_rom, predecessor, conformance,
+            override_audit, negative_all, mtp, pre_correction, telemetry_manifest),
     }
 
 
-def _h2_line(report: dict[str, Any], pre_correction: dict[str, Any]) -> str:
-    return (f"pre-correction H2 `{pre_correction['h2_m']}` m "
-            f"({pre_correction['classification']}) -> corrected H2 "
-            f"`{report['method_explicit_h2_report']['PRIMARY_CANONICAL']['value_m']}` m "
-            f"({report['functional_task_floor']['classification']})")
-
-
-def receipt(episode, report: dict[str, Any], conformance: dict[str, Any],
-            negative: dict[str, Any], mtp: dict[str, Any],
-            override_audit: dict[str, Any]) -> str:
+def res85d_receipt(episode, report: dict[str, Any], strict_rom: dict[str, Any],
+                   predecessor: dict[str, Any], conformance: dict[str, Any],
+                   override_audit: dict[str, Any], negative: dict[str, Any],
+                   mtp: dict[str, Any], pre_correction: dict[str, Any],
+                   telemetry_manifest: dict[str, Any]) -> str:
+    """RES-85D strict structural-ROM final receipt (deterministic values)."""
     h2 = report["method_explicit_h2_report"]["PRIMARY_CANONICAL"]["value_m"]
-    vz = report["apex_h2"].get("takeoff_vz_m_s")
+    apex = report["apex_h2"]
     occurrence = report["takeoff_occurrence"]
     confirmation = report["takeoff_confirmation"] or {}
-    lines = [
-        "# RES85_RECEIPT — V3 causal loaded-CMJ launch and flight control (RES-85C)",
-        "",
-        "MISSION: `RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001`",
-        "LINEAR ISSUE: RES-85",
-        "STATUS: **%s**" % (
-            "PASS" if (negative["status"] == STATUS_PASS
-                       and conformance["status"] == STATUS_PASS
-                       and mtp["status"] == STATUS_PASS
-                       and override_audit["status"] == STATUS_PASS
-                       and report["joint_rom_audit"]["status"] == STATUS_PASS
-                       and episode.status == "COMPLETED"
-                       and report["functional_task_floor"]["closure_pass"]) else "FAIL"),
-        "",
-        "## Episode",
-        "",
-        "* status: `%s`%s" % (episode.status,
-                              "" if episode.fault is None else f" (fault: `{episode.fault}`)"),
-        "* phases: `%s`" % " -> ".join(episode.phases_visited),
-        "* accepted occurrence: sample `%s` / t=`%s` s" % (
-            occurrence.get("native_index"), occurrence.get("time_s")),
-        "* takeoff confirmation: `%s` at sample `%s`" % (
-            confirmation.get("confirmed"), confirmation.get("confirmation_sample")),
-        "* takeoff vz: `%s` m/s" % vz,
-        "* H2 (DIRECT_SIMULATOR_SYSTEM_COM): `%s` m" % h2,
-        "* H_ANTI_TRIVIALITY_FLOOR classification: `%s`" % (
-            report["functional_task_floor"]["classification"]),
-        "* launch joint ROM audit (STAND -> occurrence): `%s`" % (
-            report["joint_rom_audit"]["status"]),
-        "",
-        "## Method-explicit comparator reporting",
-        "",
-        "| Method | Status | Value |",
-        "|---|---|---|",
-        f"| DIRECT_SIMULATOR_SYSTEM_COM | PRIMARY_CANONICAL | {h2} m |",
-        "| BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ | SECONDARY_CROSS_CHECK | "
-        + str(report["method_explicit_h2_report"]["SECONDARY_CROSS_CHECKS"]
-              ["BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ"]["value_m"]) + " m |",
-        "| FORCE_PLATFORM_IMPULSE_MOMENTUM | CROSS_CHECK | see impulse_cross_check |",
-        "| FORCE_PLATFORM_FLIGHT_TIME | REPORT_ONLY | see flight time entry |",
-        "| BAR_LVT_DISPLACEMENT_VELOCITY | NOT_APPLICABLE_NATIVE | no tether instrument |",
-        "",
-        "`ELITE_SOCCER_PLUS20_H2_HARD_GATE = NOT_ESTABLISHED` and",
-        "`ELITE_SOCCER_PLUS20_H2_TARGET = NOT_ESTABLISHED`.  The declared",
-        "`H_ANTI_TRIVIALITY_FLOOR = 0.150 m` is a hard functional",
-        "non-triviality boundary: it is not an elite norm, not an expected",
-        "value and not an optimization target, but it is a minimum functional",
-        "success condition (diagnostic scale cross-check: minimum ballistic",
-        "`vz = sqrt(2 g 0.150) ~= %.3f m/s`)." % FLOOR_BALLISTIC_VZ_MAX_M_S,
-        "",
-        "## Mandatory negative controls (deterministic)",
-        "",
-        "| Control | Result |",
-        "|---|---|",
-    ]
-    for c in negative["checks"]:
-        lines.append(f"| `{c['check']}` | {'PASS' if c['pass'] else 'FAIL'} |")
-    lines += [
-        "",
-        "## Actuation and MTP authority conformance",
-        "",
-        "| Check | Result |",
-        "|---|---|",
-    ]
-    for c in conformance["checks"] + mtp["checks"]:
-        lines.append(f"| `{c['check']}` | {'PASS' if c['pass'] else 'FAIL'} |")
-    lines.append(f"| `safety_override_audit` | {'PASS' if override_audit['status'] == 'PASS' else 'FAIL'} |")
-    classification = json.loads((HERE / "FULL_SUITE_CLASSIFICATION.json").read_text())
-    amendments = json.loads((HERE / "AUTHORITY_AMENDMENTS.json").read_text())
-    lines += [
-        "",
-        "## Repository suite classification",
-        "",
-        "* collected `%d`, passed `%d`, failed `%d`, skipped `%d`, collection-error modules excluded `%d`" % (
-            classification["full_suite"]["collected"],
-            classification["full_suite"]["passed"],
-            classification["full_suite"]["failed"],
-            classification["full_suite"]["skipped"],
-            classification["full_suite"]["collection_error_modules_excluded"]),
-        "* RES-85C-owned failures: `%d`; RES-85-owned failures: `%d`; RES-83/RES-84 failures: `%d`" % (
-            classification["full_suite"]["res85c_owned_failures"],
-            classification["full_suite"]["res85_owned_failures"],
-            classification["full_suite"]["res83_res84_failures"]),
-        "* pre-existing failures are classified and reproduced at ENTRY_HEAD; see `FULL_SUITE_CLASSIFICATION.json`",
-        "",
-        "## Authority amendments during Achievement B (RES-85 history)",
-        "",
-    ]
-    for amendment in amendments["amendments"]:
-        lines.append(f"* `{amendment['id']}` ({amendment['artifact']}): {amendment['change']}")
-    lines.append(f"* verdict: {amendments['verdict']}")
-    lines += [
-        "",
-        "## Scope",
-        "",
-        "RES-85 implements and qualifies causal launch/flight control only. No landing",
-        "optimisation (RES-86), no recovery (RES-87), no successor candidate identity and no",
-        "elite H2 target are claimed or created here.",
-        "",
-    ]
-    return "\n".join(lines)
-
-
-def correction_receipt(episode, report: dict[str, Any], identity_audit: dict[str, Any],
-                       conformance: dict[str, Any], override_audit: dict[str, Any],
-                       negative: dict[str, Any], pre_correction: dict[str, Any],
-                       mtp_matrix: dict[str, Any], deficit: dict[str, Any]) -> str:
-    h2 = report["method_explicit_h2_report"]["PRIMARY_CANONICAL"]["value_m"]
-    occurrence = report["takeoff_occurrence"]
-    history = report["takeoff_candidate_history"]
-    m0 = mtp_matrix["case_results"]["M0_nominal_passive_nominal_active"]
-    m1 = mtp_matrix["case_results"]["M1_zero_passive_zero_active"]
-    m3 = mtp_matrix["case_results"]["M3_zero_passive_nominal_active"]
-    winner = report["profiled"].get("controller_config", {})
+    previous_audit = predecessor["strict_structural_rom_audit"]
+    previous_trunk = previous_audit["channels"]["trunk_pelvis"]
+    trunk = strict_rom["channels"]["trunk_pelvis"]
     suite = _load_json(HERE / "FULL_SUITE_CLASSIFICATION.json")
+    amendments = _load_json(HERE / "AUTHORITY_AMENDMENTS.json")
+    matrix_conclusion = _load_json(
+        HERE / "MTP_NONCOMPENSATION_MATRIX.json")["required_conclusion"]
     lines = [
-        "# RES85C_CORRECTION_RECEIPT",
+        "# RES85D_STRICT_ROM_RECEIPT",
         "",
-        "MISSION: `RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001`",
+        "MISSION: `%s`" % MISSION_ID,
         "LINEAR ISSUE: RES-85",
         f"ENTRY_HEAD: `{ENTRY_HEAD}`",
         f"ENTRY_TREE: `{ENTRY_TREE}`",
-        f"PREVIOUS_RES85_EVIDENCE_SEAL_SHA256: `{PREVIOUS_RES85_EVIDENCE_SEAL_SHA256}`",
-        f"RES84_EVIDENCE_SEAL_SHA256: `{RES84_EVIDENCE_SEAL_SHA256}`",
+        f"RES85C_HEAD: `{RES85C_HEAD}`",
         f"RES83_PLANT_XML_SHA256: `{RES83_PLANT_XML_SHA256}`",
+        f"RES84_EVIDENCE_SEAL_SHA256: `{RES84_EVIDENCE_SEAL_SHA256}`",
+        f"PREVIOUS_RES85_EVIDENCE_SEAL_SHA256: `{PREVIOUS_RES85_EVIDENCE_SEAL_SHA256}`",
+        f"TELEMETRY_BLOB_SHA256: `{telemetry_manifest['blob_sha256']}`",
         "",
-        "The previous RES-85 (e487369) evidence remains attributable and is NOT",
-        "silently rewritten: its bundle files are the git blobs at that commit and",
-        "its external seal is recorded above.  Its episode is reproduced here as",
-        "historical pre-correction evidence with the honest classification",
-        f"`{pre_correction['classification']}` (H2 = `{pre_correction['h2_m']}` m,",
-        f"takeoff vz = `{pre_correction['takeoff_vz_m_s']}` m/s).",
+        "## Previous evidence attribution (RES-85C is NOT silently rewritten)",
         "",
-        "## Entry reconciliation",
+        "The RES-85C canonical episode remains attributable in git history at",
+        f"`{RES85C_HEAD}` and is audited here from its immutable native telemetry",
+        "(`RES85C_PREDECESSOR_STRICT_ROM.json`).  The RES-85C receipts are preserved",
+        "byte-for-byte in this bundle.",
         "",
-        "* `HEAD` == `ENTRY_HEAD`, `HEAD^{tree}` == `ENTRY_TREE` and `HEAD` == `origin/main`",
-        "  were verified before any write; the RES-83 Plant XML hash and the RES-84 and",
-        "  previous RES-85 external seals were re-verified.",
-        "* the worktree carried the interrupted prior execution artifacts of this same",
-        "  RES-85C mission.  They were audited, completed and re-verified against the",
-        "  frozen authorities; this bundle is delivered by the single RES-85C correction",
-        "  commit.  No foreign or out-of-mission change was present.",
+        "| RES-85C canonical quantity | Value | Verdict |",
+        "|---|---|---|",
+        f"| H2 (direct SYSTEM_COM) | `{predecessor['previous_h2_m']}` m | historical |",
+        f"| trunk_pelvis measured max | `{previous_trunk['max_measured_rad']}` rad "
+        "| **STRICT STRUCTURAL ROM FAIL** |",
+        f"| frozen trunk_pelvis upper | `{previous_trunk['rom_upper_rad']}` rad "
+        f"| exceeded by `{previous_trunk['measured_overshoot_rad']}` rad |",
+        f"| global min structural ROM margin | "
+        f"`{previous_audit['global_min_structural_rom_margin_rad']}` rad "
+        "| below the 1e-9 tolerance |",
+        f"| previous accepted occurrence | sample `{predecessor['previous_occurrence']}` | historical |",
+        f"| previous confirmation | sample `{predecessor['previous_confirmation']}` | historical |",
         "",
-        "## Blocker corrections",
+        "The predecessor audit is re-executed from the native arrays with the same",
+        "strict checker used for the RES-85D qualification; its verdict is FAIL on",
+        "`trunk_pelvis:upper` (see `RES85C_PREDECESSOR_STRICT_ROM.json`).",
         "",
-        "### BLOCKER A — accepted takeoff identity",
-        "",
-        "* before: the exported top-level TAKEOFF_OCCURRENCE was the first support-to-zero",
-        "  transition (startup contact chatter, sample 3 / t=0.006 s) while the launch",
-        "  actually used sample 767 / t=1.534 s (confirmation 792 / t=1.584 s).",
-        "* correction: `extract_events` now exports the unique controller-confirmed",
-        "  occurrence as the top-level TAKEOFF_OCCURRENCE; the confirmation, the H2 origin,",
-        "  the ballistic cross-check, the impulse cross-check and the diagnostic-comparator",
-        "  offsets all reference that same occurrence; every candidate remains in",
-        "  `takeoff_candidate_history` with source phase, disposition, rejection reason and",
-        "  confirmation result.",
-        f"* canonical accepted occurrence: sample `{occurrence.get('native_index')}` /",
-        f"  t=`{occurrence.get('time_s')}` s; candidate history entries: `{len(history)}`",
-        f"  (dispositions: `{identity_audit['candidate_disposition_counts']}`).",
-        f"* identity audit status: `{identity_audit['status']}`.",
-        "",
-        "### BLOCKER B — functional floor authority",
-        "",
-        "* `ELITE_SOCCER_PLUS20_H2_HARD_GATE = NOT_ESTABLISHED` (unchanged)",
-        "* `ELITE_SOCCER_PLUS20_H2_TARGET = NOT_ESTABLISHED` (restored)",
-        f"* `H_ANTI_TRIVIALITY_FLOOR = {H_ANTI_TRIVIALITY_FLOOR_M}` m with role",
-        "  `HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY`; explicit statements:",
-        "  0.150 m is NOT an elite-performance norm, NOT an optimization target,",
-        "  and IS a minimum functional success condition.",
-        "* diagnostic scale cross-check only: minimum ballistic vz =",
-        f"  `{FLOOR_BALLISTIC_VZ_MAX_M_S:.6f}` m/s (never a replacement for direct SYSTEM_COM H2).",
-        f"* corrected episode classification: `{report['functional_task_floor']['classification']}`",
-        f"  at H2 = `{h2}` m.",
-        f"* pre-correction episode: `{pre_correction['classification']}` (not relabelled PASS).",
-        "",
-        "### BLOCKER C — actuation-rate contract",
-        "",
-        "* torque-rate limit is declared `NOMINAL_SLEW_BOUND` (it is not, and is no longer",
-        "  reported as, a hard ceiling).",
-        "* moment / joint-power / MTP energy gates are the `HARD_SAFETY_BOUNDS`: they are",
-        "  enforced every sample and never exceeded.",
-        "* when a changing hard safety bound empties the slew-feasible interval the hard",
-        "  bound wins and the sample is recorded as an explicit SAFETY_OVERRIDE naming the",
-        "  single binding hard constraint and the violated nominal slew margin.",
-        "* canonical episode: undeclared slew exceedances = 0; declared override",
-        f"  samples = `{override_audit['declared_override_samples']}` sample rows",
-        f"  (`{conformance['safety_override_channel_samples']}` channel samples);",
-        "  every override is attributed to exactly one binding hard safety bound;",
-        f"  audit status `{override_audit['status']}`.",
-        "* no numeric moment, power or MTP work budget was increased.",
-        "",
-        "### BLOCKER D — MTP non-compensation",
-        "",
-        "* deterministic matrix (M0..M3 + declared sweeps) in `MTP_NONCOMPENSATION_MATRIX.json`.",
-        f"* M0 (nominal passive + nominal active): H2 = `{m0['h2_m']}` m,",
-        f"  active MTP positive work = `{m0['mtp_active_total_positive_work_j']}` J,",
-        f"  ratio to total positive joint work = `{m0['ratio_mtp_active_over_total_positive']}`.",
-        f"* M1 (zero passive + zero active): H2 = `{m1['h2_m']}` m, active MTP work =",
-        f"  `{m1['mtp_active_total_positive_work_j']}` J, confirmation =",
-        f"  `{m1['takeoff_confirmation']}`.",
-        f"* M3 (zero passive + nominal active): H2 = `{m3['h2_m']}` m.",
-        f"* conclusion: {mtp_matrix['required_conclusion']['conclusion']}.",
-        "* active MTP positive work remains a negligible fraction of total positive joint",
-        "  work; the ankle remains the dominant contributor.",
-        "",
-        "## Canonical result",
+        "## New canonical result (RES-85D)",
         "",
         "| Quantity | Value |",
         "|---|---|",
         f"| H2 (direct SYSTEM_COM) | `{h2}` m |",
-        f"| takeoff vz | `{report['apex_h2'].get('takeoff_vz_m_s')}` m/s |",
+        f"| takeoff vz | `{apex.get('takeoff_vz_m_s')}` m/s |",
         f"| accepted occurrence | sample `{occurrence.get('native_index')}` / t=`{occurrence.get('time_s')}` s |",
-        f"| confirmation | sample `{report['takeoff_confirmation'].get('confirmation_sample')}`"
-        f" / t=`{report['takeoff_confirmation'].get('confirmation_time_s')}` s |",
-        f"| ballistic cross-check residual | `{report['apex_h2'].get('ballistic_cross_check_delta_m')}` m |",
-        f"| functional floor classification | `{report['functional_task_floor']['classification']}` |",
-        f"| propulsion stroke | `{deficit['structural_countermovement_budget']['used_m']}` m of "
-        f"`{deficit['structural_countermovement_budget']['budget_m']}` m budget |",
-        f"| launch joint ROM audit | `{report['joint_rom_audit']['status']}` "
-        f"(reference `{report['joint_rom_audit']['reference_within_frozen_rom']}`, "
-        f"drive `{report['joint_rom_audit']['no_applied_moment_drives_past_frozen_rom']}`, "
-        f"envelope `{report['joint_rom_audit']['measured_overshoot_within_plant_soft_limit_envelope']}`) |",
+        f"| takeoff confirmation | sample `{confirmation.get('confirmation_sample')}` / "
+        f"t=`{confirmation.get('confirmation_time_s')}` s |",
+        f"| RES85 claim end (first legal plantar recontact) | sample `{report['res85_claim_end'].get('sample')}` / "
+        f"t=`{report['res85_claim_end'].get('time_s')}` s |",
+        f"| ballistic cross-check residual | `{apex.get('ballistic_cross_check_delta_m')}` m |",
+        f"| functional floor classification | `{report['functional_task_floor']['classification']}` "
+        f"(closure `{report['functional_task_floor']['closure_pass']}`) |",
         "",
-        "## Accepted occurrence identity",
+        "`ELITE_SOCCER_PLUS20_H2_HARD_GATE = NOT_ESTABLISHED` and",
+        "`ELITE_SOCCER_PLUS20_H2_TARGET = NOT_ESTABLISHED` (unchanged).  The",
+        "`H_ANTI_TRIVIALITY_FLOOR = 0.150 m` is a hard functional non-triviality",
+        "boundary, not an elite norm and not an optimization target.",
         "",
-        "| candidate | t (s) | source phase | disposition | rejection reason | confirmation sample | confirmed |",
+        "## Strict structural ROM (frozen human envelope)",
+        "",
+        f"* domain: `{strict_rom['scope']}` (claim end sample `{strict_rom['claim_end_sample']}`)",
+        f"* criterion: {strict_rom['criterion']}",
+        f"* tolerance: `{strict_rom['tolerance_rad']}` rad "
+        "(`FLOATING_POINT_EQUALITY_ONLY_NOT_ANATOMICAL_ROM`)",
+        f"* `GLOBAL_MIN_STRUCTURAL_ROM_MARGIN_RAD = {strict_rom['global_min_structural_rom_margin_rad']}`",
+        f"* audit status: `{strict_rom['status']}`",
+        f"* solver soft-limit probe role: "
+        f"`{strict_rom['solver_soft_limit_probe_role']}`",
+        "",
+        "| joint | frozen lower | frozen upper | min measured | max measured | min margin | status |",
         "|---|---|---|---|---|---|---|",
     ] + [
-        f"| `{h['occurrence']['native_index']}` | `{h['occurrence']['time_s']}` | "
-        f"`{h['source_phase']}` | `{h['disposition']}` | `{h['rejection_reason']}` | "
-        f"`{h['confirmation_result']['confirmation_sample']}` | "
-        f"`{h['confirmation_result']['confirmed']}` |"
-        for h in history
+        f"| `{name}` | `{ch['rom_lower_rad']}` | `{ch['rom_upper_rad']}` | "
+        f"`{ch['min_measured_rad']}` | `{ch['max_measured_rad']}` | "
+        f"`{ch['min_rom_margin_rad']}` | `{ch['status']}` |"
+        for name, ch in sorted(strict_rom["channels"].items())
     ] + [
         "",
-        "## MTP non-compensation sensitivity matrix",
+        "### trunk_pelvis (the known binding channel)",
         "",
-        "| case | zero-passive | active budget (J) | MTP moment (N*m) | takeoff | H2 (m) | "
-        "active MTP (J) | ratio active/total | budget binds | qualitative success |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        f"* frozen upper bound: `{trunk['rom_upper_rad']}` rad",
+        f"* measured maximum: `{trunk['max_measured_rad']}` rad",
+        f"* minimum ROM margin: `{trunk['min_rom_margin_rad']}` rad "
+        f"(worst side `{trunk['worst_side']}`, sample `{trunk['worst_native_sample']}`, "
+        f"phase `{trunk['worst_phase']}`)",
+        f"* at the worst sample: qdot `{trunk['qdot_at_worst_rad_s']}` rad/s, "
+        f"applied `{trunk['applied_nm_at_worst']}` N*m, "
+        f"reference `{trunk['posture_reference_at_worst_rad']}` rad",
+        "",
+        "## Hard actuation conformance",
+        "",
+        f"* torque-rate role: `{conformance['torque_rate_role']}`",
+        f"* hard safety bounds: `{conformance['hard_safety_bounds']}`",
+        f"* max applied moment (N*m): `{conformance['max_applied_nm']}`",
+        f"* max joint power (W): `{conformance['max_joint_power_w']}`",
+        f"* max bilateral asymmetry (N*m): `{conformance['max_bilateral_asymmetry_nm']}` "
+        "(RES-85 claim domain; the post-claim landing window is RES-86 scope)",
+        f"* conformance `{conformance['status']}`; safety override audit "
+        f"`{override_audit['status']}` with `{override_audit['declared_override_samples']}` "
+        "declared override sample rows and no undeclared slew exceedance",
+        "",
+        "## MTP non-compensation",
+        "",
+        f"* MTP energy report status: `{mtp['status']}`",
+        f"* matrix conclusion: `{matrix_conclusion['conclusion']}`",
+        "* zero-passive + zero-active case confirmed: "
+        f"`{matrix_conclusion['zero_passive_zero_active_feasible']}` "
+        f"(H2 = `{matrix_conclusion['zero_passive_zero_active_h2_m']}` m; "
+        "reported honestly as a sensitivity observation, below the canonical "
+        "functional floor)",
+        f"* active MTP positive work ratio (nominal): "
+        f"`{matrix_conclusion['mtp_active_ratio_nominal']}`",
+        "",
+        "## Negative controls",
+        "",
+        "| Control | Result |",
+        "|---|---|",
     ] + [
-        f"| `{name}` | `{r['zero_passive']}` | `{r['active_budget_override_j']}` | "
-        f"`{r['moment_ceiling_override_nm']}` | `{r['takeoff_confirmation']}` | "
-        f"`{r['h2_m']}` | `{r['mtp_active_total_positive_work_j']}` | "
-        f"`{r['ratio_mtp_active_over_total_positive']}` | `{r['mtp_budget_binds']}` | "
-        f"`{r['qualitative_success']}` |"
-        for name, r in sorted(mtp_matrix["case_results"].items())
+        f"| `{c['check']}` | {'PASS' if c['pass'] else 'FAIL'} |"
+        for c in negative["checks"]
     ] + [
         "",
         "## Test and suite results",
         "",
-        f"* targeted RES-85/RES-85C/Plant/measurement: `{suite['targeted_and_regression']}`",
-        f"* full repository suite: `{suite['full_suite']}`",
-        f"* pre-existing failure reproduction: `{suite['entry_head_reproduction']}`",
-        f"* failure categories: `{suite['failure_categories']}`",
+        f"* full repository suite (one run, candidate worktree at ENTRY_HEAD plus the "
+        f"RES-85D changes): collected `{suite['full_suite']['collected']}`, "
+        f"passed `{suite['full_suite']['passed']}`, failed `{suite['full_suite']['failed']}`, "
+        f"skipped `{suite['full_suite']['skipped']}`, errors "
+        f"`{suite['full_suite'].get('errors', 0)}`; excluded collection-error modules "
+        f"`{suite['full_suite']['collection_error_modules_excluded']}` "
+        "(`tests/test_ml241_qacc_resolution.py`, "
+        "`tests/test_public_support_wrench_contract.py`)",
+        f"* RES-85D-owned failures: `{suite['full_suite'].get('res85d_owned_failures')}`; "
+        f"RES-85C-owned: `{suite['full_suite']['res85c_owned_failures']}`; "
+        f"RES-85-owned: `{suite['full_suite']['res85_owned_failures']}`; "
+        f"RES-83/RES-84: `{suite['full_suite']['res83_res84_failures']}`; every recorded "
+        "failure is classified `PRE_EXISTING_*`",
+        f"* targeted qualification: `{suite['targeted_and_regression']}`; collected "
+        f"`{suite['targeted_counts']['collected']}`, passed `{suite['targeted_counts']['passed']}`, "
+        f"failed `{suite['targeted_counts']['failed']}`, skipped `{suite['targeted_counts']['skipped']}`",
+        f"* entry-head reproduction: "
+        f"`{suite['res85d_final_run']['entry_head_reproduction']['failures_reproduced_node_for_node']}` "
+        f"of `{suite['res85d_final_run']['run']['failed']}` candidate failures reproduced "
+        "node-for-node at ENTRY_HEAD with the same controlling cause; no failing test file "
+        "imports the RES-85D change surface `loaded_cmj.v3`",
         "",
-        "## Controller engineering variables (bounded declared search)",
+        "## Determinism",
         "",
-        "`PROPULSION_SEARCH.json` records the predeclared staged coordinate-ascent",
-        "grid (`a_thrust_m_s2` x `thrust_az_max_m_s2`, `extension_rate_ff_gain` x",
-        "`contact_preload_m`, `trunk_lean_frac` x `trunk_extend_frac`, then the",
-        "`a_thrust_m_s2` x `thrust_az_max_m_s2` refinement stage), the fixed declared",
-        "ROM/trunk setup, the declared ordering, the evaluation function, the 33",
-        "evaluation cap and the two-run byte-identity result.  Selected configuration:",
+        "* the bundle is built twice and compared over the declared identity domain;",
+        "  the two-build byte-identity result and per-artifact sha256 live in",
+        "  `DETERMINISM_REPORT.json`; the telemetry blob and canonical digest live in",
+        "  `TELEMETRY_MANIFEST.json`.",
+        f"* telemetry canonical digest: `{telemetry_manifest['canonical_digest']}`",
+        "* the declared search (if any) is run twice and compared over its own",
+        "  canonical payload (`STRICT_ROM_SEARCH.json`).",
+        "* evidence seal: `HASH_MANIFEST.json` covers every sealed artifact of this",
+        "  bundle and the telemetry blob; the seal is written by the same deterministic",
+        "  build that produces this receipt.",
         "",
-        "```json",
-        json.dumps({k: winner.get(k) for k in sorted(winner)}, indent=2),
-        "```",
+        "## Authority amendments (RES-85 history, unchanged)",
         "",
-        "## Actuation semantics",
-        "",
-        f"* role of the rate limit: `{conformance['torque_rate_role']}`",
-        f"* hard safety bounds: `{conformance['hard_safety_bounds']}`",
-        f"* max applied moment (N*m): `{conformance['max_applied_nm']}`",
-        f"* max joint power (W): `{conformance['max_joint_power_w']}`",
-        f"* final status: conformance `{conformance['status']}`, "
-        f"override audit `{override_audit['status']}`, negative controls `{negative['status']}`",
-        "",
-        "## Evidence",
-        "",
-        "* artifacts regenerated deterministically; `DETERMINISM_REPORT.json` records the",
-        "  declared identity domain and the two-build byte-identity result.",
-        "* `HASH_MANIFEST.json` covers every artifact and the telemetry blob.",
+    ] + [
+        f"* `{amendment['id']}` ({amendment['artifact']}): {amendment['change']}"
+        for amendment in amendments["amendments"]
+    ] + [
+        f"* verdict: {amendments['verdict']}",
         "",
         "## Final claim ceiling",
         "",
-        "RES-85C closes the causal loaded-CMJ launch and flight (takeoff, confirmation,",
+        "RES-85D closes the causal loaded-CMJ launch and flight (takeoff, confirmation,",
         "genuine 50 ms physical-time flight, apex/H2) against the frozen RES-83 Plant,",
-        "RES-84 measurement authority and RES-85 control authority.  It claims no landing",
-        "capture, no recovery, no elite performance norm and no successor candidate",
-        "identity; the functional floor is a non-triviality boundary, not a performance",
-        "claim.",
+        "RES-84 measurement authority and RES-85 control authority, and additionally",
+        "requires every measured bounded joint coordinate to remain inside the frozen",
+        "human structural envelope from the first native sample through the RES-85 claim",
+        "end.  It claims no landing capture, no recovery, no elite performance norm and",
+        "no successor candidate identity; the functional floor is a non-triviality",
+        "boundary, not a performance claim.",
+        "",
+        "`NEXT_AUTHORIZED_ACTION=RES86_ACTIVE_SET_SAFE_LANDING_CAPTURE`",
+        "(successor work is not started by RES-85D).",
         "",
     ]
     return "\n".join(lines)
@@ -1794,6 +2186,9 @@ def _write_artifacts(built: dict[str, Any]) -> dict[str, Any]:
     (HERE / "TELEMETRY_MANIFEST.json").write_text(json_text(built["telemetry_manifest"]))
     (HERE / "TELEMETRY_ARRAYS.bin").write_bytes(built["telemetry_blob"])
     (HERE / "LAUNCH_EPISODE_REPORT.json").write_text(json_text(built["episode_report"]))
+    (HERE / "STRICT_STRUCTURAL_ROM_AUDIT.json").write_text(json_text(built["strict_rom"]))
+    (HERE / "RES85C_PREDECESSOR_STRICT_ROM.json").write_text(
+        json_text(built["predecessor"]))
     (HERE / "OCCURRENCE_IDENTITY_AUDIT.json").write_text(json_text(built["identity_audit"]))
     (HERE / "PROPULSION_DEFICIT_REPORT.json").write_text(json_text(built["deficit"]))
     (HERE / "MTP_ENERGY_REPORT.json").write_text(json_text(built["mtp_report"]))
@@ -1803,8 +2198,9 @@ def _write_artifacts(built: dict[str, Any]) -> dict[str, Any]:
     (HERE / "ZERO_PASSIVE_SENSITIVITY_REPORT.json").write_text(json_text(built["zero_passive"]))
     (HERE / "PRE_CORRECTION_EPISODE_CLASSIFICATION.json").write_text(
         json_text(built["pre_correction"]))
-    (HERE / "RES85_RECEIPT.md").write_text(built["receipt"])
-    (HERE / "RES85C_CORRECTION_RECEIPT.md").write_text(built["correction_receipt"])
+    (HERE / "RES85D_STRICT_ROM_RECEIPT.md").write_text(built["strict_rom_receipt"])
+    # The RES-85C receipts (RES85_RECEIPT.md, RES85C_CORRECTION_RECEIPT.md) are
+    # preserved byte-for-byte and intentionally NOT rewritten here.
     # authority artifacts from Achievement A (regenerated deterministically)
     import build_authority_checks as BAC
 
@@ -1812,8 +2208,8 @@ def _write_artifacts(built: dict[str, Any]) -> dict[str, Any]:
     manifest = {
         "schema_version": "1.0.0",
         "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
-        "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
-        "achievement": "RES-85C: close the launch requalification and evidence consistency",
+        "mission": MISSION_ID,
+        "achievement": "RES-85D: enforce strict launch ROM and finalize RES-85",
         "files": {name: sha256_file(HERE / name) for name in sorted(ARTIFACT_FILES)
                   if (HERE / name).is_file()},
         "telemetry_blob_sha256": built["telemetry_manifest"]["blob_sha256"],
@@ -1821,6 +2217,9 @@ def _write_artifacts(built: dict[str, Any]) -> dict[str, Any]:
         "plant_xml_sha256": built["spec"]["plant_xml_sha256"],
         "res84_evidence_seal_sha256": RES84_EVIDENCE_SEAL_SHA256,
         "previous_res85_evidence_seal_sha256": PREVIOUS_RES85_EVIDENCE_SEAL_SHA256,
+        "res85c_head": RES85C_HEAD,
+        "entry_head": ENTRY_HEAD,
+        "entry_tree": ENTRY_TREE,
     }
     (HERE / "HASH_MANIFEST.json").write_text(json_text(manifest))
     return manifest
@@ -1830,6 +2229,8 @@ def _identity_payload(built: dict[str, Any]) -> dict[str, str]:
     return {
         "spec": json_text(built["spec"]),
         "episode_report": json_text(built["episode_report"]),
+        "strict_rom": json_text(built["strict_rom"]),
+        "predecessor": json_text(built["predecessor"]),
         "identity_audit": json_text(built["identity_audit"]),
         "deficit": json_text(built["deficit"]),
         "pre_correction": json_text(built["pre_correction"]),
@@ -1840,8 +2241,7 @@ def _identity_payload(built: dict[str, Any]) -> dict[str, str]:
         "zero_passive": json_text(built["zero_passive"]),
         "telemetry_manifest": json_text(built["telemetry_manifest"]),
         "telemetry_blob_sha256": sha256_bytes(built["telemetry_blob"]),
-        "receipt": built["receipt"],
-        "correction_receipt": built["correction_receipt"],
+        "strict_rom_receipt": built["strict_rom_receipt"],
     }
 
 
@@ -1856,17 +2256,21 @@ def determinism_report(first: dict[str, Any], second: dict[str, Any]) -> dict[st
            [a["telemetry_blob_sha256"], b["telemetry_blob_sha256"]])
     return {
         "schema_version": "1.0.0",
+        "mission": MISSION_ID,
         "status": _status(checks),
         "checks": checks,
         "telemetry_blob_sha256": a["telemetry_blob_sha256"],
         "identity_domain": sorted(a),
         "excluded_from_identity": [
             "sealed_at_utc", "postcommit sidecar", "git HEAD-at-authoring fields",
-            "external bundle path", "PROPULSION_SEARCH.json (separate declared search "
+            "external bundle path", "PROPULSION_SEARCH.json (RES-85C declared search "
             "artifact with its own two-run byte-identity check)",
+            "STRICT_ROM_SEARCH.json (RES-85D declared search artifact with its own "
+            "two-run byte-identity check)",
             "MTP_NONCOMPENSATION_MATRIX.json (separate declared matrix artifact with its "
             "own two-run byte-identity check)",
-            "JOINT_ROM_SOFT_LIMIT_PROBE.json (Plant property probe, deterministic script)",
+            "JOINT_ROM_SOFT_LIMIT_PROBE.json (Plant property probe, deterministic script; "
+            "numerical solver diagnostic only)",
         ],
         "artifact_sha256": {k: sha256_bytes(v.encode("utf-8")) for k, v in a.items()},
     }
@@ -1902,6 +2306,11 @@ def main(argv: list[str] | None = None) -> int:
                 "native_index"),
             "h2_m": built["episode_report"]["apex_h2"].get("h2_support_m"),
             "floor": built["episode_report"]["functional_task_floor"],
+            "strict_rom": built["strict_rom"]["status"],
+            "strict_rom_global_min_margin":
+                built["strict_rom"]["global_min_structural_rom_margin_rad"],
+            "predecessor_strict_rom": built["predecessor"][
+                "strict_structural_rom_audit"]["status"],
             "identity_audit": built["identity_audit"]["status"],
             "negative": built["negative"]["status"],
             "conformance": built["conformance"]["status"],
@@ -1917,7 +2326,7 @@ def main(argv: list[str] | None = None) -> int:
           and built["identity_audit"]["status"] == STATUS_PASS
           and built["mtp_report"]["status"] == STATUS_PASS
           and built["zero_passive"]["status"] == STATUS_PASS
-          and built["episode_report"]["joint_rom_audit"]["status"] == STATUS_PASS
+          and built["strict_rom"]["status"] == STATUS_PASS
           and built["episode"].status == "COMPLETED"
           and bool(built["episode_report"]["functional_task_floor"]["closure_pass"])
           and (det is None or det["status"] == STATUS_PASS))

@@ -1,33 +1,33 @@
 {
   "apex_h2": {
-    "apex_time_s": 1.5289529004131197,
-    "ballistic_cross_check_delta_m": -0.0052114441742021345,
-    "ballistic_height_m": 0.19388341727251565,
-    "com_z_apex_m": 1.3517870738080795,
-    "com_z_takeoff_m": 1.163115100709766,
+    "apex_time_s": 1.4057268700913501,
+    "ballistic_cross_check_delta_m": -0.0025092621395576,
+    "ballistic_height_m": 0.16272324748320732,
+    "com_z_apex_m": 1.2780436335747098,
+    "com_z_takeoff_m": 1.1178296482310601,
     "evaluable": true,
-    "h2_support_m": 0.18867197309831352,
-    "origin_occurrence_index": 666,
+    "h2_support_m": 0.16021398534364972,
+    "origin_occurrence_index": 612,
     "reason": "",
-    "takeoff_vz_m_s": 1.9503826924187873
+    "takeoff_vz_m_s": 1.7867932492654341
   },
   "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
   "diagnostic_comparator": {
     "confirmation_offset_s": 0.010000000000000009,
-    "confirmation_time_s": 1.342,
+    "confirmation_time_s": 1.234,
     "invalid": false,
     "k_d": 5,
     "left_fz_at_trigger_n": 0.0,
     "note": "Diagnostic/comparability only.  Never defines physical takeoff, flight or the H2 time origin.",
-    "offset_origin_index": 666,
+    "offset_origin_index": 612,
     "onset_offset_s": 0.0,
-    "onset_time_s": 1.332,
+    "onset_time_s": 1.224,
     "required_true_samples": 6,
     "right_fz_at_trigger_n": 0.0,
     "status": "TRIGGERED",
     "total_fz_at_trigger_n": 0.0,
     "triggered": true,
-    "true_sample_count": 220
+    "true_sample_count": 179
   },
   "episode_status": "COMPLETED",
   "fault": null,
@@ -36,113 +36,387 @@
     "classification": "ABOVE_FLOOR",
     "closure_pass": true,
     "floor_role": "HARD_FUNCTIONAL_NONTRIVIALITY_NEGATIVE_CONTROL_BOUNDARY",
-    "h2_m": 0.18867197309831352,
+    "h2_m": 0.16021398534364972,
     "h_anti_triviality_floor_m": 0.15,
     "note": "H_ANTI_TRIVIALITY_FLOOR is a minimum functional success condition, not an elite norm and not an optimization target"
   },
   "impulse_cross_check": {
-    "cross_check_end_index": 765,
+    "cross_check_end_index": 703,
     "cross_check_end_reason": "APEX_VZ_NONPOSITIVE_CROSSING",
-    "impulse_derived_delta_vz_m_s": -1.9423800000000027,
-    "impulse_n_s": -192.29562000000027,
-    "measured_delta_vz_m_s": -1.9606731349027353,
-    "occurrence_index": 666,
-    "occurrence_vz_m_s": 1.9503826924187873,
-    "residual_m_s": 0.018293134902732655,
+    "impulse_derived_delta_vz_m_s": -1.7854200000000038,
+    "impulse_n_s": -176.75658000000038,
+    "measured_delta_vz_m_s": -1.7894736550690469,
+    "occurrence_index": 612,
+    "occurrence_vz_m_s": 1.7867932492654341,
+    "residual_m_s": 0.004053655069043094,
     "rule": "LEFT_RECTANGLE_INTEGRATOR_CONSISTENT"
   },
   "joint_rom_audit": {
+    "authority": "FROZEN_HUMAN_STRUCTURAL_ENVELOPE_V3_JOINT_RANGES_RAD",
     "channels": {
       "left_ankle": {
-        "max_measured_rad": 0.5369714459257702,
+        "applied_nm_at_worst": 13.685628940724243,
+        "lower_extreme": {
+          "applied_nm": 20.927733566224614,
+          "margin_rad": 0.9000872860782771,
+          "native_sample": 8,
+          "phase": "STAND",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": -0.05984371392172286,
+          "qdot_rad_s": -7.42370314431312,
+          "time_s": 0.016
+        },
+        "lower_margin_rad": 0.9000872860782771,
+        "max_measured_rad": 0.5638063820269908,
         "measured_overshoot_rad": 0.0,
         "min_measured_rad": -0.05984371392172286,
-        "plant_soft_limit_envelope_rad": 1.5332473681554835,
+        "min_rom_margin_rad": 0.2215916179730092,
+        "posture_reference_at_worst_rad": 0.7187745596763992,
+        "qdot_at_worst_rad_s": 0.02335620685824116,
         "rom_lower_rad": -0.959931,
         "rom_upper_rad": 0.785398,
-        "within_envelope": true
+        "solver_soft_limit_diagnostic_rad": 1.5332473681554835,
+        "solver_soft_limit_diagnostic_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "status": "PASS",
+        "upper_extreme": {
+          "applied_nm": 13.685628940724243,
+          "margin_rad": 0.2215916179730092,
+          "native_sample": 551,
+          "phase": "PROPULSION",
+          "posture_reference_rad": 0.7187745596763992,
+          "q_measured_rad": 0.5638063820269908,
+          "qdot_rad_s": 0.02335620685824116,
+          "time_s": 1.102
+        },
+        "upper_margin_rad": 0.2215916179730092,
+        "worst_native_sample": 551,
+        "worst_phase": "PROPULSION",
+        "worst_side": "upper"
       },
       "left_hip": {
-        "max_measured_rad": 0.5869642166377264,
+        "applied_nm_at_worst": 12.0,
+        "lower_extreme": {
+          "applied_nm": 12.0,
+          "margin_rad": 0.349066,
+          "native_sample": 0,
+          "phase": "STAND",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": 0.0,
+          "qdot_rad_s": 0.0,
+          "time_s": 0.0
+        },
+        "lower_margin_rad": 0.349066,
+        "max_measured_rad": 0.6872899218875758,
         "measured_overshoot_rad": 0.0,
-        "min_measured_rad": -0.015228209516830607,
-        "plant_soft_limit_envelope_rad": 0.282016205134501,
+        "min_measured_rad": 0.0,
+        "min_rom_margin_rad": 0.349066,
+        "posture_reference_at_worst_rad": 0.0,
+        "qdot_at_worst_rad_s": 0.0,
         "rom_lower_rad": -0.349066,
         "rom_upper_rad": 2.268928,
-        "within_envelope": true
+        "solver_soft_limit_diagnostic_rad": 0.282016205134501,
+        "solver_soft_limit_diagnostic_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "status": "PASS",
+        "upper_extreme": {
+          "applied_nm": -27.346407526499277,
+          "margin_rad": 1.581638078112424,
+          "native_sample": 528,
+          "phase": "BRAKING",
+          "posture_reference_rad": 0.7187084609237272,
+          "q_measured_rad": 0.6872899218875758,
+          "qdot_rad_s": 0.02284932943268747,
+          "time_s": 1.056
+        },
+        "upper_margin_rad": 1.581638078112424,
+        "worst_native_sample": 0,
+        "worst_phase": "STAND",
+        "worst_side": "lower"
       },
       "left_knee": {
-        "max_measured_rad": 1.4076709358837551,
+        "applied_nm_at_worst": 16.0,
+        "lower_extreme": {
+          "applied_nm": 16.0,
+          "margin_rad": 0.0,
+          "native_sample": 0,
+          "phase": "STAND",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": 0.0,
+          "qdot_rad_s": 0.0,
+          "time_s": 0.0
+        },
+        "lower_margin_rad": 0.0,
+        "max_measured_rad": 1.4185266741631963,
         "measured_overshoot_rad": 0.0,
         "min_measured_rad": 0.0,
-        "plant_soft_limit_envelope_rad": 0.30182148798438224,
+        "min_rom_margin_rad": 0.0,
+        "posture_reference_at_worst_rad": 0.0,
+        "qdot_at_worst_rad_s": 0.0,
         "rom_lower_rad": 0.0,
         "rom_upper_rad": 2.443461,
-        "within_envelope": true
+        "solver_soft_limit_diagnostic_rad": 0.30182148798438224,
+        "solver_soft_limit_diagnostic_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "status": "PASS",
+        "upper_extreme": {
+          "applied_nm": -163.5976279009905,
+          "margin_rad": 1.0249343258368038,
+          "native_sample": 543,
+          "phase": "PROPULSION",
+          "posture_reference_rad": 1.4417172416455397,
+          "q_measured_rad": 1.4185266741631963,
+          "qdot_rad_s": 0.01885868581090097,
+          "time_s": 1.086
+        },
+        "upper_margin_rad": 1.0249343258368038,
+        "worst_native_sample": 0,
+        "worst_phase": "STAND",
+        "worst_side": "lower"
       },
       "left_mtp": {
-        "max_measured_rad": 0.07548017021316028,
+        "applied_nm_at_worst": 0.0,
+        "lower_extreme": {
+          "applied_nm": 0.0,
+          "margin_rad": 0.5218930446802337,
+          "native_sample": 297,
+          "phase": "COUNTERMOVEMENT",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": -0.0017059553197663773,
+          "qdot_rad_s": -0.001584273074294441,
+          "time_s": 0.594
+        },
+        "lower_margin_rad": 0.5218930446802337,
+        "max_measured_rad": 0.07869167394701632,
         "measured_overshoot_rad": 0.0,
-        "min_measured_rad": -0.0018407913880823632,
-        "plant_soft_limit_envelope_rad": 1.1066004393614044,
+        "min_measured_rad": -0.0017059553197663773,
+        "min_rom_margin_rad": 0.5218930446802337,
+        "posture_reference_at_worst_rad": 0.0,
+        "qdot_at_worst_rad_s": -0.001584273074294441,
         "rom_lower_rad": -0.523599,
         "rom_upper_rad": 1.570796,
-        "within_envelope": true
+        "solver_soft_limit_diagnostic_rad": 1.1066004393614044,
+        "solver_soft_limit_diagnostic_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "status": "PASS",
+        "upper_extreme": {
+          "applied_nm": 0.0,
+          "margin_rad": 1.4921043260529838,
+          "native_sample": 15,
+          "phase": "STAND",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": 0.07869167394701632,
+          "qdot_rad_s": 1.0387244134730695,
+          "time_s": 0.03
+        },
+        "upper_margin_rad": 1.4921043260529838,
+        "worst_native_sample": 297,
+        "worst_phase": "COUNTERMOVEMENT",
+        "worst_side": "lower"
       },
       "right_ankle": {
-        "max_measured_rad": 0.5369714459257705,
+        "applied_nm_at_worst": 13.685628940724243,
+        "lower_extreme": {
+          "applied_nm": 20.927733566224614,
+          "margin_rad": 0.9000872860782856,
+          "native_sample": 8,
+          "phase": "STAND",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": -0.059843713921714406,
+          "qdot_rad_s": -7.423703144312452,
+          "time_s": 0.016
+        },
+        "lower_margin_rad": 0.9000872860782856,
+        "max_measured_rad": 0.5638063820269948,
         "measured_overshoot_rad": 0.0,
         "min_measured_rad": -0.059843713921714406,
-        "plant_soft_limit_envelope_rad": 1.5332473681554892,
+        "min_rom_margin_rad": 0.2215916179730052,
+        "posture_reference_at_worst_rad": 0.7187745596763992,
+        "qdot_at_worst_rad_s": 0.023356206858275975,
         "rom_lower_rad": -0.959931,
         "rom_upper_rad": 0.785398,
-        "within_envelope": true
+        "solver_soft_limit_diagnostic_rad": 1.5332473681554892,
+        "solver_soft_limit_diagnostic_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "status": "PASS",
+        "upper_extreme": {
+          "applied_nm": 13.685628940724243,
+          "margin_rad": 0.2215916179730052,
+          "native_sample": 551,
+          "phase": "PROPULSION",
+          "posture_reference_rad": 0.7187745596763992,
+          "q_measured_rad": 0.5638063820269948,
+          "qdot_rad_s": 0.023356206858275975,
+          "time_s": 1.102
+        },
+        "upper_margin_rad": 0.2215916179730052,
+        "worst_native_sample": 551,
+        "worst_phase": "PROPULSION",
+        "worst_side": "upper"
       },
       "right_hip": {
-        "max_measured_rad": 0.5869642166377259,
-        "measured_overshoot_rad": 0.0,
-        "min_measured_rad": -0.01522820951683043,
-        "plant_soft_limit_envelope_rad": 0.2820162051344961,
-        "rom_lower_rad": -0.349066,
-        "rom_upper_rad": 2.268928,
-        "within_envelope": true
-      },
-      "right_knee": {
-        "max_measured_rad": 1.4076709358837554,
+        "applied_nm_at_worst": 12.0,
+        "lower_extreme": {
+          "applied_nm": 12.0,
+          "margin_rad": 0.349066,
+          "native_sample": 0,
+          "phase": "STAND",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": 0.0,
+          "qdot_rad_s": 0.0,
+          "time_s": 0.0
+        },
+        "lower_margin_rad": 0.349066,
+        "max_measured_rad": 0.687289921887574,
         "measured_overshoot_rad": 0.0,
         "min_measured_rad": 0.0,
-        "plant_soft_limit_envelope_rad": 0.3018214879843826,
+        "min_rom_margin_rad": 0.349066,
+        "posture_reference_at_worst_rad": 0.0,
+        "qdot_at_worst_rad_s": 0.0,
+        "rom_lower_rad": -0.349066,
+        "rom_upper_rad": 2.268928,
+        "solver_soft_limit_diagnostic_rad": 0.2820162051344961,
+        "solver_soft_limit_diagnostic_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "status": "PASS",
+        "upper_extreme": {
+          "applied_nm": -27.346407526499277,
+          "margin_rad": 1.5816380781124257,
+          "native_sample": 528,
+          "phase": "BRAKING",
+          "posture_reference_rad": 0.7187084609237272,
+          "q_measured_rad": 0.687289921887574,
+          "qdot_rad_s": 0.02284932943268697,
+          "time_s": 1.056
+        },
+        "upper_margin_rad": 1.5816380781124257,
+        "worst_native_sample": 0,
+        "worst_phase": "STAND",
+        "worst_side": "lower"
+      },
+      "right_knee": {
+        "applied_nm_at_worst": 16.0,
+        "lower_extreme": {
+          "applied_nm": 16.0,
+          "margin_rad": 0.0,
+          "native_sample": 0,
+          "phase": "STAND",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": 0.0,
+          "qdot_rad_s": 0.0,
+          "time_s": 0.0
+        },
+        "lower_margin_rad": 0.0,
+        "max_measured_rad": 1.418526674163196,
+        "measured_overshoot_rad": 0.0,
+        "min_measured_rad": 0.0,
+        "min_rom_margin_rad": 0.0,
+        "posture_reference_at_worst_rad": 0.0,
+        "qdot_at_worst_rad_s": 0.0,
         "rom_lower_rad": 0.0,
         "rom_upper_rad": 2.443461,
-        "within_envelope": true
+        "solver_soft_limit_diagnostic_rad": 0.3018214879843826,
+        "solver_soft_limit_diagnostic_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "status": "PASS",
+        "upper_extreme": {
+          "applied_nm": -163.5976279009905,
+          "margin_rad": 1.024934325836804,
+          "native_sample": 543,
+          "phase": "PROPULSION",
+          "posture_reference_rad": 1.4417172416455397,
+          "q_measured_rad": 1.418526674163196,
+          "qdot_rad_s": 0.018858685810906682,
+          "time_s": 1.086
+        },
+        "upper_margin_rad": 1.024934325836804,
+        "worst_native_sample": 0,
+        "worst_phase": "STAND",
+        "worst_side": "lower"
       },
       "right_mtp": {
-        "max_measured_rad": 0.07548017021315316,
+        "applied_nm_at_worst": 0.0,
+        "lower_extreme": {
+          "applied_nm": 0.0,
+          "margin_rad": 0.5218930446802337,
+          "native_sample": 297,
+          "phase": "COUNTERMOVEMENT",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": -0.0017059553197663906,
+          "qdot_rad_s": -0.0015842730742949638,
+          "time_s": 0.594
+        },
+        "lower_margin_rad": 0.5218930446802337,
+        "max_measured_rad": 0.07869167394700863,
         "measured_overshoot_rad": 0.0,
-        "min_measured_rad": -0.0018407913880822194,
-        "plant_soft_limit_envelope_rad": 1.106600439361415,
+        "min_measured_rad": -0.0017059553197663906,
+        "min_rom_margin_rad": 0.5218930446802337,
+        "posture_reference_at_worst_rad": 0.0,
+        "qdot_at_worst_rad_s": -0.0015842730742949638,
         "rom_lower_rad": -0.523599,
         "rom_upper_rad": 1.570796,
-        "within_envelope": true
+        "solver_soft_limit_diagnostic_rad": 1.106600439361415,
+        "solver_soft_limit_diagnostic_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "status": "PASS",
+        "upper_extreme": {
+          "applied_nm": 0.0,
+          "margin_rad": 1.4921043260529914,
+          "native_sample": 15,
+          "phase": "STAND",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": 0.07869167394700863,
+          "qdot_rad_s": 1.0387244134731062,
+          "time_s": 0.03
+        },
+        "upper_margin_rad": 1.4921043260529914,
+        "worst_native_sample": 297,
+        "worst_phase": "COUNTERMOVEMENT",
+        "worst_side": "lower"
       },
       "trunk_pelvis": {
-        "max_measured_rad": 0.6734678378904122,
-        "measured_overshoot_rad": 0.06260283789041221,
-        "min_measured_rad": -0.03960389125525615,
-        "plant_soft_limit_envelope_rad": 0.17922014641857453,
+        "applied_nm_at_worst": -170.78923326944275,
+        "lower_extreme": {
+          "applied_nm": 42.0,
+          "margin_rad": 0.5749894226064656,
+          "native_sample": 22,
+          "phase": "STAND",
+          "posture_reference_rad": 0.0,
+          "q_measured_rad": -0.03587557739353446,
+          "qdot_rad_s": -0.37547022680693765,
+          "time_s": 0.044
+        },
+        "lower_margin_rad": 0.5749894226064656,
+        "max_measured_rad": 0.5422164233170099,
+        "measured_overshoot_rad": 0.0,
+        "min_measured_rad": -0.03587557739353446,
+        "min_rom_margin_rad": 0.06864857668299007,
+        "posture_reference_at_worst_rad": 0.4662876820516547,
+        "qdot_at_worst_rad_s": 0.16768783578481739,
         "rom_lower_rad": -0.610865,
         "rom_upper_rad": 0.610865,
-        "within_envelope": true
+        "solver_soft_limit_diagnostic_rad": 0.17922014641857453,
+        "solver_soft_limit_diagnostic_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "status": "PASS",
+        "upper_extreme": {
+          "applied_nm": -170.78923326944275,
+          "margin_rad": 0.06864857668299007,
+          "native_sample": 566,
+          "phase": "PROPULSION",
+          "posture_reference_rad": 0.4662876820516547,
+          "q_measured_rad": 0.5422164233170099,
+          "qdot_rad_s": 0.16768783578481739,
+          "time_s": 1.1320000000000001
+        },
+        "upper_margin_rad": 0.06864857668299007,
+        "worst_native_sample": 566,
+        "worst_phase": "PROPULSION",
+        "worst_side": "upper"
       }
     },
-    "criterion": "reference within frozen ROM; applied moment never drives past the frozen ROM; measured overshoot within the per-channel Plant soft-limit compliance envelope",
+    "claim_end_reason": "FIRST_LEGAL_PLANTAR_RECONTACT_AFTER_FLIGHT",
+    "claim_end_sample": 791,
+    "criterion": "measured q_j(t) stays within [lower_j - tolerance, upper_j + tolerance] for every bounded actuated joint and every native sample in the RES-85 claim domain; the tolerance is floating-point equality only, never added anatomical ROM",
     "failures": [],
-    "landing_window_note": "post-flight landing ROM is RES-86 scope, not judged here",
-    "measured_overshoot_within_plant_soft_limit_envelope": true,
-    "no_applied_moment_drives_past_frozen_rom": true,
-    "reference_within_frozen_rom": true,
-    "scope": "STAND_TO_ACCEPTED_OCCURRENCE",
-    "status": "PASS"
+    "global_min_structural_rom_margin_rad": 0.0,
+    "schema_version": "1.0.0",
+    "scope": "FIRST_NATIVE_SAMPLE_THROUGH_RES85_CLAIM_END",
+    "solver_soft_limit_probe_note": "JOINT_ROM_SOFT_LIMIT_PROBE.json describes MuJoCo solver penetration/compliance behaviour only; it may not enlarge the human/structural joint ROM and no PASS depends on it",
+    "solver_soft_limit_probe_role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY_NOT_STRUCTURAL_ACCEPTANCE_AUTHORITY",
+    "status": "PASS",
+    "tolerance_rad": 1e-09
   },
   "method_explicit_h2_report": {
     "BAR_LVT_DISPLACEMENT_VELOCITY": {
@@ -153,8 +427,8 @@
     "ELITE_SOCCER_PLUS20_H2_TARGET": "NOT_ESTABLISHED",
     "EXPERIMENTAL_COMPARABILITY_REPORT_ONLY": {
       "FORCE_PLATFORM_FLIGHT_TIME": {
-        "T_flight_s": 0.42999999999999994,
-        "height_m": 0.22673362499999994,
+        "T_flight_s": 0.3480000000000001,
+        "height_m": 0.14850378000000009,
         "method_id": "FORCE_PLATFORM_FLIGHT_TIME",
         "note": "boundaries are force-comparator crossings, not physical takeoff",
         "status": "EXPERIMENTAL_COMPARABILITY_METRIC_REPORT_ONLY"
@@ -172,27 +446,25 @@
       "evaluable": true,
       "method_id": "DIRECT_SIMULATOR_SYSTEM_COM",
       "quantity": "COM_RISE_TAKEOFF_TO_APEX",
-      "value_m": 0.18867197309831352
+      "value_m": 0.16021398534364972
     },
     "SECONDARY_CROSS_CHECKS": {
       "BALLISTIC_HEIGHT_FROM_TAKEOFF_VZ": {
-        "residual_m": -0.0052114441742021345,
-        "takeoff_vz_m_s": 1.9503826924187873,
-        "value_m": 0.19388341727251565
+        "residual_m": -0.0025092621395576,
+        "takeoff_vz_m_s": 1.7867932492654341,
+        "value_m": 0.16272324748320732
       },
       "IMPULSE_DERIVED_TAKEOFF_VELOCITY": {
-        "delta_vz_m_s": -1.9423800000000027,
-        "residual_m_s": 0.018293134902732655
+        "delta_vz_m_s": -1.7854200000000038,
+        "residual_m_s": 0.004053655069043094
       }
     }
   },
-  "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+  "mission": "RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001",
   "phase_trajectory": [
     "STAND",
     "COUNTERMOVEMENT",
     "BRAKING",
-    "PROPULSION",
-    "TAKEOFF_CONFIRM",
     "PROPULSION",
     "TAKEOFF_CONFIRM",
     "FLIGHT",
@@ -208,6 +480,7 @@
       "extension_rate_ff_gain": 0.5,
       "joint_rom_barrier_gain": 800.0,
       "joint_rom_margin_rad": 0.08,
+      "joint_rom_velocity_gain": 5000.0,
       "mtp_active_budget_j": null,
       "mtp_moment_ceiling_nm": null,
       "quiet_stand_samples": 125,
@@ -217,7 +490,9 @@
       "trunk_kd": 30.0,
       "trunk_kp": 240.0,
       "trunk_lean_frac": 0.35,
-      "trunk_rom_barrier_gain": 2500.0,
+      "trunk_rom_guard_margin_rad": 0.12,
+      "trunk_rom_position_gain": 2500.0,
+      "trunk_rom_velocity_gain": 5000.0,
       "v_brake_trigger_m_s": -0.55,
       "v_countermovement_cmd_m_s": -0.35
     },
@@ -230,8 +505,8 @@
   },
   "res85_claim_end": {
     "reason": "FIRST_LEGAL_PLANTAR_RECONTACT_AFTER_FLIGHT",
-    "sample": 886,
-    "time_s": 1.772
+    "sample": 791,
+    "time_s": 1.582
   },
   "schema_version": "1.0.0",
   "takeoff_candidate_history": [
@@ -258,45 +533,70 @@
     },
     {
       "confirmation_result": {
-        "confirmation_sample": 683,
-        "confirmation_time_s": 1.366,
+        "confirmation_sample": 40,
+        "confirmation_time_s": 0.08,
         "confirmed": false,
         "failed_checks": [
           "dwell_coverage",
-          "no_legal_plantar_recontact"
+          "no_legal_plantar_recontact",
+          "bilateral_clearance_reaches_guard",
+          "system_com_vz_positive"
         ]
       },
-      "disposition": "REJECTED",
+      "disposition": "NOT_EVALUATED",
       "occurrence": {
-        "com_vz_m_s": 1.9979680959109656,
-        "last_support_index": 657,
-        "native_index": 658,
-        "time_s": 1.316
+        "com_vz_m_s": -0.039264244305174736,
+        "last_support_index": 14,
+        "native_index": 15,
+        "time_s": 0.03
       },
-      "rejection_reason": "LEGAL_RECONTACT_BEFORE_CONFIRMATION",
-      "source_phase": "PROPULSION"
+      "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+      "source_phase": null
     },
     {
       "confirmation_result": {
-        "confirmation_sample": 691,
-        "confirmation_time_s": 1.3820000000000001,
+        "confirmation_sample": 637,
+        "confirmation_time_s": 1.274,
         "confirmed": true,
         "failed_checks": []
       },
       "disposition": "ACCEPTED",
       "occurrence": {
-        "com_vz_m_s": 1.9503826924187873,
-        "last_support_index": 665,
-        "native_index": 666,
-        "time_s": 1.332
+        "com_vz_m_s": 1.7867932492654341,
+        "last_support_index": 611,
+        "native_index": 612,
+        "time_s": 1.224
       },
       "rejection_reason": null,
       "source_phase": "PROPULSION"
     },
     {
       "confirmation_result": {
-        "confirmation_sample": 989,
-        "confirmation_time_s": 1.978,
+        "confirmation_sample": 930,
+        "confirmation_time_s": 1.86,
+        "confirmed": false,
+        "failed_checks": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact",
+          "bilateral_clearance_reaches_guard",
+          "system_com_vz_positive",
+          "no_prohibited_contact"
+        ]
+      },
+      "disposition": "NOT_EVALUATED",
+      "occurrence": {
+        "com_vz_m_s": -1.4593565349600144,
+        "last_support_index": 904,
+        "native_index": 905,
+        "time_s": 1.81
+      },
+      "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+      "source_phase": null
+    },
+    {
+      "confirmation_result": {
+        "confirmation_sample": 978,
+        "confirmation_time_s": 1.956,
         "confirmed": false,
         "failed_checks": [
           "dwell_coverage",
@@ -307,38 +607,190 @@
       },
       "disposition": "NOT_EVALUATED",
       "occurrence": {
-        "com_vz_m_s": -1.2617084555638292,
-        "last_support_index": 963,
-        "native_index": 964,
-        "time_s": 1.928
+        "com_vz_m_s": -0.18900222747443693,
+        "last_support_index": 952,
+        "native_index": 953,
+        "time_s": 1.9060000000000001
       },
       "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
       "source_phase": null
     },
     {
       "confirmation_result": {
-        "confirmation_sample": 994,
-        "confirmation_time_s": 1.988,
+        "confirmation_sample": 1016,
+        "confirmation_time_s": 2.032,
         "confirmed": false,
         "failed_checks": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact",
+          "bilateral_clearance_reaches_guard",
           "system_com_vz_positive",
           "no_prohibited_contact"
         ]
       },
       "disposition": "NOT_EVALUATED",
       "occurrence": {
-        "com_vz_m_s": -0.9825041209137557,
-        "last_support_index": 968,
-        "native_index": 969,
-        "time_s": 1.938
+        "com_vz_m_s": -0.35893367772887647,
+        "last_support_index": 990,
+        "native_index": 991,
+        "time_s": 1.982
+      },
+      "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+      "source_phase": null
+    },
+    {
+      "confirmation_result": {
+        "confirmation_sample": 1058,
+        "confirmation_time_s": 2.116,
+        "confirmed": false,
+        "failed_checks": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact",
+          "bilateral_clearance_reaches_guard",
+          "system_com_vz_positive",
+          "no_prohibited_contact"
+        ]
+      },
+      "disposition": "NOT_EVALUATED",
+      "occurrence": {
+        "com_vz_m_s": -0.27511634033691845,
+        "last_support_index": 1032,
+        "native_index": 1033,
+        "time_s": 2.066
+      },
+      "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+      "source_phase": null
+    },
+    {
+      "confirmation_result": {
+        "confirmation_sample": 1121,
+        "confirmation_time_s": 2.242,
+        "confirmed": false,
+        "failed_checks": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact",
+          "system_com_vz_positive"
+        ]
+      },
+      "disposition": "NOT_EVALUATED",
+      "occurrence": {
+        "com_vz_m_s": -0.13761932982354705,
+        "last_support_index": 1095,
+        "native_index": 1096,
+        "time_s": 2.192
+      },
+      "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+      "source_phase": null
+    },
+    {
+      "confirmation_result": {
+        "confirmation_sample": 1130,
+        "confirmation_time_s": 2.2600000000000002,
+        "confirmed": false,
+        "failed_checks": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact",
+          "system_com_vz_positive"
+        ]
+      },
+      "disposition": "NOT_EVALUATED",
+      "occurrence": {
+        "com_vz_m_s": -0.1861806082926695,
+        "last_support_index": 1104,
+        "native_index": 1105,
+        "time_s": 2.21
+      },
+      "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+      "source_phase": null
+    },
+    {
+      "confirmation_result": {
+        "confirmation_sample": 1188,
+        "confirmation_time_s": 2.376,
+        "confirmed": false,
+        "failed_checks": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact",
+          "bilateral_clearance_reaches_guard",
+          "system_com_vz_positive"
+        ]
+      },
+      "disposition": "NOT_EVALUATED",
+      "occurrence": {
+        "com_vz_m_s": -0.3263956506302286,
+        "last_support_index": 1162,
+        "native_index": 1163,
+        "time_s": 2.326
+      },
+      "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+      "source_phase": null
+    },
+    {
+      "confirmation_result": {
+        "confirmation_sample": 1281,
+        "confirmation_time_s": 2.562,
+        "confirmed": false,
+        "failed_checks": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact",
+          "bilateral_clearance_reaches_guard",
+          "system_com_vz_positive"
+        ]
+      },
+      "disposition": "NOT_EVALUATED",
+      "occurrence": {
+        "com_vz_m_s": -0.24155532512128622,
+        "last_support_index": 1255,
+        "native_index": 1256,
+        "time_s": 2.512
+      },
+      "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+      "source_phase": null
+    },
+    {
+      "confirmation_result": {
+        "confirmation_sample": 1352,
+        "confirmation_time_s": 2.704,
+        "confirmed": false,
+        "failed_checks": [
+          "dwell_coverage",
+          "no_legal_plantar_recontact",
+          "system_com_vz_positive"
+        ]
+      },
+      "disposition": "NOT_EVALUATED",
+      "occurrence": {
+        "com_vz_m_s": -0.5301901032707586,
+        "last_support_index": 1326,
+        "native_index": 1327,
+        "time_s": 2.654
+      },
+      "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
+      "source_phase": null
+    },
+    {
+      "confirmation_result": {
+        "confirmation_sample": 1362,
+        "confirmation_time_s": 2.724,
+        "confirmed": false,
+        "failed_checks": [
+          "system_com_vz_positive"
+        ]
+      },
+      "disposition": "NOT_EVALUATED",
+      "occurrence": {
+        "com_vz_m_s": -0.7196793393764276,
+        "last_support_index": 1336,
+        "native_index": 1337,
+        "time_s": 2.674
       },
       "rejection_reason": "NEVER_ESCALATED_TO_TAKEOFF_CONFIRM",
       "source_phase": null
     }
   ],
   "takeoff_confirmation": {
-    "accepted_occurrence_index": 666,
-    "bilateral_clearance_max_m": 0.09530921628458403,
+    "accepted_occurrence_index": 612,
+    "bilateral_clearance_max_m": 0.0648828433967979,
     "checks": [
       {
         "check": "occurrence_valid",
@@ -347,7 +799,7 @@
       },
       {
         "check": "zero_support_at_native_index",
-        "detail": "native index 666 has zero active legal plantar support",
+        "detail": "native index 612 has zero active legal plantar support",
         "pass": true
       },
       {
@@ -362,7 +814,7 @@
       },
       {
         "check": "bilateral_clearance_reaches_guard",
-        "detail": "max bilateral clearance 0.09530921628458403 vs guard 0.002",
+        "detail": "max bilateral clearance 0.0648828433967979 vs guard 0.002",
         "pass": true
       },
       {
@@ -378,72 +830,60 @@
     ],
     "clearance_guard_m": 0.002,
     "confirmation_elapsed_s": 0.05,
-    "confirmation_sample": 691,
-    "confirmation_time_s": 1.3820000000000001,
+    "confirmation_sample": 637,
+    "confirmation_time_s": 1.274,
     "confirmed": true,
     "failed_checks": []
   },
   "takeoff_occurrence": {
     "bracket_weight": 1.0,
-    "com_vz_m_s": 1.9503826924187873,
-    "com_z_m": 1.163115100709766,
+    "com_vz_m_s": 1.7867932492654341,
+    "com_z_m": 1.1178296482310601,
     "interpolated": false,
-    "last_support_index": 665,
-    "left_clearance_m": 0.00027545161221414344,
-    "native_index": 666,
+    "last_support_index": 611,
+    "left_clearance_m": 0.00022960346644153654,
+    "native_index": 612,
     "reason": "SUPPORT_TO_ZERO_TRANSITION",
-    "right_clearance_m": 0.0002754516122144444,
-    "time_s": 1.332,
+    "right_clearance_m": 0.0002296034664410881,
+    "time_s": 1.224,
     "valid": true
   },
   "transition_log": [
     {
       "from": "COUNTERMOVEMENT",
       "reason": "QUIET_SUPPORTED_STATE_ESTABLISHED",
-      "sample": 202,
-      "time_s": 0.404
+      "sample": 161,
+      "time_s": 0.322
     },
     {
       "from": "BRAKING",
       "reason": "PREDICTIVE_BRAKING_TRIGGER",
-      "sample": 517,
-      "time_s": 1.034
+      "sample": 480,
+      "time_s": 0.96
     },
     {
       "from": "PROPULSION",
       "reason": "PHYSICAL_UPWARD_REVERSAL",
-      "sample": 587,
-      "time_s": 1.174
+      "sample": 543,
+      "time_s": 1.086
     },
     {
       "from": "TAKEOFF_CONFIRM",
       "reason": "RES84_TAKEOFF_OCCURRENCE_CANDIDATE",
-      "sample": 658,
-      "time_s": 1.316
-    },
-    {
-      "from": "PROPULSION",
-      "reason": "RECONTACT_CANCELS_PROVISIONAL_FLIGHT",
-      "sample": 659,
-      "time_s": 1.318
-    },
-    {
-      "from": "TAKEOFF_CONFIRM",
-      "reason": "RES84_TAKEOFF_OCCURRENCE_CANDIDATE",
-      "sample": 666,
-      "time_s": 1.332
+      "sample": 612,
+      "time_s": 1.224
     },
     {
       "from": "FLIGHT",
       "reason": "RES84_TAKEOFF_CONFIRMATION",
-      "sample": 691,
-      "time_s": 1.3820000000000001
+      "sample": 637,
+      "time_s": 1.274
     },
     {
       "from": "LANDING_PREP",
       "reason": "ACTUAL_DESCENT_OR_PREDICTED_TOUCHDOWN",
-      "sample": 766,
-      "time_s": 1.532
+      "sample": 704,
+      "time_s": 1.408
     }
   ],
   "warnings": []

@@ -3,7 +3,7 @@
     {
       "check": "zero_passive_active_work_within_budget",
       "detail": {
-        "active_positive_work_j": 1.6178916717732605
+        "active_positive_work_j": 0.6178095141941742
       },
       "pass": true
     },
@@ -28,10 +28,6 @@
           "TAKEOFF_CONFIRM",
           "PROPULSION",
           "TAKEOFF_CONFIRM",
-          "PROPULSION",
-          "TAKEOFF_CONFIRM",
-          "PROPULSION",
-          "TAKEOFF_CONFIRM",
           "FLIGHT",
           "LANDING_PREP"
         ],
@@ -48,10 +44,6 @@
     "TAKEOFF_CONFIRM",
     "PROPULSION",
     "TAKEOFF_CONFIRM",
-    "PROPULSION",
-    "TAKEOFF_CONFIRM",
-    "PROPULSION",
-    "TAKEOFF_CONFIRM",
     "FLIGHT",
     "LANDING_PREP"
   ],
@@ -59,6 +51,6 @@
   "negative_control_status": "PASS",
   "schema_version": "1.0.0",
   "status": "PASS",
-  "zero_passive_active_positive_work_max_j": 1.6178916717732605,
+  "zero_passive_active_positive_work_max_j": 0.6178095141941742,
   "zero_passive_budget_gated": true
 }

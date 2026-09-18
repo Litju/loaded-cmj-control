@@ -14,13 +14,13 @@
           "active_budget_j": 25.0,
           "active_positive_work_j": 0.27191709186763124,
           "total_budget_j": 40.0,
-          "total_positive_work_j": 0.6249202857321453
+          "total_positive_work_j": 5.350672812244842
         },
         "right": {
           "active_budget_j": 25.0,
           "active_positive_work_j": 0.2719170918676281,
           "total_budget_j": 40.0,
-          "total_positive_work_j": 0.6249202857327725
+          "total_positive_work_j": 5.350672840607862
         }
       },
       "pass": true
@@ -37,7 +37,7 @@
       "detail": {
         "active_mtp_positive_work_j": 0.27191709186763124,
         "ankle_exceeds_active_mtp": true,
-        "ankle_positive_work_j": 31.526090185592373
+        "ankle_positive_work_j": 59.71649472543722
       },
       "pass": true
     }
@@ -47,27 +47,27 @@
     "ledger_identity_right_residual_j": 0.0,
     "left_active_positive_work_j": 0.27191709186763124,
     "left_active_work_signed_j": 0.27191709186763124,
-    "left_passive_positive_work_j": 0.5668563218385271,
-    "left_passive_work_signed_j": -21.631186700741903,
-    "left_total_positive_work_j": 0.6249202857321453,
-    "left_total_work_signed_j": -21.35926960887427,
+    "left_passive_positive_work_j": 5.292608848351225,
+    "left_passive_work_signed_j": -33.49911645545449,
+    "left_total_positive_work_j": 5.350672812244842,
+    "left_total_work_signed_j": -33.22719936358686,
     "max_active_positive_work_j": 0.27191709186763124,
     "right_active_positive_work_j": 0.2719170918676281,
-    "right_passive_positive_work_j": 0.5668563218391537,
-    "right_total_positive_work_j": 0.6249202857327725
+    "right_passive_positive_work_j": 5.292608876714242,
+    "right_total_positive_work_j": 5.350672840607862
   },
   "ledgers": {
     "left": {
       "active_budget_j": 25.0,
       "active_positive_work_j": 0.27191709186763124,
       "total_budget_j": 40.0,
-      "total_positive_work_j": 0.6249202857321453
+      "total_positive_work_j": 5.350672812244842
     },
     "right": {
       "active_budget_j": 25.0,
       "active_positive_work_j": 0.2719170918676281,
       "total_budget_j": 40.0,
-      "total_positive_work_j": 0.6249202857327725
+      "total_positive_work_j": 5.350672840607862
     }
   },
   "mtp_gated_samples": 2990,
@@ -76,7 +76,7 @@
   "takeoff_dominance": {
     "active_mtp_positive_work_j": 0.27191709186763124,
     "ankle_exceeds_active_mtp": true,
-    "ankle_positive_work_j": 31.526090185592373
+    "ankle_positive_work_j": 59.71649472543722
   },
   "zero_passive_episode": false
 }

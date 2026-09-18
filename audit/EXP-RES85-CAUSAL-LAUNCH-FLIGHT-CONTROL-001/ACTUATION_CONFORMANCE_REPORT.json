@@ -16,12 +16,12 @@
         ],
         "max_applied_nm": [
           220.0,
-          142.42206771371013,
-          142.42206771371013,
-          353.3330706569493,
-          353.3330706569493,
-          92.36577584021637,
-          92.36577584021637,
+          258.1906155230471,
+          258.1906155230471,
+          380.0,
+          380.0,
+          250.05510912602026,
+          250.05510912603694,
           15.0,
           15.0
         ]
@@ -44,11 +44,11 @@
         ],
         "max_power_w": [
           600.0,
-          878.7597684593119,
-          878.759768459416,
-          1700.0,
+          1002.0766113028352,
+          1002.0770204872505,
           1700.0000000000002,
-          1100.0,
+          1700.0000000000002,
+          1100.0000000000002,
           1100.0,
           98.44859731287245,
           98.44859731287207
@@ -59,8 +59,8 @@
     {
       "check": "nominal_slew_exceedance_zero_unless_safety_override",
       "detail": {
-        "declared_override_channel_samples": 22,
-        "max_exceedance_nm_per_s": 16488.5842240879,
+        "declared_override_channel_samples": 59,
+        "max_exceedance_nm_per_s": 82772.06564041042,
         "undeclared_channel_samples": 0
       },
       "pass": true
@@ -68,7 +68,10 @@
     {
       "check": "bilateral_applied_symmetry_within_tolerance",
       "detail": {
-        "max_pair_asymmetry_nm": 8.120792927002185e-11,
+        "max_pair_asymmetry_nm": 1.3073986337985843e-12,
+        "post_claim_landing_window_asymmetry_nm": 3.4570746265671914e-10,
+        "post_claim_note": "post-claim landing capture is RES-86 scope; the post-claim asymmetry is reported as a diagnostic",
+        "scope": "FIRST_NATIVE_SAMPLE_THROUGH_RES85_CLAIM_END",
         "tolerance_nm": 1e-09
       },
       "pass": true
@@ -77,28 +80,24 @@
       "check": "phase_handoffs_do_not_create_hidden_slew_violations",
       "detail": {
         "handoff_samples": [
-          202,
-          517,
-          587,
-          658,
-          659,
-          666,
-          691,
-          766
+          161,
+          480,
+          543,
+          612,
+          637,
+          704
         ]
       },
       "pass": true
     }
   ],
   "handoff_samples": [
-    202,
-    517,
-    587,
-    658,
-    659,
-    666,
-    691,
-    766
+    161,
+    480,
+    543,
+    612,
+    637,
+    704
   ],
   "hard_safety_bounds": [
     "moment_ceiling",
@@ -107,50 +106,51 @@
   ],
   "max_applied_nm": [
     220.0,
-    142.42206771371013,
-    142.42206771371013,
-    353.3330706569493,
-    353.3330706569493,
-    92.36577584021637,
-    92.36577584021637,
+    258.1906155230471,
+    258.1906155230471,
+    380.0,
+    380.0,
+    250.05510912602026,
+    250.05510912603694,
     15.0,
     15.0
   ],
-  "max_bilateral_asymmetry_nm": 8.120792927002185e-11,
+  "max_bilateral_asymmetry_nm": 1.3073986337985843e-12,
   "max_joint_power_w": [
     600.0,
-    878.7597684593119,
-    878.759768459416,
-    1700.0,
+    1002.0766113028352,
+    1002.0770204872505,
     1700.0000000000002,
-    1100.0,
+    1700.0000000000002,
+    1100.0000000000002,
     1100.0,
     98.44859731287245,
     98.44859731287207
   ],
+  "max_post_claim_asymmetry_nm": 3.4570746265671914e-10,
   "max_rate_nm_per_s": [
-    14708.677805947758,
-    6000.000000000004,
-    6000.000000000004,
-    24488.584224087375,
-    24488.5842240879,
-    12997.065361437364,
-    12997.065361477968,
+    35257.293623420606,
+    6000.000000000007,
+    6000.000000000007,
+    22827.10874862434,
+    22827.10874862465,
+    88772.06564039827,
+    88772.06564041042,
     7500.0,
     7500.0
   ],
-  "safety_override_channel_samples": 22,
-  "safety_override_samples": 17,
+  "safety_override_channel_samples": 59,
+  "safety_override_samples": 54,
   "saturation_stage_counts": {
-    "moment": 34,
-    "mtp_budget": 1318,
-    "mtp_phase_gate": 1670,
-    "none": 1189,
-    "power": 95,
-    "rate": 572,
-    "safety_override_joint_power_ceiling": 20,
+    "moment": 172,
+    "mtp_budget": 1206,
+    "mtp_phase_gate": 1782,
+    "none": 650,
+    "power": 125,
+    "rate": 3248,
+    "safety_override_joint_power_ceiling": 57,
     "safety_override_mtp_phase_gate": 2,
-    "symmetry": 8600
+    "symmetry": 6258
   },
   "schema_version": "1.0.0",
   "status": "PASS",

@@ -1,6 +1,13 @@
-"""RES-85C deterministic Plant joint-ROM soft-limit probe.
+"""RES-85D deterministic Plant joint-ROM soft-limit probe (numerical diagnostic).
 
-MISSION: RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001
+MISSION: RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001
+
+ROLE: NUMERICAL_SOLVER_DIAGNOSTIC_ONLY.  This probe describes a MuJoCo solver
+penetration/compliance property of the sealed Plant.  It is NOT structural
+acceptance authority: it may not enlarge the human/structural joint ROM and no
+RES-85D PASS depends on its envelope.  The acceptance authority is the frozen
+``V3_JOINT_RANGES_RAD`` envelope applied to the measured coordinates with a
+1e-9 floating-point comparison tolerance only.
 
 The sealed V3 Plant declares ``limited="true"`` hinge joints with MuJoCo 3.8.0
 compiler-default limit softness, so the ROM is enforced by a soft constraint and
@@ -12,9 +19,9 @@ deterministic probe (no controller, no measurement layer):
   channel's frozen moment ceiling towards the limit for 0.8 s at the native
   timestep, and record the maximum overshoot beyond the limit.
 
-The result is the declared per-channel soft-limit compliance envelope used by
-the RES-85C joint-ROM feasibility check; it is a Plant property, not a
-controller budget.
+The result is the measured per-channel soft-limit compliance envelope, kept as
+a numerical solver diagnostic for RES-86 and later work; it is a Plant
+property, not a controller budget and not structural authority.
 
 Run:  python3 probe_joint_rom_soft_limits.py
 """
@@ -90,10 +97,13 @@ def build() -> dict[str, Any]:
         }
     return {
         "schema_version": "1.0.0",
-        "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+        "mission": "RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001",
         "linear_issue": "RES-85",
-        "purpose": ("declared Plant soft-limit compliance envelope used by the RES-85C "
-                    "launch joint-ROM feasibility check"),
+        "role": "NUMERICAL_SOLVER_DIAGNOSTIC_ONLY",
+        "not_structural_acceptance_authority": True,
+        "purpose": ("numerical solver diagnostic: measured per-channel MuJoCo "
+                    "soft-limit compliance envelope of the sealed Plant; never "
+                    "structural acceptance authority"),
         "probe": {
             "start_offset_rad": START_OFFSET_RAD,
             "steps": STEPS,
@@ -104,10 +114,12 @@ def build() -> dict[str, Any]:
         "channels": channels,
         "worst_case_soft_limit_compliance_rad": float(worst),
         "interpretation": (
-            "a driven joint may cross its declared ROM by at most this measured amount; "
-            "the RES-85C feasibility check requires the launch measured overshoot to stay "
-            "inside the per-channel envelope AND the controller posture reference to stay "
-            "inside the declared ROM"),
+            "a driven joint may penetrate its soft limit by at most this measured "
+            "numerical amount under the frozen channel moment ceiling; this is a "
+            "solver/Plant property only.  It is NOT a human-valid qualification "
+            "criterion: RES-85D requires every measured coordinate to stay inside "
+            "the frozen structural envelope with a 1e-9 floating-point tolerance "
+            "regardless of this envelope"),
     }
 
 

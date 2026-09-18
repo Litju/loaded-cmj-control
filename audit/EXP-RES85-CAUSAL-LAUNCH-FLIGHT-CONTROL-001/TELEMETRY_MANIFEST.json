@@ -7,7 +7,7 @@
       "name": "applied_nm",
       "nbytes": 108000,
       "offset": 0,
-      "sha256": "6d56767ad56483f9be0495bc60971def902a1478cefb69cc00032fbf9dc158b7",
+      "sha256": "bd770762a9f9dab9fa89a2f24bee4bcdc6b94bff42f6dfc055b62b6c8b3f5f96",
       "shape": [
         1500,
         9
@@ -19,7 +19,7 @@
       "name": "az_des_m_s2",
       "nbytes": 12000,
       "offset": 108000,
-      "sha256": "8a95ca027565c558acf6e218db42f1f0e5267444a6de876082e571b826a560ad",
+      "sha256": "bc5db937f70a1382d044eeb69ca0f7c0550abe9337d15f612059bb4780b16e6d",
       "shape": [
         1500
       ]
@@ -30,7 +30,7 @@
       "name": "com_velocity_world_m_s",
       "nbytes": 36000,
       "offset": 120000,
-      "sha256": "79c4979e7de85a5a34edea34066b29981541c0052b0cc485882a950e9c755982",
+      "sha256": "6cc0da562d6f9c2f8ac4ac534b2fe45349b7f19283fc883d660ae99bd767485d",
       "shape": [
         1500,
         3
@@ -42,7 +42,7 @@
       "name": "com_world_m",
       "nbytes": 36000,
       "offset": 156000,
-      "sha256": "05d4b866556a5b0ca901f00b9ff94ecc8fb5b0b1d36f5f31974954510cb9c14b",
+      "sha256": "08d0cca7c7ef35db92b285e01e803a8148ca074c866ae5648609152ce20056ae",
       "shape": [
         1500,
         3
@@ -54,7 +54,7 @@
       "name": "commanded_nm",
       "nbytes": 108000,
       "offset": 192000,
-      "sha256": "608e01635b7174b80d98188a6dcf6753e99d6e1429ded5c5d6121ecbcdc6b628",
+      "sha256": "97afd3bd677176cc96fd8ebf450c3097cd348bcaedc190517b46486fdb794af8",
       "shape": [
         1500,
         9
@@ -66,7 +66,7 @@
       "name": "cop_clamped",
       "nbytes": 1500,
       "offset": 300000,
-      "sha256": "31e950d3185fa32b12c19c98e88b10d73ab94a69fa6634301b0caf3b0ef4d122",
+      "sha256": "da372349ad97448bb7a4e601847b3efabfc7d3858c4ca8204b48da725dd7c612",
       "shape": [
         1500
       ]
@@ -77,7 +77,7 @@
       "name": "cop_clamped_x_m",
       "nbytes": 12000,
       "offset": 301500,
-      "sha256": "08a996d0e8f481f3a27f8026b000e237b2429edf8c0b7687859fe576ecba20f2",
+      "sha256": "9969bbd7888e279ace95b2ff0181cf186905dcd1cc4f3c1460fb59001cc2280a",
       "shape": [
         1500
       ]
@@ -88,7 +88,7 @@
       "name": "cop_des_x_m",
       "nbytes": 12000,
       "offset": 313500,
-      "sha256": "abc6366562de8901d9206faf6f1147244b990132fd39920bc82ad1c47bf9901a",
+      "sha256": "5d28aae70a52f7025c468f224ab0a81f3559f030184521d25943020c4d91c5f6",
       "shape": [
         1500
       ]
@@ -97,9 +97,9 @@
       "dtype": "object",
       "encoding": "utf8_object_records_unit_separated",
       "name": "cop_validity",
-      "nbytes": 23637,
+      "nbytes": 19694,
       "offset": 325500,
-      "sha256": "2d48e7b58517f1da05d8c6eff0267123e9fce7dacaf3ae7ff29ccbb2b7b6a2e4",
+      "sha256": "681f27a201405806694b8d0ac420ea016b7830d272e2d7f92e8f2eb4c544c6d9",
       "shape": [
         1500
       ]
@@ -109,8 +109,8 @@
       "encoding": "raw_little_endian",
       "name": "cop_x_m",
       "nbytes": 12000,
-      "offset": 349137,
-      "sha256": "e7fdd110827fe6d61730a446175b14181d98c8b50bd09ff7ab8d7cdfa7e66ffb",
+      "offset": 345194,
+      "sha256": "7f314e63196b5ba654c9a5e2a10a2ab1e7171302101cf3ce8988304167eeb65d",
       "shape": [
         1500
       ]
@@ -120,8 +120,8 @@
       "encoding": "raw_little_endian",
       "name": "fx_des_n",
       "nbytes": 12000,
-      "offset": 361137,
-      "sha256": "21abf67c58940e90fc1cdd20aed5529d014b1e2643326d0fb6b651fa1b2865eb",
+      "offset": 357194,
+      "sha256": "1a52e7cac7e8b6479d3f231e09fd5157e5793cc2af63ba0f3186326d8bc31695",
       "shape": [
         1500
       ]
@@ -131,8 +131,8 @@
       "encoding": "raw_little_endian",
       "name": "fz_des_n",
       "nbytes": 12000,
-      "offset": 373137,
-      "sha256": "1c615bec45886871a67e57be103ad91b31596c65ddba99dc716d84a5a072fb02",
+      "offset": 369194,
+      "sha256": "91a0720d5abb33c67dca1289d9daf5e8b8e78183f3cea48066f540ed2a4f723d",
       "shape": [
         1500
       ]
@@ -142,7 +142,7 @@
       "encoding": "raw_little_endian",
       "name": "index",
       "nbytes": 12000,
-      "offset": 385137,
+      "offset": 381194,
       "sha256": "50a855022070ba1b399050fa682c88f3cdb2f2ef0f2c20acfdc8dceda2a2dd8e",
       "shape": [
         1500
@@ -153,8 +153,8 @@
       "encoding": "raw_little_endian",
       "name": "joint_limit_margin",
       "nbytes": 144000,
-      "offset": 397137,
-      "sha256": "ed9692b4bc703470182583b95cf3cc4f99f848dcade0f994080f49dc3710e7ce",
+      "offset": 393194,
+      "sha256": "444d35965a434b7099f4b62b9045b23e2f555788903ffd945fa231eccd5c6c3c",
       "shape": [
         1500,
         12
@@ -165,8 +165,8 @@
       "encoding": "raw_little_endian",
       "name": "joint_power_w",
       "nbytes": 108000,
-      "offset": 541137,
-      "sha256": "b7572b291fe08b0c585e772fa46be6d99a31d7b26a40e755292216b709294e03",
+      "offset": 537194,
+      "sha256": "e730c22b63239e23449d0bd1b4e9d69d6664d9309576461507b1370458d93198",
       "shape": [
         1500,
         9
@@ -177,8 +177,8 @@
       "encoding": "raw_little_endian",
       "name": "joint_q",
       "nbytes": 144000,
-      "offset": 649137,
-      "sha256": "b8ab8366e05d2a86676ecbc63ff826b4c89f2e4092f675323783da0c9e7c5362",
+      "offset": 645194,
+      "sha256": "b766b2b9ca5ed3ed878a09a52e8eb8c67892f19d381dd9aea748b84cfe552d77",
       "shape": [
         1500,
         12
@@ -189,8 +189,8 @@
       "encoding": "raw_little_endian",
       "name": "joint_qd",
       "nbytes": 144000,
-      "offset": 793137,
-      "sha256": "940b32c526c1db06b43d87da0f8044a34a5636559b7fb7b49f570eb46b693ec2",
+      "offset": 789194,
+      "sha256": "effa208f4cb845533262d09c60a17b6526a24e236dd667c76a702b73a6e3f724",
       "shape": [
         1500,
         12
@@ -201,8 +201,8 @@
       "encoding": "raw_little_endian",
       "name": "joint_work_j",
       "nbytes": 108000,
-      "offset": 937137,
-      "sha256": "3b6cbfc1ddc62da8493a87cfa8a8a4601af802122645f542a85017fd67fc15a4",
+      "offset": 933194,
+      "sha256": "9b59d5587beb7a1288edb3dd7fadf955e5818092e3e3a738adcebb3acaca416c",
       "shape": [
         1500,
         9
@@ -213,8 +213,8 @@
       "encoding": "raw_little_endian",
       "name": "left_clearance_m",
       "nbytes": 12000,
-      "offset": 1045137,
-      "sha256": "27cf521599e8a935606763b96f3d17f4bdb4348cc5cd326aa5dfc381679214cf",
+      "offset": 1041194,
+      "sha256": "99a8c2673907ae2b99e6be31c3515d818c0f578a3a874736e780fbd691df74a3",
       "shape": [
         1500
       ]
@@ -224,8 +224,8 @@
       "encoding": "raw_little_endian",
       "name": "left_wrench",
       "nbytes": 72000,
-      "offset": 1057137,
-      "sha256": "e69b9011be7e3dc7dacc6f6d98d131616f6fef0c2429b34b8bb2b10ada3f1b13",
+      "offset": 1053194,
+      "sha256": "f1c92ab56f060e5db3f5032093a76f2ce2d3ef6d5dedddf331341efd90f0eced",
       "shape": [
         1500,
         6
@@ -236,8 +236,8 @@
       "encoding": "raw_little_endian",
       "name": "legal_plantar_active",
       "nbytes": 12000,
-      "offset": 1129137,
-      "sha256": "f9c46b38f0d966bee8efd102eb4650b12678cb7ecb0c336f2ca06bcea0496ef7",
+      "offset": 1125194,
+      "sha256": "ad38b83a63951ff269881e8a2380010c8b235a57b47708ad7672b762303aeb85",
       "shape": [
         1500
       ]
@@ -247,8 +247,8 @@
       "encoding": "raw_little_endian",
       "name": "legal_plantar_detected",
       "nbytes": 12000,
-      "offset": 1141137,
-      "sha256": "219f455dcc516e9463359aa7dcb3cb5f30c4bac4972fc2784e378ab6e2518bc7",
+      "offset": 1137194,
+      "sha256": "a281e3b6de31371982888362ca6dfc6130c15a685c69c75149e4487d7801c00b",
       "shape": [
         1500
       ]
@@ -258,8 +258,8 @@
       "encoding": "raw_little_endian",
       "name": "moment_margin_nm",
       "nbytes": 108000,
-      "offset": 1153137,
-      "sha256": "270c8dc5e5537df8b0cafb6a3c8ee0e8620d07b762601a0385a6d93950069b4f",
+      "offset": 1149194,
+      "sha256": "7c03fe538419b6044dea02b661784d9224c2d27fe692c18455a9f2d12ccad1ee",
       "shape": [
         1500,
         9
@@ -270,8 +270,8 @@
       "encoding": "raw_little_endian",
       "name": "mtp_active_power_w",
       "nbytes": 24000,
-      "offset": 1261137,
-      "sha256": "63ad24f91861586e87776b37c2d0b105b357d346042b4eabe6b38ca653b8b038",
+      "offset": 1257194,
+      "sha256": "469758f92512fb9f86fd48b737686dea0546fcbd3ab79919a36c6b62df9e569c",
       "shape": [
         1500,
         2
@@ -282,7 +282,7 @@
       "encoding": "raw_little_endian",
       "name": "mtp_active_work_j",
       "nbytes": 24000,
-      "offset": 1285137,
+      "offset": 1281194,
       "sha256": "0307e89e8d2b8c29d808c9fc5b5bbdea70e1cfbcd52f1b8b6116d5bb9e6195c4",
       "shape": [
         1500,
@@ -294,7 +294,7 @@
       "encoding": "raw_little_endian",
       "name": "mtp_active_work_signed_j",
       "nbytes": 24000,
-      "offset": 1309137,
+      "offset": 1305194,
       "sha256": "0307e89e8d2b8c29d808c9fc5b5bbdea70e1cfbcd52f1b8b6116d5bb9e6195c4",
       "shape": [
         1500,
@@ -306,7 +306,7 @@
       "encoding": "raw_little_endian",
       "name": "mtp_gated",
       "nbytes": 24000,
-      "offset": 1333137,
+      "offset": 1329194,
       "sha256": "42d82cfab80c696da2b4b8290276ac66891762d5921daa6e11d458d00e311327",
       "shape": [
         1500,
@@ -318,8 +318,8 @@
       "encoding": "raw_little_endian",
       "name": "mtp_passive_moment_nm",
       "nbytes": 24000,
-      "offset": 1357137,
-      "sha256": "7a92898fa43f9367f7db05130f2502d884b4407ccd05392e3dd4750a3303c2af",
+      "offset": 1353194,
+      "sha256": "29c19c15ec6d6c7138cbc7bd77d3f5c5a17f0f83013dd6e631aa828ea30eacb3",
       "shape": [
         1500,
         2
@@ -330,8 +330,8 @@
       "encoding": "raw_little_endian",
       "name": "mtp_passive_power_w",
       "nbytes": 24000,
-      "offset": 1381137,
-      "sha256": "f2e4c9aa49d4cfc2f31de78c149c836a27f131a78122bd5832c4b58b48557a97",
+      "offset": 1377194,
+      "sha256": "64b0edfa38935f40e954e7a0557334e77f072c69e25970ea3f2d3db01d1790d9",
       "shape": [
         1500,
         2
@@ -342,7 +342,7 @@
       "encoding": "raw_little_endian",
       "name": "mtp_passive_reconstruction_residual_nm",
       "nbytes": 12000,
-      "offset": 1405137,
+      "offset": 1401194,
       "sha256": "ff6698a6e831ffcf47af2fed388ffc262f319e72b26cd140929d1e19b1246ad4",
       "shape": [
         1500
@@ -353,8 +353,8 @@
       "encoding": "raw_little_endian",
       "name": "mtp_passive_work_j",
       "nbytes": 24000,
-      "offset": 1417137,
-      "sha256": "189db20569864b828495329f418ad23424982dd85dcb56ff19ea1577f6ab6b16",
+      "offset": 1413194,
+      "sha256": "a39096cf321b770807378681fadac67e2a043b0813675944944c1ba5614caffc",
       "shape": [
         1500,
         2
@@ -365,8 +365,8 @@
       "encoding": "raw_little_endian",
       "name": "mtp_passive_work_signed_j",
       "nbytes": 24000,
-      "offset": 1441137,
-      "sha256": "8c1129dded0dd9b1f44651bf587cbb899196134a23021cb685ed37e98d09edf3",
+      "offset": 1437194,
+      "sha256": "ff53fa88eee8b4f9fc8c086285641c4012661f13fb982a71a515c6ff11827c52",
       "shape": [
         1500,
         2
@@ -377,8 +377,8 @@
       "encoding": "raw_little_endian",
       "name": "mtp_total_power_w",
       "nbytes": 24000,
-      "offset": 1465137,
-      "sha256": "efa081054a5f1627429253bca22a7ad102019275a0c959589c0855b664ac26c0",
+      "offset": 1461194,
+      "sha256": "7b7f565324d5ac98b3adf57118e4710e7a8cd48a4e4e83cdcd978fbc0bc206b8",
       "shape": [
         1500,
         2
@@ -389,8 +389,8 @@
       "encoding": "raw_little_endian",
       "name": "mtp_total_work_j",
       "nbytes": 24000,
-      "offset": 1489137,
-      "sha256": "02b2fbc64cd8d3c8f08e332fb026d17221ea8f0933fe32c78022790130d701ea",
+      "offset": 1485194,
+      "sha256": "ecc1aac9783799120233269cdc0e7339542241d6d3c8aa90b35ad26bab029ec9",
       "shape": [
         1500,
         2
@@ -401,8 +401,8 @@
       "encoding": "raw_little_endian",
       "name": "mtp_total_work_signed_j",
       "nbytes": 24000,
-      "offset": 1513137,
-      "sha256": "bb3bb3564bfaa8ab26ce9ab34ffdd2786eccdf35cfceee2fe0e0dce56d4035f1",
+      "offset": 1509194,
+      "sha256": "a54b2b50860d334fc1837f96c26e16d3c4d19392efd6a309107f701791b700ea",
       "shape": [
         1500,
         2
@@ -413,8 +413,8 @@
       "encoding": "raw_little_endian",
       "name": "nominal_slew_exceedance_nm_per_s",
       "nbytes": 108000,
-      "offset": 1537137,
-      "sha256": "2683704d14b6794b1e6ba19d77b7c816c545b3813501bc8275b7c7365d7c050c",
+      "offset": 1533194,
+      "sha256": "9b158d833e4dd5a2dfb15810c88e414860dbfb9af31c61d99fc28af842e5db5a",
       "shape": [
         1500,
         9
@@ -425,8 +425,8 @@
       "encoding": "raw_little_endian",
       "name": "nonplantar_floor_active",
       "nbytes": 12000,
-      "offset": 1645137,
-      "sha256": "f162058c7fef0a0dbcd2758a77b03bf9bf1d30cfa64a48b17bdcc14f90c6cfe5",
+      "offset": 1641194,
+      "sha256": "4c7369d71f2f33a9aa4249ba816592ba2bd7865f50dbbe4629cbe440a69a2b04",
       "shape": [
         1500
       ]
@@ -436,7 +436,7 @@
       "encoding": "raw_little_endian",
       "name": "out_of_plane_fy_n",
       "nbytes": 12000,
-      "offset": 1657137,
+      "offset": 1653194,
       "sha256": "ff6698a6e831ffcf47af2fed388ffc262f319e72b26cd140929d1e19b1246ad4",
       "shape": [
         1500
@@ -447,8 +447,8 @@
       "encoding": "raw_little_endian",
       "name": "out_of_plane_fy_over_fz",
       "nbytes": 12000,
-      "offset": 1669137,
-      "sha256": "b1b0f51f8b25776db9d6029b0536822ded14514b75382b3f17ea9c290fa0e2e9",
+      "offset": 1665194,
+      "sha256": "db24a2f1cdfd1d4b0ee50665532aea20d1baaf73aecc34aea9108d859ac0f4e6",
       "shape": [
         1500
       ]
@@ -458,8 +458,8 @@
       "encoding": "raw_little_endian",
       "name": "out_of_plane_mx_nm",
       "nbytes": 12000,
-      "offset": 1681137,
-      "sha256": "3a6716394da5a1926d56037e12e288bb31311b396ddfe8442cb8c441b7282059",
+      "offset": 1677194,
+      "sha256": "1de6414c10c9f85081785b01d6b55174ab8939d425e3b716454f48e654820ad7",
       "shape": [
         1500
       ]
@@ -469,8 +469,8 @@
       "encoding": "raw_little_endian",
       "name": "out_of_plane_mx_over_fz_m",
       "nbytes": 12000,
-      "offset": 1693137,
-      "sha256": "37b221041310a52cc2d338f13dff184a27cd65b0eb46de87a7101788fe1e960e",
+      "offset": 1689194,
+      "sha256": "b321be0dbb894050652a9abd76deb5474d0cf64e857f57d5d3a7c9ef9890bedb",
       "shape": [
         1500
       ]
@@ -480,8 +480,8 @@
       "encoding": "raw_little_endian",
       "name": "out_of_plane_mz_nm",
       "nbytes": 12000,
-      "offset": 1705137,
-      "sha256": "2c1760127d05900342c11cd5750b011da18a858caf9003fd6e0188ce14f9b8a1",
+      "offset": 1701194,
+      "sha256": "1a357a736046fa9053aeb786701c87f43cab25af5cf9176948236e9299025aa9",
       "shape": [
         1500
       ]
@@ -491,8 +491,8 @@
       "encoding": "raw_little_endian",
       "name": "out_of_plane_mz_over_fz_m",
       "nbytes": 12000,
-      "offset": 1717137,
-      "sha256": "bbbdc02448600ec72a02cc67d23278f4196cf3fd89455d6fa923730eeeec0f78",
+      "offset": 1713194,
+      "sha256": "f6ac1afecc233790a462c66549d6a23f7f5b72dd06d211acb8048bf1946e9f5e",
       "shape": [
         1500
       ]
@@ -502,8 +502,8 @@
       "encoding": "raw_little_endian",
       "name": "phase_code",
       "nbytes": 12000,
-      "offset": 1729137,
-      "sha256": "218d3f211353db3ca431947847ea9bd21f46cccc962c65596c4e6d118bf05999",
+      "offset": 1725194,
+      "sha256": "fbbc5eeeb4db21d6265369bde2693a1560d0bc0997b7d747e6f15120afbdd03c",
       "shape": [
         1500
       ]
@@ -512,9 +512,9 @@
       "dtype": "object",
       "encoding": "utf8_object_records_unit_separated",
       "name": "phase_name",
-      "nbytes": 18167,
-      "offset": 1741137,
-      "sha256": "3b6c1e4f7e9e0f42934fab88dd7d043c4c28fe822466f761af0e581aafd05d1e",
+      "nbytes": 18564,
+      "offset": 1737194,
+      "sha256": "cf035dc70709de03b2c6dbd32ad65a0b5599c75e50616e1c43f2f7ab598a39ef",
       "shape": [
         1500
       ]
@@ -524,8 +524,8 @@
       "encoding": "raw_little_endian",
       "name": "posture_reference_rad",
       "nbytes": 108000,
-      "offset": 1759304,
-      "sha256": "e9fdfe16316a98268ae900d13ae1fa09376e34a9479a696a5d2e4fbf1b583b72",
+      "offset": 1755758,
+      "sha256": "8a9f89e0924b4d9587e2ddc932d7cede8d273338478d2a6ff3b6aeaaea089627",
       "shape": [
         1500,
         9
@@ -536,8 +536,8 @@
       "encoding": "raw_little_endian",
       "name": "power_margin_w",
       "nbytes": 108000,
-      "offset": 1867304,
-      "sha256": "35a118f5df307bef72faf44fa638514dcf2bf84923d29feec99b117e501cf071",
+      "offset": 1863758,
+      "sha256": "a5e1ab558b373e28a29c90945c65eb2711a251743d754fc25160ffe4408afce8",
       "shape": [
         1500,
         9
@@ -548,8 +548,8 @@
       "encoding": "raw_little_endian",
       "name": "prohibited_active",
       "nbytes": 12000,
-      "offset": 1975304,
-      "sha256": "f162058c7fef0a0dbcd2758a77b03bf9bf1d30cfa64a48b17bdcc14f90c6cfe5",
+      "offset": 1971758,
+      "sha256": "4c7369d71f2f33a9aa4249ba816592ba2bd7865f50dbbe4629cbe440a69a2b04",
       "shape": [
         1500
       ]
@@ -559,8 +559,8 @@
       "encoding": "raw_little_endian",
       "name": "prohibited_detected",
       "nbytes": 12000,
-      "offset": 1987304,
-      "sha256": "dd1a7dd545cb50994c91b17e8ba0b9401f286820661bbc0a537da6278e5df7d3",
+      "offset": 1983758,
+      "sha256": "d4bbc537d1452478f65ea105a90b954959ebc8e566e34453f42fea6fd9090ea3",
       "shape": [
         1500
       ]
@@ -570,8 +570,8 @@
       "encoding": "raw_little_endian",
       "name": "quiet_samples",
       "nbytes": 12000,
-      "offset": 1999304,
-      "sha256": "5581d81befc890474a70f5e01f4008adb5cc256b0ab194ae811006506f0fc797",
+      "offset": 1995758,
+      "sha256": "92a89725ed48d9e8aab28a565ac1d66ee7fc85553f51df85b34c94e6476666f2",
       "shape": [
         1500
       ]
@@ -581,8 +581,8 @@
       "encoding": "raw_little_endian",
       "name": "rate_margin_nm",
       "nbytes": 108000,
-      "offset": 2011304,
-      "sha256": "912e06b78422beaa48c80f90f10533f9253bb989fea13b683a1ec2ac3af9eaa1",
+      "offset": 2007758,
+      "sha256": "d9ab2182ff351aa83dbc618fbd68d27b1e8539367a13e5c0a1c6828f779fa413",
       "shape": [
         1500,
         9
@@ -593,8 +593,8 @@
       "encoding": "raw_little_endian",
       "name": "right_clearance_m",
       "nbytes": 12000,
-      "offset": 2119304,
-      "sha256": "72b96e89f319c33644d3eb6d55df39a0dd36241c9e1195e11366600e7e8ea46d",
+      "offset": 2115758,
+      "sha256": "711720fa6686343db41d7d39f9a5ee1b53784b5f32bc6414d0c54862d7030f47",
       "shape": [
         1500
       ]
@@ -604,8 +604,8 @@
       "encoding": "raw_little_endian",
       "name": "right_wrench",
       "nbytes": 72000,
-      "offset": 2131304,
-      "sha256": "fde35d185d5c8219b709884d78af208d826bd06b4092c6b414389a7b470364dc",
+      "offset": 2127758,
+      "sha256": "f16f34b16c1555b010886b7a9ade11e01ae531f88ec18805c8edc9733db4591a",
       "shape": [
         1500,
         6
@@ -616,8 +616,8 @@
       "encoding": "raw_little_endian",
       "name": "safety_override",
       "nbytes": 108000,
-      "offset": 2203304,
-      "sha256": "e8649dfa597035ad4477d857f6091dd2cd8e7c223a3eef6a5131ef6a8aecf194",
+      "offset": 2199758,
+      "sha256": "a238078fde607f89fa6d7860933b743ce5bb400b4c78fe60c78520beaa791d67",
       "shape": [
         1500,
         9
@@ -627,9 +627,9 @@
       "dtype": "object",
       "encoding": "utf8_object_records_unit_separated",
       "name": "safety_override_reason",
-      "nbytes": 13924,
-      "offset": 2311304,
-      "sha256": "14264509359fa85258c4fbf0a54a808b63712a632c2bd62890c1a47ef8bd3237",
+      "nbytes": 14627,
+      "offset": 2307758,
+      "sha256": "0980fed8172d24b565d29464f9a69508b898e3b2ca5c22fd30f7028c6e43c73f",
       "shape": [
         1500,
         9
@@ -639,9 +639,9 @@
       "dtype": "object",
       "encoding": "utf8_object_records_unit_separated",
       "name": "saturation_stage",
-      "nbytes": 127359,
-      "offset": 2325228,
-      "sha256": "2b64e2d0103ed80cfb519efbd7a95284fdd1dce3e771e0788f200b75031c280b",
+      "nbytes": 119892,
+      "offset": 2322385,
+      "sha256": "727375caf625b4e890869bd9ba8638e83952e8eaf232c50c2331ad5bede9fa16",
       "shape": [
         1500,
         9
@@ -652,8 +652,8 @@
       "encoding": "raw_little_endian",
       "name": "saturation_stage_code",
       "nbytes": 108000,
-      "offset": 2452587,
-      "sha256": "456cc645859879a243bcd0f7b480a49229d475f540c5a0dfcd0fee916d0b9f92",
+      "offset": 2442277,
+      "sha256": "6c42fa59056c971a445346066373903e34f91c4ed9e7b99964b01f4718ce9e05",
       "shape": [
         1500,
         9
@@ -664,8 +664,8 @@
       "encoding": "raw_little_endian",
       "name": "support_hull_area_m2",
       "nbytes": 12000,
-      "offset": 2560587,
-      "sha256": "76c4da0939ae93e19dfda990557a8b4d144ffbaf7cef7defb1d71050f95ca71e",
+      "offset": 2550277,
+      "sha256": "4ed7c97196c5de0cd235db7806cf28e6fd4232f34376b53556eab0ff2359350b",
       "shape": [
         1500
       ]
@@ -674,9 +674,9 @@
       "dtype": "object",
       "encoding": "utf8_object_records_unit_separated",
       "name": "support_mode",
-      "nbytes": 11244,
-      "offset": 2572587,
-      "sha256": "bd9b131bf7cbeafea311da885616dd51213215ec2ba81c38c192320b4f3744ab",
+      "nbytes": 13049,
+      "offset": 2562277,
+      "sha256": "8555ea9337c3521209183d610a9e4b69d18d2b967b175ba5b04c7f9dd1c7278e",
       "shape": [
         1500
       ]
@@ -686,8 +686,8 @@
       "encoding": "raw_little_endian",
       "name": "support_sagittal_margin_m",
       "nbytes": 12000,
-      "offset": 2583831,
-      "sha256": "f161929b705d59e63c4c084097b1ac5bb95edde86822a849cb64f8bbefa695a1",
+      "offset": 2575326,
+      "sha256": "40c0df72e105bbc0ccec96193a5290a49b3b55264065ff0a3c3fa0aaf61692c1",
       "shape": [
         1500
       ]
@@ -697,8 +697,8 @@
       "encoding": "raw_little_endian",
       "name": "symmetry_asymmetry_nm",
       "nbytes": 12000,
-      "offset": 2595831,
-      "sha256": "c426a8826336586131abe19389ea415c1461046900c18b5312d47df2201ca761",
+      "offset": 2587326,
+      "sha256": "210d74ab91d5d95272277c0dfb9a8c4ed160af4e6ea2408ff01265476060c574",
       "shape": [
         1500
       ]
@@ -708,8 +708,8 @@
       "encoding": "raw_little_endian",
       "name": "takeoff_candidate_index",
       "nbytes": 12000,
-      "offset": 2607831,
-      "sha256": "c97cda00786415580114358e829a1d0d3ceed3dadfed24979b707ee45467c375",
+      "offset": 2599326,
+      "sha256": "05af5c3870396d2e2c95004bb197b55cec47704d1fa2c58f0772e084f216a271",
       "shape": [
         1500
       ]
@@ -719,8 +719,8 @@
       "encoding": "raw_little_endian",
       "name": "takeoff_confirmed",
       "nbytes": 1500,
-      "offset": 2619831,
-      "sha256": "f0e20492926525ecd716a63b0a4ab15df6cb4de8a4a3fece0636f4c1ac20ac6b",
+      "offset": 2611326,
+      "sha256": "a7dde9e151381f6a11f0127a24c7faadadcc992572683f126cb9e55fcc9c443b",
       "shape": [
         1500
       ]
@@ -730,7 +730,7 @@
       "encoding": "raw_little_endian",
       "name": "time_s",
       "nbytes": 12000,
-      "offset": 2621331,
+      "offset": 2612826,
       "sha256": "91881a2ef7753b377f8fde653a71db6739b088089845c0c6f707d77291299176",
       "shape": [
         1500
@@ -741,8 +741,8 @@
       "encoding": "raw_little_endian",
       "name": "torque_rate_nm_per_s",
       "nbytes": 108000,
-      "offset": 2633331,
-      "sha256": "29966370cc57c18b874100b49e2920cfa57b7d55b7fa549e86166852a220fd40",
+      "offset": 2624826,
+      "sha256": "104e672eaff0177155ecf20d1b1473df26ff6f79c8e90b5387b645de3c99412b",
       "shape": [
         1500,
         9
@@ -753,8 +753,8 @@
       "encoding": "raw_little_endian",
       "name": "total_wrench",
       "nbytes": 72000,
-      "offset": 2741331,
-      "sha256": "6ab9d9299ac90c17788e35bacfbe1fec6b0ff7e1e0d94ac0b8764e320d6318ce",
+      "offset": 2732826,
+      "sha256": "46c5517a2db131ab25088fc96620d3c90c783c6774a07473af2f27809d6e2ab8",
       "shape": [
         1500,
         6
@@ -764,19 +764,19 @@
       "dtype": "object",
       "encoding": "utf8_object_records_unit_separated",
       "name": "transition_reason",
-      "nbytes": 1764,
-      "offset": 2813331,
-      "sha256": "6c6345b660cb12cb1ee62e00a41ffab3005dd720dcf10e5b17fc82fcf9a276c3",
+      "nbytes": 1694,
+      "offset": 2804826,
+      "sha256": "f68587dd989bb8b0f41b81b1839011a2852a1b41b008d4213dbe354b995540aa",
       "shape": [
         1500
       ]
     }
   ],
   "authority_id": "LCMJ_RES85_CAUSAL_LAUNCH_FLIGHT_CONTROL_V1",
-  "blob_sha256": "91c0b293b67c961dd2209cb8afb083db9f7462226d856f1ea226bebfc9807e12",
+  "blob_sha256": "2944bdf78888e694905f9bdbafc60f393a0a304f7d6dc6fa3aa1e1e512fb670b",
   "byte_order": "little_endian_native_float64_and_bool",
-  "canonical_digest": "1eeed1fa5a5bd57455c20ca95deee5280ffa652715f587eb60d78bdd2cdcdbda",
+  "canonical_digest": "37e83c46241121d2d4bd7ba9b904a539b2a578c2fe64f4b8597c597d7c8365d3",
   "reconstruction_note": "arrays are raw little-endian buffers concatenated in the declared offset order; dtypes and shapes are sufficient to reconstruct every native sample of the episode",
   "schema_version": "1.0.0",
-  "total_bytes": 2815095
+  "total_bytes": 2806520
 }

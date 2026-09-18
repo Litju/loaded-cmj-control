@@ -96,9 +96,31 @@ TRUNK_LEAN_FRAC = 0.35
 TRUNK_EXTEND_FRAC = 0.40
 TRUNK_KP = 240.0
 TRUNK_KD = 30.0
+
+# ---------------------------------------------------------------------------
+# RES-85D strict structural-ROM guard (state causal, predictive)
+#
+# The RES-85C barrier was position-only: it reacted after the joint entered the
+# margin band and could not stop a joint whose outward velocity had already
+# been built up by the coupled propulsion dynamics, so the measured
+# trunk_pelvis coordinate crossed the frozen +-35 deg structural bound.  The
+# guard is now POSITION_GUARD + OUTWARD_VELOCITY_BRAKING: within a declared
+# brake zone it applies an opposing moment proportional to the measured
+# outward joint velocity, and the zone grows with a declared stopping horizon
+# (|qdot| * ROM_BRAKE_HORIZON_S), so a fast joint begins braking before it can
+# cross the frozen bound.  The guard is exactly zero in the interior, never
+# propels a joint toward a limit, uses only measured state and stays inside
+# the frozen actuation authority (it is a desired-moment term; the actuation
+# layer still enforces moment/power/rate).  It never writes Plant state.
+# ---------------------------------------------------------------------------
 JOINT_ROM_MARGIN_RAD = 0.08
 JOINT_ROM_BARRIER_GAIN = 800.0
-TRUNK_ROM_BARRIER_GAIN = 2500.0
+JOINT_ROM_VELOCITY_GAIN = 5000.0
+TRUNK_ROM_GUARD_MARGIN_RAD = 0.12
+TRUNK_ROM_POSITION_GAIN = 2500.0
+TRUNK_ROM_VELOCITY_GAIN = 5000.0
+ROM_BRAKE_HORIZON_S = 0.10
+JOINT_ROM_BRAKE_ZONE_RAD = 0.15
 
 STRUCTURAL_FLEXION_SAFETY_RAD = 0.05
 
@@ -160,7 +182,10 @@ class V3ControllerConfig:
     trunk_kd: float = TRUNK_KD
     joint_rom_margin_rad: float = JOINT_ROM_MARGIN_RAD
     joint_rom_barrier_gain: float = JOINT_ROM_BARRIER_GAIN
-    trunk_rom_barrier_gain: float = TRUNK_ROM_BARRIER_GAIN
+    joint_rom_velocity_gain: float = JOINT_ROM_VELOCITY_GAIN
+    trunk_rom_guard_margin_rad: float = TRUNK_ROM_GUARD_MARGIN_RAD
+    trunk_rom_position_gain: float = TRUNK_ROM_POSITION_GAIN
+    trunk_rom_velocity_gain: float = TRUNK_ROM_VELOCITY_GAIN
     v_countermovement_cmd_m_s: float = V_COUNTERMOVEMENT_CMD_M_S
     a_brake_m_s2: float = A_BRAKE_M_S2
     v_brake_trigger_m_s: float = V_BRAKE_TRIGGER_M_S
@@ -361,23 +386,53 @@ class V3LaunchController:
         ref_rate[0] = ref_rate[0] + trunk_slope * rate_s
         return ref_rate
 
-    def _rom_barrier(self, q: np.ndarray, desired: np.ndarray) -> np.ndarray:
-        """One-sided joint-ROM barrier on the measured actuated joint state.
+    def _rom_guard(self, q: np.ndarray, qdot: np.ndarray,
+                   desired: np.ndarray) -> np.ndarray:
+        """State-causal predictive structural-ROM guard on the measured state.
 
-        Keeps every actuated Plant joint inside its frozen ROM with a declared
-        margin; the barrier is exactly zero in the interior of the ROM and only
-        opposes motion towards a limit, so it never supplies propulsion.
+        Two declared, additive, one-sided terms per bounded actuated joint:
+
+        * POSITION_GUARD: exactly zero until the measured coordinate enters the
+          declared margin band inside a frozen structural limit, then opposes
+          only motion toward that limit;
+        * OUTWARD_VELOCITY_BRAKING: within the declared brake zone (the larger
+          of ``JOINT_ROM_BRAKE_ZONE_RAD`` and the declared stopping horizon
+          ``|qdot| * ROM_BRAKE_HORIZON_S``), the measured outward velocity is
+          opposed with ``velocity_gain * qdot``, so the moment begins before
+          the coordinate approaches the bound and can be rate-ramped by the
+          actuation layer in time.
+
+        Both terms are zero in the interior, never have a sign that propels the
+        joint toward the limit they protect, and are pure desired-moment
+        corrections: the Plant state is never written and the actuation
+        authority still owns the applied moment.
         """
-        margin = float(self.config.joint_rom_margin_rad)
-        gain = np.full(N_CHANNELS, float(self.config.joint_rom_barrier_gain))
-        gain[0] = float(self.config.trunk_rom_barrier_gain)
-        out = desired.copy()
+        margin = np.full(N_CHANNELS, float(self.config.joint_rom_margin_rad))
+        margin[0] = float(self.config.trunk_rom_guard_margin_rad)
+        pos_gain = np.full(N_CHANNELS, float(self.config.joint_rom_barrier_gain))
+        pos_gain[0] = float(self.config.trunk_rom_position_gain)
+        vel_gain = np.full(N_CHANNELS, float(self.config.joint_rom_velocity_gain))
+        vel_gain[0] = float(self.config.trunk_rom_velocity_gain)
+
         upper = self._rom_hi - margin
         lower = self._rom_lo + margin
+        out = desired.copy()
         over = q > upper
         under = q < lower
-        out[over] -= gain[over] * (q[over] - upper[over])
-        out[under] += gain[under] * (lower[under] - q[under])
+        out[over] -= pos_gain[over] * (q[over] - upper[over])
+        out[under] += pos_gain[under] * (lower[under] - q[under])
+
+        gap_hi = upper - q
+        zone_hi = np.maximum(np.abs(qdot) * ROM_BRAKE_HORIZON_S,
+                             JOINT_ROM_BRAKE_ZONE_RAD)
+        frac_hi = np.clip(1.0 - gap_hi / zone_hi, 0.0, 1.0)
+        out -= vel_gain * np.maximum(qdot, 0.0) * frac_hi
+
+        gap_lo = q - lower
+        zone_lo = np.maximum(np.abs(qdot) * ROM_BRAKE_HORIZON_S,
+                             JOINT_ROM_BRAKE_ZONE_RAD)
+        frac_lo = np.clip(1.0 - gap_lo / zone_lo, 0.0, 1.0)
+        out += vel_gain * np.maximum(-qdot, 0.0) * frac_lo
         return out
 
     def _joint_limit_margin(self, data: mujoco.MjData) -> np.ndarray:
@@ -706,7 +761,7 @@ class V3LaunchController:
                     * self.config.extension_rate_ff_gain
                     if self.phase in SUPPORTED_PHASES else np.zeros(N_CHANNELS))
         desired = desired - kp * (q - q_ref) - kd * (qdot - rate_ref)
-        desired = self._rom_barrier(q, desired)
+        desired = self._rom_guard(q, qdot, desired)
 
         mtp_q = (float(data.qpos[plant.idx.qadr["left_mtp"]]),
                  float(data.qpos[plant.idx.qadr["right_mtp"]]))
@@ -784,7 +839,13 @@ class V3LaunchController:
                 "trunk_extend_frac": self.config.trunk_extend_frac,
                 "joint_rom_margin_rad": self.config.joint_rom_margin_rad,
                 "joint_rom_barrier_gain": self.config.joint_rom_barrier_gain,
-                "trunk_rom_barrier_gain": self.config.trunk_rom_barrier_gain,
+                "joint_rom_velocity_gain": self.config.joint_rom_velocity_gain,
+                "trunk_rom_guard_margin_rad": self.config.trunk_rom_guard_margin_rad,
+                "trunk_rom_position_gain": self.config.trunk_rom_position_gain,
+                "trunk_rom_velocity_gain": self.config.trunk_rom_velocity_gain,
+                "rom_brake_horizon_s": ROM_BRAKE_HORIZON_S,
+                "joint_rom_brake_zone_rad": JOINT_ROM_BRAKE_ZONE_RAD,
+                "rom_guard_structure": "POSITION_GUARD_PLUS_OUTWARD_VELOCITY_BRAKING",
                 "trunk_kp": self.config.trunk_kp,
                 "trunk_kd": self.config.trunk_kd,
                 "joint_kp": [float(v) for v in JOINT_KP],

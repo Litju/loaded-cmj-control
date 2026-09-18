@@ -13,7 +13,7 @@
     }
   ],
   "commands": {
-    "entry_head_reproduction": "git worktree add --detach <tmp> e487369f6861d9c9bc27f9f3d92b981fb3684293 && cp <untracked owner tests> <tmp>/tests/ && pytest <same node ids> -q --tb=line",
+    "entry_head_reproduction": "git worktree add --detach <tmp> ffc98526bd2b0da76dbef50891415ebdb345a1fd && cp <untracked owner tests> <tmp>/tests/ && pytest <same node ids> -q --tb=line",
     "full_suite": "pytest tests/ -q -p no:randomly --ignore=tests/test_ml241_qacc_resolution.py --ignore=tests/test_public_support_wrench_contract.py",
     "res83_plant": "pytest tests/test_res83_v3_plant.py",
     "res84_regression": "pytest tests/test_res84_v3_measurement_contact.py",
@@ -354,23 +354,729 @@
     }
   ],
   "full_suite": {
-    "collected": 890,
+    "collected": 912,
     "collection_error_modules_excluded": 2,
+    "errors": 0,
     "failed": 60,
-    "passed": 823,
+    "passed": 845,
     "res83_res84_failures": 0,
     "res85_owned_failures": 0,
     "res85c_owned_failures": 0,
+    "res85d_owned_failures": 0,
     "skipped": 7
   },
-  "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001",
+  "mission": "RES85D_STRICT_ROM_RECONCILIATION_AND_FINAL_RESEAL_001",
+  "res85c_historical_run": {
+    "failure_categories": {
+      "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT": 2,
+      "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT": 17,
+      "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT": 3,
+      "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY": 3,
+      "PRE_EXISTING_LEGACY_V1_QUALIFICATION": 1,
+      "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY": 9,
+      "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH": 25
+    },
+    "failures": [
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res54_true_com_velocity.py::test_event_rebase_determinism"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_01_exact_e10_restore"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_03_trunk_rate_semantics"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_04_cop_support_frame"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_05_centroidal_wrench_identity"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_06_local_effectiveness"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_10_rr_spec_immutable"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_11_e11_alone_insufficient"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT",
+        "reason": "external evidence bundle contract absent",
+        "test": "tests/test_res73_balance_capture.py::test_13_evidence_contract"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_01_rr_confirmed_start"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_03_handoff_spec_immutable"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_04_fixed_foot_path"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_07_timescaling_identity"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_12_e12_identity_and_post_hold"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT",
+        "reason": "external evidence bundle contract absent",
+        "test": "tests/test_res74_stable_recovery.py::test_13_evidence_contract"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_res76_full_closure.py::test_05_rr_dwell_to_recovery_init"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_res76_full_closure.py::test_07_res43_one_way_handoff"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res76_full_closure.py::test_11_handoff_transfer"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res16_true_standing.py::test_12_E1_E11_unchanged"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res31_honest_planar_root.py::test_pre_limit_trajectory_identity"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res43_true_standing_rebase.py::test_16_controller_unchanged"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res5_honest_fall.py::test_fall_shell_physical_contact"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res6_compliant_landing_contact.py::test_standing_pass"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res8_captured_squat.py::test_capture_target_from_proven_state"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res8_captured_squat.py::test_E11_before_fall"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner debug_state braking_onset_time_s differs from expected",
+        "test": "tests/test_progressive_braking_controller.py::test_braking_onset_at_upward_bw_crossing_while_descending"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_no_late_depth_takeover_without_weight_crossing"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_braking_onset_requires_sustained_countermovement_descent"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_no_phase_regression_from_braking"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_braking_reversal_enters_propulsion_and_never_returns"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner pfip action schema lacks 'braking_onset_time_s'",
+        "test": "tests/test_progressive_braking_controller.py::test_propulsion_flight_landing_prep_absorb_chain"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches RECOVERY (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_absorption_to_recovery_after_capture_dwell"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches FLIGHT (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_flight_actions_are_independent_of_contact_inputs"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_progressive_braking_controller.py::test_progressive_ratchet_respects_reachable_increment"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_progressive_braking_controller.py::test_extension_freezes_once_force_requirement_is_met"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_progressive_braking_controller.py::test_impulse_accounting_matches_manual_integration"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner pfip allocator signature drift",
+        "test": "tests/test_progressive_braking_controller.py::test_progressive_mode_disables_allocator_vertical_vote"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner pfip revision is '1.0', test expects R049",
+        "test": "tests/test_progressive_braking_controller.py::test_controller_revision_identifies_candidate"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches ABSORPTION (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_full_event_frontier_ordering_is_forward_only"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_progressive_braking_controller.py::test_reset_clears_braking_state"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner hip policy CONTROLLER_REVISION lacks R049",
+        "test": "tests/test_hip_braking_polarity.py::test_r049_reference_sources_are_distinct_and_valid"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_pre_braking_behavior_is_byte_identical"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_only_authorized_channels_diverge_and_knees_never_change"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_committed_extension_support_cannot_be_erased_under_deficit"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_hip_delta_matches_exact_polarity_correction_while_unclamped"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_actions_finite_bounded_through_extended_braking"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_knee_rate_feasibility.py::test_defect_removed_once_support_is_committed"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_knee_rate_feasibility.py::test_no_unrelated_channel_changes_vs_frozen_r047"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_knee_rate_feasibility.py::test_extension_direction_residual_is_not_blocked"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_knee_rate_feasibility.py::test_accepted_action_slew_still_bounds_knee_delivery"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent /tmp/res51/work/E8_BRANCH_STATE.npz",
+        "test": "tests/test_res51_centroidal_landing.py::test_e8_state_restore_identity"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent /tmp/res52/work/EVENTS.json",
+        "test": "tests/test_res52_soft_contact.py::test_18_profile_run_safety_gates_short_cell"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external evidence file F4-ORACLE-FEASIBILITY/.../ml212_runner.py",
+        "test": "tests/test_g4r2_composition.py::test_historical_evidence_is_unchanged"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT",
+        "reason": "cyipopt unavailable at the offline solver boundary",
+        "test": "tests/test_ml243_ipopt_backend.py::test_synthetic_sparse_linear_known_solution_and_counters"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT",
+        "reason": "cyipopt unavailable at the offline solver boundary",
+        "test": "tests/test_ml243_ipopt_backend.py::test_synthetic_nonlinear_solution_and_ipopt_derivative_checker"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT",
+        "reason": "cyipopt unavailable at the offline solver boundary",
+        "test": "tests/test_ml243_ipopt_backend.py::test_short_same_plant_zero_defect_fixture"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY",
+        "reason": "legacy transcription state-delta count 2 != 1",
+        "test": "tests/test_ml243_ipopt_backend.py::test_short_same_plant_perturbed_feasibility_restoration"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY",
+        "reason": "legacy transcription state-delta count 2 != 1",
+        "test": "tests/test_ml243_ipopt_backend.py::test_deterministic_repeated_synthetic_and_same_plant_receipts"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY",
+        "reason": "legacy oracle derivatives.py substrate hash mismatch",
+        "test": "tests/test_ml243_ipopt_backend.py::test_ml241_and_physical_substrate_hashes_are_unchanged_after_reversal_erratum"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V1_QUALIFICATION",
+        "reason": "legacy V1 mechanics qualification subprocess 39/40",
+        "test": "tests/test_public_qualification.py::test_qualification_suite_passes[qualification_mechanics.py]"
+      }
+    ],
+    "full_suite": {
+      "collected": 890,
+      "collection_error_modules_excluded": 2,
+      "failed": 60,
+      "passed": 823,
+      "skipped": 7
+    },
+    "mission": "RES85C_NARROW_POSTSEAL_CORRECTION_AND_LAUNCH_REQUALIFICATION_001"
+  },
+  "res85d_final_run": {
+    "entry_head_reproduction": {
+      "controlling_cause_families": {
+        "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT": 2,
+        "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT": 17,
+        "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT": 3,
+        "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY": 3,
+        "PRE_EXISTING_LEGACY_V1_QUALIFICATION": 1,
+        "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY": 9,
+        "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH": 25
+      },
+      "failing_test_files_importing_res85d_change_surface": 0,
+      "failures_reproduced_node_for_node": 60,
+      "method": "git worktree add --detach <tmp> ffc98526bd2b0da76dbef50891415ebdb345a1fd; copy the untracked owner test files and untracked owner source/tool dependencies verbatim; run only the candidate failing node ids with PYTHONPATH=<worktree>/src so the worktree source wins over the editable install; pytest <60 node ids> -q --tb=line",
+      "note": "no failing test file imports loaded_cmj.v3, the only module carrying the RES-85D controller change; every failure pre-exists at ENTRY_HEAD",
+      "same_failure_set": true,
+      "untracked_files_copied_verbatim": [
+        "tests/test_progressive_braking_controller.py",
+        "tests/test_hip_braking_polarity.py",
+        "tests/test_knee_rate_feasibility.py",
+        "tests/test_res51_centroidal_landing.py",
+        "tests/test_res52_soft_contact.py",
+        "tests/test_res10_physics_sample_sync.py",
+        "tests/test_public_support_wrench_contract.py",
+        "src/loaded_cmj/control/gen3_reference.py",
+        "src/loaded_cmj/control/res51_policy.py",
+        "src/loaded_cmj/control/reference_data/",
+        "tools/diagnostic_replay.py",
+        "tools/reproduce_res10_sync.py",
+        "tools/res51/",
+        "tools/run_canonical_rollout.py"
+      ],
+      "worktree_head": "ffc98526bd2b0da76dbef50891415ebdb345a1fd"
+    },
+    "failure_categories": {
+      "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT": 2,
+      "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT": 17,
+      "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT": 3,
+      "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY": 3,
+      "PRE_EXISTING_LEGACY_V1_QUALIFICATION": 1,
+      "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY": 9,
+      "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH": 25
+    },
+    "failures": [
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res54_true_com_velocity.py::test_event_rebase_determinism"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_01_exact_e10_restore"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_03_trunk_rate_semantics"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_04_cop_support_frame"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_05_centroidal_wrench_identity"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_06_local_effectiveness"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_10_rr_spec_immutable"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res73_balance_capture.py::test_11_e11_alone_insufficient"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT",
+        "reason": "external evidence bundle contract absent",
+        "test": "tests/test_res73_balance_capture.py::test_13_evidence_contract"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_01_rr_confirmed_start"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_03_handoff_spec_immutable"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_04_fixed_foot_path"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_07_timescaling_identity"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res74_stable_recovery.py::test_12_e12_identity_and_post_hold"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_EVIDENCE_CONTRACT_ABSENT",
+        "reason": "external evidence bundle contract absent",
+        "test": "tests/test_res74_stable_recovery.py::test_13_evidence_contract"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_res76_full_closure.py::test_05_rr_dwell_to_recovery_init"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_res76_full_closure.py::test_07_res43_one_way_handoff"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external session artifact",
+        "test": "tests/test_res76_full_closure.py::test_11_handoff_transfer"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res16_true_standing.py::test_12_E1_E11_unchanged"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res31_honest_planar_root.py::test_pre_limit_trajectory_identity"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res43_true_standing_rebase.py::test_16_controller_unchanged"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res5_honest_fall.py::test_fall_shell_physical_contact"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res6_compliant_landing_contact.py::test_standing_pass"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res8_captured_squat.py::test_capture_target_from_proven_state"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V2_TRAJECTORY_IDENTITY",
+        "reason": "legacy V2 trajectory identity",
+        "test": "tests/test_v2_1_res8_captured_squat.py::test_E11_before_fall"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner debug_state braking_onset_time_s differs from expected",
+        "test": "tests/test_progressive_braking_controller.py::test_braking_onset_at_upward_bw_crossing_while_descending"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_no_late_depth_takeover_without_weight_crossing"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_braking_onset_requires_sustained_countermovement_descent"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_no_phase_regression_from_braking"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_braking_reversal_enters_propulsion_and_never_returns"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner pfip action schema lacks 'braking_onset_time_s'",
+        "test": "tests/test_progressive_braking_controller.py::test_propulsion_flight_landing_prep_absorb_chain"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches RECOVERY (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_absorption_to_recovery_after_capture_dwell"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches FLIGHT (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_flight_actions_are_independent_of_contact_inputs"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_progressive_braking_controller.py::test_progressive_ratchet_respects_reachable_increment"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_progressive_braking_controller.py::test_extension_freezes_once_force_requirement_is_met"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_progressive_braking_controller.py::test_impulse_accounting_matches_manual_integration"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner pfip allocator signature drift",
+        "test": "tests/test_progressive_braking_controller.py::test_progressive_mode_disables_allocator_vertical_vote"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner pfip revision is '1.0', test expects R049",
+        "test": "tests/test_progressive_braking_controller.py::test_controller_revision_identifies_candidate"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches ABSORPTION (phase frontier drift)",
+        "test": "tests/test_progressive_braking_controller.py::test_full_event_frontier_ordering_is_forward_only"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_progressive_braking_controller.py::test_reset_clears_braking_state"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner hip policy CONTROLLER_REVISION lacks R049",
+        "test": "tests/test_hip_braking_polarity.py::test_r049_reference_sources_are_distinct_and_valid"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_pre_braking_behavior_is_byte_identical"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_only_authorized_channels_diverge_and_knees_never_change"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_committed_extension_support_cannot_be_erased_under_deficit"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_hip_delta_matches_exact_polarity_correction_while_unclamped"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner action schema lacks 'brake_level'",
+        "test": "tests/test_hip_braking_polarity.py::test_actions_finite_bounded_through_extended_braking"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_knee_rate_feasibility.py::test_defect_removed_once_support_is_committed"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_knee_rate_feasibility.py::test_no_unrelated_channel_changes_vs_frozen_r047"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_knee_rate_feasibility.py::test_extension_direction_residual_is_not_blocked"
+      },
+      {
+        "category": "PRE_EXISTING_OWNER_CONTROLLER_INTERFACE_MISMATCH",
+        "reason": "owner policy never reaches BRAKING (phase frontier drift)",
+        "test": "tests/test_knee_rate_feasibility.py::test_accepted_action_slew_still_bounds_knee_delivery"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent /tmp/res51/work/E8_BRANCH_STATE.npz",
+        "test": "tests/test_res51_centroidal_landing.py::test_e8_state_restore_identity"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent /tmp/res52/work/EVENTS.json",
+        "test": "tests/test_res52_soft_contact.py::test_18_profile_run_safety_gates_short_cell"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SESSION_ARTIFACT_ABSENT",
+        "reason": "absent external evidence file F4-ORACLE-FEASIBILITY/.../ml212_runner.py",
+        "test": "tests/test_g4r2_composition.py::test_historical_evidence_is_unchanged"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT",
+        "reason": "cyipopt unavailable at the offline solver boundary",
+        "test": "tests/test_ml243_ipopt_backend.py::test_synthetic_sparse_linear_known_solution_and_counters"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT",
+        "reason": "cyipopt unavailable at the offline solver boundary",
+        "test": "tests/test_ml243_ipopt_backend.py::test_synthetic_nonlinear_solution_and_ipopt_derivative_checker"
+      },
+      {
+        "category": "PRE_EXISTING_EXTERNAL_SOLVER_BACKEND_ABSENT",
+        "reason": "cyipopt unavailable at the offline solver boundary",
+        "test": "tests/test_ml243_ipopt_backend.py::test_short_same_plant_zero_defect_fixture"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY",
+        "reason": "legacy transcription state-delta count 2 != 1",
+        "test": "tests/test_ml243_ipopt_backend.py::test_short_same_plant_perturbed_feasibility_restoration"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY",
+        "reason": "legacy transcription state-delta count 2 != 1",
+        "test": "tests/test_ml243_ipopt_backend.py::test_deterministic_repeated_synthetic_and_same_plant_receipts"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_ORACLE_TRANSCRIPTION_IDENTITY",
+        "reason": "legacy oracle derivatives.py substrate hash mismatch",
+        "test": "tests/test_ml243_ipopt_backend.py::test_ml241_and_physical_substrate_hashes_are_unchanged_after_reversal_erratum"
+      },
+      {
+        "category": "PRE_EXISTING_LEGACY_V1_QUALIFICATION",
+        "reason": "legacy V1 mechanics qualification subprocess 39/40",
+        "test": "tests/test_public_qualification.py::test_qualification_suite_passes[qualification_mechanics.py]"
+      }
+    ],
+    "res85d_owned_failure_ids": [],
+    "res85d_owned_failures": 0,
+    "run": {
+      "candidate_state": "HEAD ffc98526bd2b0da76dbef50891415ebdb345a1fd plus the RES-85D working-tree implementation, tests and regenerated evidence",
+      "classification_recorded_after_run": true,
+      "collected": 912,
+      "command": "pytest tests/ -p no:randomly --ignore=tests/test_ml241_qacc_resolution.py --ignore=tests/test_public_support_wrench_contract.py --junitxml=<junit.xml> --tb=no -rN",
+      "duration_s": 1188.44,
+      "errors": 0,
+      "failed": 60,
+      "ignored_collection_modules": [
+        "tests/test_ml241_qacc_resolution.py",
+        "tests/test_public_support_wrench_contract.py"
+      ],
+      "passed": 845,
+      "res85d_owned_failures": 0,
+      "skipped": 7,
+      "worktree_head": "ffc98526bd2b0da76dbef50891415ebdb345a1fd"
+    },
+    "status": "FINAL",
+    "verdict": "ALL RECORDED RES-85D FAILURES PRE-EXIST AT ENTRY_HEAD OR ARE ENVIRONMENTAL/NONSCIENTIFIC; NO RES-85D-OWNED FAILURE"
+  },
   "schema_version": "1.0.0",
   "targeted_and_regression": {
     "tests/test_res83_v3_plant.py": "PASS",
     "tests/test_res84_v3_measurement_contact.py": "PASS",
     "tests/test_res85_authority_freeze.py": "PASS",
     "tests/test_res85_v3_causal_launch.py": "PASS",
-    "tests/test_res85c_correction.py": "PASS"
+    "tests/test_res85c_correction.py": "PASS",
+    "tests/test_res85d_strict_rom.py": "PASS"
+  },
+  "targeted_counts": {
+    "collected": 222,
+    "command": "pytest tests/test_res83_v3_plant.py tests/test_res84_v3_measurement_contact.py tests/test_res85_authority_freeze.py tests/test_res85_v3_causal_launch.py tests/test_res85c_correction.py tests/test_res85d_strict_rom.py -q --tb=short",
+    "failed": 0,
+    "passed": 222,
+    "per_file": {
+      "tests/test_res83_v3_plant.py": 31,
+      "tests/test_res84_v3_measurement_contact.py": 92,
+      "tests/test_res85_authority_freeze.py": 19,
+      "tests/test_res85_v3_causal_launch.py": 31,
+      "tests/test_res85c_correction.py": 28,
+      "tests/test_res85d_strict_rom.py": 21
+    },
+    "skipped": 0
   },
   "verdict": "ALL RECORDED FAILURES PRE-EXIST AT ENTRY_HEAD AND ARE CLASSIFIED AS ENVIRONMENTAL, LEGACY-V2/V1, LEGACY-ORACLE OR UNTRACKED-OWNER-INTERFACE; NONE IS INTRODUCED BY RES-85C"
 }
