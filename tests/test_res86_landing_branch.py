@@ -26,12 +26,15 @@ for _path in (str(TASK_ROOT), str(TASK_ROOT / "src")):
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
+import subprocess  # noqa: E402
+
 from loaded_cmj.v3 import constants as C  # noqa: E402
 from loaded_cmj.v3 import measurement as M  # noqa: E402
 from loaded_cmj.v3.controller import PHASE_ORDER, V3_CONTROLLER_AUTHORITY_ID  # noqa: E402
 from loaded_cmj.v3.plant import V3Plant  # noqa: E402
 from tools.res86.capture_landing_branch import (  # noqa: E402
     E8_SAMPLE,
+    MISSION_AUTHORED_PATHS,
     PRE_TOUCHDOWN_SAMPLE,
     TOTAL_NATIVE_SAMPLES,
     baseline_negative_control,
@@ -40,6 +43,7 @@ from tools.res86.capture_landing_branch import (  # noqa: E402
     milestone_report,
     run_canonical_reference,
     run_instrumented_capture,
+    source_worktree_classification,
 )
 
 SUMMARY_PATH = (TASK_ROOT / "audit" / "EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001" /
@@ -195,6 +199,34 @@ def test_no_res83_res84_res85_regression(canonical):
         column = qpos[:end, C.V3_JOINT_NAMES.index(name)]
         assert float(column.min()) >= float(rng[0]) - 1.0e-9, name
         assert float(column.max()) <= float(rng[1]) + 1.0e-9, name
+
+
+# ---------------------------------------------------------------------------
+# A1 provenance erratum: mission-authored files are never owner files
+# ---------------------------------------------------------------------------
+def test_provenance_classification_keeps_mission_files_disjoint():
+    classification = source_worktree_classification()
+    mission = set(classification["mission_authored_paths_at_entry"])
+    owner = set(classification["untracked_owner_files_at_entry"])
+    assert mission.isdisjoint(owner)
+    assert set(classification["committed_by_this_mission"]) == set(MISSION_AUTHORED_PATHS)
+    for path in MISSION_AUTHORED_PATHS:
+        assert path not in owner, path
+
+
+def test_mission_authored_files_are_git_tracked_at_the_achievement_commit():
+    """The RES-86A commit authored these files; they were absent at ENTRY_HEAD."""
+    entry_head = "314b96494305ff2a8f82c1506a0e96f5f308ae4e"
+    achievement = "3f379a3290ec75b76b66a05080eb66707e33a396"
+    for path in MISSION_AUTHORED_PATHS:
+        before = subprocess.run(
+            ["git", "-C", str(TASK_ROOT), "rev-parse", f"{entry_head}:{path}"],
+            capture_output=True)
+        after = subprocess.run(
+            ["git", "-C", str(TASK_ROOT), "rev-parse", f"{achievement}:{path}"],
+            capture_output=True)
+        assert before.returncode != 0, path
+        assert after.returncode == 0, path
 
 
 def test_milestones_match_sealed_res85_binding(capture, canonical):

@@ -675,22 +675,52 @@ def environment_record() -> dict:
     }
 
 
+MISSION_AUTHORED_PATHS: tuple[str, ...] = (
+    "audit/EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001/BRANCH_CAPTURE_SUMMARY.json",
+    "audit/EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001/RES86A_RECEIPT.md",
+    "audit/EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001/V3_LANDING_ACCEPTANCE_AUTHORITY.json",
+    "audit/EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001/V3_LANDING_ACCEPTANCE_AUTHORITY_DIGEST.json",
+    "audit/EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001/build_authority.py",
+    "audit/EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001/checksums.sha256",
+    "src/loaded_cmj/v3/active_set_capture.py",
+    "src/loaded_cmj/v3/landing_authority.py",
+    "src/loaded_cmj/v3/landing_metrics.py",
+    "tests/test_res86_active_set_capture.py",
+    "tests/test_res86_landing_authority.py",
+    "tests/test_res86_landing_branch.py",
+    "tools/res86/capture_landing_branch.py",
+)
+
+
 def source_worktree_classification() -> dict:
+    """Split untracked paths into mission-authored and pre-existing owner files.
+
+    The predecessor RES-86A record mislabelled the mission-authored RES-86
+    source/test/tool files as pre-existing owner files; the corrected rule
+    keeps the two classes disjoint and records what the mission commits.
+    """
     porcelain = subprocess.check_output(
         ["git", "status", "--porcelain=v1", "--untracked-files=all"], cwd=str(ROOT)).decode()
     untracked = [line[3:] for line in porcelain.splitlines() if line.startswith("?? ")]
     tracked_dirty = [line for line in porcelain.splitlines()
                      if line and not line.startswith("?? ")]
+    mission_paths = sorted(path for path in untracked if path in MISSION_AUTHORED_PATHS)
+    owner_untracked = sorted(path for path in untracked if path not in MISSION_AUTHORED_PATHS)
     return {
         "mission": MISSION,
         "classification_rule": (
-            "PRE-EXISTING owner files present at ENTRY_HEAD; not authored by this mission; "
-            "never staged or committed by RES-86A."
+            "Mission-authored RES-86 paths are authored and committed by this mission; "
+            "PRE-EXISTING owner files were present at ENTRY_HEAD and are never staged "
+            "or committed by this mission.  The two classes are disjoint."
         ),
-        "untracked_owner_files_at_entry": sorted(untracked),
+        "mission_authored_paths_at_entry": mission_paths,
+        "untracked_owner_files_at_entry": owner_untracked,
         "tracked_dirty_at_entry": sorted(tracked_dirty),
-        "committed_by_this_mission": [],
-        "note": "This record is generated before capture; the achievement commit stages only RES-86 paths.",
+        "committed_by_this_mission": sorted(MISSION_AUTHORED_PATHS),
+        "note": (
+            "This record is generated before capture; the achievement commit stages only "
+            "the mission-authored RES-86 paths listed in committed_by_this_mission."
+        ),
     }
 
 
