@@ -1,0 +1,16 @@
+{
+  "authority_id": "LCMJ_RES86_V3_LANDING_ACCEPTANCE_AUTHORITY_V1",
+  "authority_version": "1.0.0",
+  "canonical_sha256": "16fdcf06b56b432cf49a5d6b9ffa7562926523aa3364ce9d61ebf1dba107a29d",
+  "classification": "OWNER_ENGINEERING_TASK_BOUND_WITH_SENSITIVITY",
+  "false_closure_prohibition": [
+    "L4-T8",
+    "E11",
+    "E12",
+    "C_11",
+    "HY_11",
+    "M_11"
+  ],
+  "source_module": "src/loaded_cmj/v3/landing_authority.py",
+  "source_module_sha256": "24fc5de63c7a5027c235e3dfd57908d621575108c40f61eadcc905995da05077"
+}

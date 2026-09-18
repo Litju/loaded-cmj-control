@@ -1,0 +1,90 @@
+{
+  "active_set_signature": {
+    "baseline_signature": "645db573da726bafdef7bbf9d299ed1803b98c2896a33cecadea67cd27f06051",
+    "branch_id": "RES86_BRANCH_PRE_TOUCHDOWN_SAMPLE_790",
+    "branch_signature": "cea0ff7c92c7f10f0b168e67ba1758b97720557ce8a8eda2eb1710391a4a4cf1",
+    "executed_interval_id": "NATIVE_SAMPLES_790_1499",
+    "signature_version": "RES86_ACTIVE_SET_SIGNATURE_V1"
+  },
+  "authority_id": "LCMJ_RES86_V3_ACTIVE_SET_CAPTURE_V1",
+  "baseline": {
+    "chatter_transitions": 20,
+    "first_prohibited_contact_sample": 928,
+    "max_abs_com_vx_m_s": 0.4149846204805426,
+    "max_abs_hy_kg_m2_s": 16.899614462794553,
+    "max_penetration_m": 0.0480219023120563,
+    "peak_total_floor_fz_n": 2846.0071985474465,
+    "structural_rom_first_violation_sample": 950,
+    "support_loss_sample": 905
+  },
+  "capture_commit_head": "314b96494305ff2a8f82c1506a0e96f5f308ae4e",
+  "capture_commit_tree": "f501146f83057133002f065b15a05d51b4f7ab6e",
+  "experiment_id": "EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001",
+  "first_contact": {
+    "com_vz_m_s": -1.7294385957361254,
+    "contact_sequence": [
+      "floor->left_toe_support (2 rows)",
+      "floor->right_toe_support (2 rows)"
+    ],
+    "legal_plantar_active": 4,
+    "prohibited_detected": 0,
+    "regions": [
+      "toe"
+    ],
+    "sample": 791,
+    "sides": [
+      "left",
+      "right"
+    ],
+    "state_sha256": "e411462929c178b97a1132babb46f2fde8c7e12c5d40e40e8f18fa7ce7869355",
+    "state_size": 142,
+    "state_spec": "mjSTATE_INTEGRATION",
+    "time_s": 1.582
+  },
+  "milestones": {
+    "apex_h2_support_m": 0.16021398534364972,
+    "canonical_manifest_values": {
+      "claim_end_sample": 791,
+      "h2_support_m": 0.16021398534364972,
+      "takeoff_confirmation_sample": 637,
+      "takeoff_occurrence_index": 612
+    },
+    "claim_end": {
+      "reason": "FIRST_LEGAL_PLANTAR_RECONTACT_AFTER_FLIGHT",
+      "sample": 791,
+      "time_s": 1.582
+    },
+    "takeoff_confirmation": {
+      "confirmation_sample": 637,
+      "confirmed": true
+    },
+    "takeoff_occurrence": {
+      "native_index": 612,
+      "time_s": 1.224
+    }
+  },
+  "mission": "RES86A_LANDING_AUTHORITY_BRANCH_AND_RECORDER_FOUNDATION_001",
+  "pre_touchdown": {
+    "legal_plantar_active": 0,
+    "prohibited_detected": 0,
+    "sample": 790,
+    "state_sha256": "08605746ced78fa130c6fc210661fdd611e22e0bbbe20b9758f85b060d93cb42",
+    "state_size": 142,
+    "state_spec": "mjSTATE_INTEGRATION",
+    "time_s": 1.58
+  },
+  "recorder": {
+    "canonical_digest": "49229f6c4b2b0b2b8fda562eec088be2800fccfeb37431452fe66d5a0f895833",
+    "contact_rows_total": 15211,
+    "efc_rows_total": 90482,
+    "encoding": "CSR_OFFSETS_FLAT_ROWS_NO_TRUNCATION",
+    "ncon_max": 24,
+    "nefc_max": 144
+  },
+  "schema_version": "1.0.0",
+  "sealed_references": {
+    "res82_landing_contract": "audit/EXP-RES82-SUCCESSOR-SCIENTIFIC-TASK-CONTRACT-001/LANDING_BALANCE_RECOVERY_CONTRACT.json",
+    "res85_binding": "audit/EXP-RES85-CAUSAL-LAUNCH-FLIGHT-CONTROL-001/RES85E_EXTERNAL_EVIDENCE_BINDING.json",
+    "res85_telemetry_manifest": "audit/EXP-RES85-CAUSAL-LAUNCH-FLIGHT-CONTROL-001/TELEMETRY_MANIFEST.json"
+  }
+}
