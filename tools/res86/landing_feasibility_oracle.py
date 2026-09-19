@@ -479,6 +479,7 @@ class StructuredWitnessParameters:
     hip_bias_nm: float
     early_hold_bw: float
     early_hold_s: float
+    roll_bias_scale: float = 0.0
 
 
 STRUCTURED_PARAMETER_BOUNDS: tuple[tuple[float, float], ...] = (
@@ -491,6 +492,7 @@ STRUCTURED_PARAMETER_BOUNDS: tuple[tuple[float, float], ...] = (
     (-250.0, 250.0),  # hip_bias_nm
     (0.0, 2.0),       # early_hold_bw
     (0.0, 0.10),      # early_hold_s
+    (0.0, 1.0),       # roll_bias_scale
 )
 
 STRUCTURED_STARTS: tuple[StructuredWitnessParameters, ...] = (
@@ -503,9 +505,14 @@ STRUCTURED_STARTS: tuple[StructuredWitnessParameters, ...] = (
 
 
 def _virtual_model_moments(oracle: LandingFeasibilityOracle, data: mujoco.MjData,
-                           fz_n: float, fx_n: float, x_cop_m: float) -> np.ndarray:
-    """Causal ``bias - J^T F`` sagittal support moments at the requested CoP."""
-    tau = np.asarray(data.qfrc_bias[oracle._dof], dtype=np.float64)
+                           fz_n: float, fx_n: float, x_cop_m: float,
+                           *, bias_scale: float = 1.0) -> np.ndarray:
+    """Causal ``bias_scale * bias - J^T F`` sagittal moments at the requested CoP.
+
+    ``bias_scale = 0`` with ``F = 0`` is exactly the slack (zero desired torque)
+    roll phase; ``bias_scale = 1`` is the full virtual support model.
+    """
+    tau = float(bias_scale) * np.asarray(data.qfrc_bias[oracle._dof], dtype=np.float64)
     for side in C.V3_SIDES:
         force = np.array([fx_n * 0.5, 0.0, fz_n * 0.5], dtype=np.float64)
         point = np.array([x_cop_m, 0.085 if side == "left" else -0.085, 0.0])
@@ -521,18 +528,24 @@ def _virtual_model_moments(oracle: LandingFeasibilityOracle, data: mujoco.MjData
 
 
 def _structured_desired(oracle: LandingFeasibilityOracle, params: StructuredWitnessParameters,
-                        data: mujoco.MjData, time_s: float) -> np.ndarray:
+                        data: mujoco.MjData, time_s: float, *,
+                        mode_gate: bool = False) -> np.ndarray:
     metrics = oracle._fast_metrics(data)
     com_v = oracle._system_com_velocity(data)
     vz = float(com_v[2])
     vx = float(com_v[0])
     com_x = float(data.subtree_com[0][0])
     cap = float(params.fz_cap_bw) * BW_N
-    if time_s < params.early_hold_s:
+    gate_open = True
+    if mode_gate:
+        gate_open = any(region != "toe" for _side, region in metrics.active_regions)
+    if time_s < params.early_hold_s or (mode_gate and not gate_open):
         fz_ref = min(float(params.early_hold_bw) * BW_N, cap)
+        bias_scale = float(params.roll_bias_scale)
     else:
         fz_ref = min(BW_N + float(C.V3_SYSTEM_MASS_KG) * max(0.0, -vz)
                      / max(params.t_stop_s, 1.0e-6), cap)
+        bias_scale = 1.0
     fz_cmd = min(fz_ref, metrics.fz_total
                  + float(params.force_ramp_bw_per_s) * BW_N * oracle.dt)
     if metrics.support_x_mean is None:
@@ -541,7 +554,8 @@ def _structured_desired(oracle: LandingFeasibilityOracle, params: StructuredWitn
         x_cop = float(metrics.support_x_mean) + (com_x - float(metrics.support_x_mean)) \
             * float(params.cop_blend)
     fx = float(np.clip(-0.5 * float(C.V3_SYSTEM_MASS_KG) * vx, -0.5 * fz_cmd, 0.5 * fz_cmd))
-    tau = _virtual_model_moments(oracle, data, fz_cmd, fx, x_cop)
+    tau = _virtual_model_moments(oracle, data, fz_cmd, fx, x_cop,
+                                 bias_scale=bias_scale)
     for channel in COORDINATE_CHANNELS["hip_pair"]:
         tau[channel] += float(params.hip_bias_nm)
     for channel in COORDINATE_CHANNELS["knee_pair"]:
@@ -641,16 +655,6 @@ class LandingFeasibilityOracle:
             raise ValueError(f"sequence shape {sequence.shape} != ({native_steps}, 9)")
         return self._replay(sequence, native_steps, collect_samples=collect_samples,
                             evaluation_index=evaluation_index)
-
-    def evaluate_structured(self, params: StructuredWitnessParameters, native_steps: int, *,
-                            collect_samples: bool = True, evaluation_index: int = 0,
-                            stabilizer: BranchStabilizer | None = None) -> BranchResult:
-        """Replay the declared structured witness parameterization."""
-        return self._replay(None, native_steps, collect_samples=collect_samples,
-                            evaluation_index=evaluation_index, stabilizer=stabilizer,
-                            policy=lambda data, j: _structured_desired(
-                                self, params, data,
-                                self.branch.pre_touchdown.time_s + j * self.dt))
 
     def evaluate(self, knots: np.ndarray, native_steps: int, *,
                  collect_samples: bool = True, evaluation_index: int = 0,
@@ -1169,18 +1173,26 @@ class LandingFeasibilityOracle:
     # ------------------------------------------------------------------
     def evaluate_structured(self, params: StructuredWitnessParameters, native_steps: int, *,
                             collect_samples: bool = True, evaluation_index: int = 0,
-                            stabilizer: BranchStabilizer | None = None) -> BranchResult:
-        """Replay the declared structured witness parameterization."""
+                            stabilizer: BranchStabilizer | None = None,
+                            mode_gate: bool = False) -> BranchResult:
+        """Replay the declared structured witness parameterization.
+
+        ``mode_gate`` holds the braking demand at the early-hold level until the
+        active legal contact mode leaves the initial toe-only mode, so the foot
+        can roll flat before load is accepted.
+        """
         return self._replay(None, native_steps, collect_samples=collect_samples,
                             evaluation_index=evaluation_index, stabilizer=stabilizer,
                             record_actions=True,
                             policy=lambda data, j: _structured_desired(
                                 self, params, data,
-                                self.branch.pre_touchdown.time_s + j * self.dt))
+                                self.branch.pre_touchdown.time_s + j * self.dt,
+                                mode_gate=mode_gate))
 
     def search_structured(self, native_steps: int, budget: int, *,
                           stabilizer: BranchStabilizer | None = None,
                           starts: Sequence[StructuredWitnessParameters] | None = None,
+                          mode_gate: bool = False,
                           verbose: bool = False) -> dict:
         """Deterministic bounded Powell search over the structured witness law."""
         from scipy.optimize import minimize
@@ -1204,7 +1216,8 @@ class LandingFeasibilityOracle:
             evaluations["count"] += 1
             result = self.evaluate_structured(
                 unflatten(vector), native_steps, collect_samples=False,
-                evaluation_index=evaluations["count"], stabilizer=stabilizer)
+                evaluation_index=evaluations["count"], stabilizer=stabilizer,
+                mode_gate=mode_gate)
             return self.cost(result)
 
         history: list[dict] = []
@@ -1220,7 +1233,8 @@ class LandingFeasibilityOracle:
             params = unflatten(solution.x)
             result = self.evaluate_structured(params, native_steps, collect_samples=True,
                                               evaluation_index=evaluations["count"],
-                                              stabilizer=stabilizer)
+                                              stabilizer=stabilizer,
+                                              mode_gate=mode_gate)
             value = self.cost(result)
             history.append({
                 "start_index": start_index,
