@@ -454,11 +454,108 @@ class BranchStabilizer:
         return profile_term + stabilizer
 
 
+# ===========================================================================
+# structured witness generator (deterministic action-sequence parameterization)
+# ===========================================================================
+@dataclass(frozen=True)
+class StructuredWitnessParameters:
+    """Declared low-dimensional action-sequence parameterization.
+
+    This is a *witness generator*, not a controller: it produces a causal
+    desired-moment sequence from the exact branch state, the sequence is
+    recorded, and the witness is the recorded sequence replayed open-loop and
+    verified by the oracle.  The parameterization mirrors the physical landing
+    structure (a bounded force reference ramped against the measured contact
+    force, a declared CoP request inside the active support, and constant
+    coordinate biases), and is never the production landing controller.
+    """
+
+    t_stop_s: float
+    force_ramp_bw_per_s: float
+    fz_cap_bw: float
+    cop_blend: float
+    ankle_bias_nm: float
+    knee_bias_nm: float
+    hip_bias_nm: float
+    early_hold_bw: float
+    early_hold_s: float
+
+
+STRUCTURED_PARAMETER_BOUNDS: tuple[tuple[float, float], ...] = (
+    (0.06, 0.60),     # t_stop_s
+    (1.0, 60.0),      # force_ramp_bw_per_s
+    (1.0, 8.0),       # fz_cap_bw
+    (0.0, 1.0),       # cop_blend
+    (-150.0, 60.0),   # ankle_bias_nm
+    (-250.0, 250.0),  # knee_bias_nm
+    (-250.0, 250.0),  # hip_bias_nm
+    (0.0, 2.0),       # early_hold_bw
+    (0.0, 0.10),      # early_hold_s
+)
+
+STRUCTURED_STARTS: tuple[StructuredWitnessParameters, ...] = (
+    StructuredWitnessParameters(0.15, 15.0, 6.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+    StructuredWitnessParameters(0.25, 8.0, 5.0, 0.0, -40.0, -80.0, 0.0, 0.3, 0.04),
+    StructuredWitnessParameters(0.12, 30.0, 7.0, 0.3, 0.0, 60.0, 60.0, 0.6, 0.02),
+    StructuredWitnessParameters(0.35, 20.0, 6.0, 0.0, -20.0, -150.0, 0.0, 0.5, 0.06),
+    StructuredWitnessParameters(0.20, 40.0, 8.0, 0.5, 20.0, 120.0, 60.0, 0.8, 0.03),
+)
+
+
+def _virtual_model_moments(oracle: LandingFeasibilityOracle, data: mujoco.MjData,
+                           fz_n: float, fx_n: float, x_cop_m: float) -> np.ndarray:
+    """Causal ``bias - J^T F`` sagittal support moments at the requested CoP."""
+    tau = np.asarray(data.qfrc_bias[oracle._dof], dtype=np.float64)
+    for side in C.V3_SIDES:
+        force = np.array([fx_n * 0.5, 0.0, fz_n * 0.5], dtype=np.float64)
+        point = np.array([x_cop_m, 0.085 if side == "left" else -0.085, 0.0])
+        for name in ("hip", "knee", "ankle", "mtp"):
+            joint_name = f"{side}_{name}"
+            jid = int(oracle.plant.idx.joint[joint_name])
+            anchor = np.asarray(data.xanchor[jid], dtype=np.float64)
+            axis = np.asarray(data.xaxis[jid], dtype=np.float64)
+            arm = np.cross(axis, point - anchor)
+            channel = CHANNELS.index(joint_name)
+            tau[channel] -= float(np.dot(arm, force))
+    return tau
+
+
+def _structured_desired(oracle: LandingFeasibilityOracle, params: StructuredWitnessParameters,
+                        data: mujoco.MjData, time_s: float) -> np.ndarray:
+    metrics = oracle._fast_metrics(data)
+    com_v = oracle._system_com_velocity(data)
+    vz = float(com_v[2])
+    vx = float(com_v[0])
+    com_x = float(data.subtree_com[0][0])
+    cap = float(params.fz_cap_bw) * BW_N
+    if time_s < params.early_hold_s:
+        fz_ref = min(float(params.early_hold_bw) * BW_N, cap)
+    else:
+        fz_ref = min(BW_N + float(C.V3_SYSTEM_MASS_KG) * max(0.0, -vz)
+                     / max(params.t_stop_s, 1.0e-6), cap)
+    fz_cmd = min(fz_ref, metrics.fz_total
+                 + float(params.force_ramp_bw_per_s) * BW_N * oracle.dt)
+    if metrics.support_x_mean is None:
+        x_cop = com_x
+    else:
+        x_cop = float(metrics.support_x_mean) + (com_x - float(metrics.support_x_mean)) \
+            * float(params.cop_blend)
+    fx = float(np.clip(-0.5 * float(C.V3_SYSTEM_MASS_KG) * vx, -0.5 * fz_cmd, 0.5 * fz_cmd))
+    tau = _virtual_model_moments(oracle, data, fz_cmd, fx, x_cop)
+    for channel in COORDINATE_CHANNELS["hip_pair"]:
+        tau[channel] += float(params.hip_bias_nm)
+    for channel in COORDINATE_CHANNELS["knee_pair"]:
+        tau[channel] += float(params.knee_bias_nm)
+    for channel in COORDINATE_CHANNELS["ankle_pair"]:
+        tau[channel] += float(params.ankle_bias_nm)
+    return np.clip(tau, -0.95 * MOMENT_CEILING_NM, 0.95 * MOMENT_CEILING_NM)
+
+
 class LandingFeasibilityOracle:
     """Exact controller-independent branch oracle from the sealed 790 certificate."""
 
     def __init__(self, branch: CanonicalBranch, *, class_name: str = "legal",
-                 plant: V3Plant | None = None) -> None:
+                 plant: V3Plant | None = None, native_dt_s: float = NATIVE_DT_S) -> None:
         if class_name not in ("legal", "toe"):
             raise ValueError(f"unknown oracle class {class_name!r}")
         self.branch = branch
@@ -466,8 +563,12 @@ class LandingFeasibilityOracle:
         self.plant = plant if plant is not None else V3Plant()
         self.model = self.plant.model
         self.dt = float(self.model.opt.timestep)
-        if abs(self.dt - NATIVE_DT_S) > 1e-12:
-            raise RuntimeError(f"native dt {self.dt!r} != {NATIVE_DT_S!r}")
+        self.native_dt_s = float(native_dt_s)
+        if abs(self.dt - self.native_dt_s) > 1e-12:
+            raise RuntimeError(f"native dt {self.dt!r} != declared oracle dt {self.native_dt_s!r}")
+        # D_BL physical-time material-reflight interval count on this native grid.
+        self.material_reflight_samples = int(np.ceil(
+            D_BL_S / self.dt - 1.0e-9)) if self.dt > 0 else 0
         self.data = self.plant.make_data()
         self._state_size = int(
             mujoco.mj_stateSize(self.model, mujoco.mjtState.mjSTATE_INTEGRATION))
@@ -541,6 +642,16 @@ class LandingFeasibilityOracle:
         return self._replay(sequence, native_steps, collect_samples=collect_samples,
                             evaluation_index=evaluation_index)
 
+    def evaluate_structured(self, params: StructuredWitnessParameters, native_steps: int, *,
+                            collect_samples: bool = True, evaluation_index: int = 0,
+                            stabilizer: BranchStabilizer | None = None) -> BranchResult:
+        """Replay the declared structured witness parameterization."""
+        return self._replay(None, native_steps, collect_samples=collect_samples,
+                            evaluation_index=evaluation_index, stabilizer=stabilizer,
+                            policy=lambda data, j: _structured_desired(
+                                self, params, data,
+                                self.branch.pre_touchdown.time_s + j * self.dt))
+
     def evaluate(self, knots: np.ndarray, native_steps: int, *,
                  collect_samples: bool = True, evaluation_index: int = 0,
                  stabilizer: BranchStabilizer | None = None,
@@ -551,10 +662,11 @@ class LandingFeasibilityOracle:
                             evaluation_index=evaluation_index, stabilizer=stabilizer,
                             record_actions=record_actions)
 
-    def _replay(self, channel_values: np.ndarray, native_steps: int, *,
+    def _replay(self, channel_values: np.ndarray | None, native_steps: int, *,
                 collect_samples: bool = True, evaluation_index: int = 0,
                 stabilizer: BranchStabilizer | None = None,
-                record_actions: bool = False) -> BranchResult:
+                record_actions: bool = False,
+                policy: Callable[[mujoco.MjData, int], np.ndarray] | None = None) -> BranchResult:
         data = self.data
         model = self.model
         mujoco.mj_setState(model, data, self.branch.pre_touchdown.state_vector,
@@ -597,7 +709,12 @@ class LandingFeasibilityOracle:
             executed_actions = None
         for j in range(int(native_steps)):
             desired = np.zeros(9, dtype=np.float64)
-            desired[:] = channel_values[j]
+            if policy is not None:
+                desired[:] = np.asarray(policy(data, j), dtype=np.float64)
+            elif channel_values is not None:
+                desired[:] = channel_values[j]
+            else:
+                raise ValueError("either channel_values or policy is required")
             if stabilizer is not None:
                 desired = stabilizer.contribution(self, data, desired)
             if executed_actions is not None:
@@ -695,7 +812,7 @@ class LandingFeasibilityOracle:
         orientation = M.orientation_state(self.plant, data)
         terminal_com_v = self._system_com_velocity(data)
         terminal_support = current.legal_active_count > 0
-        material_reflight = max_support_free_run >= MATERIAL_REFLIGHT_SAMPLES
+        material_reflight = max_support_free_run >= self.material_reflight_samples
         result = BranchResult(
             profile=np.asarray(channel_values, dtype=np.float64).copy(),
             native_steps=int(native_steps),
@@ -731,7 +848,9 @@ class LandingFeasibilityOracle:
             grf_vertical_impulse_ns=float(grf_impulse),
             mode_sequence=mode_sequence,
             desired_nm=(executed_actions if executed_actions is not None
-                        else np.asarray(channel_values, dtype=np.float64)),
+                        else (np.asarray(channel_values, dtype=np.float64)
+                              if channel_values is not None
+                              else np.zeros((int(native_steps), 9), dtype=np.float64))),
             penetration_excess_integral_m_s=float(penetration_excess_integral),
             rom_excess_integral_rad_s=float(rom_excess_integral),
             peak_fz_excess_integral_n_s=float(peak_fz_excess_integral),
@@ -757,6 +876,7 @@ class LandingFeasibilityOracle:
         prohibited: bool
         prohibited_active: bool
         finite: bool
+        support_x_mean: float | None = None
 
     def _fast_metrics(self, data: mujoco.MjData) -> "_FastMetrics":
         floor = self._floor_gid
@@ -767,6 +887,7 @@ class LandingFeasibilityOracle:
         max_penetration = 0.0
         prohibited = False
         prohibited_active = False
+        support_x_values: list[float] = []
         finite = bool(np.all(np.isfinite(data.qpos)) and np.all(np.isfinite(data.qvel)))
         for contact_id in range(int(data.ncon)):
             contact = data.contact[contact_id]
@@ -800,6 +921,7 @@ class LandingFeasibilityOracle:
                     else:
                         right_fz += normal
                     active_regions.add((side, region_name))
+                    support_x_values.append(float(contact.pos[0]))
             elif other in self._prohibited_geoms:
                 prohibited = True
                 if normal > 0.0:
@@ -819,6 +941,7 @@ class LandingFeasibilityOracle:
             prohibited=bool(prohibited),
             prohibited_active=bool(prohibited_active),
             finite=finite,
+            support_x_mean=(float(np.mean(support_x_values)) if support_x_values else None),
         )
 
     def _rom_margin(self, data: mujoco.MjData) -> float:
@@ -1044,6 +1167,88 @@ class LandingFeasibilityOracle:
     # ------------------------------------------------------------------
     # full-authority witness verification
     # ------------------------------------------------------------------
+    def evaluate_structured(self, params: StructuredWitnessParameters, native_steps: int, *,
+                            collect_samples: bool = True, evaluation_index: int = 0,
+                            stabilizer: BranchStabilizer | None = None) -> BranchResult:
+        """Replay the declared structured witness parameterization."""
+        return self._replay(None, native_steps, collect_samples=collect_samples,
+                            evaluation_index=evaluation_index, stabilizer=stabilizer,
+                            record_actions=True,
+                            policy=lambda data, j: _structured_desired(
+                                self, params, data,
+                                self.branch.pre_touchdown.time_s + j * self.dt))
+
+    def search_structured(self, native_steps: int, budget: int, *,
+                          stabilizer: BranchStabilizer | None = None,
+                          starts: Sequence[StructuredWitnessParameters] | None = None,
+                          verbose: bool = False) -> dict:
+        """Deterministic bounded Powell search over the structured witness law."""
+        from scipy.optimize import minimize
+
+        start_list = list(starts) if starts is not None else list(STRUCTURED_STARTS)
+        bounds = list(STRUCTURED_PARAMETER_BOUNDS)
+        evaluations = {"count": 0}
+
+        def flatten(params: StructuredWitnessParameters) -> np.ndarray:
+            return np.asarray([getattr(params, field) for field in
+                               StructuredWitnessParameters.__dataclass_fields__],
+                              dtype=np.float64)
+
+        def unflatten(vector: np.ndarray) -> StructuredWitnessParameters:
+            vector = np.clip(vector, [b[0] for b in bounds], [b[1] for b in bounds])
+            return StructuredWitnessParameters(
+                **{field: float(vector[index]) for index, field in enumerate(
+                    StructuredWitnessParameters.__dataclass_fields__)})
+
+        def objective(vector: np.ndarray) -> float:
+            evaluations["count"] += 1
+            result = self.evaluate_structured(
+                unflatten(vector), native_steps, collect_samples=False,
+                evaluation_index=evaluations["count"], stabilizer=stabilizer)
+            return self.cost(result)
+
+        history: list[dict] = []
+        best: dict | None = None
+        for start_index, start in enumerate(start_list):
+            if evaluations["count"] >= budget:
+                break
+            remaining = budget - evaluations["count"]
+            solution = minimize(
+                objective, flatten(start), method="Powell", bounds=bounds,
+                options={"maxfev": max(1, int(remaining)), "xtol": SOLVER_XTOL,
+                         "ftol": SOLVER_FTOL, "disp": False})
+            params = unflatten(solution.x)
+            result = self.evaluate_structured(params, native_steps, collect_samples=True,
+                                              evaluation_index=evaluations["count"],
+                                              stabilizer=stabilizer)
+            value = self.cost(result)
+            history.append({
+                "start_index": start_index,
+                "cost": float(value),
+                "terminal_vz": float(result.terminal_com_vz_m_s),
+                "admissible": bool(result.admissible),
+                "hard_gate_failures": result.hard_gate_failures,
+                "evaluations": int(evaluations["count"]),
+            })
+            if verbose:
+                print(json.dumps(history[-1]), flush=True)
+            candidate = {"params": params, "result": result, "cost": value}
+            if best is None or value < best["cost"]:
+                best = candidate
+            if result.admissible:
+                break
+        assert best is not None
+        return {
+            "best": best,
+            "evaluations": int(evaluations["count"]),
+            "budget": int(budget),
+            "history": history,
+            "native_steps": int(native_steps),
+            "horizon_s": float(native_steps * self.dt),
+            "class": self.class_name,
+            "solver": "deterministic_bounded_powell_structured_law_v1",
+        }
+
     def verify(self, actions: np.ndarray, native_steps: int) -> dict:
         """Replay the witness with the full RES-84 decoder and authority metrics.
 
