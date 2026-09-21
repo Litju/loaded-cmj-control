@@ -28,7 +28,7 @@ import mujoco
 import numpy as np
 
 from loaded_cmj.v3 import constants as C
-from loaded_cmj.v3.plant import V3Plant
+from loaded_cmj.v3.plant import V3Plant, model_xml
 
 V3_CONTACT_REALIZATION_AUTHORITY_ID = "LCMJ_RES86_V3_CONTACT_REALIZATION_V1"
 
@@ -40,6 +40,123 @@ DECLARED_TORSIONAL_ROLLING = 0.0
 ENGINE_MINIMUM_FRICTION = float(mujoco.mjMINMU)
 SOLREF_TOLERANCE = 1.0e-12
 SOLIMP_TOLERANCE = 1.0e-12
+
+# ---------------------------------------------------------------------------
+# RES-86 contact candidate (solution verification, CC-10/CC-11)
+# ---------------------------------------------------------------------------
+# The RES-84 provisional numerical baseline is the declared geom-level
+# ``solref`` (0.02, 1.0).  RES-86 owns the final solution verification of the
+# provisional contact numerics.  The smallest stiffening declared by the RES-86
+# audit lattice is the plantar support-geom solref time constant 0.02 -> 0.01 s
+# (the other lattice entries additionally stiffen the impedance scaling and are
+# therefore *not* smaller).  The geom-level declaration is not what the solver
+# consumes: MuJoCo mixes the two geoms' solref through ``solmix`` (both 1.0,
+# equal priority 0), so the realized contact consumes the arithmetic mean of the
+# declared plantar value and the floor's compiled default (0.02, 1.0):
+# 0.01 -> 0.015 and 0.02 -> 0.02.  The realized value is what every
+# qualification claim is stated against.
+RES86_CONTACT_CANDIDATE_LABEL = "RES86_CONTACT_CANDIDATE_SOLREF_TAU_0_01"
+RES86_CANDIDATE_DECLARED_SOLREF = (0.01, 1.0)
+RES86_NOMINAL_DECLARED_SOLREF = DECLARED_SOLREF
+RES86_CANDIDATE_REALIZED_SOLREF = (0.015, 1.0)
+RES86_NOMINAL_REALIZED_SOLREF = DECLARED_SOLREF
+MUJOCO_COMPILED_DEFAULT_SOLREF = (0.02, 1.0)
+# MuJoCo resolves a soft contact against a reference-acceleration safety
+# mechanism (``refsafe``); the RES-86 solution verification never disables it
+# and never changes the integrator/solver/cone semantics.
+ENGINE_REQUIRED_DISABLED_FLAGS = 0
+# A declared contact time constant is numerically resolved when the engine's
+# stiffness/constraint update is not asked to represent a time constant shorter
+# than two integration steps.  MuJoCo's own compiled default check uses the same
+# factor for the reference acceleration path.
+TIMECONST_DT_RESOLUTION_FACTOR = 2.0
+
+
+def mixed_solref(declared_solref: Sequence[float], *,
+                 other_solref: Sequence[float] = MUJOCO_COMPILED_DEFAULT_SOLREF,
+                 declared_solmix: float = 1.0,
+                 other_solmix: float = 1.0,
+                 declared_priority: int = 0,
+                 other_priority: int = 0) -> tuple[float, float]:
+    """Engine geom-pair mixing rule for ``solref`` (equal-priority solmix mean).
+
+    MuJoCo takes the higher-priority geom's value when the priorities differ;
+    with equal priority the two values are combined with the ``solmix``
+    weights.  This helper is the *expected* value only: every qualification
+    claim is verified against the engine's realized ``mjContact`` row.
+    """
+    if int(declared_priority) > int(other_priority):
+        return (float(declared_solref[0]), float(declared_solref[1]))
+    if int(other_priority) > int(declared_priority):
+        return (float(other_solref[0]), float(other_solref[1]))
+    total = float(declared_solmix) + float(other_solmix)
+    if total <= 0.0:
+        raise ValueError("solmix weights must sum to a positive value")
+    return tuple(
+        (float(declared_solmix) * float(a) + float(other_solmix) * float(b)) / total
+        for a, b in zip(declared_solref, other_solref))
+
+
+def build_contact_realization_plant(declared_solref: Sequence[float] | None = None,
+                                    dt_s: float | None = None) -> V3Plant:
+    """In-memory Plant whose support geoms declare ``declared_solref``.
+
+    Only the legal plantar support geoms' ``solref`` is set; ``condim``,
+    ``solimp`` and ``friction`` are untouched, so the realization is a single
+    declared contact-compliance change on an unchanged Plant topology.  The
+    sealed XML on disk is never mutated.  ``dt_s`` overrides the integration
+    step (the declared timestep sensitivity lattice) without touching the sealed
+    Plant declaration.
+    """
+    if declared_solref is None and dt_s is None:
+        return V3Plant()
+    spec = mujoco.MjSpec.from_string(model_xml())
+    if dt_s is not None:
+        spec.option.timestep = float(dt_s)
+    if declared_solref is not None:
+        support_names = set(C.V3_PLANTAR_SUPPORT_GEOMS)
+        values = np.asarray(declared_solref, dtype=np.float64)
+        if values.shape != (2,):
+            raise ValueError("declared_solref must have two entries")
+        for geom in spec.geoms:
+            if geom.name in support_names:
+                geom.solref = values
+    return V3Plant(model=spec.compile())
+
+
+def engine_solver_semantics(model: mujoco.MjModel) -> dict:
+    """Exact solver semantics of a compiled model (never changed by RES-86)."""
+    disableflags = int(model.opt.disableflags)
+    return {
+        "timestep_s": float(model.opt.timestep),
+        "integrator": int(model.opt.integrator),
+        "cone": int(model.opt.cone),
+        "solver": int(model.opt.solver),
+        "iterations": int(model.opt.iterations),
+        "tolerance": float(model.opt.tolerance),
+        "ls_iterations": int(model.opt.ls_iterations),
+        "disableflags": disableflags,
+        "refsafe_enabled": bool(
+            not (disableflags & int(mujoco.mjtDisableBit.mjDSBL_REFSAFE))),
+        "contact_disabled": bool(
+            disableflags & int(mujoco.mjtDisableBit.mjDSBL_CONTACT)),
+    }
+
+
+def timeconst_resolution(declared_solref: Sequence[float], dt_s: float, *,
+                         other_solref: Sequence[float] = MUJOCO_COMPILED_DEFAULT_SOLREF
+                         ) -> dict:
+    """Realized time constant and its resolution against the integration step."""
+    realized = mixed_solref(declared_solref, other_solref=other_solref)
+    ratio = float(realized[0]) / float(dt_s) if dt_s > 0.0 else float("inf")
+    return {
+        "declared_solref": [float(v) for v in declared_solref],
+        "realized_solref": [float(v) for v in realized],
+        "dt_s": float(dt_s),
+        "timeconst_over_dt": ratio,
+        "resolved": bool(ratio >= TIMECONST_DT_RESOLUTION_FACTOR),
+        "resolution_factor": TIMECONST_DT_RESOLUTION_FACTOR,
+    }
 
 
 @dataclass(frozen=True)
@@ -123,52 +240,68 @@ def effective_floor_contacts(plant: V3Plant,
 
 
 def verify_effective_contact_realization(plant: V3Plant, data: mujoco.MjData,
-                                         *, require_plantar: bool = True) -> dict:
-    """Verify the runtime rows against the declared nominal realization.
+                                         *, require_plantar: bool = True,
+                                         expected_solref: Sequence[float] = DECLARED_SOLREF,
+                                         expected_solimp: Sequence[float] = DECLARED_SOLIMP,
+                                         expected_dim: int = DECLARED_PLANTAR_CONDIM,
+                                         expected_sliding_friction: float = DECLARED_SLIDING_FRICTION,
+                                         expected_includemargin_m: float | None = None,
+                                         ) -> dict:
+    """Verify the runtime rows against an expected (mixed) realization.
 
-    Every legal plantar floor contact must have the declared ``dim``,
-    ``solref``, ``solimp`` and sliding friction; the declared torsional/rolling
-    placeholder (0.0) must be realized exactly at the engine's minimum friction
-    clamp ``mjMINMU`` (the engine never realizes a zero torsional/rolling term).
+    Every legal plantar floor contact must have the *realized* ``dim``,
+    ``solref``, ``solimp``, sliding friction and (when declared)
+    ``includemargin``; the declared torsional/rolling placeholder (0.0) is
+    realized exactly at the engine's minimum friction clamp ``mjMINMU`` (the
+    engine never realizes a zero torsional/rolling term).  ``expected_solref``
+    is the value after the engine's geom-pair mixing, never the raw geom-level
+    declaration.
     """
+    expected_solref = tuple(float(v) for v in expected_solref)
+    expected_solimp = tuple(float(v) for v in expected_solimp)
     rows = effective_floor_contacts(plant, data)
     plantar = [row for row in rows if row.is_plantar_floor]
     failures: list[str] = []
     if require_plantar and not plantar:
         failures.append("NO_ACTIVE_PLANTAR_CONTACT")
     for row in plantar:
-        if row.dim != DECLARED_PLANTAR_CONDIM:
+        if row.dim != int(expected_dim):
             failures.append(f"CONDIM:{row.other_geom}:{row.dim}")
-        if (abs(row.solref[0] - DECLARED_SOLREF[0]) > SOLREF_TOLERANCE
-                or abs(row.solref[1] - DECLARED_SOLREF[1]) > SOLREF_TOLERANCE):
+        if (abs(row.solref[0] - expected_solref[0]) > SOLREF_TOLERANCE
+                or abs(row.solref[1] - expected_solref[1]) > SOLREF_TOLERANCE):
             failures.append(f"SOLREF:{row.other_geom}:{row.solref}")
-        for actual, declared in zip(row.solimp, DECLARED_SOLIMP):
+        for actual, declared in zip(row.solimp, expected_solimp):
             if abs(actual - declared) > SOLIMP_TOLERANCE:
                 failures.append(f"SOLIMP:{row.other_geom}:{row.solimp}")
                 break
-        if (abs(row.friction[0] - DECLARED_SLIDING_FRICTION) > SOLREF_TOLERANCE
-                or abs(row.friction[1] - DECLARED_SLIDING_FRICTION) > SOLREF_TOLERANCE):
+        if (abs(row.friction[0] - float(expected_sliding_friction)) > SOLREF_TOLERANCE
+                or abs(row.friction[1] - float(expected_sliding_friction)) > SOLREF_TOLERANCE):
             failures.append(f"SLIDING_FRICTION:{row.other_geom}:{row.friction}")
         if (abs(row.friction[2] - ENGINE_MINIMUM_FRICTION) > SOLREF_TOLERANCE
                 or abs(row.friction[3] - ENGINE_MINIMUM_FRICTION) > SOLREF_TOLERANCE
                 or abs(row.friction[4] - ENGINE_MINIMUM_FRICTION) > SOLREF_TOLERANCE):
             failures.append(f"TOR_ROLL_CLAMP:{row.other_geom}:{row.friction}")
+        if expected_includemargin_m is not None and abs(
+                row.includemargin_m - float(expected_includemargin_m)) > SOLREF_TOLERANCE:
+            failures.append(f"INCLUDEMARGIN:{row.other_geom}:{row.includemargin_m}")
     return {
         "authority_id": V3_CONTACT_REALIZATION_AUTHORITY_ID,
         "status": "PASS" if not failures else "FAIL",
         "failures": failures,
         "declared": {
-            "solref": list(DECLARED_SOLREF),
-            "solimp": list(DECLARED_SOLIMP),
-            "sliding_friction": DECLARED_SLIDING_FRICTION,
-            "plantar_condim": DECLARED_PLANTAR_CONDIM,
+            "solref": list(expected_solref),
+            "solimp": list(expected_solimp),
+            "sliding_friction": float(expected_sliding_friction),
+            "plantar_condim": int(expected_dim),
             "torsional_rolling_declared": DECLARED_TORSIONAL_ROLLING,
             "torsional_rolling_realized": ENGINE_MINIMUM_FRICTION,
+            "includemargin_m": expected_includemargin_m,
             "realization_note": (
                 "the declared 0.0 torsional/rolling placeholder is realized at "
                 "the engine minimum friction clamp mjMINMU; the engine never "
                 "solves a zero torsional/rolling term"),
         },
+        "solver_semantics": engine_solver_semantics(plant.model),
         "plantar_rows": [
             {
                 "geom": row.other_geom,
@@ -210,9 +343,21 @@ __all__ = [
     "DECLARED_SOLREF",
     "DECLARED_TORSIONAL_ROLLING",
     "ENGINE_MINIMUM_FRICTION",
+    "ENGINE_REQUIRED_DISABLED_FLAGS",
+    "MUJOCO_COMPILED_DEFAULT_SOLREF",
+    "RES86_CANDIDATE_DECLARED_SOLREF",
+    "RES86_CANDIDATE_REALIZED_SOLREF",
+    "RES86_CONTACT_CANDIDATE_LABEL",
+    "RES86_NOMINAL_DECLARED_SOLREF",
+    "RES86_NOMINAL_REALIZED_SOLREF",
+    "TIMECONST_DT_RESOLUTION_FACTOR",
     "V3EffectiveContact",
     "V3_CONTACT_REALIZATION_AUTHORITY_ID",
+    "build_contact_realization_plant",
     "contact_realization_fingerprint",
     "effective_floor_contacts",
+    "engine_solver_semantics",
+    "mixed_solref",
+    "timeconst_resolution",
     "verify_effective_contact_realization",
 ]

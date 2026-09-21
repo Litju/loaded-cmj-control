@@ -1,0 +1,8364 @@
+{
+ "authority_id": "LCMJ_RES86_CONTACT_CANDIDATE_QUALIFICATION_V1",
+ "mission": "RES86_CONTACT_REALIZATION_QUALIFICATION_AND_E10_CLOSURE_001",
+ "linear_issue": "RES-86",
+ "candidate": {
+  "label": "RES86_CONTACT_CANDIDATE_SOLREF_TAU_0_01",
+  "declared_geom_solref": [
+   0.01,
+   1.0
+  ],
+  "expected_realized_solref": [
+   0.015,
+   1.0
+  ],
+  "nominal_declared_geom_solref": [
+   0.02,
+   1.0
+  ],
+  "nominal_realized_solref": [
+   0.02,
+   1.0
+  ],
+  "selection_rule": "smallest declared stiffening of the RES-86 predeclared audit lattice (plantar support-geom solref time constant 0.02 -> 0.01 s); the impedance-scaling and combined lattice entries are additional degrees and are therefore not smaller; condim, solimp and friction are unchanged",
+  "declared_realization_after_mixing": "the geom-level 0.01 s time constant is realized at 0.015 s because MuJoCo mixes the plantar geom solref with the floor's compiled default (0.02, 1.0) through equal solmix weights and equal priority; every claim is stated against the realized row"
+ },
+ "reference_witnesses": {
+  "path": "/home/litju/Projects/loaded-cmj-control/audit/EXP-RES86-ACTIVE-SET-SAFE-LANDING-CAPTURE-001/contact_candidate/REFERENCE_WITNESSES.json",
+  "sha256": "c2c45fd82c1c1d9153269e2a5ecbc15b5feb03670c007498f5d682a3a1f9c89c",
+  "sources": {
+   "nominal_witness": {
+    "file": "contact_nominal_causal.json",
+    "sha256": "cb645ab1171e33230c1ce2b97d7d4d649a1f420cc5a57d69d43f973300127ce3",
+    "note": "contact_nominal_causal.json (nominal realization, bounded coordinate descent)"
+   },
+   "candidate_witness": {
+    "file": "contact_stiff_causal.json",
+    "sha256": "d9db43bf75d38e77860787054be354b519246e9673c06750016749c605f26f59",
+    "note": "contact_stiff_causal.json (plantar geom solref tau 0.02 -> 0.01 declaration; realized 0.015)"
+   }
+  },
+  "grid": {
+   "native_dt_s": 0.002,
+   "native_steps": 200,
+   "horizon_s": 0.4,
+   "branch_pre_touchdown_sha256": "08605746ced78fa130c6fc210661fdd611e22e0bbbe20b9758f85b060d93cb42",
+   "branch_e8_sha256": "e411462929c178b97a1132babb46f2fde8c7e12c5d40e40e8f18fa7ce7869355"
+  }
+ },
+ "dt_grid_s": [
+  0.001,
+  0.002,
+  0.004
+ ],
+ "in_domain_dt_s": [
+  0.001,
+  0.002
+ ],
+ "stress_dt_s": [
+  0.004
+ ],
+ "short_horizon_s": 0.04,
+ "short_horizon_reference_witness": "nominal_witness",
+ "boundary": {
+  "not_e10": "the candidate witness is a vertical-arrest / hard-safety witness only; its terminal CAM and posture gates fail, so it is not an E10 witness",
+  "nominal_10mm_is_not_infeasibility": "the nominal 10.2115 mm from the bounded search is a bounded-search result, never a global infeasibility proof",
+  "contact_compliance_causal": "the realized solref change is proven materially causal by the fixed-action cross-realization replays",
+  "stress_dt": "dt = 0.004 s moves 8 mm per sample at the sealed ~2 m/s descent, which is comparable to the 10 mm penetration budget; the 0.004 s step is recorded as an out-of-domain stress boundary and is never used as a qualification pass"
+ },
+ "realization_audit": {
+  "dt_0.001": {
+   "dt_s": 0.001,
+   "nominal": {
+    "label": "nominal",
+    "declared_geom_solref": [
+     0.02,
+     1.0
+    ],
+    "expected_mixed_solref": [
+     0.02,
+     1.0
+    ],
+    "expected_realized_solref": [
+     0.02,
+     1.0
+    ],
+    "realized_status": "PASS",
+    "realized_failures": [],
+    "plantar_rows": [
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     }
+    ],
+    "floor_row_count": 24,
+    "solver_semantics": {
+     "timestep_s": 0.001,
+     "integrator": 0,
+     "cone": 0,
+     "solver": 2,
+     "iterations": 100,
+     "tolerance": 1e-08,
+     "ls_iterations": 50,
+     "disableflags": 0,
+     "refsafe_enabled": true,
+     "contact_disabled": false
+    },
+    "timeconst_resolution": {
+     "declared_solref": [
+      0.02,
+      1.0
+     ],
+     "realized_solref": [
+      0.02,
+      1.0
+     ],
+     "dt_s": 0.001,
+     "timeconst_over_dt": 20.0,
+     "resolved": true,
+     "resolution_factor": 2.0
+    },
+    "fingerprint": "36c955cfc7a016f538bf5b1ce3d7d89aad7b92681377cc18fba9721895fca4ba"
+   },
+   "candidate": {
+    "label": "candidate",
+    "declared_geom_solref": [
+     0.01,
+     1.0
+    ],
+    "expected_mixed_solref": [
+     0.015,
+     1.0
+    ],
+    "expected_realized_solref": [
+     0.015,
+     1.0
+    ],
+    "realized_status": "PASS",
+    "realized_failures": [],
+    "plantar_rows": [
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     }
+    ],
+    "floor_row_count": 24,
+    "solver_semantics": {
+     "timestep_s": 0.001,
+     "integrator": 0,
+     "cone": 0,
+     "solver": 2,
+     "iterations": 100,
+     "tolerance": 1e-08,
+     "ls_iterations": 50,
+     "disableflags": 0,
+     "refsafe_enabled": true,
+     "contact_disabled": false
+    },
+    "timeconst_resolution": {
+     "declared_solref": [
+      0.01,
+      1.0
+     ],
+     "realized_solref": [
+      0.015,
+      1.0
+     ],
+     "dt_s": 0.001,
+     "timeconst_over_dt": 15.0,
+     "resolved": true,
+     "resolution_factor": 2.0
+    },
+    "fingerprint": "0a5844456145bf1af0b6ccedf3979773cfb99ee75a528a0fe238a9b4866e371f"
+   },
+   "nominal_timestep_ok": true,
+   "candidate_timestep_ok": true
+  },
+  "dt_0.002": {
+   "dt_s": 0.002,
+   "nominal": {
+    "label": "nominal",
+    "declared_geom_solref": [
+     0.02,
+     1.0
+    ],
+    "expected_mixed_solref": [
+     0.02,
+     1.0
+    ],
+    "expected_realized_solref": [
+     0.02,
+     1.0
+    ],
+    "realized_status": "PASS",
+    "realized_failures": [],
+    "plantar_rows": [
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     }
+    ],
+    "floor_row_count": 24,
+    "solver_semantics": {
+     "timestep_s": 0.002,
+     "integrator": 0,
+     "cone": 0,
+     "solver": 2,
+     "iterations": 100,
+     "tolerance": 1e-08,
+     "ls_iterations": 50,
+     "disableflags": 0,
+     "refsafe_enabled": true,
+     "contact_disabled": false
+    },
+    "timeconst_resolution": {
+     "declared_solref": [
+      0.02,
+      1.0
+     ],
+     "realized_solref": [
+      0.02,
+      1.0
+     ],
+     "dt_s": 0.002,
+     "timeconst_over_dt": 10.0,
+     "resolved": true,
+     "resolution_factor": 2.0
+    },
+    "fingerprint": "36c955cfc7a016f538bf5b1ce3d7d89aad7b92681377cc18fba9721895fca4ba"
+   },
+   "candidate": {
+    "label": "candidate",
+    "declared_geom_solref": [
+     0.01,
+     1.0
+    ],
+    "expected_mixed_solref": [
+     0.015,
+     1.0
+    ],
+    "expected_realized_solref": [
+     0.015,
+     1.0
+    ],
+    "realized_status": "PASS",
+    "realized_failures": [],
+    "plantar_rows": [
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     }
+    ],
+    "floor_row_count": 24,
+    "solver_semantics": {
+     "timestep_s": 0.002,
+     "integrator": 0,
+     "cone": 0,
+     "solver": 2,
+     "iterations": 100,
+     "tolerance": 1e-08,
+     "ls_iterations": 50,
+     "disableflags": 0,
+     "refsafe_enabled": true,
+     "contact_disabled": false
+    },
+    "timeconst_resolution": {
+     "declared_solref": [
+      0.01,
+      1.0
+     ],
+     "realized_solref": [
+      0.015,
+      1.0
+     ],
+     "dt_s": 0.002,
+     "timeconst_over_dt": 7.5,
+     "resolved": true,
+     "resolution_factor": 2.0
+    },
+    "fingerprint": "0a5844456145bf1af0b6ccedf3979773cfb99ee75a528a0fe238a9b4866e371f"
+   },
+   "nominal_timestep_ok": true,
+   "candidate_timestep_ok": true
+  },
+  "dt_0.004": {
+   "dt_s": 0.004,
+   "nominal": {
+    "label": "nominal",
+    "declared_geom_solref": [
+     0.02,
+     1.0
+    ],
+    "expected_mixed_solref": [
+     0.02,
+     1.0
+    ],
+    "expected_realized_solref": [
+     0.02,
+     1.0
+    ],
+    "realized_status": "PASS",
+    "realized_failures": [],
+    "plantar_rows": [
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0003557847126610244,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.02,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00035578471266102096,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     }
+    ],
+    "floor_row_count": 24,
+    "solver_semantics": {
+     "timestep_s": 0.004,
+     "integrator": 0,
+     "cone": 0,
+     "solver": 2,
+     "iterations": 100,
+     "tolerance": 1e-08,
+     "ls_iterations": 50,
+     "disableflags": 0,
+     "refsafe_enabled": true,
+     "contact_disabled": false
+    },
+    "timeconst_resolution": {
+     "declared_solref": [
+      0.02,
+      1.0
+     ],
+     "realized_solref": [
+      0.02,
+      1.0
+     ],
+     "dt_s": 0.004,
+     "timeconst_over_dt": 5.0,
+     "resolved": true,
+     "resolution_factor": 2.0
+    },
+    "fingerprint": "36c955cfc7a016f538bf5b1ce3d7d89aad7b92681377cc18fba9721895fca4ba"
+   },
+   "candidate": {
+    "label": "candidate",
+    "declared_geom_solref": [
+     0.01,
+     1.0
+    ],
+    "expected_mixed_solref": [
+     0.015,
+     1.0
+    ],
+    "expected_realized_solref": [
+     0.015,
+     1.0
+    ],
+    "realized_status": "PASS",
+    "realized_failures": [],
+    "plantar_rows": [
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_heel_support",
+      "side": "left",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_forefoot_support",
+      "side": "left",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "left_toe_support",
+      "side": "left",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_heel_support",
+      "side": "right",
+      "region": "heel",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_forefoot_support",
+      "side": "right",
+      "region": "forefoot",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.0002191161219503154,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     },
+     {
+      "geom": "right_toe_support",
+      "side": "right",
+      "region": "toe",
+      "dim": 4,
+      "solref": [
+       0.015,
+       1.0
+      ],
+      "solimp": [
+       0.9,
+       0.95,
+       0.001,
+       0.5,
+       2.0
+      ],
+      "friction": [
+       0.9,
+       0.9,
+       1e-05,
+       1e-05,
+       1e-05
+      ],
+      "includemargin_m": 0.0,
+      "dist_m": -0.00021911612195031193,
+      "geom_priorities": [
+       0,
+       0
+      ],
+      "geom_solmix": [
+       1.0,
+       1.0
+      ]
+     }
+    ],
+    "floor_row_count": 24,
+    "solver_semantics": {
+     "timestep_s": 0.004,
+     "integrator": 0,
+     "cone": 0,
+     "solver": 2,
+     "iterations": 100,
+     "tolerance": 1e-08,
+     "ls_iterations": 50,
+     "disableflags": 0,
+     "refsafe_enabled": true,
+     "contact_disabled": false
+    },
+    "timeconst_resolution": {
+     "declared_solref": [
+      0.01,
+      1.0
+     ],
+     "realized_solref": [
+      0.015,
+      1.0
+     ],
+     "dt_s": 0.004,
+     "timeconst_over_dt": 3.75,
+     "resolved": true,
+     "resolution_factor": 2.0
+    },
+    "fingerprint": "0a5844456145bf1af0b6ccedf3979773cfb99ee75a528a0fe238a9b4866e371f"
+   },
+   "nominal_timestep_ok": true,
+   "candidate_timestep_ok": true
+  }
+ },
+ "short_horizon": {
+  "nominal_witness": {
+   "nominal_dt_0.001": {
+    "native_steps": 40,
+    "horizon_s": 0.04,
+    "max_penetration_m": 0.010851400730678609,
+    "net_vertical_impulse_ns": -12.154686856345887,
+    "grf_vertical_impulse_ns": 26.692913143654113,
+    "peak_total_fz_n": 1219.390822496299,
+    "peak_total_fz_bw": 1.2555636101033774,
+    "min_rom_margin_rad": 0.2586507697220507,
+    "max_moment_ratio": 0.8327953443792327,
+    "max_power_ratio": 0.5928563317333547,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.045005061482959484,
+    "terminal_com_vz_m_s": -1.8297596427076415,
+    "terminal_hy_kg_m2_s": -6.1274353615868975,
+    "terminal_root_pitch_rad": -0.1422947958852776,
+    "terminal_trunk_pitch_rad": 0.01700349353933775,
+    "terminal_root_pitch_rate_rad_s": -3.0801495498682696,
+    "terminal_trunk_pitch_rate_rad_s": 1.3331461732150052,
+    "hard_gate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 40
+     }
+    ],
+    "sequence_sha256": "3009d48d45abc16b8e82449aa9ad222f0cf1078a451b9916e6bc085724552336",
+    "terminal_state_sha256": "947c35f85d47f9dffda68cc8533619a1b5eef4a9c8a87dba8a53b57d59277946",
+    "deterministic_replay": true
+   },
+   "nominal_dt_0.002": {
+    "native_steps": 20,
+    "horizon_s": 0.04,
+    "max_penetration_m": 0.010211545500979788,
+    "net_vertical_impulse_ns": -12.550622536075767,
+    "grf_vertical_impulse_ns": 26.296977463924232,
+    "peak_total_fz_n": 1262.1261983838735,
+    "peak_total_fz_bw": 1.2995667154561656,
+    "min_rom_margin_rad": 0.2847123833136719,
+    "max_moment_ratio": 0.8428321301526411,
+    "max_power_ratio": 0.5940658506979907,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.04609756934933817,
+    "terminal_com_vz_m_s": -1.8293731512647127,
+    "terminal_hy_kg_m2_s": -6.246249600399079,
+    "terminal_root_pitch_rad": -0.15119880112335365,
+    "terminal_trunk_pitch_rad": 0.01850847214183124,
+    "terminal_root_pitch_rate_rad_s": -3.3666378463747533,
+    "terminal_trunk_pitch_rate_rad_s": 1.3900524150209685,
+    "hard_gate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 20
+     }
+    ],
+    "sequence_sha256": "892387b30b6cce2d74320d2a383dce024712c868a55d0002cf202f3e9deaf2b3",
+    "terminal_state_sha256": "28dad2e04eb0560cf57505e1a017c2b1094a06db85392de3ec38aebd86b86161",
+    "deterministic_replay": true
+   },
+   "nominal_dt_0.004": {
+    "native_steps": 5,
+    "horizon_s": 0.02,
+    "max_penetration_m": 0.031944449399072566,
+    "net_vertical_impulse_ns": -9.73703715241784,
+    "grf_vertical_impulse_ns": 9.686762847582163,
+    "peak_total_fz_n": 780.8032724590784,
+    "peak_total_fz_bw": 0.8039655190632917,
+    "min_rom_margin_rad": 0.45540881026558194,
+    "max_moment_ratio": 0.5333333333333333,
+    "max_power_ratio": 0.4285784427066238,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": -0.025295470646651032,
+    "terminal_com_vz_m_s": -1.8026458352146117,
+    "terminal_hy_kg_m2_s": 1.44548341297582,
+    "terminal_root_pitch_rad": -0.08778258426511397,
+    "terminal_trunk_pitch_rad": -0.007575427485835146,
+    "terminal_root_pitch_rate_rad_s": -1.2179594393515027,
+    "terminal_trunk_pitch_rate_rad_s": 1.3209095551486536,
+    "hard_gate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 5
+     }
+    ],
+    "sequence_sha256": "4cad96af1c872b00ee99145baa6dbee98a2e4c34a9772472a2d36a21fd324973",
+    "terminal_state_sha256": "8fa8a077915a3f79dce1d3115e267258b8914d305fd62c2d4f36d73120e9eab1",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.001": {
+    "native_steps": 40,
+    "horizon_s": 0.04,
+    "max_penetration_m": 0.008151093699334758,
+    "net_vertical_impulse_ns": -12.333218746707715,
+    "grf_vertical_impulse_ns": 26.514381253292285,
+    "peak_total_fz_n": 1199.8892188718273,
+    "peak_total_fz_bw": 1.235483498462533,
+    "min_rom_margin_rad": 0.248029494005927,
+    "max_moment_ratio": 0.8327953443792327,
+    "max_power_ratio": 0.6017164740868173,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.04724478118403737,
+    "terminal_com_vz_m_s": -1.8317100939696138,
+    "terminal_hy_kg_m2_s": -6.287621900674113,
+    "terminal_root_pitch_rad": -0.1424368817375928,
+    "terminal_trunk_pitch_rad": 0.016956637559502136,
+    "terminal_root_pitch_rate_rad_s": -3.081573746108654,
+    "terminal_trunk_pitch_rate_rad_s": 1.3328447098505634,
+    "hard_gate_failures": [],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 40
+     }
+    ],
+    "sequence_sha256": "3009d48d45abc16b8e82449aa9ad222f0cf1078a451b9916e6bc085724552336",
+    "terminal_state_sha256": "13e72674b0696f58d8ac3471f3f27b58b09df260e1f283ad0657ca7ed091e30e",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.002": {
+    "native_steps": 20,
+    "horizon_s": 0.04,
+    "max_penetration_m": 0.008090821581122856,
+    "net_vertical_impulse_ns": -12.658725327684419,
+    "grf_vertical_impulse_ns": 26.188874672315585,
+    "peak_total_fz_n": 1245.8432417063557,
+    "peak_total_fz_bw": 1.282800730759538,
+    "min_rom_margin_rad": 0.2798738225356793,
+    "max_moment_ratio": 0.8428321301526411,
+    "max_power_ratio": 0.5456524189784372,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.04797673202968041,
+    "terminal_com_vz_m_s": -1.8304402342117152,
+    "terminal_hy_kg_m2_s": -6.368071511586981,
+    "terminal_root_pitch_rad": -0.15131967376254785,
+    "terminal_trunk_pitch_rad": 0.018468851521482255,
+    "terminal_root_pitch_rate_rad_s": -3.368915848116322,
+    "terminal_trunk_pitch_rate_rad_s": 1.3894004331784298,
+    "hard_gate_failures": [],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 20
+     }
+    ],
+    "sequence_sha256": "892387b30b6cce2d74320d2a383dce024712c868a55d0002cf202f3e9deaf2b3",
+    "terminal_state_sha256": "45054ef66f33ec6d9ea37e44f8587e9729f380c9cc6ca06949fbc1bbf62aad7a",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.004": {
+    "native_steps": 5,
+    "horizon_s": 0.02,
+    "max_penetration_m": 0.02606612559431577,
+    "net_vertical_impulse_ns": -9.27072738336651,
+    "grf_vertical_impulse_ns": 10.153072616633494,
+    "peak_total_fz_n": 763.3831106700768,
+    "peak_total_fz_bw": 0.7860285944769579,
+    "min_rom_margin_rad": 0.44150730686610157,
+    "max_moment_ratio": 0.5333333333333333,
+    "max_power_ratio": 0.45776606852906987,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": -0.03106013053562185,
+    "terminal_com_vz_m_s": -1.797054138727174,
+    "terminal_hy_kg_m2_s": 2.0985712667138974,
+    "terminal_root_pitch_rad": -0.08790663913770566,
+    "terminal_trunk_pitch_rad": -0.007618321670351924,
+    "terminal_root_pitch_rate_rad_s": -1.2283336627288124,
+    "terminal_trunk_pitch_rate_rad_s": 1.3172707844899953,
+    "hard_gate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 5
+     }
+    ],
+    "sequence_sha256": "4cad96af1c872b00ee99145baa6dbee98a2e4c34a9772472a2d36a21fd324973",
+    "terminal_state_sha256": "f60291c28e94f8021ae70f77855c2c1810b870427f958659a697ba5f9f8d8948",
+    "deterministic_replay": true
+   }
+  },
+  "candidate_witness": {
+   "nominal_dt_0.001": {
+    "native_steps": 40,
+    "horizon_s": 0.04,
+    "max_penetration_m": 0.017864851377027938,
+    "net_vertical_impulse_ns": -6.930301214262656,
+    "grf_vertical_impulse_ns": 31.91729878573735,
+    "peak_total_fz_n": 1291.3300848121949,
+    "peak_total_fz_bw": 1.329636924610215,
+    "min_rom_margin_rad": 0.2777740114494899,
+    "max_moment_ratio": 0.7614446633747464,
+    "max_power_ratio": 1.0,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": -0.013213736121829947,
+    "terminal_com_vz_m_s": -1.776223525023953,
+    "terminal_hy_kg_m2_s": 0.3247997979370393,
+    "terminal_root_pitch_rad": 0.1406967395612178,
+    "terminal_trunk_pitch_rad": 0.030158271432558392,
+    "terminal_root_pitch_rate_rad_s": 12.647801504749722,
+    "terminal_trunk_pitch_rate_rad_s": 2.2338501793967147,
+    "hard_gate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 40
+     }
+    ],
+    "sequence_sha256": "3009d48d45abc16b8e82449aa9ad222f0cf1078a451b9916e6bc085724552336",
+    "terminal_state_sha256": "794ff4890018773450213a57c5df88ab1b646a8359e58a920749dd6adfa589fd",
+    "deterministic_replay": true
+   },
+   "nominal_dt_0.002": {
+    "native_steps": 20,
+    "horizon_s": 0.04,
+    "max_penetration_m": 0.014202160277490966,
+    "net_vertical_impulse_ns": -7.823749151600999,
+    "grf_vertical_impulse_ns": 31.023850848399,
+    "peak_total_fz_n": 1500.2083256024252,
+    "peak_total_fz_bw": 1.5447114628470486,
+    "min_rom_margin_rad": 0.32133125016558645,
+    "max_moment_ratio": 0.777648825292321,
+    "max_power_ratio": 1.0,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": -0.025712833268239168,
+    "terminal_com_vz_m_s": -1.7818239590049307,
+    "terminal_hy_kg_m2_s": 1.6068681469325654,
+    "terminal_root_pitch_rad": 0.10738601417053262,
+    "terminal_trunk_pitch_rad": 0.02983047583187587,
+    "terminal_root_pitch_rate_rad_s": 10.40630850403555,
+    "terminal_trunk_pitch_rate_rad_s": 2.2239828034156517,
+    "hard_gate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 20
+     }
+    ],
+    "sequence_sha256": "892387b30b6cce2d74320d2a383dce024712c868a55d0002cf202f3e9deaf2b3",
+    "terminal_state_sha256": "fdc3c20aab49ab03d0b006c6951801df65312010d0b4e53f36de0e93a5c387f8",
+    "deterministic_replay": true
+   },
+   "nominal_dt_0.004": {
+    "native_steps": 5,
+    "horizon_s": 0.02,
+    "max_penetration_m": 0.04015529061601702,
+    "net_vertical_impulse_ns": -6.270999284051413,
+    "grf_vertical_impulse_ns": 13.15280071594859,
+    "peak_total_fz_n": 1148.7053113911584,
+    "peak_total_fz_bw": 1.1827812388833887,
+    "min_rom_margin_rad": 0.4696268247413795,
+    "max_moment_ratio": 0.5333333333333333,
+    "max_power_ratio": 0.7574895932308968,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": -0.040578676551301214,
+    "terminal_com_vz_m_s": -1.774876973576223,
+    "terminal_hy_kg_m2_s": 3.2343620304772016,
+    "terminal_root_pitch_rad": -0.015743307828615983,
+    "terminal_trunk_pitch_rad": -0.003980325254187674,
+    "terminal_root_pitch_rate_rad_s": 5.166410523462213,
+    "terminal_trunk_pitch_rate_rad_s": 1.6051386751680945,
+    "hard_gate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     }
+    ],
+    "sequence_sha256": "9de590b28da03efa28165d45562ec667c4f78e1f63b3cba98f8014c04e67cf51",
+    "terminal_state_sha256": "83d3c15fd25760abba44cab7b17c0754140f5887413afe84156433beefe5a9d4",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.001": {
+    "native_steps": 40,
+    "horizon_s": 0.04,
+    "max_penetration_m": 0.012678411337505389,
+    "net_vertical_impulse_ns": -8.848568856982569,
+    "grf_vertical_impulse_ns": 29.999031143017447,
+    "peak_total_fz_n": 1257.5327878457292,
+    "peak_total_fz_bw": 1.2948370430561775,
+    "min_rom_margin_rad": 0.2398042788325062,
+    "max_moment_ratio": 0.7614446633747464,
+    "max_power_ratio": 1.0,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 1,
+    "max_support_free_run": 1,
+    "terminal_legal_support": false,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": -0.005624617155415665,
+    "terminal_com_vz_m_s": -1.7862380196001775,
+    "terminal_hy_kg_m2_s": -0.4734463230320087,
+    "terminal_root_pitch_rad": 0.1404185695458412,
+    "terminal_trunk_pitch_rad": 0.030062504971841764,
+    "terminal_root_pitch_rate_rad_s": 12.619569757397889,
+    "terminal_trunk_pitch_rate_rad_s": 2.224711469663152,
+    "hard_gate_failures": [
+     "MAX_PENETRATION",
+     "SUPPORT_RETENTION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.975,
+    "support_transitions": 1,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 39
+     },
+     {
+      "value": [],
+      "samples": 1
+     }
+    ],
+    "sequence_sha256": "83c37e78ac1e9785caa4318062d698c2ba87f05bb68648be062eb527021e1763",
+    "terminal_state_sha256": "44a68f567b1239ff6e89e4fac6dd840976d89f645788fbf19450b83da9fb5fd9",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.002": {
+    "native_steps": 20,
+    "horizon_s": 0.04,
+    "max_penetration_m": 0.009894065392043315,
+    "net_vertical_impulse_ns": -8.008850461586905,
+    "grf_vertical_impulse_ns": 30.838749538413097,
+    "peak_total_fz_n": 1489.790173062011,
+    "peak_total_fz_bw": 1.533984259580526,
+    "min_rom_margin_rad": 0.3010079003918037,
+    "max_moment_ratio": 0.777648825292321,
+    "max_power_ratio": 1.0,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": -0.02481921408056214,
+    "terminal_com_vz_m_s": -1.7836343062718358,
+    "terminal_hy_kg_m2_s": 1.5381819874137046,
+    "terminal_root_pitch_rad": 0.10718139140997043,
+    "terminal_trunk_pitch_rad": 0.029763800526633313,
+    "terminal_root_pitch_rate_rad_s": 10.391807291632974,
+    "terminal_trunk_pitch_rate_rad_s": 2.2203830571970133,
+    "hard_gate_failures": [],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 20
+     }
+    ],
+    "sequence_sha256": "892387b30b6cce2d74320d2a383dce024712c868a55d0002cf202f3e9deaf2b3",
+    "terminal_state_sha256": "2c62c05351a7d58920446b0849ad85efc27d69066301c47dc433cd8e2b59a679",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.004": {
+    "native_steps": 5,
+    "horizon_s": 0.02,
+    "max_penetration_m": 0.03293485862884093,
+    "net_vertical_impulse_ns": -6.047871771196232,
+    "grf_vertical_impulse_ns": 13.375928228803769,
+    "peak_total_fz_n": 1047.0004912140423,
+    "peak_total_fz_bw": 1.078059382009743,
+    "min_rom_margin_rad": 0.4696268247413795,
+    "max_moment_ratio": 0.5333333333333333,
+    "max_power_ratio": 0.5259553782318529,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": -0.046997522410627324,
+    "terminal_com_vz_m_s": -1.768474296503589,
+    "terminal_hy_kg_m2_s": 3.954507426682572,
+    "terminal_root_pitch_rad": -0.015907251140370324,
+    "terminal_trunk_pitch_rad": -0.004037102562701275,
+    "terminal_root_pitch_rate_rad_s": 5.150497379439872,
+    "terminal_trunk_pitch_rate_rad_s": 1.599546954825656,
+    "hard_gate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 5
+     }
+    ],
+    "sequence_sha256": "4cad96af1c872b00ee99145baa6dbee98a2e4c34a9772472a2d36a21fd324973",
+    "terminal_state_sha256": "7bb6f5c1fa184d5eb08d41b7571e28af290e026740576a8be446afac18608300",
+    "deterministic_replay": true
+   }
+  }
+ },
+ "battery": {
+  "nominal_witness": {
+   "nominal_dt_0.001": {
+    "native_steps": 400,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.033942741097869183,
+    "net_vertical_impulse_ns": 211.14446946525877,
+    "grf_vertical_impulse_ns": 599.6204694652592,
+    "peak_total_fz_n": 2661.3320356132313,
+    "peak_total_fz_bw": 2.7402794876524994,
+    "min_rom_margin_rad": -0.333782623545249,
+    "max_moment_ratio": 0.908971645815904,
+    "max_power_ratio": 1.0000000000000002,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 8,
+    "max_support_free_run": 7,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.9635360956891283,
+    "terminal_com_vz_m_s": 0.4300127793264975,
+    "terminal_hy_kg_m2_s": -8.610137509108942,
+    "terminal_root_pitch_rad": -0.06148957340880867,
+    "terminal_trunk_pitch_rad": -0.8108385688680307,
+    "terminal_root_pitch_rate_rad_s": -2.015319442092023,
+    "terminal_trunk_pitch_rate_rad_s": -0.11869210282790466,
+    "hard_gate_failures": [
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.975,
+    "support_transitions": 8,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 55
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 21
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 26
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 15
+     },
+     {
+      "value": [],
+      "samples": 7
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 85
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 37
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 15
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 10
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 17
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 7
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 26
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 56
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 5
+     }
+    ],
+    "sequence_sha256": "40fe0926c7131baec5ed98812ee2c6967704b00e0e41a6366bdbd7f6b0e6e664",
+    "terminal_state_sha256": "64c0cb80f60490f838aeb6b9bd7bcce2a07ac672a95766ccab91afd71b644d36",
+    "deterministic_replay": true
+   },
+   "nominal_dt_0.002": {
+    "native_steps": 200,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.010211545500979788,
+    "net_vertical_impulse_ns": 169.14451426076982,
+    "grf_vertical_impulse_ns": 557.6205142607698,
+    "peak_total_fz_n": 2198.301399440281,
+    "peak_total_fz_bw": 2.2635132151693087,
+    "min_rom_margin_rad": 0.016131861597016073,
+    "max_moment_ratio": 0.984565469142095,
+    "max_power_ratio": 0.9336405719173289,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.00523220193908982,
+    "terminal_com_vz_m_s": 8.127437154703189e-05,
+    "terminal_hy_kg_m2_s": 8.13173729235385,
+    "terminal_root_pitch_rad": -0.025422023112411814,
+    "terminal_trunk_pitch_rad": 0.26757631498647383,
+    "terminal_root_pitch_rate_rad_s": 1.4501479879968904,
+    "terminal_trunk_pitch_rate_rad_s": 1.2224262208640415,
+    "hard_gate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 200
+     }
+    ],
+    "sequence_sha256": "103abc7d036a9cea8a17e30b817fcc83a1abf8ace86360cd025cf45eaca6e386",
+    "terminal_state_sha256": "0d05a96e8637594de673df041fdd22646e1a5333a6b540e4a298944583b435e2",
+    "deterministic_replay": true
+   },
+   "nominal_dt_0.004": {
+    "native_steps": 100,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.07594836083463341,
+    "net_vertical_impulse_ns": 135.50123587701665,
+    "grf_vertical_impulse_ns": 523.9772358770166,
+    "peak_total_fz_n": 4097.2495609478965,
+    "peak_total_fz_bw": 4.2187929869005,
+    "min_rom_margin_rad": -0.8191495287116467,
+    "max_moment_ratio": 0.9431415392707324,
+    "max_power_ratio": 1.0,
+    "mtp_authority_ok": true,
+    "prohibited_any": true,
+    "prohibited_active_any": true,
+    "material_reflight": false,
+    "chatter_transitions": 7,
+    "max_support_free_run": 11,
+    "terminal_legal_support": false,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 1.4541266092104417,
+    "terminal_com_vz_m_s": -0.3598801157174997,
+    "terminal_hy_kg_m2_s": -19.734341833688475,
+    "terminal_root_pitch_rad": -0.10746692632308459,
+    "terminal_trunk_pitch_rad": -0.795321034923616,
+    "terminal_root_pitch_rate_rad_s": -0.4151066003255208,
+    "terminal_trunk_pitch_rate_rad_s": -0.1907930197680452,
+    "hard_gate_failures": [
+     "PROHIBITED_CONTACT",
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM",
+     "SUPPORT_RETENTION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.79,
+    "support_transitions": 7,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 5
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [],
+      "samples": 6
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:heel",
+       "right:heel"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 16
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 5
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 20
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 13
+     },
+     {
+      "value": [],
+      "samples": 11
+     }
+    ],
+    "sequence_sha256": "28e5a541fb8f9569243c89cca86733186560d2df9e95125b8cd57d369152dd2f",
+    "terminal_state_sha256": "9230a56c95ea5ad7d73d57ff9c1c5261517f948a35a0c171e71b694088be1c33",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.001": {
+    "native_steps": 400,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.03627490197855693,
+    "net_vertical_impulse_ns": 99.24515436760163,
+    "grf_vertical_impulse_ns": 487.72115436760174,
+    "peak_total_fz_n": 2684.7690778641627,
+    "peak_total_fz_bw": 2.7644117812829236,
+    "min_rom_margin_rad": -0.7350388690992001,
+    "max_moment_ratio": 0.908971645815904,
+    "max_power_ratio": 1.0000000000000002,
+    "mtp_authority_ok": true,
+    "prohibited_any": true,
+    "prohibited_active_any": true,
+    "material_reflight": true,
+    "chatter_transitions": 21,
+    "max_support_free_run": 53,
+    "terminal_legal_support": false,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 1.1325779110602987,
+    "terminal_com_vz_m_s": -0.7116051790103988,
+    "terminal_hy_kg_m2_s": -50.49923322852647,
+    "terminal_root_pitch_rad": -0.7923417028867787,
+    "terminal_trunk_pitch_rad": -0.9435184974307079,
+    "terminal_root_pitch_rate_rad_s": 3.022799748523749,
+    "terminal_trunk_pitch_rate_rad_s": -9.415836618462983,
+    "hard_gate_failures": [
+     "PROHIBITED_CONTACT",
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM",
+     "MATERIAL_REFLIGHT",
+     "SUPPORT_RETENTION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.7975,
+    "support_transitions": 21,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 49
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 26
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 15
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 18
+     },
+     {
+      "value": [],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 49
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 63
+     },
+     {
+      "value": [],
+      "samples": 17
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 45
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 38
+     },
+     {
+      "value": [],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [],
+      "samples": 53
+     }
+    ],
+    "sequence_sha256": "294814f19f24fe340196a24ab2f5e4cef6eac2ccdbd218040236ee9d67dd864e",
+    "terminal_state_sha256": "db44fb1056d4ce7e14a98d9c962b6c87cb71e2cd632357cde33e3cf03f8c1f24",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.002": {
+    "native_steps": 200,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.020799899495458588,
+    "net_vertical_impulse_ns": 203.58295350276498,
+    "grf_vertical_impulse_ns": 592.0589535027651,
+    "peak_total_fz_n": 2900.9933926463727,
+    "peak_total_fz_bw": 2.9870503121391,
+    "min_rom_margin_rad": -0.29757370100298397,
+    "max_moment_ratio": 0.984565469142095,
+    "max_power_ratio": 1.0000000000000002,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.4493761332052128,
+    "terminal_com_vz_m_s": 0.32543358212412743,
+    "terminal_hy_kg_m2_s": -12.588731351507874,
+    "terminal_root_pitch_rad": -0.5299328044144422,
+    "terminal_trunk_pitch_rad": 0.10914821701037902,
+    "terminal_root_pitch_rate_rad_s": -2.4982991347670698,
+    "terminal_trunk_pitch_rate_rad_s": -0.9242082854093898,
+    "hard_gate_failures": [
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 176
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 12
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     }
+    ],
+    "sequence_sha256": "e80ad02340dc97e6a590800027f5d42076258734530212f7da0941b72a5826d3",
+    "terminal_state_sha256": "d37fa19601ed1c731616a8d8210ecda70ba839709a5393a8a7b6adb6167a9351",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.004": {
+    "native_steps": 100,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.04682960111409974,
+    "net_vertical_impulse_ns": 159.46057349344946,
+    "grf_vertical_impulse_ns": 547.9365734934494,
+    "peak_total_fz_n": 3465.3756233507193,
+    "peak_total_fz_bw": 3.5681747375392243,
+    "min_rom_margin_rad": -0.27708676093642226,
+    "max_moment_ratio": 0.9333333333333333,
+    "max_power_ratio": 1.0000000000000002,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 5,
+    "max_support_free_run": 6,
+    "terminal_legal_support": false,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 1.2676012625821336,
+    "terminal_com_vz_m_s": 0.10421202293400178,
+    "terminal_hy_kg_m2_s": -2.019875897573675,
+    "terminal_root_pitch_rad": 0.11950788267718467,
+    "terminal_trunk_pitch_rad": -0.5864264770113825,
+    "terminal_root_pitch_rate_rad_s": -1.087017071165547,
+    "terminal_trunk_pitch_rate_rad_s": 0.026660110766827616,
+    "hard_gate_failures": [
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM",
+     "SUPPORT_RETENTION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.9,
+    "support_transitions": 5,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 8
+     },
+     {
+      "value": [],
+      "samples": 6
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:heel",
+       "right:heel"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 10
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 8
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 5
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 5
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 7
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 7
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 16
+     },
+     {
+      "value": [],
+      "samples": 3
+     }
+    ],
+    "sequence_sha256": "39e6a52731f5f4af0002b1629949392fc2abe8755e8466c125affdfb51d9d2c3",
+    "terminal_state_sha256": "c3d247d4bfa909fbbc74e9a65a922ad1155cf6034e9a713a35ab841ed515b757",
+    "deterministic_replay": true
+   }
+  },
+  "candidate_witness": {
+   "nominal_dt_0.001": {
+    "native_steps": 400,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.033103102407281544,
+    "net_vertical_impulse_ns": 156.84380582485858,
+    "grf_vertical_impulse_ns": 545.3198058248589,
+    "peak_total_fz_n": 3083.962661274998,
+    "peak_total_fz_bw": 3.1754472979283124,
+    "min_rom_margin_rad": -0.2947210888598528,
+    "max_moment_ratio": 0.8015477069402859,
+    "max_power_ratio": 1.0000000000000002,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 8,
+    "max_support_free_run": 12,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.019438518747416124,
+    "terminal_com_vz_m_s": -0.12305581964081537,
+    "terminal_hy_kg_m2_s": 18.023138856271995,
+    "terminal_root_pitch_rad": 0.47487943070067584,
+    "terminal_trunk_pitch_rad": 0.7772954239713479,
+    "terminal_root_pitch_rate_rad_s": 15.011693440726209,
+    "terminal_trunk_pitch_rate_rad_s": 3.1440576431473026,
+    "hard_gate_failures": [
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.9525,
+    "support_transitions": 8,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 43
+     },
+     {
+      "value": [],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 21
+     },
+     {
+      "value": [],
+      "samples": 12
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 10
+     },
+     {
+      "value": [
+       "left:heel",
+       "left:toe",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 6
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 44
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 21
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 11
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 10
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 13
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 8
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 9
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 40
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 21
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 16
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 8
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 43
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "right:forefoot"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 5
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 5
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 3
+     }
+    ],
+    "sequence_sha256": "7543bbaf4389f5d474ef06c56aac18ceae0d5e07e49581e80de75b6ff9c95709",
+    "terminal_state_sha256": "ab50c350b0f414908be7329c0ad9c7ecb397c031139b9c8aa7a0e0425165ee23",
+    "deterministic_replay": true
+   },
+   "nominal_dt_0.002": {
+    "native_steps": 200,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.04581882342928378,
+    "net_vertical_impulse_ns": 183.03053663558134,
+    "grf_vertical_impulse_ns": 571.5065366355815,
+    "peak_total_fz_n": 3706.9913091401486,
+    "peak_total_fz_bw": 3.816957865237645,
+    "min_rom_margin_rad": -1.2571790671480012,
+    "max_moment_ratio": 0.8937745056076041,
+    "max_power_ratio": 1.0000000000000002,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 4,
+    "max_support_free_run": 7,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.40396578745269357,
+    "terminal_com_vz_m_s": 0.1835354182515148,
+    "terminal_hy_kg_m2_s": -11.722564222351666,
+    "terminal_root_pitch_rad": -0.0444000580292127,
+    "terminal_trunk_pitch_rad": 0.39474248356962005,
+    "terminal_root_pitch_rate_rad_s": 9.12683036312065,
+    "terminal_trunk_pitch_rate_rad_s": -1.5691492706913834,
+    "hard_gate_failures": [
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.96,
+    "support_transitions": 4,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 142
+     },
+     {
+      "value": [],
+      "samples": 7
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 31
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 8
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 7
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 4
+     }
+    ],
+    "sequence_sha256": "b1833fb1237ac07be72d433ae295297e05fe822a79812650e849426e8c0421ac",
+    "terminal_state_sha256": "6eacd398473934e1e94cd93e605f1fcf5c7e302e76f127290a2548423a34376e",
+    "deterministic_replay": true
+   },
+   "nominal_dt_0.004": {
+    "native_steps": 100,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.07159153422893062,
+    "net_vertical_impulse_ns": 134.57347340228276,
+    "grf_vertical_impulse_ns": 523.0494734022827,
+    "peak_total_fz_n": 4275.57902134393,
+    "peak_total_fz_bw": 4.402412526224457,
+    "min_rom_margin_rad": -0.6556924196680773,
+    "max_moment_ratio": 0.7695375373846006,
+    "max_power_ratio": 1.0000000000000002,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 6,
+    "max_support_free_run": 7,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.740009091010688,
+    "terminal_com_vz_m_s": -0.30420260163086726,
+    "terminal_hy_kg_m2_s": 8.618411303810582,
+    "terminal_root_pitch_rad": 0.9187084526308271,
+    "terminal_trunk_pitch_rad": 0.6247124186202984,
+    "terminal_root_pitch_rate_rad_s": 14.419620072361113,
+    "terminal_trunk_pitch_rate_rad_s": 2.152104648045082,
+    "hard_gate_failures": [
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.87,
+    "support_transitions": 6,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [],
+      "samples": 7
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:heel",
+       "left:toe",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:heel",
+       "right:heel"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "right:forefoot",
+       "right:heel"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "right:forefoot"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:heel",
+       "left:toe",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 6
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 10
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 6
+     },
+     {
+      "value": [],
+      "samples": 5
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 6
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "right:forefoot"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 6
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     }
+    ],
+    "sequence_sha256": "524666a1a5d4b6b15c1fccb5d74316dc53a72ab528c9eac05ea33954427a5340",
+    "terminal_state_sha256": "9bd8ba03c5a653285cf8276ff2fb60770f62ade7aa2455bcd07d80794cc285fc",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.001": {
+    "native_steps": 400,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.029123638803098123,
+    "net_vertical_impulse_ns": 220.7094746767662,
+    "grf_vertical_impulse_ns": 609.1854746767666,
+    "peak_total_fz_n": 4532.657245833793,
+    "peak_total_fz_bw": 4.6671168832399355,
+    "min_rom_margin_rad": -0.31763159458845847,
+    "max_moment_ratio": 0.8954319545185644,
+    "max_power_ratio": 1.0000000000000002,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 6,
+    "max_support_free_run": 12,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.2690419363850838,
+    "terminal_com_vz_m_s": 0.5334552347885996,
+    "terminal_hy_kg_m2_s": 16.827005010717883,
+    "terminal_root_pitch_rad": 0.2913428948914981,
+    "terminal_trunk_pitch_rad": 0.5960122023309554,
+    "terminal_root_pitch_rate_rad_s": 15.915912155342742,
+    "terminal_trunk_pitch_rate_rad_s": 3.6117754103324042,
+    "hard_gate_failures": [
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.95,
+    "support_transitions": 6,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 39
+     },
+     {
+      "value": [],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 19
+     },
+     {
+      "value": [],
+      "samples": 12
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 9
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 7
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [],
+      "samples": 5
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "right:forefoot",
+       "right:heel"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 35
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 22
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 8
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 8
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 7
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 7
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 7
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 5
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 24
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 23
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 112
+     }
+    ],
+    "sequence_sha256": "32c17ee43339920f70fd89259e61b5eee24a89d5b5c64cb65937cf793b5d5638",
+    "terminal_state_sha256": "96d7d73470aa7b43b3626995ab0fbd2d68f47fd557758bc02b0d8ce576d269f0",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.002": {
+    "native_steps": 200,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.009910184765470523,
+    "net_vertical_impulse_ns": 171.4369189093406,
+    "grf_vertical_impulse_ns": 559.9129189093405,
+    "peak_total_fz_n": 2770.0699138529767,
+    "peak_total_fz_bw": 2.8522430357118345,
+    "min_rom_margin_rad": 0.04406494480542378,
+    "max_moment_ratio": 0.8059391715118174,
+    "max_power_ratio": 1.0,
+    "mtp_authority_ok": true,
+    "prohibited_any": false,
+    "prohibited_active_any": false,
+    "material_reflight": false,
+    "chatter_transitions": 0,
+    "max_support_free_run": 0,
+    "terminal_legal_support": true,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": -0.22357253816400374,
+    "terminal_com_vz_m_s": -1.8722268771252926e-05,
+    "terminal_hy_kg_m2_s": 27.590901603979926,
+    "terminal_root_pitch_rad": 0.8840110422943084,
+    "terminal_trunk_pitch_rad": 1.0372578628221496,
+    "terminal_root_pitch_rate_rad_s": 17.04008325756223,
+    "terminal_trunk_pitch_rate_rad_s": 4.167310749138018,
+    "hard_gate_failures": [],
+    "admissible": true,
+    "finite": true,
+    "support_fraction": 1.0,
+    "support_transitions": 0,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 175
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 15
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "right:forefoot"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "right:forefoot"
+      ],
+      "samples": 7
+     }
+    ],
+    "sequence_sha256": "0a53b8dbd76373e31d0a2550eef91a4c1a48d845b7837b6c851a982a8eca4e6c",
+    "terminal_state_sha256": "e9d8a08824af5db55a2012a5ad5bdda19d9b5f0e67c8195b3debc98a943201e1",
+    "deterministic_replay": true
+   },
+   "candidate_dt_0.004": {
+    "native_steps": 100,
+    "horizon_s": 0.4,
+    "max_penetration_m": 0.04360441913561551,
+    "net_vertical_impulse_ns": 161.44539798165084,
+    "grf_vertical_impulse_ns": 549.9213979816509,
+    "peak_total_fz_n": 8514.742950078713,
+    "peak_total_fz_bw": 8.767329719291501,
+    "min_rom_margin_rad": -0.6350978954826604,
+    "max_moment_ratio": 0.7871232434368116,
+    "max_power_ratio": 1.0000000000000002,
+    "mtp_authority_ok": true,
+    "prohibited_any": true,
+    "prohibited_active_any": true,
+    "material_reflight": false,
+    "chatter_transitions": 5,
+    "max_support_free_run": 10,
+    "terminal_legal_support": false,
+    "toe_mode_escaped": false,
+    "terminal_com_vx_m_s": 0.3071990467699259,
+    "terminal_com_vz_m_s": -0.0938155375750668,
+    "terminal_hy_kg_m2_s": 20.804606457571158,
+    "terminal_root_pitch_rad": 0.6461193638738413,
+    "terminal_trunk_pitch_rad": 0.5413162398485326,
+    "terminal_root_pitch_rate_rad_s": 14.174822517199734,
+    "terminal_trunk_pitch_rate_rad_s": 2.634008161196883,
+    "hard_gate_failures": [
+     "PROHIBITED_CONTACT",
+     "MAX_PENETRATION",
+     "STRUCTURAL_ROM",
+     "PEAK_FZ",
+     "SUPPORT_RETENTION"
+    ],
+    "admissible": false,
+    "finite": true,
+    "support_fraction": 0.81,
+    "support_transitions": 5,
+    "region_run_lengths": [
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 5
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [],
+      "samples": 8
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:heel",
+       "left:toe",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 4
+     },
+     {
+      "value": [
+       "left:heel",
+       "right:heel"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "right:forefoot"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 6
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:heel",
+       "left:toe",
+       "right:forefoot",
+       "right:heel",
+       "right:toe"
+      ],
+      "samples": 3
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 17
+     },
+     {
+      "value": [
+       "left:forefoot",
+       "left:toe",
+       "right:forefoot",
+       "right:toe"
+      ],
+      "samples": 2
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 13
+     },
+     {
+      "value": [],
+      "samples": 1
+     },
+     {
+      "value": [
+       "left:toe",
+       "right:toe"
+      ],
+      "samples": 14
+     },
+     {
+      "value": [],
+      "samples": 10
+     }
+    ],
+    "sequence_sha256": "1508164e1db0ff8008a330d1ecbd73be5087150fad79baefbdb5e6aeb9451ea4",
+    "terminal_state_sha256": "e87994a137d9eae17c28dee6377ba91ad4dec21f1b863ffb60a26d19cbc8cc91",
+    "deterministic_replay": true
+   }
+  }
+ },
+ "criteria": {
+  "V1_realization_identity": true,
+  "V2_engine_semantics_unchanged": true,
+  "V3_timeconst_resolved": true,
+  "V3_detail": {
+   "dt_0.001": {
+    "candidate_realized": [
+     0.015,
+     1.0
+    ],
+    "nominal_realized": [
+     0.02,
+     1.0
+    ],
+    "candidate_timeconst_over_dt": 15.0,
+    "nominal_timeconst_over_dt": 20.0
+   },
+   "dt_0.002": {
+    "candidate_realized": [
+     0.015,
+     1.0
+    ],
+    "nominal_realized": [
+     0.02,
+     1.0
+    ],
+    "candidate_timeconst_over_dt": 7.5,
+    "nominal_timeconst_over_dt": 10.0
+   },
+   "dt_0.004": {
+    "candidate_realized": [
+     0.015,
+     1.0
+    ],
+    "nominal_realized": [
+     0.02,
+     1.0
+    ],
+    "candidate_timeconst_over_dt": 3.75,
+    "nominal_timeconst_over_dt": 5.0
+   }
+  },
+  "V7_material_causality": true,
+  "V8_in_domain_dt_comparison": true,
+  "V8_detail": {
+   "dt_0.001": {
+    "nominal_penetration_m": 0.010851400730678609,
+    "candidate_penetration_m": 0.008151093699334758,
+    "nominal_failures": [
+     "MAX_PENETRATION"
+    ],
+    "candidate_failures": [],
+    "nominal_peak_fz_bw": 1.2555636101033774,
+    "candidate_peak_fz_bw": 1.235483498462533,
+    "deterministic": true
+   },
+   "dt_0.002": {
+    "nominal_penetration_m": 0.010211545500979788,
+    "candidate_penetration_m": 0.008090821581122856,
+    "nominal_failures": [
+     "MAX_PENETRATION"
+    ],
+    "candidate_failures": [],
+    "nominal_peak_fz_bw": 1.2995667154561656,
+    "candidate_peak_fz_bw": 1.282800730759538,
+    "deterministic": true
+   },
+   "dt_0.004": {
+    "nominal_penetration_m": 0.031944449399072566,
+    "candidate_penetration_m": 0.02606612559431577,
+    "nominal_failures": [
+     "MAX_PENETRATION"
+    ],
+    "candidate_failures": [
+     "MAX_PENETRATION"
+    ],
+    "nominal_peak_fz_bw": 0.8039655190632917,
+    "candidate_peak_fz_bw": 0.7860285944769579,
+    "deterministic": true
+   }
+  },
+  "V9_stress_dt_is_out_of_domain": true,
+  "V9_detail": {
+   "dt_0.004": {
+    "nominal_penetration_m": 0.031944449399072566,
+    "candidate_penetration_m": 0.02606612559431577,
+    "impact_step_m": 0.0069177585819159325
+   }
+  },
+  "V4_replay_determinism": true,
+  "V5_witness_reproduction": true,
+  "V5_detail": {
+   "nominal_witness:nominal_dt_0.001": {},
+   "nominal_witness:nominal_dt_0.002": {
+    "max_penetration_m": true,
+    "terminal_com_vz_m_s": true,
+    "terminal_com_vx_m_s": true,
+    "peak_total_fz_bw": true,
+    "min_rom_margin_rad": true,
+    "max_moment_ratio": true,
+    "max_power_ratio": true,
+    "net_vertical_impulse_ns": true,
+    "grf_vertical_impulse_ns": true,
+    "terminal_hy_kg_m2_s": true,
+    "terminal_root_pitch_rad": true,
+    "terminal_trunk_pitch_rad": true,
+    "terminal_root_pitch_rate_rad_s": true,
+    "terminal_trunk_pitch_rate_rad_s": true,
+    "admissible": true,
+    "prohibited_any": true,
+    "material_reflight": true,
+    "chatter_transitions": true,
+    "max_support_free_run": true,
+    "hard_gate_failures": true
+   },
+   "nominal_witness:nominal_dt_0.004": {},
+   "nominal_witness:candidate_dt_0.001": {},
+   "nominal_witness:candidate_dt_0.002": {},
+   "nominal_witness:candidate_dt_0.004": {},
+   "candidate_witness:nominal_dt_0.001": {},
+   "candidate_witness:nominal_dt_0.002": {},
+   "candidate_witness:nominal_dt_0.004": {},
+   "candidate_witness:candidate_dt_0.001": {},
+   "candidate_witness:candidate_dt_0.002": {
+    "max_penetration_m": true,
+    "terminal_com_vz_m_s": true,
+    "terminal_com_vx_m_s": true,
+    "peak_total_fz_bw": true,
+    "min_rom_margin_rad": true,
+    "max_moment_ratio": true,
+    "max_power_ratio": true,
+    "net_vertical_impulse_ns": true,
+    "grf_vertical_impulse_ns": true,
+    "terminal_hy_kg_m2_s": true,
+    "terminal_root_pitch_rad": true,
+    "terminal_trunk_pitch_rad": true,
+    "terminal_root_pitch_rate_rad_s": true,
+    "terminal_trunk_pitch_rate_rad_s": true,
+    "admissible": true,
+    "prohibited_any": true,
+    "material_reflight": true,
+    "chatter_transitions": true,
+    "max_support_free_run": true,
+    "hard_gate_failures": true
+   },
+   "candidate_witness:candidate_dt_0.004": {}
+  },
+  "V6_candidate_admissible": true,
+  "V6_nominal_boundary_failure": [
+   "MAX_PENETRATION"
+  ],
+  "V10_candidate_hard_authority_hygiene": true
+ },
+ "status": "PASS",
+ "approach_state": {
+  "branch_pre_touchdown_sha256": "08605746ced78fa130c6fc210661fdd611e22e0bbbe20b9758f85b060d93cb42",
+  "branch_e8_sha256": "e411462929c178b97a1132babb46f2fde8c7e12c5d40e40e8f18fa7ce7869355",
+  "one_step_com_vz_m_s": -1.729439645478983,
+  "one_step_com_vx_m_s": -0.03987554877420188,
+  "one_step_penetration_m": 0.0028038439191269277
+ },
+ "required_criteria": [
+  "V1_realization_identity",
+  "V2_engine_semantics_unchanged",
+  "V3_timeconst_resolved",
+  "V4_replay_determinism",
+  "V5_witness_reproduction",
+  "V6_candidate_admissible",
+  "V7_material_causality",
+  "V8_in_domain_dt_comparison",
+  "V9_stress_dt_is_out_of_domain",
+  "V10_candidate_hard_authority_hygiene"
+ ],
+ "missing_criteria": [],
+ "failed_criteria": []
+}
