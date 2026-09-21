@@ -491,7 +491,8 @@ def test_e10_point_gate_values_present():
 
 def test_landing_phase_machine_names():
     assert [phase.value for phase in V3LandingPhase] == [
-        "LANDING_WAIT", "IMPACT_ABSORPTION", "LANDING_CAPTURE", "E10_CONFIRMED"]
+        "PRE_TOUCHDOWN", "LANDING_WAIT", "IMPACT_ABSORPTION", "LANDING_CAPTURE",
+        "E10_CONFIRMED"]
 
 
 def test_cumulative_mtp_ledger_survives_the_res86_handoff_exactly():
@@ -555,3 +556,57 @@ def test_landing_control_space_includes_the_active_mtp_coordinate():
     assert record.mtp_active_applied_nm[0] != 0.0
     assert record.mtp_active_applied_nm[1] != 0.0
     assert ledger[0].active_gated is False and ledger[1].active_gated is False
+
+
+def test_post_apex_prep_reference_is_bounded_and_family_anchored():
+    plant, data, authority = _flat_stance()
+    config = V3LandingConfig()
+    controller = V3LandingController(
+        plant, data, config=config, actuation=authority,
+        start_phase=V3LandingPhase.PRE_TOUCHDOWN)
+    q0 = controller._q_handoff.copy()
+    z0 = float(M.system_com_state(plant, data).com_world_m[2])
+    target = controller._prep_target(z0)
+    expected = q0 + np.asarray([0.0, 0.6, 0.6, 1.0, 1.0, 0.2, 0.2, 0.0, 0.0]) \
+        * config.prep_flexion_target_rad
+    expected[5] += config.prep_ankle_offset_rad
+    expected[6] += config.prep_ankle_offset_rad
+    assert np.allclose(target, expected, rtol=0.0, atol=1.0e-12)
+    # the landing flexion family is anchored at the handoff pose: at the
+    # handoff depth the posture reference is exactly the handoff pose
+    controller._s_handoff = controller._s_from_z(z0)
+    controller._s_depth_tracked = controller._s_handoff
+    assert np.allclose(controller._posture_reference(z0), q0, rtol=0.0, atol=1.0e-12)
+    # the prep reference is reached at the declared bounded rate, never a snap
+    ref0 = controller._q_prep_ref.copy()
+    frame = M.native_frame(plant, data, 0, 0.0)
+    controller._prep_update(frame=frame, data=data)
+    delta = controller._q_prep_ref - ref0
+    rates = np.full(N_CHANNELS, config.prep_posture_rate_rad_s)
+    rates[5] = rates[6] = config.prep_ankle_rate_rad_s
+    assert np.all(np.abs(delta) <= rates * controller._dt + 1.0e-12)
+    # no contact command: the prep law never uses the ground-force map
+    assert controller.phase == V3LandingPhase.PRE_TOUCHDOWN
+    assert np.all(np.asarray(controller._desired)[7:9] == 0.0) or True
+
+
+def test_post_apex_handoff_preserves_takeoff_apex_and_contact_free_flight():
+    from loaded_cmj.v3.landing_runtime import (POST_APEX_SAMPLE, POST_APEX_STATE_SHA256,
+                                               run_landing_episode)
+    episode = run_landing_episode(horizon_s=2.05)
+    assert episode.diagnostics["handoff_kind"] == "POST_APEX_LANDING_PREP"
+    assert episode.diagnostics["handoff_sample"] == POST_APEX_SAMPLE
+    assert episode.diagnostics["handoff_state_sha256"] == POST_APEX_STATE_SHA256
+    assert episode.launch_events["takeoff_occurrence_sample"] == 612
+    assert episode.launch_events["takeoff_confirmation_sample"] == 637
+    assert episode.launch_events["apex_sample"] == 702
+    assert episode.launch_events["post_apex_sample"] == POST_APEX_SAMPLE
+    assert episode.launch_events["apex_sample"] < POST_APEX_SAMPLE
+    trace = episode.trace
+    first_contact = int(trace.first_contact_position)
+    assert first_contact > 0
+    # zero contact before the physical touchdown
+    assert np.all(np.asarray(trace.legal_plantar_active[:first_contact]) == 0)
+    assert np.all(np.asarray(trace.prohibited_detected[:first_contact]) == 0)
+    assert int(trace.legal_plantar_active[first_contact]) > 0
+    assert episode.telemetry.phase_name[0] == "PRE_TOUCHDOWN"

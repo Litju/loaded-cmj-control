@@ -63,6 +63,17 @@ E8_STATE_SHA256 = "e411462929c178b97a1132babb46f2fde8c7e12c5d40e40e8f18fa7ce7869
 PRE_TOUCHDOWN_STATE_SHA256 = (
     "08605746ced78fa130c6fc210661fdd611e22e0bbbe20b9758f85b060d93cb42")
 
+# Post-apex upstream handoff: the first native sample of the launch's
+# LANDING_PREP phase (the launch phase machine enters it just after the apex at
+# sample 702).  From here the RES-86 landing controller owns the touchdown
+# preparation, preserving takeoff occurrence/confirmation, the apex, the
+# genuine flight and zero contact before the physical touchdown.
+POST_APEX_SAMPLE = 705
+POST_APEX_TIME_S = 1.410
+POST_APEX_STATE_SHA256 = (
+    "31ddc10f883b785e5c240ba920c4d4fcf738dac74f4ae938464b92f6823cb220")
+APEX_SAMPLE = 702
+
 DEFAULT_HORIZON_S = 3.5
 
 
@@ -241,6 +252,59 @@ def _integration_state_sha256(plant: V3Plant, data: mujoco.MjData) -> str:
     return hashlib.sha256(vector.tobytes()).hexdigest()
 
 
+def _run_launch_to_post_apex(plant: V3Plant, data: mujoco.MjData, *,
+                             n_samples: int, config: V3ControllerConfig,
+                             capture_active_set: bool = False
+                             ) -> tuple[V3LaunchController, V3HandoffCertificate, dict[str, Any],
+                                        ActiveSetRecorder | None]:
+    """Run the sealed launch to the first post-apex LANDING_PREP sample.
+
+    The launch law is byte-identical to the RES-85 canonical episode through
+    this sample; the apex (maximum SYSTEM_COM height) is strictly before the
+    handoff and the takeoff occurrence/confirmation are preserved.
+    """
+    settle_standing_stance(plant, data)
+    launch = V3LaunchController(plant, data, config=config)
+    frames: list[M.V3NativeFrame] = []
+    recorder = ActiveSetRecorder(plant) if capture_active_set else None
+    dt = float(plant.model.opt.timestep)
+    apex_index = -1
+    apex_height = -np.inf
+    for k in range(n_samples):
+        t = k * dt
+        frame = M.native_frame(plant, data, k, t)
+        snapshot = M.measure(plant, data, flight_context=launch.phase.value in
+                             ("TAKEOFF_CONFIRM", "FLIGHT", "LANDING_PREP"))
+        frames.append(frame)
+        com = M.system_com_state(plant, data)
+        if com.com_world_m[2] > apex_height:
+            apex_height = float(com.com_world_m[2])
+            apex_index = int(k)
+        if recorder is not None and k >= PRE_TOUCHDOWN_SAMPLE:
+            recorder.append(data, sample_index=k, time_s=t, records=snapshot.records)
+        if launch.phase.value == "LANDING_PREP" and k >= POST_APEX_SAMPLE:
+            handoff = capture_handoff_certificate(
+                plant, data, sample_index=k, time_s=t, authority=launch.actuation)
+            events = {
+                "post_apex_sample": int(k),
+                "apex_sample": int(apex_index),
+                "apex_com_height_m": float(apex_height),
+                "takeoff_occurrence_sample": (
+                    None if launch.accepted_occurrence is None
+                    else int(launch.accepted_occurrence.native_index)),
+                "takeoff_confirmation_sample": (
+                    None if launch.confirmation is None
+                    else int(launch.confirmation.confirmation_sample)),
+                "post_apex_state_sha256": handoff.state_sha256,
+            }
+            return launch, handoff, events, recorder
+        step = launch.update(frame, snapshot, frames, plant, data)
+        data.ctrl[:] = step.applied_nm
+        mujoco.mj_step(plant.model, data)
+        mujoco.mj_forward(plant.model, data)
+    raise V3LandingRuntimeError("no post-apex LANDING_PREP sample within the horizon")
+
+
 def _run_launch_to_handoff(plant: V3Plant, data: mujoco.MjData, *,
                            n_samples: int, config: V3ControllerConfig,
                            capture_active_set: bool = False
@@ -320,8 +384,16 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
                         plant: V3Plant | None = None,
                         capture_active_set: bool = False,
                         stop_after_e10_s: float | None = None,
+                        upstream_prep: bool = True,
                         ) -> V3LandingEpisode:
-    """Run the canonical launch through E8 and the RES-86 landing controller."""
+    """Run the canonical launch and the RES-86 landing controller.
+
+    With ``upstream_prep`` (default) the launch is reproduced byte-identically
+    to the first post-apex LANDING_PREP sample and the landing controller then
+    owns the touchdown preparation and the whole landing.  With
+    ``upstream_prep=False`` the legacy handoff at the E8 first-contact sample is
+    preserved.
+    """
     plant = plant if plant is not None else V3Plant()
     dt = float(plant.model.opt.timestep)
     if abs(dt - M.NATIVE_DT_S) > 1e-12:
@@ -334,10 +406,16 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
     authority: V3ActuationAuthority
 
     if handoff_certificate is None:
-        launch, handoff, launch_events, recorder = _run_launch_to_handoff(
-            plant, data, n_samples=n_samples,
-            config=controller_config or V3ControllerConfig(dt_s=dt),
-            capture_active_set=capture_active_set)
+        if upstream_prep:
+            launch, handoff, launch_events, recorder = _run_launch_to_post_apex(
+                plant, data, n_samples=n_samples,
+                config=controller_config or V3ControllerConfig(dt_s=dt),
+                capture_active_set=capture_active_set)
+        else:
+            launch, handoff, launch_events, recorder = _run_launch_to_handoff(
+                plant, data, n_samples=n_samples,
+                config=controller_config or V3ControllerConfig(dt_s=dt),
+                capture_active_set=capture_active_set)
         authority = launch.actuation
     else:
         handoff = handoff_certificate
@@ -345,12 +423,17 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
         if landing_actuation is not None:
             landing_actuation.restore_state(handoff.actuation)
             authority = landing_actuation
-    if handoff.state_sha256 != E8_STATE_SHA256:
+    if upstream_prep and handoff.sample_index == POST_APEX_SAMPLE:
+        if handoff.state_sha256 != POST_APEX_STATE_SHA256:
+            warnings.append(f"POST_APEX_STATE_SHA256_DIFFERS:{handoff.state_sha256}")
+    elif handoff.state_sha256 != E8_STATE_SHA256:
         warnings.append(f"E8_STATE_SHA256_DIFFERS:{handoff.state_sha256}")
 
+    start_phase = (V3LandingPhase.PRE_TOUCHDOWN
+                   if handoff.sample_index == POST_APEX_SAMPLE else None)
     landing = V3LandingController(plant, data,
                                   config=landing_config or V3LandingConfig(),
-                                  actuation=authority)
+                                  actuation=authority, start_phase=start_phase)
     log = _empty_telemetry_lists()
     steps: list[V3LandingStep] = []
     fault: str | None = None
@@ -362,7 +445,9 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
     for k in range(int(handoff.sample_index), n_samples):
         t = k * dt
         frame = M.native_frame(plant, data, k, t)
-        snapshot = M.measure(plant, data, flight_context=False)
+        snapshot = M.measure(
+            plant, data,
+            flight_context=landing.phase == V3LandingPhase.PRE_TOUCHDOWN)
         try:
             step = landing.update(frame, snapshot, [], plant, data)
         except V3LandingFault as exc:
@@ -447,6 +532,11 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
 
     telemetry = V3LandingTelemetry(**{name: _stack(name, values)
                                       for name, values in log.items()})
+    legal_series = np.asarray(telemetry.legal_plantar_active, dtype=np.int64)
+    if legal_series.size and bool(np.any(legal_series > 0)):
+        first_contact_position = int(np.argmax(legal_series > 0))
+    else:
+        first_contact_position = -1
     trace = V3LandingTrace(
         index=np.asarray(telemetry.index, dtype=np.int64),
         time_s=np.asarray(telemetry.time_s, dtype=np.float64),
@@ -469,11 +559,14 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
         rom_margin_min_rad=np.asarray(telemetry.rom_margin_min_rad, dtype=np.float64),
         max_abs_moment_ratio=np.asarray(telemetry.max_abs_moment_ratio, dtype=np.float64),
         max_abs_power_ratio=np.asarray(telemetry.max_abs_power_ratio, dtype=np.float64),
-        first_contact_position=0,
+        first_contact_position=first_contact_position,
     )
     if trace.length == 0:
         events = {"status": "FAIL", "reason": fault or "EMPTY_LANDING_TRACE"}
         tables = None
+    elif first_contact_position < 0:
+        events = {"status": "FAIL", "reason": fault or "NO_FIRST_LEGAL_CONTACT"}
+        tables = recorder.finalize() if recorder is not None else None
     else:
         events = evaluate_landing_trace(trace)
         events["controller_phase_final"] = landing.phase.value
@@ -482,7 +575,10 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
         "handoff_sample": int(handoff.sample_index),
         "handoff_time_s": float(handoff.time_s),
         "handoff_state_sha256": handoff.state_sha256,
+        "handoff_kind": ("POST_APEX_LANDING_PREP" if handoff.sample_index == POST_APEX_SAMPLE
+                         else "E8_FIRST_CONTACT"),
         "e8_state_sha256_expected": E8_STATE_SHA256,
+        "post_apex_state_sha256_expected": POST_APEX_STATE_SHA256,
         "pre_touchdown_state_sha256_expected": PRE_TOUCHDOWN_STATE_SHA256,
         "landing_samples": int(telemetry.index.shape[0]),
         "e10_confirmed_time_s": landing.e10_confirmed_time_s,

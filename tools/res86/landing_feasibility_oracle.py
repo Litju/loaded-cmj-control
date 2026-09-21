@@ -581,9 +581,16 @@ class LandingFeasibilityOracle:
     """Exact controller-independent branch oracle from the sealed 790 certificate."""
 
     def __init__(self, branch: CanonicalBranch, *, class_name: str = "legal",
-                 plant: V3Plant | None = None, native_dt_s: float = NATIVE_DT_S) -> None:
+                 plant: V3Plant | None = None, native_dt_s: float = NATIVE_DT_S,
+                 objective: str = "arrest", penalty_scale: float = 1.0) -> None:
         if class_name not in ("legal", "toe"):
             raise ValueError(f"unknown oracle class {class_name!r}")
+        if objective not in ("arrest", "capture"):
+            raise ValueError(f"unknown oracle objective {objective!r}")
+        if not np.isfinite(penalty_scale) or penalty_scale < 1.0:
+            raise ValueError("penalty_scale must be finite and >= 1")
+        self.objective = objective
+        self.penalty_scale = float(penalty_scale)
         self.branch = branch
         self.class_name = class_name
         self.plant = plant if plant is not None else V3Plant()
@@ -1002,13 +1009,20 @@ class LandingFeasibilityOracle:
     def cost(self, result: BranchResult) -> float:
         if not result.finite:
             return PENALTY_NONFINITE
-        value = -result.terminal_com_vz_m_s
-        value += PENALTY_PENETRATION * max(0.0, result.max_penetration_m - PENETRATION_LIMIT_M)
-        value += PENALTY_PEN_INTEGRAL * result.penetration_excess_integral_m_s
+        if self.objective == "capture":
+            # Capture objective: drive the terminal SYSTEM_COM vertical velocity
+            # to zero from either side (no bounce credit).
+            value = abs(result.terminal_com_vz_m_s)
+        else:
+            value = -result.terminal_com_vz_m_s
+        gate_scale = self.penalty_scale
+        value += gate_scale * PENALTY_PENETRATION * max(
+            0.0, result.max_penetration_m - PENETRATION_LIMIT_M)
+        value += gate_scale * PENALTY_PEN_INTEGRAL * result.penetration_excess_integral_m_s
         if result.prohibited_any:
             value += PENALTY_PROHIBITED
-        value += PENALTY_ROM * max(0.0, -result.min_rom_margin_rad)
-        value += PENALTY_ROM_INTEGRAL * result.rom_excess_integral_rad_s
+        value += gate_scale * PENALTY_ROM * max(0.0, -result.min_rom_margin_rad)
+        value += gate_scale * PENALTY_ROM_INTEGRAL * result.rom_excess_integral_rad_s
         value += PENALTY_MOMENT * max(0.0, result.max_moment_ratio - 1.0)
         value += PENALTY_POWER * max(0.0, result.max_power_ratio - 1.0)
         if not result.mtp_authority_ok:
@@ -1548,12 +1562,16 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--certificate-cache", type=Path, default=None)
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--objective", choices=("arrest", "capture"), default="arrest")
+    parser.add_argument("--penalty-scale", type=float, default=1.0)
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
     t0 = time.time()
     branch = capture_canonical_branch(cache_path=args.certificate_cache)
-    oracle = LandingFeasibilityOracle(branch, class_name=args.class_name)
+    oracle = LandingFeasibilityOracle(branch, class_name=args.class_name,
+                                      objective=args.objective,
+                                      penalty_scale=args.penalty_scale)
     native_steps = int(round(args.horizon_s / NATIVE_DT_S))
     stabilizer = BranchStabilizer(enabled=args.stabilizer == "on")
     if args.solver == "cd":
@@ -1572,6 +1590,8 @@ def main() -> None:
     record["oracle_evaluations_used"] = search["evaluations"]
     record["oracle_evaluation_budget"] = search["budget"]
     record["oracle_solver"] = search.get("solver", "deterministic_bounded_powell")
+    record["oracle_objective"] = oracle.objective
+    record["oracle_penalty_scale"] = oracle.penalty_scale
     record["stabilizer"] = {
         "enabled": stabilizer.enabled,
         "joint_damping": stabilizer.joint_damping,

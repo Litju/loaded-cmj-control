@@ -165,11 +165,11 @@ CONSTRAINT_ROW_NAMES: tuple[str, ...] = (
 )
 
 OBJECTIVE_WEIGHTS: dict[str, float] = {
-    # Vertical arrest is carried by the causal stopping-time force reference in
-    # the baseline (with the measured-force ramp), not by the local velocity
-    # objective: a 10 ms velocity target would demand forces the current leg
-    # state cannot deliver without unloading contact.
-    "com_vz_terminal": 0.0,
+    # The causal stopping-time force reference in the baseline carries the
+    # arrest; the local velocity objective keeps the optimizer from trading the
+    # arrest away for posture, but it is bounded so a single 10 ms cell can
+    # never demand a force the leg cannot deliver without unloading contact.
+    "com_vz_terminal": 2.0,
     "com_vx_terminal": 5.0,
     "hy_terminal": 0.5,
     "root_pitch_terminal": 0.5,
@@ -178,7 +178,14 @@ OBJECTIVE_WEIGHTS: dict[str, float] = {
     "trunk_pitch_rate_terminal": 1.0,
 }
 
-_FLEXION_DIRECTION = np.array([0.0, 0.5, 0.5, 1.0, 1.0, 0.5, 0.5, 0.0, 0.0], dtype=np.float64)
+# Sagittal flexion family direction of the landing law.  The landing family is
+# anchored at the exact handoff pose and keeps the ankle contribution small: the
+# knee/hip carry the absorption while the ankle holds its frozen structural ROM
+# reserve (a standing-anchored family with a large ankle coefficient would drive
+# the ankle reference past the frozen ROM during the absorption stroke).
+LANDING_FLEXION_DIRECTION = np.array(
+    [0.0, 0.6, 0.6, 1.0, 1.0, 0.2, 0.2, 0.0, 0.0], dtype=np.float64)
+_FLEXION_DIRECTION = LANDING_FLEXION_DIRECTION
 
 
 class V3LandingFault(RuntimeError):
@@ -186,6 +193,7 @@ class V3LandingFault(RuntimeError):
 
 
 class V3LandingPhase(str, Enum):
+    PRE_TOUCHDOWN = "PRE_TOUCHDOWN"
     LANDING_WAIT = "LANDING_WAIT"
     IMPACT_ABSORPTION = "IMPACT_ABSORPTION"
     LANDING_CAPTURE = "LANDING_CAPTURE"
@@ -215,6 +223,7 @@ class V3LandingConfig:
     toe_phase_contact_gain_nm_per_n: float = 0.2
     toe_phase_contact_cap_nm: float = 80.0
     fz_reference_ramp_bw_per_interval: float = 0.5
+    fz_reference_ramp_s: float = 0.05
     joint_kp: tuple[float, ...] = (120.0, 60.0, 60.0, 80.0, 80.0, 60.0, 60.0, 0.0, 0.0)
     joint_kd: tuple[float, ...] = (20.0, 8.0, 8.0, 10.0, 10.0, 8.0, 8.0, 0.0, 0.0)
     trunk_posture_kp: float = 250.0
@@ -231,6 +240,20 @@ class V3LandingConfig:
     linear_prediction_relative_tolerance: float = 0.5
     include_mtp_coordinate: bool = True
     stop_after_e10_s: float = 0.10
+    # Post-apex touchdown preparation (upstream extension of the landing law
+    # into the flight LANDING_PREP window).  The prep reference is a bounded
+    # posture move from the exact handoff pose; it never snaps and never
+    # commands contact.
+    prep_flexion_target_rad: float = 0.10
+    prep_ankle_offset_rad: float = -0.20
+    prep_posture_rate_rad_s: float = 2.0
+    prep_ankle_rate_rad_s: float = 2.0
+    prep_moment_scale: float = 0.9
+    # Free-flight posture gains are deliberately a small fraction of the
+    # supported-phase gains: in flight a stiff PD against a fixed target
+    # excites a discrete limit cycle in the low-inertia distal chain.
+    prep_position_gain_scale: float = 0.2
+    prep_damping_gain_scale: float = 1.0
 
     def coordinate_trust(self, coordinate: str) -> float:
         index = CONTROL_COORDINATES.index(coordinate)
@@ -715,12 +738,14 @@ class V3LandingController:
 
     def __init__(self, plant: V3Plant, data: mujoco.MjData, *,
                  config: V3LandingConfig | None = None,
-                 actuation: V3ActuationAuthority | None = None) -> None:
+                 actuation: V3ActuationAuthority | None = None,
+                 start_phase: V3LandingPhase | None = None) -> None:
         self.plant = plant
         self.config = config or V3LandingConfig()
         self.actuation = actuation if actuation is not None else V3ActuationAuthority(
             float(plant.model.opt.timestep))
         self.engine = V3BranchEngine(plant)
+        self._start_phase = start_phase
         self._dt = float(plant.model.opt.timestep)
         if abs(self._dt - NATIVE_DT_S) > 1e-12:
             raise V3LandingFault(f"native dt {self._dt!r} != RES-84 native dt {NATIVE_DT_S!r}")
@@ -742,8 +767,8 @@ class V3LandingController:
     # lifecycle
     # ------------------------------------------------------------------
     def _reset_state(self, data: mujoco.MjData) -> None:
-        self.phase = V3LandingPhase.LANDING_WAIT
-        self._previous_phase = V3LandingPhase.LANDING_WAIT
+        self.phase = self._start_phase or V3LandingPhase.LANDING_WAIT
+        self._previous_phase = self.phase
         self._transition_reason = ""
         self._step_index = 0
         self._handoff_index: int | None = None
@@ -753,8 +778,11 @@ class V3LandingController:
         self._e10_confirmed_time_s: float | None = None
         self._sustain_start_time_s: float | None = None
         self._q_handoff = np.zeros(N_CHANNELS, dtype=np.float64)
+        self._q_prep_ref = np.zeros(N_CHANNELS, dtype=np.float64)
         self._s_handoff = 0.0
         self._s_depth_tracked = 0.0
+        self._last_support_width_m = 0.0
+        self._contact_establishment = False
         self._desired = np.zeros(N_CHANNELS, dtype=np.float64)
         self._pending_live_identity: np.ndarray | None = None
         self._gate_penalty = {name: 1.0 for name in CONSTRAINT_ROW_NAMES}
@@ -764,6 +792,13 @@ class V3LandingController:
 
     def _calibrate_handoff_pose(self, data: mujoco.MjData) -> None:
         self._q_handoff = np.array([data.qpos[a] for a in self._qadr], dtype=np.float64)
+        self._q_prep_ref = self._q_handoff.copy()
+        # Anchor the landing flexion family at the exact incoming landing pose:
+        # the handoff configuration is not on the standing family, and a
+        # standing-anchored depth table would command a deep squat reference
+        # against a leg that is not there.
+        self._q_stand, self._s_table, self._z_table = \
+            self._calibrate_flexion_family(data, base=self._q_handoff)
 
     def reset(self, data: mujoco.MjData) -> None:
         self._mtp_ledger = self.actuation.snapshot_state().mtp_ledger
@@ -784,10 +819,19 @@ class V3LandingController:
     # ------------------------------------------------------------------
     # equipment calibration (Plant geometry only)
     # ------------------------------------------------------------------
-    def _calibrate_flexion_family(self, data: mujoco.MjData
+    def _calibrate_flexion_family(self, data: mujoco.MjData,
+                                  base: np.ndarray | None = None
                                   ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Calibrated sagittal flexion family and its SYSTEM_COM depth table.
+
+        ``base`` is the family anchor pose.  The landing family is anchored at
+        the exact handoff pose (the incoming landing configuration is not on the
+        standing family), so ``_s_from_z`` measures additional flexion from the
+        handoff configuration and the posture reference tracks the actual leg.
+        """
         scratch = self._calibration_data
-        q_stand = np.zeros(N_CHANNELS, dtype=np.float64)
+        q_stand = (np.zeros(N_CHANNELS, dtype=np.float64) if base is None
+                   else np.asarray(base, dtype=np.float64).copy())
         ankle = C.V3_JOINT_RANGES_RAD["left_ankle"][1]
         knee = C.V3_JOINT_RANGES_RAD["left_knee"][1]
         hip = C.V3_JOINT_RANGES_RAD["left_hip"][1]
@@ -804,6 +848,15 @@ class V3LandingController:
             scratch.qpos[self.plant.idx.qadr["root_tx"]] = x_stand
             mujoco.mj_forward(self.plant.model, scratch)
             z_table[i] = float(M.system_com_state(self.plant, scratch).com_world_m[2])
+        # The depth table must be strictly decreasing in s for the inverse map
+        # to be well defined: a small flexion offset can momentarily raise the
+        # SYSTEM_COM (foot/ankle geometry), so the running minimum is the
+        # declared depth of each flexion level and the flat leading region is
+        # compacted away.
+        z_table = np.minimum.accumulate(z_table)
+        keep = np.concatenate(([True], np.diff(z_table) < 0.0))
+        s_table = s_table[keep]
+        z_table = z_table[keep]
         return q_stand, s_table, z_table
 
     def _s_from_z(self, z: float) -> float:
@@ -822,6 +875,7 @@ class V3LandingController:
         if target == self.phase:
             return
         allowed = {
+            V3LandingPhase.PRE_TOUCHDOWN: (V3LandingPhase.IMPACT_ABSORPTION,),
             V3LandingPhase.LANDING_WAIT: (V3LandingPhase.IMPACT_ABSORPTION,),
             V3LandingPhase.IMPACT_ABSORPTION: (V3LandingPhase.LANDING_CAPTURE,),
             V3LandingPhase.LANDING_CAPTURE: (V3LandingPhase.E10_CONFIRMED,),
@@ -846,9 +900,10 @@ class V3LandingController:
     def _update_phase(self, frame: M.V3NativeFrame) -> None:
         if self._first_contact_time_s is None and frame.legal_plantar_active > 0:
             self._first_contact_time_s = float(frame.time_s)
-        if self.phase == V3LandingPhase.LANDING_WAIT:
+        if self.phase in (V3LandingPhase.PRE_TOUCHDOWN, V3LandingPhase.LANDING_WAIT):
             if frame.legal_plantar_active > 0:
-                self._transition(V3LandingPhase.IMPACT_ABSORPTION, "FIRST_LEGAL_POST_FLIGHT_CONTACT")
+                self._transition(V3LandingPhase.IMPACT_ABSORPTION,
+                                 "FIRST_LEGAL_POST_FLIGHT_CONTACT")
         bilateral = self._bilateral_loaded(frame)
         if self.phase == V3LandingPhase.IMPACT_ABSORPTION and bilateral:
             self._bilateral_onset_time_s = float(frame.time_s)
@@ -864,6 +919,104 @@ class V3LandingController:
                     self._transition(V3LandingPhase.E10_CONFIRMED, "SUSTAINED_WHOLE_BODY_E10_PREDICATE")
             else:
                 self._sustain_start_time_s = None
+
+    # ------------------------------------------------------------------
+    # post-apex touchdown preparation (flight LANDING_PREP window)
+    # ------------------------------------------------------------------
+    def _prep_desired(self, data: mujoco.MjData) -> np.ndarray:
+        """Bounded causal posture law for the post-apex preparation window.
+
+        There is no ground contact in this window, so the law is a declared
+        joint-space posture move along the calibrated flexion family from the
+        exact handoff pose with the frozen structural-ROM guard; it never uses
+        the ground-force map and never commands contact.
+        """
+        q = np.array([data.qpos[a] for a in self._qadr], dtype=np.float64)
+        qdot = np.array([data.qvel[d] for d in self._dof], dtype=np.float64)
+        kp = np.asarray(self.config.joint_kp, dtype=np.float64).copy()
+        kd = np.asarray(self.config.joint_kd, dtype=np.float64).copy()
+        kp[0] = self.config.trunk_posture_kp
+        kd[0] = self.config.trunk_posture_kd
+        kp = kp * float(self.config.prep_position_gain_scale)
+        kd = kd * float(self.config.prep_damping_gain_scale)
+        tau = (np.array(data.qfrc_bias[self._dof], dtype=np.float64)
+               - kp * (q - self._q_prep_ref) - kd * qdot)
+        tau = self._rom_guard(q, qdot, tau)
+        cap = float(self.config.prep_moment_scale) * MOMENT_CEILING_NM
+        return np.clip(tau, -cap, cap)
+
+    def _prep_target(self, z: float) -> np.ndarray:
+        """Declared touchdown-preparation reference from the exact handoff pose.
+
+        The reference is the handoff pose plus the declared flexion offset along
+        the sagittal flexion direction, with an additional declared ankle offset
+        for dorsiflexion ROM reserve at touchdown.  The reference is reached
+        through the bounded prep rate, never as a snap.
+        """
+        del z  # the prep reference is a declared offset from the exact handoff pose
+        q_ref = (self._q_handoff
+                 + _FLEXION_DIRECTION * float(self.config.prep_flexion_target_rad))
+        q_ref[5] += float(self.config.prep_ankle_offset_rad)
+        q_ref[6] += float(self.config.prep_ankle_offset_rad)
+        return q_ref
+
+    def _prep_update(self, *, frame: M.V3NativeFrame, data: mujoco.MjData) -> V3LandingStep:
+        dt = self._dt
+        target = self._prep_target(float(frame.com_world_m[2]))
+        rates = np.full(N_CHANNELS, float(self.config.prep_posture_rate_rad_s),
+                        dtype=np.float64)
+        rates[5] = rates[6] = float(self.config.prep_ankle_rate_rad_s)
+        self._q_prep_ref = self._q_prep_ref + np.clip(
+            target - self._q_prep_ref, -rates * dt, rates * dt)
+        desired = self._prep_desired(data)
+        base = self.engine.capture_state(data, sample_index=int(frame.index),
+                                         time_s=float(frame.time_s),
+                                         authority=self.actuation)
+        # The preparation law is a causal feedback law recomputed and
+        # revalidated at every native sample: the validated interval is exactly
+        # the one native step that executes.  Holding a free-flight posture
+        # action for a whole control cell excites a discrete limit cycle in the
+        # low-inertia distal chain.
+        outcome = self.engine.evaluate(base, desired, native_steps=1,
+                                       phase=self.phase.value)
+        failures = self._hard_gate_failures(
+            outcome, bilateral_established=False, e10_sustain_active=False,
+            prior_support_free_run=int(self._consecutive_support_free),
+            enforce_support=False)
+        fallback = False
+        fallback_reason = ""
+        failed_gate = ""
+        if failures:
+            fallback = True
+            fallback_reason = "PREP_ACTION_REJECTED:" + ",".join(failures)
+            desired = np.asarray(self.actuation.previous_applied, dtype=np.float64)
+            outcome = self.engine.evaluate(base, desired, native_steps=1,
+                                           phase=self.phase.value)
+            fallback_failures = self._hard_gate_failures(
+                outcome, bilateral_established=False, e10_sustain_active=False,
+                prior_support_free_run=int(self._consecutive_support_free),
+                enforce_support=False)
+            if fallback_failures:
+                self._fault("PREP_FALLBACK_FAILS_HARD_SAFETY:"
+                            + ",".join(fallback_failures))
+            failed_gate = failures[0]
+        self._desired = np.asarray(desired, dtype=np.float64).copy()
+        applied, record, ledger = self._apply_live(self._desired, data)
+        self._mtp_ledger = ledger
+        return V3LandingStep(
+            index=int(frame.index), time_s=float(frame.time_s), phase=self.phase.value,
+            previous_phase=self._previous_phase.value,
+            transition_reason=self._transition_reason, control_update=True,
+            proposed_desired_nm=np.asarray(desired).copy(),
+            validated_desired_nm=np.asarray(desired).copy(),
+            applied_nm=np.asarray(applied).copy(),
+            fallback=bool(fallback), fallback_reason=fallback_reason,
+            failed_gate=failed_gate, trust_region_level=0,
+            trust_region_nm=np.zeros(len(CONTROL_COORDINATES)),
+            linear_prediction_max_residual=0.0,
+            validated_branch_state_sha256=outcome.terminal_state_sha256,
+            live_branch_identity=None, derivatives=(), constraints=(),
+            outcome=outcome, actuation=record)
 
     # ------------------------------------------------------------------
     # baseline desired moment (causal virtual model + posture)
@@ -931,16 +1084,22 @@ class V3LandingController:
         hy = centroidal_hy_kg_m2_s(self.plant, data)
         a_z = float(np.clip(-vz / config.t_stop_s, 0.0, config.a_z_max_m_s2))
         fz_stop_demand = max(M.SYSTEM_MASS_KG * (M.GRAVITY_M_S2 + a_z), 0.0)
-        # The stopping-time demand is the reference, but the commanded ground
-        # force may only grow by a declared amount per control interval above
-        # the currently measured floor force.  A step demand (2.5 BW at a
-        # contact carrying 0.4 BW) would be converted by the instantaneous
-        # force map into a knee-extension demand larger than the actual load,
-        # extending the leg and unloading the foot; the ramp keeps the leg in
-        # compression so absorption emerges instead of a bounce.
-        fz_measured = max(float(frame.total_floor_force_world_n[2]), 0.0)
-        fz_ramp = (config.fz_reference_ramp_bw_per_interval * C.V3_SYSTEM_WEIGHT_N)
-        fz_total = float(min(fz_stop_demand, fz_measured + fz_ramp))
+        # Declared physical-time force-reference ramp from physical first contact.
+        # The demand is not throttled by the measured contact force: coupling it
+        # to the measured force deadlocks the capture (a contact that is not yet
+        # loaded can never ask for the load that would arrest the body).  The
+        # ramp starts at the current body weight and reaches the stopping-time
+        # demand within the declared ramp time; exact branch validation and the
+        # frozen penetration/ROM/support gates decide every executed action.
+        if self._first_contact_time_s is None:
+            ramp_fraction = 0.0
+        else:
+            elapsed = float(frame.time_s) - float(self._first_contact_time_s)
+            ramp_fraction = float(np.clip(
+                elapsed / max(float(config.fz_reference_ramp_s), 1.0e-9), 0.0, 1.0))
+        fz_floor = M.SYSTEM_MASS_KG * M.GRAVITY_M_S2
+        fz_total = float(min(fz_stop_demand,
+                             fz_floor + ramp_fraction * max(fz_stop_demand - fz_floor, 0.0)))
         x_cop_des = x + (hy / config.t_capture_h_s
                          + z * M.SYSTEM_MASS_KG * vx / config.t_capture_x_s) / fz_total
         interval = self._support_interval(snapshot)
@@ -958,36 +1117,23 @@ class V3LandingController:
         if hull.evaluable and hull.vertices_xy:
             xs = [v[0] for v in hull.vertices_xy]
             support_width = float(max(xs) - min(xs))
+        # Stage A (legal foot-roll/contact establishment): a narrow (toe-only)
+        # support keeps the full ground-force map.  The CoP request is clipped
+        # to the actual support hull above, and the map's ankle/MTP terms are
+        # exactly the plantarflexion moment that holds the toe on the floor
+        # while the proximal chain loads.  The support width is retained as
+        # declared diagnostic evidence only.
+        self._last_support_width_m = support_width
         toe_phase = support_width < config.toe_phase_support_width_m
-        channel_scale = np.ones(N_CHANNELS, dtype=np.float64)
-        posture_scale = np.ones(N_CHANNELS, dtype=np.float64)
-        if toe_phase:
-            # Toe-only support: the ankle is owned by the contact reflex below
-            # (the raw CoP-to-ankle arm would otherwise demand a heel-holding
-            # plantarflexion); the knee/hip/trunk force map stays active with
-            # the ramped demand so the leg absorbs while the toe stays loaded.
-            channel_scale = channel_scale * float(config.toe_phase_ground_map_scale)
-            channel_scale[5] = channel_scale[6] = 0.0
-            posture_scale[5] = posture_scale[6] = 0.0
-        tau = self._virtual_joint_moments(data, fz_total, fx_total, x_cop, channel_scale)
+        self._contact_establishment = bool(toe_phase)
+        tau = self._virtual_joint_moments(data, fz_total, fx_total, x_cop)
         q_ref = self._posture_reference(z)
         kp = np.asarray(config.joint_kp, dtype=np.float64).copy()
         kd = np.asarray(config.joint_kd, dtype=np.float64).copy()
         kp[0] = config.trunk_posture_kp
         kd[0] = config.trunk_posture_kd
-        tau = tau - (kp * posture_scale) * (q - q_ref) - (kd * posture_scale) * qdot
-        guard_scale = posture_scale.copy()
-        if toe_phase:
-            guard_scale[5] = guard_scale[6] = 0.0
-        tau = self._rom_guard(q, qdot, tau, guard_scale)
-        if toe_phase:
-            fz_ref = float(config.toe_phase_contact_fz_ref_n)
-            gain = float(config.toe_phase_contact_gain_nm_per_n)
-            ankle_cap = float(config.toe_phase_contact_cap_nm)
-            tau[5] = float(np.clip(-gain * (fz_ref - float(frame.left_foot_force_world_n[2])),
-                                   -ankle_cap, ankle_cap))
-            tau[6] = float(np.clip(-gain * (fz_ref - float(frame.right_foot_force_world_n[2])),
-                                   -ankle_cap, ankle_cap))
+        tau = tau - kp * (q - q_ref) - kd * qdot
+        tau = self._rom_guard(q, qdot, tau)
         cap = DESIRED_MOMENT_FRACTION_CAP * MOMENT_CEILING_NM
         return np.clip(tau, -cap, cap)
 
@@ -1129,7 +1275,8 @@ class V3LandingController:
     # ------------------------------------------------------------------
     def _hard_gate_failures(self, outcome: V3BranchOutcome, *, bilateral_established: bool,
                             e10_sustain_active: bool = False,
-                            prior_support_free_run: int = 0) -> list[str]:
+                            prior_support_free_run: int = 0,
+                            enforce_support: bool = True) -> list[str]:
         failures: list[str] = []
         if not outcome.finite:
             failures.append("NONFINITE_STATE")
@@ -1145,11 +1292,12 @@ class V3LandingController:
             failures.append("HARD_POWER")
         if not outcome.mtp_authority_ok:
             failures.append("MTP_AUTHORITY")
-        if outcome.max_support_free_run >= SUPPORT_FREE_RUN_LIMIT:
-            failures.append("SUPPORT_RETENTION")
-        if prior_support_free_run + outcome.terminal_support_free_run >= \
-                SUPPORT_FREE_RUN_CONTROL_LIMIT:
-            failures.append("SUPPORT_RETENTION")
+        if enforce_support:
+            if outcome.max_support_free_run >= SUPPORT_FREE_RUN_LIMIT:
+                failures.append("SUPPORT_RETENTION")
+            if prior_support_free_run + outcome.terminal_support_free_run >= \
+                    SUPPORT_FREE_RUN_CONTROL_LIMIT:
+                failures.append("SUPPORT_RETENTION")
         if bilateral_established and e10_sustain_active:
             # Once the E10 sustain run is active the bilateral loaded predicate
             # must hold at every native sample of the executed interval.
@@ -1198,6 +1346,8 @@ class V3LandingController:
         bilateral = self.phase in (V3LandingPhase.LANDING_CAPTURE, V3LandingPhase.E10_CONFIRMED)
         steps = int(self.config.control_interval_native_steps)
         control_update = ((int(frame.index) - int(self._handoff_index)) % steps == 0)
+        if self.phase == V3LandingPhase.PRE_TOUCHDOWN:
+            return self._prep_update(frame=frame, data=data)
         if control_update:
             return self._control_update(data=data, frame=frame, snapshot=snapshot,
                                         bilateral=bilateral)
@@ -1425,8 +1575,19 @@ class V3LandingController:
             "objective_weights": dict(OBJECTIVE_WEIGHTS),
             "penetration_limit_m": PENETRATION_LIMIT_M,
             "support_free_run_limit": SUPPORT_FREE_RUN_LIMIT,
+            "support_free_run_control_limit_s": SUPPORT_FREE_RUN_CONTROL_LIMIT_S,
             "f_thr_n": F_THR_N,
             "phase_order": [phase.value for phase in V3LandingPhase],
+            "post_apex_prep": {
+                "phase": V3LandingPhase.PRE_TOUCHDOWN.value,
+                "flexion_target_rad": self.config.prep_flexion_target_rad,
+                "ankle_offset_rad": self.config.prep_ankle_offset_rad,
+                "posture_rate_rad_s": self.config.prep_posture_rate_rad_s,
+                "ankle_rate_rad_s": self.config.prep_ankle_rate_rad_s,
+                "moment_scale": self.config.prep_moment_scale,
+                "law": "CAUSAL_POSTURE_PD_FROM_HANDOFF_POSE_WITH_FROZEN_ROM_GUARD",
+                "contact": "NO_CONTACT_COMMAND_NO_GROUND_FORCE_MAP",
+            },
         }
 
 
