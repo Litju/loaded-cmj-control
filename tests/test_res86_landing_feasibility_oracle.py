@@ -63,8 +63,14 @@ def test_branch_certificates_match_sealed_identity(branch):
     assert branch.e8.state_sha256 == E8_STATE_SHA256
     assert branch.pre_touchdown.state_vector.shape == branch.e8.state_vector.shape
     assert branch.e8.actuation.previous_applied_nm
+    # The flight phase gate zeroes the applied active MTP moment transiently; it
+    # must not latch the energy ledger, so the landing continues from the
+    # unchanged cumulative budget.
     for entry in branch.pre_touchdown.actuation.mtp_ledger:
-        assert entry.active_gated is True  # flight phase gated the active MTP channel
+        assert entry.active_gated is False
+        assert entry.late_phase is True
+        assert entry.active_positive_work_j > 0.0
+        assert entry.active_positive_work_j < 0.5 * 25.0
 
 
 def test_profile_mapping_is_piecewise_linear_and_symmetric(oracle_legal):

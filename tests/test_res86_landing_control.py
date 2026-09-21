@@ -33,6 +33,8 @@ if str(SRC) not in sys.path:
 from loaded_cmj.v3 import measurement as M  # noqa: E402
 from loaded_cmj.v3.actuation import (  # noqa: E402
     N_CHANNELS,
+    MTP_ACTIVE_POSITIVE_WORK_BUDGET_J,
+    MTP_LATE_ACTIVE_FRACTION,
     V3ActuationAuthority,
     V3ActuationState,
     V3MtpLedgerEntry,
@@ -96,6 +98,71 @@ def test_control_interval_is_five_native_steps():
 # ---------------------------------------------------------------------------
 # actuation history snapshot / restore
 # ---------------------------------------------------------------------------
+def test_mtp_phase_gate_is_transient_and_ledger_stays_cumulative():
+    """A flight phase gate must not permanently disable the landing MTP.
+
+    The flight gate zeroes the applied active MTP moment per sample, but the
+    cumulative energy ledger is untouched and the remaining late budget is
+    still spendable once legal plantar support is re-established.  Only an
+    exhausted energy budget latches the channel (AEI-1d).
+    """
+    authority = V3ActuationAuthority(0.002)
+    command = np.zeros(N_CHANNELS)
+    command[7] = command[8] = 20.0
+    qdot = np.zeros(N_CHANNELS)
+    qdot[7] = qdot[8] = 5.0
+    passive = (0.0, 0.0)
+    ledger = (V3MtpLedgerEntry(), V3MtpLedgerEntry())
+    # supported pre-flight work
+    for _ in range(10):
+        applied, _, ledger = authority.apply(
+            command, qdot, phase="BRAKING", mtp_active_allowed=True,
+            mtp_passive_moment_nm=passive, mtp_ledger=ledger)
+    spent_before_flight = ledger[0].active_positive_work_j
+    assert spent_before_flight > 0.0
+    previous_applied = authority.previous_applied
+    # flight: phase-gated for many samples
+    for _ in range(40):
+        applied, record, ledger = authority.apply(
+            command, qdot, phase="FLIGHT", mtp_active_allowed=(False, False),
+            mtp_passive_moment_nm=passive, mtp_ledger=ledger)
+        assert applied[7] == 0.0 and applied[8] == 0.0
+        assert record.mtp_gated == (True, True)
+        assert record.saturation_stage[7] in ("mtp_phase_gate",
+                                              "safety_override_mtp_phase_gate")
+    assert ledger[0].active_gated is False and ledger[1].active_gated is False
+    assert ledger[0].active_positive_work_j == spent_before_flight
+    # the applied active MTP moment is exactly zero while the phase gate is on,
+    # so only the non-MTP torque-rate history is unchanged
+    assert np.array_equal(authority.previous_applied[:7], previous_applied[:7])
+    assert authority.previous_applied[7] == 0.0 and authority.previous_applied[8] == 0.0
+    # legal landing support: the same cumulative ledger may still spend budget
+    applied, record, ledger = authority.apply(
+        command, qdot, phase="IMPACT_ABSORPTION", mtp_active_allowed=(True, True),
+        mtp_passive_moment_nm=passive, mtp_ledger=ledger)
+    assert applied[7] != 0.0 and applied[8] != 0.0
+    assert record.mtp_gated == (False, False)
+    assert ledger[0].active_positive_work_j > spent_before_flight
+    # the late active budget is a fraction of the sealed 25 J budget and the
+    # cumulative spend never exceeds it
+    late_budget = MTP_ACTIVE_POSITIVE_WORK_BUDGET_J * MTP_LATE_ACTIVE_FRACTION
+    assert ledger[0].active_positive_work_j <= late_budget + 1.0e-9
+
+    # energy exhaustion is the only latch: drive a fresh authority past budget
+    exhausted = V3ActuationAuthority(0.002)
+    ledger = (V3MtpLedgerEntry(), V3MtpLedgerEntry())
+    big = np.zeros(N_CHANNELS)
+    big[7] = big[8] = 45.0
+    fast = np.zeros(N_CHANNELS)
+    fast[7] = fast[8] = 10.0
+    for _ in range(2000):
+        _, _, ledger = exhausted.apply(
+            big, fast, phase="IMPACT_ABSORPTION", mtp_active_allowed=True,
+            mtp_passive_moment_nm=passive, mtp_ledger=ledger)
+    assert ledger[0].active_gated is True and ledger[1].active_gated is True
+    assert ledger[0].active_positive_work_j <= late_budget + 1.0e-9
+
+
 def test_actuation_snapshot_restore_preserves_history():
     authority = V3ActuationAuthority(0.002)
     desired = np.array([10.0, -20.0, -20.0, -30.0, -30.0, 5.0, 5.0, 1.0, 1.0])

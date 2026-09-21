@@ -390,6 +390,12 @@ class V3ActuationAuthority:
             mtp_exhausted[foot] = bool(remaining_active <= WORK_TOLERANCE_J
                                        or remaining_total <= WORK_TOLERANCE_J)
             if not allowed_pair[foot]:
+                # Transient phase gate: the active MTP channel is exactly zero at
+                # this sample and the event is reported per sample.  It never
+                # latches the energy ledger (only an exhausted budget does,
+                # AEI-1d), so a later supported phase continues from the
+                # unchanged cumulative ledger and may still spend the remaining
+                # budget.
                 mtp_cap_nm[idx] = 0.0
                 mtp_cap_reason[idx] = "mtp_phase_gate"
                 gated[foot] = True
@@ -476,7 +482,10 @@ class V3ActuationAuthority:
             ledger[foot] = V3MtpLedgerEntry(
                 active_positive_work_j=entry.active_positive_work_j + max(active_power, 0.0) * dt,
                 total_positive_work_j=entry.total_positive_work_j + max(total_power, 0.0) * dt,
-                active_gated=bool(entry.active_gated or gated[foot] or mtp_exhausted[foot]),
+                # The ledger latch is the *energy* gate only (AEI-1d): a phase
+                # gate is a per-sample transient and never permanently disables
+                # the active MTP channel downstream.
+                active_gated=bool(entry.active_gated or mtp_exhausted[foot]),
                 late_phase=late_phase,
                 total_budget_exceeded_by_passive=bool(total_exceeded_by_passive),
             )

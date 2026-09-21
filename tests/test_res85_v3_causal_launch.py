@@ -371,11 +371,21 @@ def test_authority_rejects_malformed_commands():
 def test_authority_mtp_phase_gate_zeroes_active_mtp():
     authority = V3ActuationAuthority(M.NATIVE_DT_S)
     ledger = (V3MtpLedgerEntry(), V3MtpLedgerEntry())
-    applied, record, _ = authority.apply(
+    applied, record, updated = authority.apply(
         np.full(N_CHANNELS, 45.0), np.zeros(N_CHANNELS), phase="FLIGHT",
         mtp_active_allowed=False, mtp_passive_moment_nm=(0.0, 0.0), mtp_ledger=ledger)
     assert applied[7] == 0.0 and applied[8] == 0.0
     assert record.saturation_stage[7] == "mtp_phase_gate"
+    # The phase gate is transient: it is reported per sample and never latches
+    # the energy ledger, so a later supported phase can still use the budget.
+    assert record.mtp_gated == (True, True)
+    assert updated[0].active_gated is False and updated[1].active_gated is False
+    assert updated[0].active_positive_work_j == 0.0
+    supported, record, _ = authority.apply(
+        np.full(N_CHANNELS, 12.0), np.full(N_CHANNELS, 10.0), phase="BRAKING",
+        mtp_active_allowed=True, mtp_passive_moment_nm=(0.0, 0.0), mtp_ledger=updated)
+    assert supported[7] != 0.0 and supported[8] != 0.0
+    assert record.saturation_stage[7] != "mtp_phase_gate"
 
 
 def test_authority_mtp_budget_is_hard():

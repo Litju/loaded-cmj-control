@@ -275,6 +275,7 @@ class V3LaunchController:
         self._transition_reason = ""
         self._mtp_ledger: tuple[V3MtpLedgerEntry, V3MtpLedgerEntry] = (
             V3MtpLedgerEntry(), V3MtpLedgerEntry())
+        self._mtp_hold = [False, False]
 
         q0 = np.array([data.qpos[a] for a in self._qadr], dtype=np.float64)
         x_stand = float(M.system_com_state(self.plant, data).com_world_m[0])
@@ -777,8 +778,20 @@ class V3LaunchController:
                              if r.active_legal_plantar)
         right_supported = any(r.side == "right" for r in snapshot.records
                               if r.active_legal_plantar)
-        mtp_allowed = (self.phase in SUPPORTED_PHASES and left_supported,
-                       self.phase in SUPPORTED_PHASES and right_supported)
+        gate = (self.phase in SUPPORTED_PHASES and left_supported,
+                self.phase in SUPPORTED_PHASES and right_supported)
+        # RES-85 qualified launch MTP hold: the sealed launch evidence held the
+        # active MTP channel off for the remainder of the launch once its
+        # per-foot gate first fired.  That behavior is a property of the launch
+        # law and is reproduced here explicitly; it is never written into the
+        # shared actuation ledger.  The authority ledger latches only on energy
+        # exhaustion, so the cumulative RES-85 MTP work is preserved exactly and
+        # the RES-86 landing continues from it with a usable active MTP channel.
+        for foot in (0, 1):
+            if not gate[foot]:
+                self._mtp_hold[foot] = True
+        mtp_allowed = (gate[0] and not self._mtp_hold[0],
+                       gate[1] and not self._mtp_hold[1])
 
         applied, record, ledger = self.actuation.apply(
             desired, qdot, phase=self.phase.value, mtp_active_allowed=mtp_allowed,
@@ -854,6 +867,10 @@ class V3LaunchController:
                 "cop_hull_margin_m": COP_HULL_MARGIN_M,
                 "landing_prep_flexion": LANDING_PREP_FLEXION,
                 "structural_flexion_safety_rad": STRUCTURAL_FLEXION_SAFETY_RAD,
+                "mtp_qualified_launch_hold": (
+                    "PER_FOOT_ONCE_FIRST_GATE_FIRES; a launch-law hold that is "
+                    "never written into the shared actuation ledger, so the "
+                    "cumulative MTP budget survives into the RES-86 landing"),
             },
             "fault_mode": "FAIL_CLOSED_EXPLICIT_EXCEPTION",
             "scorer_private_memory": "NONE",
