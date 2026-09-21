@@ -101,11 +101,13 @@ PENETRATION_LIMIT_M = 0.010
 PENETRATION_SOLVE_MARGIN_M = 0.0
 ROM_SOLVE_MARGIN_RAD = 0.0
 SUPPORT_FREE_RUN_LIMIT = CONTROL_INTERVAL_NATIVE_STEPS
-# Control-margin limit on the *cumulative* consecutive support-free samples:
-# the qualification gate forbids a material reflight of >= D_BL (25 native
-# samples); the controller plans against a stricter declared budget so a chain
-# of short interval-local losses can never accumulate into a material reflight.
+# Control-margin limit on the *cumulative* consecutive support-free samples.
+# The qualification gate is the PHYSICAL-time material-reflight definition
+# (a legal-support-free interval of at least D_BL_S = 0.050 s); the controller
+# plans against a stricter declared physical-time budget so a chain of short
+# interval-local losses can never accumulate into a material reflight.
 SUPPORT_FREE_RUN_CONTROL_LIMIT = 16
+SUPPORT_FREE_RUN_CONTROL_LIMIT_S = SUPPORT_FREE_RUN_CONTROL_LIMIT * NATIVE_DT_S
 
 # Bounded landing ROM guard: the RES-85 guard structure with a declared
 # velocity ceiling and a bounded per-channel contribution, so a fast foot-slap

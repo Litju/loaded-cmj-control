@@ -79,7 +79,10 @@ from loaded_cmj.v3.landing_control import (  # noqa: E402
     CONTROL_COORDINATES,
     COORDINATE_CHANNELS,
 )
-from loaded_cmj.v3.landing_metrics import centroidal_hy_kg_m2_s  # noqa: E402
+from loaded_cmj.v3.landing_metrics import (  # noqa: E402
+    centroidal_hy_kg_m2_s,
+    material_reflight_intervals,
+)
 from loaded_cmj.v3.launch_runtime import settle_standing_stance  # noqa: E402
 from loaded_cmj.v3.plant import V3Plant  # noqa: E402
 
@@ -589,7 +592,9 @@ class LandingFeasibilityOracle:
         self.native_dt_s = float(native_dt_s)
         if abs(self.dt - self.native_dt_s) > 1e-12:
             raise RuntimeError(f"native dt {self.dt!r} != declared oracle dt {self.native_dt_s!r}")
-        # D_BL physical-time material-reflight interval count on this native grid.
+        # Diagnostic-only interval count at nominal dt; the material-reflight
+        # authority is the PHYSICAL elapsed time of a support-free interval
+        # (>= D_BL_S), never a sample count.
         self.material_reflight_samples = int(np.ceil(
             D_BL_S / self.dt - 1.0e-9)) if self.dt > 0 else 0
         self.data = self.plant.make_data()
@@ -631,6 +636,21 @@ class LandingFeasibilityOracle:
     # ------------------------------------------------------------------
     # profile parameterization
     # ------------------------------------------------------------------
+    def material_reflight_of(self, support_flags: Sequence[bool]) -> bool:
+        """Physical-time material reflight of a support sequence.
+
+        A support-free interval is material when its elapsed physical duration
+        reaches ``D_BL_S`` (the RES-82/84 convention ``t[last] - t[first]``),
+        never when a sample count reaches a nominal-dt-derived number.
+        """
+        flags = np.asarray(support_flags, dtype=bool)
+        intervals = material_reflight_intervals(
+            flags, 0,
+            sample_times_s=[self.branch.pre_touchdown.time_s + (j + 1) * self.dt
+                            for j in range(flags.size)],
+            min_duration_s=D_BL_S)
+        return bool(intervals)
+
     def knot_times(self, native_steps: int, n_knots: int) -> np.ndarray:
         horizon = native_steps * self.dt
         if n_knots < 2:
@@ -706,6 +726,7 @@ class LandingFeasibilityOracle:
         max_support_free_run = 0
         chatter = 0
         prev_support: bool | None = None
+        support_flags: list[bool] = []
         mode_sequence: list[tuple[tuple[str, str], ...]] = []
         toe_mode_escaped = False
         net_impulse = 0.0
@@ -782,6 +803,7 @@ class LandingFeasibilityOracle:
                         or entry.total_positive_work_j > MTP_TOTAL_POSITIVE_WORK_BUDGET_J + 1.0e-9):
                     mtp_ok = False
             support = current.legal_active_count > 0
+            support_flags.append(bool(support))
             if prev_support is not None and support != prev_support:
                 chatter += 1
             prev_support = support
@@ -825,7 +847,7 @@ class LandingFeasibilityOracle:
         orientation = M.orientation_state(self.plant, data)
         terminal_com_v = self._system_com_velocity(data)
         terminal_support = current.legal_active_count > 0
-        material_reflight = max_support_free_run >= self.material_reflight_samples
+        material_reflight = self.material_reflight_of(support_flags)
         result = BranchResult(
             profile=np.asarray(channel_values, dtype=np.float64).copy(),
             native_steps=int(native_steps),
@@ -1280,10 +1302,7 @@ class LandingFeasibilityOracle:
         match the fast-path evaluation; any mismatch fails closed.
         """
         from loaded_cmj.v3.active_set_capture import ActiveSetRecorder
-        from loaded_cmj.v3.landing_metrics import (
-            material_reflight_intervals,
-            max_penetration_m,
-        )
+        from loaded_cmj.v3.landing_metrics import max_penetration_m
 
         actions = np.asarray(actions, dtype=np.float64)
         if actions.shape != (native_steps, 9):

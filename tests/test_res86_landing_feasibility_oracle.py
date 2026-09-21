@@ -170,3 +170,30 @@ def test_hard_gate_catalog_and_cost_ordering(oracle_legal):
     assert "MAX_PENETRATION" in failures
     cost = oracle_legal.cost(result)
     assert cost > 0.0
+
+
+def test_material_reflight_is_physical_time_not_sample_count(oracle_legal):
+    """The oracle gate uses the D_BL physical duration, never a sample count."""
+    def flags(free_start: int, free_stop_inclusive: int, total: int) -> np.ndarray:
+        support = np.ones(total, dtype=bool)
+        support[free_start:free_stop_inclusive + 1] = False
+        return support
+
+    # 25 inclusive free samples = 24 intervals = 0.048 s -> not material
+    assert oracle_legal.material_reflight_of(flags(10, 34, 60)) is False
+    # 26 inclusive free samples = 25 intervals = 0.050 s -> material
+    assert oracle_legal.material_reflight_of(flags(10, 35, 61)) is True
+
+    # the same physical duration is material at a different native dt with a
+    # completely different sample count: 50 samples at 1 ms = 0.049 s is not,
+    # 51 samples at 1 ms = 0.050 s is.
+    from tools.res86.landing_contact_sensitivity import (
+        ContactRealization, build_realization)
+    fine_plant = build_realization(ContactRealization(
+        label="dt_0.001", dt_s=0.001, mu_slide=0.9, plantar_condim=4,
+        solref=(0.02, 1.0), solimp=(0.9, 0.95, 0.001, 0.5, 2.0),
+        declaration="RES84 timestep sensitivity domain"))
+    fine = LandingFeasibilityOracle(oracle_legal.branch, plant=fine_plant,
+                                    native_dt_s=0.001)
+    assert fine.material_reflight_of(flags(10, 59, 90)) is False
+    assert fine.material_reflight_of(flags(10, 60, 91)) is True
