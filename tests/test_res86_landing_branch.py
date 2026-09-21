@@ -204,8 +204,20 @@ def test_no_res83_res84_res85_regression(canonical):
     assert [p.value for p in PHASE_ORDER][-1] == "LANDING_PREP"
 
     sealed = compare_run_b_to_sealed(canonical)
-    assert sealed["status"] == "PASS", [c["array"] for c in sealed["checks"] if not c["match"]]
+    # The RES-85 qualified launch is preserved bit-exactly in its physics: the
+    # sealed state digests, the applied moment sequence and every derived
+    # trajectory array match.  The only declared difference is the MTP
+    # saturation-stage *label*: the shared authority now reports a transient
+    # phase gate as ``mtp_phase_gate`` instead of latching it as ``mtp_budget``,
+    # which is the RES-86 authority-bug correction.  No applied moment, state or
+    # event changes.
+    declared_label_arrays = {"saturation_stage", "saturation_stage_code"}
+    mismatches = [c["array"] for c in sealed["checks"] if not c["match"]]
+    assert set(mismatches) <= declared_label_arrays, mismatches
     assert sealed["array_count"] >= 60
+    applied = [c for c in sealed["checks"] if c["array"] == "applied_nm"]
+    assert applied and applied[0]["match"]
+    assert sealed["array_count"] - len(mismatches) >= 60
 
     events = canonical["episode"].events
     assert events["takeoff_occurrence"]["native_index"] == 612
