@@ -35,6 +35,7 @@ from loaded_cmj.v3.actuation import (  # noqa: E402
     N_CHANNELS,
     MTP_ACTIVE_POSITIVE_WORK_BUDGET_J,
     MTP_LATE_ACTIVE_FRACTION,
+    MTP_TOTAL_POSITIVE_WORK_BUDGET_J,
     V3ActuationAuthority,
     V3ActuationState,
     V3MtpLedgerEntry,
@@ -491,3 +492,45 @@ def test_e10_point_gate_values_present():
 def test_landing_phase_machine_names():
     assert [phase.value for phase in V3LandingPhase] == [
         "LANDING_WAIT", "IMPACT_ABSORPTION", "LANDING_CAPTURE", "E10_CONFIRMED"]
+
+
+def test_cumulative_mtp_ledger_survives_the_res86_handoff_exactly():
+    """The RES-86 landing continues the RES-85 MTP ledger with no reset.
+
+    The launch is replayed from the sealed RES-85 authority, the handoff
+    snapshot is restored onto a fresh authority (the RES-86 landing pattern)
+    and the per-foot cumulative active/total positive work is bit-identical.
+    A landing-supported command then spends from the *same* cumulative value
+    and never exceeds the frozen late-phase budgets.
+    """
+    from loaded_cmj.v3.landing_runtime import build_handoff_certificate
+
+    certificate, _events = build_handoff_certificate()
+    handoff_ledger = certificate.actuation.mtp_ledger
+    assert handoff_ledger[0].active_gated is False
+    assert handoff_ledger[1].active_gated is False
+    assert handoff_ledger[0].active_positive_work_j > 0.0
+    assert abs(handoff_ledger[0].active_positive_work_j
+               - handoff_ledger[1].active_positive_work_j) < 1.0e-12
+
+    restored = V3ActuationAuthority(0.002)
+    restored.restore_state(certificate.actuation)
+    assert restored.internal_mtp_ledger == handoff_ledger
+    assert restored.previous_applied.tolist() == list(
+        certificate.actuation.previous_applied_nm)
+
+    command = np.zeros(N_CHANNELS)
+    command[7] = command[8] = 20.0
+    qdot = np.zeros(N_CHANNELS)
+    qdot[7] = qdot[8] = 2.0
+    ledger = restored.internal_mtp_ledger
+    for _ in range(5):
+        applied, _record, ledger = restored.apply(
+            command, qdot, phase="IMPACT_ABSORPTION", mtp_active_allowed=(True, True),
+            mtp_passive_moment_nm=(0.0, 0.0), mtp_ledger=ledger)
+        assert applied[7] != 0.0 and applied[8] != 0.0
+    assert ledger[0].active_positive_work_j > handoff_ledger[0].active_positive_work_j
+    late_budget = MTP_ACTIVE_POSITIVE_WORK_BUDGET_J * MTP_LATE_ACTIVE_FRACTION
+    for entry in ledger:
+        assert entry.active_positive_work_j <= late_budget + 1.0e-9
+        assert entry.total_positive_work_j <= MTP_TOTAL_POSITIVE_WORK_BUDGET_J + 1.0e-9
