@@ -99,7 +99,10 @@ PENETRATION_LIMIT_M = 0.010
 PEAK_FZ_LIMIT_BW = 8.0
 BW_N = float(C.V3_SYSTEM_WEIGHT_N)
 V_ABS_TAIL_M_S = 0.05
-MATERIAL_REFLIGHT_SAMPLES = 25  # D_BL at nominal dt (physical-time authority, 0.050 s)
+MATERIAL_REFLIGHT_SAMPLES = 25  # diagnostic count at nominal dt; never the authority
+# Cache schema tag: bump whenever the branch certificate encoding or the
+# actuation-ledger semantics change, so a stale development cache is rejected.
+BRANCH_CACHE_VERSION = 2
 
 # Deterministic oracle search constants (declared, not tuned post hoc).
 DEFAULT_KNOTS = 7
@@ -123,12 +126,13 @@ PENALTY_NO_TERMINAL_SUPPORT = 5.0e4
 PENALTY_NONFINITE = 1.0e8
 PENALTY_TOE_MODE = 1.0e6  # toe-restricted class: leaving the toe mode is a hard rejection
 
-# Piecewise-linear constant knots for the four usable coordinates: the MTP
-# active channel is gated off by the frozen MTP ledger after flight (the
-# authority zeroes it), so it is not a decision variable; its desired value is
-# a fixed 0.0.
-ORACLE_COORDINATES: tuple[str, ...] = tuple(
-    name for name in CONTROL_COORDINATES if name != "mtp_pair")
+# Piecewise-linear knots for every independent sagittal control coordinate,
+# including the MTP pair: the shared actuation authority now latches its MTP
+# energy ledger only on energy exhaustion, so a transient flight/support gate
+# no longer removes the active MTP channel from the landing control space.  The
+# MTP remains bounded by its frozen moment/power ceilings and per-foot energy
+# budgets exactly like every other coordinate.
+ORACLE_COORDINATES: tuple[str, ...] = tuple(CONTROL_COORDINATES)
 N_ORACLE_COORDS = len(ORACLE_COORDINATES)
 COORDINATE_CEILING: tuple[float, ...] = tuple(
     min(float(MOMENT_CEILING_NM[channel]) for channel in COORDINATE_CHANNELS[name])
@@ -233,7 +237,7 @@ def _certificate_record(cert: BranchCertificate) -> dict[str, np.ndarray]:
 
 def _save_branch_cache(path: Path, branch: CanonicalBranch) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {}
+    payload = {"cache_version": np.array([BRANCH_CACHE_VERSION], dtype=np.int64)}
     for label, cert in (("pre", branch.pre_touchdown), ("e8", branch.e8)):
         for name, array in _certificate_record(cert).items():
             payload[f"{label}_{name}"] = array
@@ -243,6 +247,11 @@ def _save_branch_cache(path: Path, branch: CanonicalBranch) -> None:
 def _load_branch_cache(path: Path) -> CanonicalBranch | None:
     try:
         data = np.load(path, allow_pickle=True)
+        # A development cache is only accepted when it was written by the
+        # current cache schema; a stale ledger/gate encoding can never silently
+        # displace the current authority semantics.
+        if int(data["cache_version"][0]) != BRANCH_CACHE_VERSION:
+            return None
         certificates = {}
         for label, expected_sha in (("pre", PRE_TOUCHDOWN_STATE_SHA256),
                                     ("e8", E8_STATE_SHA256)):

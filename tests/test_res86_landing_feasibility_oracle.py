@@ -24,6 +24,7 @@ for _path in (str(TASK_ROOT), str(TASK_ROOT / "src")):
         sys.path.insert(0, _path)
 
 from loaded_cmj.v3.actuation import MOMENT_CEILING_NM  # noqa: E402
+from loaded_cmj.v3.landing_control import CONTROL_COORDINATES  # noqa: E402
 from tools.res86.landing_feasibility_oracle import (  # noqa: E402
     BW_N,
     E8_STATE_SHA256,
@@ -82,11 +83,14 @@ def test_profile_mapping_is_piecewise_linear_and_symmetric(oracle_legal):
     assert profile.shape == (4, 9)
     # bilateral channels of each pair carry the same value
     for _coordinate, channels in (("hip_pair", (1, 2)), ("knee_pair", (3, 4)),
-                                  ("ankle_pair", (5, 6))):
+                                  ("ankle_pair", (5, 6)), ("mtp_pair", (7, 8))):
         assert np.array_equal(profile[:, channels[0]], profile[:, channels[1]])
-    # the MTP channel is not a decision variable and stays zero
-    assert np.all(profile[:, 7] == 0.0)
-    assert np.all(profile[:, 8] == 0.0)
+    # the MTP pair is a decision variable: its knots reach channels 7 and 8
+    assert N_ORACLE_COORDS == len(CONTROL_COORDINATES)
+    assert np.any(profile[:, 7] != 0.0)
+    assert np.array_equal(profile[:, 7], profile[:, 8])
+    assert np.all(np.abs(profile[:, 7])
+                  <= MOMENT_CEILING_NM[7] + 1e-9)
     # piecewise-linear interpolation at the declared sample midpoints
     times = oracle_legal.knot_times(4, 3)
     sample_times = (np.arange(4, dtype=np.float64) + 0.5) * oracle_legal.dt

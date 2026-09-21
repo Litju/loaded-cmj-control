@@ -47,6 +47,7 @@ from loaded_cmj.v3.plant import V3Plant, model_xml  # noqa: E402
 from tools.res86.landing_feasibility_oracle import (  # noqa: E402
     BW_N,
     DEFAULT_KNOTS,
+    N_ORACLE_COORDS,
     BranchStabilizer,
     LandingFeasibilityOracle,
     NATIVE_DT_S,
@@ -204,15 +205,15 @@ def evaluate_realization(branch, realization: ContactRealization, actions: np.nd
             "admissible": result.admissible,
         }
     if search_budget > 0:
-        starts = [np.zeros((search_knots, 4), dtype=np.float64)]
+        starts = [np.zeros((search_knots, N_ORACLE_COORDS), dtype=np.float64)]
         if knots is not None:
             source_steps = 150  # nominal reference horizon
             profile = LandingFeasibilityOracle(branch).profile_from_knots(
                 knots, source_steps, knots.shape[0])
             times = np.linspace(0.0, native_steps * realization.dt_s, search_knots)
             source_times = (np.arange(source_steps) + 0.5) * NATIVE_DT_S
-            seed = np.zeros((search_knots, 4), dtype=np.float64)
-            coordinate_channel = (0, 1, 3, 5)  # trunk, hip pair, knee pair, ankle pair
+            seed = np.zeros((search_knots, N_ORACLE_COORDS), dtype=np.float64)
+            coordinate_channel = (0, 1, 3, 5, 7)  # trunk, hip, knee, ankle, mtp pairs
             for index, channel in enumerate(coordinate_channel):
                 seed[:, index] = np.interp(times, source_times, profile[:, channel])
             starts.append(seed)

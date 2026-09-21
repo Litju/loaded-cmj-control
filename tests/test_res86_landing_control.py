@@ -534,3 +534,24 @@ def test_cumulative_mtp_ledger_survives_the_res86_handoff_exactly():
     for entry in ledger:
         assert entry.active_positive_work_j <= late_budget + 1.0e-9
         assert entry.total_positive_work_j <= MTP_TOTAL_POSITIVE_WORK_BUDGET_J + 1.0e-9
+
+
+def test_landing_control_space_includes_the_active_mtp_coordinate():
+    """The landing control/feasibility space includes the active MTP pair.
+
+    The MTP coordinate is a declared decision variable and the shared authority
+    now permits a bounded active MTP moment while the foot is legally supported.
+    """
+    plant, data, authority = _flat_stance()
+    controller = V3LandingController(plant, data, config=V3LandingConfig(),
+                                     actuation=authority)
+    assert "mtp_pair" in CONTROL_COORDINATES
+    assert V3LandingConfig().include_mtp_coordinate is True
+    assert controller.config.coordinate_ceiling("mtp_pair") == 45.0
+    desired = np.zeros(N_CHANNELS)
+    desired[7] = desired[8] = 12.0
+    _applied, record, ledger = controller._apply_live(desired, data)
+    assert record.mtp_gated == (False, False)
+    assert record.mtp_active_applied_nm[0] != 0.0
+    assert record.mtp_active_applied_nm[1] != 0.0
+    assert ledger[0].active_gated is False and ledger[1].active_gated is False
