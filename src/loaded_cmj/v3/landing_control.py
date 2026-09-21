@@ -254,6 +254,16 @@ class V3LandingConfig:
     # excites a discrete limit cycle in the low-inertia distal chain.
     prep_position_gain_scale: float = 0.2
     prep_damping_gain_scale: float = 1.0
+    # Stage B (whole-body absorption): the posture reference adds a declared
+    # time-based flexion stroke from physical first contact so the knee/hip
+    # absorb while the ankle holds its frozen ROM reserve, instead of waiting
+    # for a SYSTEM_COM drop that only the absorption itself can produce.
+    absorption_flexion_rate_rad_s: float = 4.0
+    absorption_flexion_max_rad: float = 1.2
+    # Stage A roll control: while the legal contact is still being established
+    # (narrow support) the ankle carries an extra declared rate brake so the
+    # foot rolls onto the wider plantar contact instead of slamming flat.
+    contact_establishment_ankle_rate_brake_nms_per_rad: float = 40.0
 
     def coordinate_trust(self, coordinate: str) -> float:
         index = CONTROL_COORDINATES.index(coordinate)
@@ -783,6 +793,7 @@ class V3LandingController:
         self._s_depth_tracked = 0.0
         self._last_support_width_m = 0.0
         self._contact_establishment = False
+        self._time_s = 0.0
         self._desired = np.zeros(N_CHANNELS, dtype=np.float64)
         self._pending_live_identity: np.ndarray | None = None
         self._gate_penalty = {name: 1.0 for name in CONSTRAINT_ROW_NAMES}
@@ -865,6 +876,12 @@ class V3LandingController:
 
     def _posture_reference(self, z: float) -> np.ndarray:
         s = max(self._s_from_z(z), self._s_handoff)
+        if self._first_contact_time_s is not None:
+            elapsed = max(float(self._time_s) - float(self._first_contact_time_s), 0.0)
+            stroke = min(float(self.config.absorption_flexion_rate_rad_s) * elapsed,
+                         float(self.config.absorption_flexion_max_rad))
+            s = s + stroke
+        s = min(s, float(self._s_table[-1]))
         self._s_depth_tracked = max(self._s_depth_tracked, s)
         return self._q_handoff + _FLEXION_DIRECTION * (s - self._s_handoff)
 
@@ -897,9 +914,16 @@ class V3LandingController:
                     and float(frame.left_foot_force_world_n[2]) > F_THR_N
                     and float(frame.right_foot_force_world_n[2]) > F_THR_N)
 
-    def _update_phase(self, frame: M.V3NativeFrame) -> None:
+    def _update_phase(self, frame: M.V3NativeFrame, data: mujoco.MjData) -> None:
         if self._first_contact_time_s is None and frame.legal_plantar_active > 0:
             self._first_contact_time_s = float(frame.time_s)
+            # Re-anchor the landing flexion family at the actual touchdown pose:
+            # the post-apex preparation may have extended the leg, and a family
+            # anchored at the pre-preparation flight pose would command a deep
+            # squat reference against a leg that is not there.
+            self._calibrate_handoff_pose(data)
+            self._s_handoff = self._s_from_z(float(frame.com_world_m[2]))
+            self._s_depth_tracked = self._s_handoff
         if self.phase in (V3LandingPhase.PRE_TOUCHDOWN, V3LandingPhase.LANDING_WAIT):
             if frame.legal_plantar_active > 0:
                 self._transition(V3LandingPhase.IMPACT_ABSORPTION,
@@ -1133,6 +1157,10 @@ class V3LandingController:
         kp[0] = config.trunk_posture_kp
         kd[0] = config.trunk_posture_kd
         tau = tau - kp * (q - q_ref) - kd * qdot
+        if self._contact_establishment:
+            brake = float(self.config.contact_establishment_ankle_rate_brake_nms_per_rad)
+            tau[5] -= brake * qdot[5]
+            tau[6] -= brake * qdot[6]
         tau = self._rom_guard(q, qdot, tau)
         cap = DESIRED_MOMENT_FRACTION_CAP * MOMENT_CEILING_NM
         return np.clip(tau, -cap, cap)
@@ -1329,16 +1357,19 @@ class V3LandingController:
                data: mujoco.MjData) -> V3LandingStep:
         self._validate_frame(frame)
         self._step_index = int(frame.index)
+        self._time_s = float(frame.time_s)
         self._previous_phase = self.phase
         self._transition_reason = ""
         if self._handoff_index is None:
             self._handoff_index = int(frame.index)
             self._handoff_time_s = float(frame.time_s)
-            self._first_contact_time_s = float(frame.time_s)
             self._calibrate_handoff_pose(data)
             self._s_handoff = self._s_from_z(float(frame.com_world_m[2]))
             self._s_depth_tracked = self._s_handoff
-        self._update_phase(frame)
+            if frame.legal_plantar_active > 0:
+                # legacy E8 handoff: the trace already starts in contact
+                self._first_contact_time_s = float(frame.time_s)
+        self._update_phase(frame, data)
         if frame.legal_plantar_active > 0:
             self._consecutive_support_free = 0
         else:
