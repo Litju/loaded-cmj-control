@@ -569,9 +569,24 @@ def test_post_apex_prep_reference_is_bounded_and_family_anchored():
     target = controller._prep_target(z0)
     expected = q0 + np.asarray([0.0, 0.6, 0.6, 1.0, 1.0, 0.2, 0.2, 0.0, 0.0]) \
         * config.prep_flexion_target_rad
+    # the declared independent knee offset reaches the leg forward without
+    # changing the flexion family (default 0.0 keeps the frozen reference)
+    assert config.prep_knee_offset_rad == 0.0
+    expected[3] += config.prep_knee_offset_rad
+    expected[4] += config.prep_knee_offset_rad
     expected[5] += config.prep_ankle_offset_rad
     expected[6] += config.prep_ankle_offset_rad
     assert np.allclose(target, expected, rtol=0.0, atol=1.0e-12)
+    # a nonzero declared reach moves only the knee pair of the reference
+    reach_config = V3LandingConfig(prep_knee_offset_rad=-0.4)
+    reach_controller = V3LandingController(
+        plant, data, config=reach_config, actuation=authority,
+        start_phase=V3LandingPhase.PRE_TOUCHDOWN)
+    q0_reach = reach_controller._q_handoff.copy()
+    reach_target = reach_controller._prep_target(z0)
+    assert np.allclose(reach_target - q0_reach, target - q0
+                       + np.asarray([0.0, 0.0, 0.0, -0.4, -0.4, 0.0, 0.0, 0.0, 0.0]),
+                       rtol=0.0, atol=1.0e-12)
     # the landing flexion family is anchored at the handoff pose: at the
     # handoff depth the posture reference is exactly the handoff pose
     controller._s_handoff = controller._s_from_z(z0)

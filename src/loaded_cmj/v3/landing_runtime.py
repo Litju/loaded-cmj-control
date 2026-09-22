@@ -32,6 +32,15 @@ from loaded_cmj.v3.actuation import (
     V3ActuationState,
 )
 from loaded_cmj.v3.active_set_capture import ActiveSetRecorder, V3ActiveSetTables
+from loaded_cmj.v3.contact_realization import (
+    RES86_CANDIDATE_DECLARED_SOLREF,
+    RES86_CANDIDATE_REALIZED_SOLREF,
+    RES86_CONTACT_CANDIDATE_LABEL,
+    RES86_NOMINAL_REALIZED_SOLREF,
+    build_contact_realization_plant,
+    effective_floor_contacts,
+    verify_effective_contact_realization,
+)
 from loaded_cmj.v3.controller import (
     V3ControllerConfig,
     V3ControllerFault,
@@ -385,6 +394,7 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
                         capture_active_set: bool = False,
                         stop_after_e10_s: float | None = None,
                         upstream_prep: bool = True,
+                        contact_realization: str = "candidate",
                         ) -> V3LandingEpisode:
     """Run the canonical launch and the RES-86 landing controller.
 
@@ -393,36 +403,58 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
     owns the touchdown preparation and the whole landing.  With
     ``upstream_prep=False`` the legacy handoff at the E8 first-contact sample is
     preserved.
+
+    ``contact_realization`` selects the qualified RES-86 plantar contact
+    realization: ``"candidate"`` (the RES-86 solution-verification candidate,
+    realized plantar ``solref`` (0.015, 1.0)) or ``"nominal"`` (the RES-84
+    provisional baseline, realized (0.02, 1.0)).  The Plant topology, ``condim``,
+    ``solimp`` and friction are unchanged in both cases.
     """
-    plant = plant if plant is not None else V3Plant()
-    dt = float(plant.model.opt.timestep)
+    if contact_realization not in ("candidate", "nominal"):
+        raise V3LandingRuntimeError(
+            f"unknown contact realization {contact_realization!r}")
+    # The sealed RES-85 launch owns the standing settle and the flight phase;
+    # the RES-86 contact realization is a landing-phase realization only (it
+    # cannot act in flight).  Unless the caller supplies an explicit Plant, the
+    # launch is reproduced on the sealed nominal Plant and its exact integration
+    # state is transferred to the realization Plant at the flight handoff, so
+    # the sealed launch identity is preserved for every landing realization.
+    if plant is None:
+        declared = (RES86_CANDIDATE_DECLARED_SOLREF
+                    if contact_realization == "candidate" else None)
+        landing_plant = build_contact_realization_plant(declared)
+        launch_plant = V3Plant()
+    else:
+        landing_plant = launch_plant = plant
+    dt = float(landing_plant.model.opt.timestep)
     if abs(dt - M.NATIVE_DT_S) > 1e-12:
         raise V3LandingRuntimeError(f"native dt {dt!r} != {M.NATIVE_DT_S!r}")
-    data = plant.make_data()
     n_samples = int(round(horizon_s / dt))
     warnings: list[str] = []
     launch_events: dict[str, Any] = {}
     recorder: ActiveSetRecorder | None = None
-    authority: V3ActuationAuthority
+    handoff: V3HandoffCertificate
 
     if handoff_certificate is None:
+        launch_data = launch_plant.make_data()
         if upstream_prep:
-            launch, handoff, launch_events, recorder = _run_launch_to_post_apex(
-                plant, data, n_samples=n_samples,
+            _launch, handoff, launch_events, recorder = _run_launch_to_post_apex(
+                launch_plant, launch_data, n_samples=n_samples,
                 config=controller_config or V3ControllerConfig(dt_s=dt),
                 capture_active_set=capture_active_set)
         else:
-            launch, handoff, launch_events, recorder = _run_launch_to_handoff(
-                plant, data, n_samples=n_samples,
+            _launch, handoff, launch_events, recorder = _run_launch_to_handoff(
+                launch_plant, launch_data, n_samples=n_samples,
                 config=controller_config or V3ControllerConfig(dt_s=dt),
                 capture_active_set=capture_active_set)
-        authority = launch.actuation
     else:
         handoff = handoff_certificate
-        authority = _restore_handoff(plant, data, handoff)
-        if landing_actuation is not None:
-            landing_actuation.restore_state(handoff.actuation)
-            authority = landing_actuation
+    plant = landing_plant
+    data = plant.make_data()
+    authority = _restore_handoff(plant, data, handoff)
+    if landing_actuation is not None:
+        landing_actuation.restore_state(handoff.actuation)
+        authority = landing_actuation
     if upstream_prep and handoff.sample_index == POST_APEX_SAMPLE:
         if handoff.state_sha256 != POST_APEX_STATE_SHA256:
             warnings.append(f"POST_APEX_STATE_SHA256_DIFFERS:{handoff.state_sha256}")
@@ -571,7 +603,30 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
         events = evaluate_landing_trace(trace)
         events["controller_phase_final"] = landing.phase.value
         tables = recorder.finalize() if recorder is not None else None
+    expected_realized = (RES86_CANDIDATE_REALIZED_SOLREF
+                         if contact_realization == "candidate"
+                         else RES86_NOMINAL_REALIZED_SOLREF)
+    realization_verification = verify_effective_contact_realization(
+        plant, data, require_plantar=False, expected_solref=expected_realized)
     diagnostics = {
+        "contact_realization": contact_realization,
+        "contact_realization_label": (RES86_CONTACT_CANDIDATE_LABEL
+                                       if contact_realization == "candidate"
+                                       else "RES84_PROVISIONAL_NOMINAL"),
+        "contact_realization_declared_geom_solref": [
+            float(v) for v in (RES86_CANDIDATE_DECLARED_SOLREF
+                               if contact_realization == "candidate"
+                               else RES86_NOMINAL_REALIZED_SOLREF)],
+        "contact_realization_expected_realized_solref": [float(v)
+                                                         for v in expected_realized],
+        "contact_realization_verification": realization_verification,
+        "contact_realization_final_rows": [
+            {
+                "geom": row.other_geom, "side": row.side, "region": row.region,
+                "dim": row.dim, "solref": list(row.solref), "solimp": list(row.solimp),
+                "friction": list(row.friction), "includemargin_m": row.includemargin_m,
+            }
+            for row in effective_floor_contacts(plant, data) if row.is_plantar_floor],
         "handoff_sample": int(handoff.sample_index),
         "handoff_time_s": float(handoff.time_s),
         "handoff_state_sha256": handoff.state_sha256,
@@ -582,6 +637,8 @@ def run_landing_episode(*, horizon_s: float = DEFAULT_HORIZON_S,
         "pre_touchdown_state_sha256_expected": PRE_TOUCHDOWN_STATE_SHA256,
         "landing_samples": int(telemetry.index.shape[0]),
         "e10_confirmed_time_s": landing.e10_confirmed_time_s,
+        "e10_window_violated_time_s": landing.e10_window_violated_time_s,
+        "e10_window_violation_reason": landing.e10_window_violation_reason,
         "fallback_count": int(np.count_nonzero(telemetry.fallback)),
         "trust_region_shrinks": int(np.count_nonzero(telemetry.trust_region_level > 0)),
         "live_branch_identity_failures": int(sum(

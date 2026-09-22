@@ -78,6 +78,8 @@ from loaded_cmj.v3.landing_authority import D_BL_S, V3_STRUCTURAL_ROM_TOLERANCE_
 from loaded_cmj.v3.landing_control import (  # noqa: E402
     CONTROL_COORDINATES,
     COORDINATE_CHANNELS,
+    E10_POINT_LIMITS,
+    E10_WINDOW_LIMITS,
 )
 from loaded_cmj.v3.landing_metrics import (  # noqa: E402
     centroidal_hy_kg_m2_s,
@@ -128,6 +130,13 @@ PENALTY_REFLIGHT = 2.0e5
 PENALTY_NO_TERMINAL_SUPPORT = 5.0e4
 PENALTY_NONFINITE = 1.0e8
 PENALTY_TOE_MODE = 1.0e6  # toe-restricted class: leaving the toe mode is a hard rejection
+# E10-aware objective terms (declared; the E10 gates are never relaxed)
+PENALTY_NO_E10 = 2.0e5
+PENALTY_E10_POINT = 2.0e4
+PENALTY_E10_WINDOW = 2.0e4
+PENALTY_E10_LATENESS = 2.0e2
+PENALTY_E10_TAIL = 4.0e4
+E10_REACH_PROGRESS_CREDIT = 0.9
 
 # Piecewise-linear knots for every independent sagittal control coordinate,
 # including the MTP pair: the shared actuation authority now latches its MTP
@@ -350,6 +359,23 @@ class BranchResult:
     rom_excess_integral_rad_s: float = 0.0
     peak_fz_excess_integral_n_s: float = 0.0
     evaluation_index: int = 0
+    # E10-aware evaluation (declared authority semantics, controller-independent)
+    e10_aware: bool = False
+    e10_reached: bool = False
+    e10_offset: int | None = None
+    e10_time_s: float | None = None
+    e10_sustain_start_offset: int | None = None
+    e10_first_contact_offset: int | None = None
+    e10_point_values: dict | None = None
+    e10_window_values: dict | None = None
+    e10_point_gates_ok: bool | None = None
+    e10_window_gates_ok: bool | None = None
+    e10_point_exceedance: float = 0.0
+    e10_window_exceedance: float = 0.0
+    e10_loaded_max_run_s: float = 0.0
+    e10_sustain_max_run_s: float = 0.0
+    e10_sustain_progress: float = 0.0
+    e10_tail_min_abs_vz_m_s: float | None = None
 
     @property
     def terminal_state_sha256(self) -> str:
@@ -359,6 +385,14 @@ class BranchResult:
     @property
     def hard_gate_failures(self) -> list[str]:
         failures: list[str] = []
+        if self.e10_aware:
+            if not self.e10_reached:
+                failures.append("E10_NOT_REACHED")
+            else:
+                if self.e10_point_gates_ok is False:
+                    failures.append("E10_POINT_GATE")
+                if self.e10_window_gates_ok is False:
+                    failures.append("E10_WINDOW_GATE")
         if not self.finite:
             failures.append("NONFINITE_STATE")
         if self.prohibited_any:
@@ -492,6 +526,14 @@ class StructuredWitnessParameters:
     early_hold_bw: float
     early_hold_s: float
     roll_bias_scale: float = 0.0
+    # E10-aware angular-momentum feedback: the CoP request is shifted ahead of
+    # the COM by ``hy_cop_gain`` per unit positive centroidal angular momentum
+    # (a forward CoP creates the negative pitching torque that removes it), and
+    # the ankle bias carries an additional proportional angular-momentum term
+    # (positive = plantarflexion = forward CoP shift).  Both are declared action
+    # parameterization terms, never authority writes.
+    hy_cop_gain_m_per_kg_m2_s: float = 0.0
+    ankle_hy_gain_nm_per_kg_m2_s: float = 0.0
 
 
 STRUCTURED_PARAMETER_BOUNDS: tuple[tuple[float, float], ...] = (
@@ -505,6 +547,8 @@ STRUCTURED_PARAMETER_BOUNDS: tuple[tuple[float, float], ...] = (
     (0.0, 2.0),       # early_hold_bw
     (0.0, 0.10),      # early_hold_s
     (0.0, 1.0),       # roll_bias_scale
+    (-0.03, 0.03),    # hy_cop_gain_m_per_kg_m2_s
+    (-120.0, 120.0),  # ankle_hy_gain_nm_per_kg_m2_s
 )
 
 STRUCTURED_STARTS: tuple[StructuredWitnessParameters, ...] = (
@@ -513,6 +557,15 @@ STRUCTURED_STARTS: tuple[StructuredWitnessParameters, ...] = (
     StructuredWitnessParameters(0.12, 30.0, 7.0, 0.3, 0.0, 60.0, 60.0, 0.6, 0.02),
     StructuredWitnessParameters(0.35, 20.0, 6.0, 0.0, -20.0, -150.0, 0.0, 0.5, 0.06),
     StructuredWitnessParameters(0.20, 40.0, 8.0, 0.5, 20.0, 120.0, 60.0, 0.8, 0.03),
+    # E10-aware seeds: angular-momentum feedback shifts the CoP ahead of the
+    # COM (and adds plantarflexion) so the impact-created angular momentum is
+    # removed with a bounded, causal term instead of a posture excursion.
+    StructuredWitnessParameters(0.25, 10.0, 6.0, 0.0, 0.0, -60.0, 0.0, 0.3, 0.04,
+                                hy_cop_gain_m_per_kg_m2_s=0.01,
+                                ankle_hy_gain_nm_per_kg_m2_s=40.0),
+    StructuredWitnessParameters(0.20, 20.0, 7.0, 0.0, 0.0, 0.0, 60.0, 0.5, 0.02,
+                                hy_cop_gain_m_per_kg_m2_s=0.02,
+                                ankle_hy_gain_nm_per_kg_m2_s=80.0),
 )
 
 
@@ -565,6 +618,8 @@ def _structured_desired(oracle: LandingFeasibilityOracle, params: StructuredWitn
     else:
         x_cop = float(metrics.support_x_mean) + (com_x - float(metrics.support_x_mean)) \
             * float(params.cop_blend)
+    hy = oracle._hy_fast(data)
+    x_cop += float(params.hy_cop_gain_m_per_kg_m2_s) * float(hy)
     fx = float(np.clip(-0.5 * float(C.V3_SYSTEM_MASS_KG) * vx, -0.5 * fz_cmd, 0.5 * fz_cmd))
     tau = _virtual_model_moments(oracle, data, fz_cmd, fx, x_cop,
                                  bias_scale=bias_scale)
@@ -573,7 +628,8 @@ def _structured_desired(oracle: LandingFeasibilityOracle, params: StructuredWitn
     for channel in COORDINATE_CHANNELS["knee_pair"]:
         tau[channel] += float(params.knee_bias_nm)
     for channel in COORDINATE_CHANNELS["ankle_pair"]:
-        tau[channel] += float(params.ankle_bias_nm)
+        tau[channel] += (float(params.ankle_bias_nm)
+                         + float(params.ankle_hy_gain_nm_per_kg_m2_s) * float(hy))
     return np.clip(tau, -0.95 * MOMENT_CEILING_NM, 0.95 * MOMENT_CEILING_NM)
 
 
@@ -582,7 +638,8 @@ class LandingFeasibilityOracle:
 
     def __init__(self, branch: CanonicalBranch, *, class_name: str = "legal",
                  plant: V3Plant | None = None, native_dt_s: float = NATIVE_DT_S,
-                 objective: str = "arrest", penalty_scale: float = 1.0) -> None:
+                 objective: str = "arrest", penalty_scale: float = 1.0,
+                 e10_aware: bool = False) -> None:
         if class_name not in ("legal", "toe"):
             raise ValueError(f"unknown oracle class {class_name!r}")
         if objective not in ("arrest", "capture"):
@@ -591,6 +648,7 @@ class LandingFeasibilityOracle:
             raise ValueError("penalty_scale must be finite and >= 1")
         self.objective = objective
         self.penalty_scale = float(penalty_scale)
+        self.e10_aware = bool(e10_aware)
         self.branch = branch
         self.class_name = class_name
         self.plant = plant if plant is not None else V3Plant()
@@ -626,6 +684,7 @@ class LandingFeasibilityOracle:
                                 if V3_JOINT_RANGES_RAD[name] is not None]
         self._cf = np.zeros(6, dtype=np.float64)
         self._frame = np.zeros(9, dtype=np.float64)
+        self._hy_velocity = np.zeros(6, dtype=np.float64)
         self._rom_lo = np.asarray([
             -np.inf if V3_JOINT_RANGES_RAD[name] is None else float(V3_JOINT_RANGES_RAD[name][0])
             for name in CHANNELS], dtype=np.float64)
@@ -742,6 +801,7 @@ class LandingFeasibilityOracle:
         rom_excess_integral = 0.0
         peak_fz_excess_integral = 0.0
         terminated_early = False
+        e10_track: list[dict] = []
 
         current = self._fast_metrics(data)
         if record_actions or stabilizer is not None:
@@ -819,6 +879,25 @@ class LandingFeasibilityOracle:
             else:
                 support_free_run += 1
                 max_support_free_run = max(max_support_free_run, support_free_run)
+            if self.e10_aware:
+                com_now = (com_v if com_v is not None
+                           else self._system_com_velocity(data))
+                sample_orientation = M.orientation_state(self.plant, data)
+                e10_track.append({
+                    "offset": j + 1,
+                    "time_s": self.branch.pre_touchdown.time_s + (j + 1) * self.dt,
+                    "left_legal": bool(current.left_legal),
+                    "right_legal": bool(current.right_legal),
+                    "left_fz": float(current.left_fz),
+                    "right_fz": float(current.right_fz),
+                    "vx": float(com_now[0]),
+                    "vz": float(com_now[2]),
+                    "hy": float(self._hy_fast(data)),
+                    "root_pitch": float(sample_orientation.root_pitch_rad),
+                    "trunk_pitch": float(sample_orientation.trunk_absolute_pitch_rad),
+                    "root_rate": float(sample_orientation.root_pitch_rate_rad_s),
+                    "trunk_rate": float(sample_orientation.trunk_absolute_pitch_rate_rad_s),
+                })
             if self.class_name == "toe":
                 for _side, region in current.active_regions:
                     if region != "toe":
@@ -848,6 +927,7 @@ class LandingFeasibilityOracle:
                 terminated_early = True
                 break
 
+        e10 = (self._e10_summary(e10_track) if self.e10_aware else None)
         terminal_vector = np.zeros(self._state_size, dtype=np.float64)
         mujoco.mj_getState(model, data, terminal_vector,
                            mujoco.mjtState.mjSTATE_INTEGRATION)
@@ -897,6 +977,23 @@ class LandingFeasibilityOracle:
             rom_excess_integral_rad_s=float(rom_excess_integral),
             peak_fz_excess_integral_n_s=float(peak_fz_excess_integral),
             evaluation_index=int(evaluation_index),
+            e10_aware=bool(self.e10_aware),
+            e10_reached=bool(e10 is not None and e10.get("reached")),
+            e10_offset=None if e10 is None else e10.get("e10_offset"),
+            e10_time_s=None if e10 is None else e10.get("e10_time_s"),
+            e10_sustain_start_offset=None if e10 is None else e10.get("sustain_start_offset"),
+            e10_first_contact_offset=None if e10 is None else e10.get("first_contact_offset"),
+            e10_point_values=None if e10 is None else e10.get("point_values"),
+            e10_window_values=None if e10 is None else e10.get("window_values"),
+            e10_point_gates_ok=None if e10 is None else e10.get("point_gates_ok"),
+            e10_window_gates_ok=None if e10 is None else e10.get("window_gates_ok"),
+            e10_point_exceedance=0.0 if e10 is None else float(e10.get("point_exceedance", 0.0)),
+            e10_window_exceedance=0.0 if e10 is None else float(e10.get("window_exceedance", 0.0)),
+            e10_loaded_max_run_s=0.0 if e10 is None else float(e10.get("loaded_max_run_s", 0.0)),
+            e10_sustain_max_run_s=0.0 if e10 is None else float(e10.get("sustain_max_run_s", 0.0)),
+            e10_sustain_progress=0.0 if e10 is None else float(e10.get("sustain_progress", 0.0)),
+            e10_tail_min_abs_vz_m_s=(None if e10 is None
+                                     else e10.get("tail_min_abs_vz_m_s")),
         )
         self._evaluation_count = max(self._evaluation_count, int(evaluation_index) + 1)
         self._last_result = result
@@ -1003,6 +1100,188 @@ class LandingFeasibilityOracle:
         velocities = cvel[:, 3:] + np.cross(cvel[:, :3], xipos - reference)
         return (masses[:, None] * velocities).sum(axis=0) / float(C.V3_SYSTEM_MASS_KG)
 
+    def _hy_fast(self, data: mujoco.MjData) -> float:
+        """Whole-body centroidal Hy (world y), sealed per-body convention.
+
+        Reproduces :func:`loaded_cmj.v3.landing_metrics.centroidal_hy_kg_m2_s`
+        exactly (same body set, same ``mj_objectVelocity`` quantity, same
+        accumulation order), with one preallocated velocity buffer so the
+        E10-aware search stays tractable.
+        """
+        model = self.model
+        # Same accumulation as the sealed ``_mass_state`` so the value is
+        # bit-identical to ``centroidal_hy_kg_m2_s``.
+        body_ids = self._system_body_ids
+        masses = self._system_masses
+        center = (masses[:, None]
+                  * np.asarray(data.xipos[body_ids], dtype=np.float64)).sum(axis=0) \
+            / float(masses.sum())
+        vel = self._hy_velocity
+        h = np.zeros(3, dtype=np.float64)
+        for body_id in range(1, int(model.nbody)):
+            mujoco.mj_objectVelocity(model, data, mujoco.mjtObj.mjOBJ_BODY,
+                                     int(body_id), vel, 0)
+            rot = np.asarray(data.ximat[body_id], dtype=np.float64).reshape(3, 3)
+            inertia = np.diag(np.asarray(model.body_inertia[body_id],
+                                         dtype=np.float64))
+            h += (rot @ inertia @ rot.T) @ vel[:3]
+            h += np.cross(np.asarray(data.xipos[body_id], dtype=np.float64) - center,
+                          float(model.body_mass[body_id]) * vel[3:6])
+        return float(h[1])
+
+    def _e10_summary(self, track: list[dict]) -> dict:
+        """Controller-independent E10 evaluation of a tracked sample stream."""
+        first_contact = next((entry["offset"] for entry in track
+                              if entry["left_legal"] or entry["right_legal"]), None)
+        if first_contact is None:
+            return {"reached": False, "reason": "NO_LEGAL_CONTACT",
+                    "first_contact_offset": None,
+                    "sustain_max_run_s": 0.0, "loaded_max_run_s": 0.0,
+                    "sustain_progress": 0.0, "tail_min_abs_vz_m_s": None,
+                    "window_values": None, "window_gates": None,
+                    "window_gates_ok": False, "window_exceedance": 0.0,
+                    "point_exceedance": 0.0}
+        establishment = None
+        for entry in track:
+            if entry["offset"] < first_contact:
+                continue
+            if (entry["left_legal"] and entry["right_legal"]
+                    and entry["left_fz"] > F_THR_N and entry["right_fz"] > F_THR_N):
+                establishment = entry["offset"]
+                break
+        run_start: dict | None = None
+        e10_entry: dict | None = None
+        for entry in track:
+            if entry["offset"] < first_contact:
+                continue
+            predicate = (entry["left_legal"] and entry["right_legal"]
+                         and entry["left_fz"] > F_THR_N and entry["right_fz"] > F_THR_N
+                         and abs(entry["vz"]) < V_ABS_TAIL_M_S)
+            if not predicate:
+                run_start = None
+                continue
+            if run_start is None:
+                run_start = entry
+            if entry["time_s"] - run_start["time_s"] >= D_BL_S - 1.0e-12:
+                e10_entry = entry
+                break
+        # Longest continuous loaded runs from first contact.  The E10-aware
+        # objective uses the sustained-predicate progress as a gradient toward
+        # the D_BL dwell instead of a single discontinuous reach cliff.
+        loaded_start: dict | None = None
+        sustain_start: dict | None = None
+        loaded_max = 0.0
+        sustain_max = 0.0
+        for entry in track:
+            if entry["offset"] < first_contact:
+                continue
+            loaded = (entry["left_legal"] and entry["right_legal"]
+                      and entry["left_fz"] > F_THR_N and entry["right_fz"] > F_THR_N)
+            if loaded:
+                if loaded_start is None:
+                    loaded_start = entry
+                loaded_max = max(loaded_max, entry["time_s"] - loaded_start["time_s"])
+                if abs(entry["vz"]) < V_ABS_TAIL_M_S:
+                    if sustain_start is None:
+                        sustain_start = entry
+                    sustain_max = max(sustain_max, entry["time_s"] - sustain_start["time_s"])
+                else:
+                    sustain_start = None
+            else:
+                loaded_start = None
+                sustain_start = None
+        window = [entry for entry in track if entry["offset"] >= first_contact]
+        if e10_entry is not None:
+            window = [entry for entry in track
+                      if first_contact <= entry["offset"] <= e10_entry["offset"]]
+        window_values = {
+            "max_abs_com_vx_m_s": max(abs(entry["vx"]) for entry in window),
+            "max_abs_hy_kg_m2_s": max(abs(entry["hy"]) for entry in window),
+            "max_abs_root_pitch_rad": max(abs(entry["root_pitch"]) for entry in window),
+            "max_abs_trunk_pitch_rad": max(abs(entry["trunk_pitch"]) for entry in window),
+            "max_abs_root_pitch_rate_rad_s": max(abs(entry["root_rate"]) for entry in window),
+            "max_abs_trunk_pitch_rate_rad_s": max(abs(entry["trunk_rate"]) for entry in window),
+        }
+        window_gates = {
+            "max_abs_com_vx": window_values["max_abs_com_vx_m_s"] <= E10_WINDOW_LIMITS["com_vx"],
+            "max_abs_Hy": window_values["max_abs_hy_kg_m2_s"] <= E10_WINDOW_LIMITS["hy"],
+            "root_pitch_envelope": window_values["max_abs_root_pitch_rad"]
+            <= E10_WINDOW_LIMITS["root_pitch"],
+            "trunk_pitch_envelope": window_values["max_abs_trunk_pitch_rad"]
+            <= E10_WINDOW_LIMITS["trunk_pitch"],
+            "max_abs_root_pitch_rate": window_values["max_abs_root_pitch_rate_rad_s"]
+            <= E10_WINDOW_LIMITS["root_pitch_rate"],
+            "max_abs_trunk_pitch_rate": window_values["max_abs_trunk_pitch_rate_rad_s"]
+            <= E10_WINDOW_LIMITS["trunk_pitch_rate"],
+        }
+        window_exceedance = 0.0
+        for key, limit in (("max_abs_com_vx_m_s", E10_WINDOW_LIMITS["com_vx"]),
+                           ("max_abs_hy_kg_m2_s", E10_WINDOW_LIMITS["hy"]),
+                           ("max_abs_root_pitch_rad", E10_WINDOW_LIMITS["root_pitch"]),
+                           ("max_abs_trunk_pitch_rad", E10_WINDOW_LIMITS["trunk_pitch"]),
+                           ("max_abs_root_pitch_rate_rad_s", E10_WINDOW_LIMITS["root_pitch_rate"]),
+                           ("max_abs_trunk_pitch_rate_rad_s", E10_WINDOW_LIMITS["trunk_pitch_rate"])):
+            window_exceedance += max(0.0, window_values[key] - limit) / limit
+        tail_min_abs_vz = min(abs(entry["vz"]) for entry in window)
+        summary = {
+            "reached": e10_entry is not None,
+            "first_contact_offset": int(first_contact),
+            "bilateral_established_offset": (None if establishment is None
+                                             else int(establishment)),
+            "reason": None if e10_entry is not None
+            else "NO_SUSTAINED_BILATERAL_LOADED_PREDICATE_WITH_ABS_COM_VZ_BELOW_TAIL",
+            "window_values": window_values,
+            "window_gates": window_gates,
+            "window_gates_ok": bool(all(window_gates.values())),
+            "window_exceedance": float(window_exceedance),
+            "loaded_max_run_s": float(loaded_max),
+            "sustain_max_run_s": float(sustain_max),
+            "sustain_progress": float(min(sustain_max / D_BL_S, 1.0)),
+            "tail_min_abs_vz_m_s": float(tail_min_abs_vz),
+        }
+        if e10_entry is not None:
+            point_values = {
+                "com_vx_m_s": e10_entry["vx"],
+                "com_vz_m_s": e10_entry["vz"],
+                "hy_kg_m2_s": e10_entry["hy"],
+                "root_pitch_rad": e10_entry["root_pitch"],
+                "trunk_pitch_rad": e10_entry["trunk_pitch"],
+                "root_pitch_rate_rad_s": e10_entry["root_rate"],
+                "trunk_pitch_rate_rad_s": e10_entry["trunk_rate"],
+            }
+            point_gates = {
+                "max_abs_com_vx": abs(point_values["com_vx_m_s"]) <= E10_POINT_LIMITS["com_vx"],
+                "max_abs_Hy": abs(point_values["hy_kg_m2_s"]) <= E10_POINT_LIMITS["hy"],
+                "max_abs_root_pitch": abs(point_values["root_pitch_rad"])
+                <= E10_POINT_LIMITS["root_pitch"],
+                "max_abs_trunk_pitch": abs(point_values["trunk_pitch_rad"])
+                <= E10_POINT_LIMITS["trunk_pitch"],
+                "max_abs_root_pitch_rate": abs(point_values["root_pitch_rate_rad_s"])
+                <= E10_POINT_LIMITS["root_pitch_rate"],
+                "max_abs_trunk_pitch_rate": abs(point_values["trunk_pitch_rate_rad_s"])
+                <= E10_POINT_LIMITS["trunk_pitch_rate"],
+            }
+            point_exceedance = 0.0
+            for key, limit in (("com_vx_m_s", E10_POINT_LIMITS["com_vx"]),
+                               ("hy_kg_m2_s", E10_POINT_LIMITS["hy"]),
+                               ("root_pitch_rad", E10_POINT_LIMITS["root_pitch"]),
+                               ("trunk_pitch_rad", E10_POINT_LIMITS["trunk_pitch"]),
+                               ("root_pitch_rate_rad_s", E10_POINT_LIMITS["root_pitch_rate"]),
+                               ("trunk_pitch_rate_rad_s", E10_POINT_LIMITS["trunk_pitch_rate"])):
+                point_exceedance += max(0.0, abs(point_values[key]) - limit) / limit
+            summary.update({
+                "e10_offset": int(e10_entry["offset"]),
+                "e10_time_s": float(e10_entry["time_s"]),
+                "sustain_start_offset": int(run_start["offset"]),
+                "point_values": point_values,
+                "point_gates": point_gates,
+                "point_gates_ok": bool(all(point_gates.values())),
+                "point_exceedance": float(point_exceedance),
+            })
+        else:
+            summary["point_exceedance"] = 0.0
+        return summary
+
     # ------------------------------------------------------------------
     # cost function for the deterministic bounded solver
     # ------------------------------------------------------------------
@@ -1036,6 +1315,23 @@ class LandingFeasibilityOracle:
             value += PENALTY_NO_TERMINAL_SUPPORT
         if self.class_name == "toe" and result.toe_mode_escaped:
             value += PENALTY_TOE_MODE
+        if self.e10_aware:
+            # E10-aware ranking: the E10 point gates and the first-contact-to-E10
+            # transient envelopes are part of the optimization, from the start.
+            # When E10 is not reached the reach penalty is graded by the longest
+            # sustained predicate run, so the search has a gradient toward the
+            # D_BL dwell; the window envelopes stay priced throughout.
+            value += PENALTY_E10_WINDOW * result.e10_window_exceedance
+            if not result.e10_reached:
+                value += PENALTY_NO_E10 * (1.0 - E10_REACH_PROGRESS_CREDIT
+                                           * result.e10_sustain_progress)
+                tail = result.e10_tail_min_abs_vz_m_s
+                if tail is not None:
+                    value += PENALTY_E10_TAIL * max(0.0, float(tail) - V_ABS_TAIL_M_S)
+            else:
+                value += PENALTY_E10_POINT * result.e10_point_exceedance
+                # prefer an earlier confirmed E10 at the same quality
+                value += PENALTY_E10_LATENESS * max(0.0, float(result.e10_time_s or 0.0))
         return float(value)
 
     # ------------------------------------------------------------------
@@ -1548,6 +1844,22 @@ def _result_record(result: BranchResult, oracle: LandingFeasibilityOracle,
         "knots": np.asarray(result.profile, dtype=np.float64).tolist(),
         "profile_channel_nm": np.asarray(result.desired_nm, dtype=np.float64).tolist(),
         "evaluation_index": result.evaluation_index,
+        "e10_aware": bool(result.e10_aware),
+        "e10_reached": bool(result.e10_reached),
+        "e10_offset": result.e10_offset,
+        "e10_time_s": result.e10_time_s,
+        "e10_first_contact_offset": result.e10_first_contact_offset,
+        "e10_sustain_start_offset": result.e10_sustain_start_offset,
+        "e10_point_values": result.e10_point_values,
+        "e10_point_gates_ok": result.e10_point_gates_ok,
+        "e10_window_values": result.e10_window_values,
+        "e10_window_gates_ok": result.e10_window_gates_ok,
+        "e10_point_exceedance": result.e10_point_exceedance,
+        "e10_window_exceedance": result.e10_window_exceedance,
+        "e10_loaded_max_run_s": result.e10_loaded_max_run_s,
+        "e10_sustain_max_run_s": result.e10_sustain_max_run_s,
+        "e10_sustain_progress": result.e10_sustain_progress,
+        "e10_tail_min_abs_vz_m_s": result.e10_tail_min_abs_vz_m_s,
     }
 
 
@@ -1557,24 +1869,50 @@ def main() -> None:
     parser.add_argument("--horizon-s", type=float, default=0.300)
     parser.add_argument("--knots", type=int, default=DEFAULT_KNOTS)
     parser.add_argument("--budget", type=int, default=DEFAULT_BUDGET)
-    parser.add_argument("--solver", choices=("cd", "powell"), default="cd")
+    parser.add_argument("--solver", choices=("cd", "powell", "structured"), default="cd")
     parser.add_argument("--stabilizer", choices=("on", "off"), default="on")
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--certificate-cache", type=Path, default=None)
     parser.add_argument("--verify", action="store_true")
     parser.add_argument("--objective", choices=("arrest", "capture"), default="arrest")
     parser.add_argument("--penalty-scale", type=float, default=1.0)
+    parser.add_argument("--e10-aware", action="store_true",
+                        help="rank candidates by the frozen E10 point/window gates")
+    parser.add_argument("--mode-gate", action="store_true",
+                        help="hold the structured braking demand until the legal "
+                             "contact mode leaves the initial toe-only mode")
+    parser.add_argument("--structured-seed", type=int, default=-1,
+                        help="use one declared structured start (-1 = all starts)")
+    parser.add_argument("--contact", choices=("nominal", "candidate"), default="nominal",
+                        help="declared plantar contact realization (candidate = the "
+                             "qualified RES-86 solref stiffening)")
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
     t0 = time.time()
     branch = capture_canonical_branch(cache_path=args.certificate_cache)
-    oracle = LandingFeasibilityOracle(branch, class_name=args.class_name,
+    plant = None
+    if args.contact == "candidate":
+        from loaded_cmj.v3.contact_realization import (
+            RES86_CANDIDATE_DECLARED_SOLREF,
+            build_contact_realization_plant,
+        )
+        plant = build_contact_realization_plant(RES86_CANDIDATE_DECLARED_SOLREF)
+    oracle = LandingFeasibilityOracle(branch, class_name=args.class_name, plant=plant,
                                       objective=args.objective,
-                                      penalty_scale=args.penalty_scale)
+                                      penalty_scale=args.penalty_scale,
+                                      e10_aware=args.e10_aware)
     native_steps = int(round(args.horizon_s / NATIVE_DT_S))
     stabilizer = BranchStabilizer(enabled=args.stabilizer == "on")
-    if args.solver == "cd":
+    if args.solver == "structured":
+        starts = None
+        if args.structured_seed >= 0:
+            starts = [STRUCTURED_STARTS[args.structured_seed]]
+        search = oracle.search_structured(native_steps, args.budget,
+                                          stabilizer=stabilizer, starts=starts,
+                                          mode_gate=args.mode_gate,
+                                          verbose=args.verbose)
+    elif args.solver == "cd":
         seeds = default_seed_ordering(oracle, args.knots)
         search = oracle.search_coordinate_descent(
             native_steps, args.knots, args.budget, initial_knots=seeds,
@@ -1592,6 +1930,13 @@ def main() -> None:
     record["oracle_solver"] = search.get("solver", "deterministic_bounded_powell")
     record["oracle_objective"] = oracle.objective
     record["oracle_penalty_scale"] = oracle.penalty_scale
+    record["oracle_e10_aware"] = bool(oracle.e10_aware)
+    record["oracle_mode_gate"] = bool(args.mode_gate)
+    record["oracle_contact_realization"] = args.contact
+    if "params" in best:
+        record["structured_params"] = {
+            field: float(getattr(best["params"], field))
+            for field in StructuredWitnessParameters.__dataclass_fields__}
     record["stabilizer"] = {
         "enabled": stabilizer.enabled,
         "joint_damping": stabilizer.joint_damping,

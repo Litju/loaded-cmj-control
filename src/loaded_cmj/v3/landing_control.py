@@ -97,6 +97,26 @@ assert CONTROL_INTERVAL_NATIVE_STEPS * NATIVE_DT_S == CONTROL_INTERVAL_S
 
 F_THR_N = 10.0
 V_ABS_TAIL_M_S = 0.05
+# Frozen RES-86 E10 point gates and first-contact-to-E10 transient envelopes
+# (LCMJ_RES86_V3_LANDING_ACCEPTANCE_AUTHORITY_V1).  The landing controller
+# enforces them exactly on every validated interval; the independent event
+# authority re-evaluates them from the recorded trace.
+E10_POINT_LIMITS: dict[str, float] = {
+    "com_vx": 0.30,
+    "hy": 5.0,
+    "root_pitch": 0.35,
+    "trunk_pitch": 0.45,
+    "root_pitch_rate": 3.0,
+    "trunk_pitch_rate": 3.0,
+}
+E10_WINDOW_LIMITS: dict[str, float] = {
+    "com_vx": 0.40,
+    "hy": 5.0,
+    "root_pitch": 0.45,
+    "trunk_pitch": 0.55,
+    "root_pitch_rate": 5.0,
+    "trunk_pitch_rate": 5.0,
+}
 PENETRATION_LIMIT_M = 0.010
 PENETRATION_SOLVE_MARGIN_M = 0.0
 ROM_SOLVE_MARGIN_RAD = 0.0
@@ -245,6 +265,7 @@ class V3LandingConfig:
     # posture move from the exact handoff pose; it never snaps and never
     # commands contact.
     prep_flexion_target_rad: float = 0.10
+    prep_knee_offset_rad: float = 0.0
     prep_ankle_offset_rad: float = -0.20
     prep_posture_rate_rad_s: float = 2.0
     prep_ankle_rate_rad_s: float = 2.0
@@ -786,6 +807,8 @@ class V3LandingController:
         self._first_contact_time_s: float | None = None
         self._bilateral_onset_time_s: float | None = None
         self._e10_confirmed_time_s: float | None = None
+        self._e10_window_violated_time_s: float | None = None
+        self._e10_window_violation_reason: str = ""
         self._sustain_start_time_s: float | None = None
         self._q_handoff = np.zeros(N_CHANNELS, dtype=np.float64)
         self._q_prep_ref = np.zeros(N_CHANNELS, dtype=np.float64)
@@ -826,6 +849,15 @@ class V3LandingController:
     @property
     def first_contact_time_s(self) -> float | None:
         return self._first_contact_time_s
+
+    @property
+    def e10_window_violated_time_s(self) -> float | None:
+        """First live sample that left the frozen first-contact-to-E10 envelope."""
+        return self._e10_window_violated_time_s
+
+    @property
+    def e10_window_violation_reason(self) -> str:
+        return self._e10_window_violation_reason
 
     # ------------------------------------------------------------------
     # equipment calibration (Plant geometry only)
@@ -934,7 +966,10 @@ class V3LandingController:
             self._sustain_start_time_s = None
             self._transition(V3LandingPhase.LANDING_CAPTURE, "BILATERAL_LOADED_SUPPORT_ESTABLISHED")
         if self.phase == V3LandingPhase.LANDING_CAPTURE:
-            predicate = bilateral and abs(float(frame.com_velocity_world_m_s[2])) < V_ABS_TAIL_M_S
+            predicate = (bilateral
+                         and self._e10_window_violated_time_s is None
+                         and abs(float(frame.com_velocity_world_m_s[2])) < V_ABS_TAIL_M_S
+                         and self._e10_point_gates_ok(data, frame))
             if predicate:
                 if self._sustain_start_time_s is None:
                     self._sustain_start_time_s = float(frame.time_s)
@@ -943,6 +978,68 @@ class V3LandingController:
                     self._transition(V3LandingPhase.E10_CONFIRMED, "SUSTAINED_WHOLE_BODY_E10_PREDICATE")
             else:
                 self._sustain_start_time_s = None
+        if (self._first_contact_time_s is not None
+                and self._e10_confirmed_time_s is None
+                and self._e10_window_violated_time_s is None
+                and frame.time_s >= float(self._first_contact_time_s)):
+            # Frozen first-contact-to-E10 transient envelopes on the executed
+            # live trace.  They are qualification gates of the landing window,
+            # not counterfactual branch predictions: the controller evaluates
+            # the actual samples it executes.  Once any envelope is violated the
+            # window can never pass, so the violation is latched with its exact
+            # cause and E10 confirmation is permanently refused (no false E10
+            # from a landing that already left the frozen envelope).
+            violations = self._e10_window_violations(data, frame)
+            if violations:
+                self._e10_window_violated_time_s = float(frame.time_s)
+                self._e10_window_violation_reason = ",".join(violations)
+
+    def _e10_window_violations(self, data: mujoco.MjData,
+                               frame: M.V3NativeFrame) -> list[str]:
+        """Frozen first-contact-to-E10 transient envelopes on a live sample.
+
+        The same limits the independent event authority evaluates on the
+        recorded trace, applied to the exact native sample.  A non-empty result
+        means the executed landing has left the frozen envelope and can never
+        record a passing E10 window.
+        """
+        orientation = M.orientation_state(self.plant, data)
+        hy = centroidal_hy_kg_m2_s(self.plant, data)
+        values = (
+            ("E10_WINDOW_COM_VX", abs(float(frame.com_velocity_world_m_s[0])),
+             E10_WINDOW_LIMITS["com_vx"]),
+            ("E10_WINDOW_HY", abs(hy), E10_WINDOW_LIMITS["hy"]),
+            ("E10_WINDOW_ROOT_PITCH", abs(orientation.root_pitch_rad),
+             E10_WINDOW_LIMITS["root_pitch"]),
+            ("E10_WINDOW_TRUNK_PITCH", abs(orientation.trunk_absolute_pitch_rad),
+             E10_WINDOW_LIMITS["trunk_pitch"]),
+            ("E10_WINDOW_ROOT_RATE", abs(orientation.root_pitch_rate_rad_s),
+             E10_WINDOW_LIMITS["root_pitch_rate"]),
+            ("E10_WINDOW_TRUNK_RATE", abs(orientation.trunk_absolute_pitch_rate_rad_s),
+             E10_WINDOW_LIMITS["trunk_pitch_rate"]),
+        )
+        return [name for name, value, limit in values if value > limit]
+
+    def _e10_point_gates_ok(self, data: mujoco.MjData, frame: M.V3NativeFrame) -> bool:
+        """Frozen E10 point gates on the current native sample.
+
+        The controller's own confirmation requires the point gates *throughout*
+        the sustain run, which is strictly stronger than the independent event
+        authority (point gates at the confirmation sample), so a vertical-arrest
+        witness with bad CAM/posture can never be confirmed as E10.
+        """
+        orientation = M.orientation_state(self.plant, data)
+        hy = centroidal_hy_kg_m2_s(self.plant, data)
+        values = (
+            (abs(float(frame.com_velocity_world_m_s[0])), E10_POINT_LIMITS["com_vx"]),
+            (abs(hy), E10_POINT_LIMITS["hy"]),
+            (abs(orientation.root_pitch_rad), E10_POINT_LIMITS["root_pitch"]),
+            (abs(orientation.trunk_absolute_pitch_rad), E10_POINT_LIMITS["trunk_pitch"]),
+            (abs(orientation.root_pitch_rate_rad_s), E10_POINT_LIMITS["root_pitch_rate"]),
+            (abs(orientation.trunk_absolute_pitch_rate_rad_s),
+             E10_POINT_LIMITS["trunk_pitch_rate"]),
+        )
+        return all(value <= limit for value, limit in values)
 
     # ------------------------------------------------------------------
     # post-apex touchdown preparation (flight LANDING_PREP window)
@@ -980,6 +1077,11 @@ class V3LandingController:
         del z  # the prep reference is a declared offset from the exact handoff pose
         q_ref = (self._q_handoff
                  + _FLEXION_DIRECTION * float(self.config.prep_flexion_target_rad))
+        # Declared independent knee offset: a negative value reaches the leg
+        # forward (hip flexion with knee extension) so the landing foot can be
+        # placed under the SYSTEM_COM instead of behind it.
+        q_ref[3] += float(self.config.prep_knee_offset_rad)
+        q_ref[4] += float(self.config.prep_knee_offset_rad)
         q_ref[5] += float(self.config.prep_ankle_offset_rad)
         q_ref[6] += float(self.config.prep_ankle_offset_rad)
         return q_ref
@@ -1296,6 +1398,17 @@ class V3LandingController:
         target[OUTPUT_INDEX["trunk_pitch_terminal"]] = tp + tpr * t_int
         target[OUTPUT_INDEX["root_pitch_rate_terminal"]] = rpr + rpr_command * t_int
         target[OUTPUT_INDEX["trunk_pitch_rate_terminal"]] = tpr + tpr_command * t_int
+        # E10-aware objective: the contraction targets are clipped to the frozen
+        # E10 point gates, so the optimizer never aims at a state the
+        # confirmation cannot accept.
+        for name, limit in (("com_vx_terminal", E10_POINT_LIMITS["com_vx"]),
+                            ("hy_terminal", E10_POINT_LIMITS["hy"]),
+                            ("root_pitch_terminal", E10_POINT_LIMITS["root_pitch"]),
+                            ("trunk_pitch_terminal", E10_POINT_LIMITS["trunk_pitch"]),
+                            ("root_pitch_rate_terminal", E10_POINT_LIMITS["root_pitch_rate"]),
+                            ("trunk_pitch_rate_terminal", E10_POINT_LIMITS["trunk_pitch_rate"])):
+            target[OUTPUT_INDEX[name]] = float(np.clip(target[OUTPUT_INDEX[name]],
+                                                       -limit, limit))
         return target
 
     # ------------------------------------------------------------------
@@ -1306,6 +1419,13 @@ class V3LandingController:
                             prior_support_free_run: int = 0,
                             enforce_support: bool = True) -> list[str]:
         failures: list[str] = []
+        # E10-awareness of the interval validator is expressed through the
+        # E10-clipped objective targets (the optimizer never aims at a state the
+        # confirmation cannot accept) and through the live window/point gate
+        # enforcement in ``_update_phase``.  Counterfactual branch-predicted
+        # gate rejections are deliberately not used: the frozen envelope is a
+        # property of the executed native window, and a 10 ms branch prediction
+        # is not that window.
         if not outcome.finite:
             failures.append("NONFINITE_STATE")
         if outcome.prohibited_contact:
