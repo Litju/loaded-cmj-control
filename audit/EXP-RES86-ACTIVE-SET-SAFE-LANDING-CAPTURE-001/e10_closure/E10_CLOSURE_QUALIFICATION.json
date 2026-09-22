@@ -1,0 +1,1051 @@
+{
+  "authority_id": "LCMJ_RES86_E10_CLOSURE_QUALIFICATION_V1",
+  "mission": "RES86_CONTACT_REALIZATION_QUALIFICATION_AND_E10_CLOSURE_001",
+  "linear_issue": "RES-86",
+  "contact_realization": "candidate",
+  "preparation_candidates": {
+    "best_effort_touchdown": {
+      "preparation_config": {
+        "prep_position_gain_scale": 1.0,
+        "prep_flexion_target_rad": 0.4,
+        "prep_knee_offset_rad": 0.0,
+        "prep_ankle_offset_rad": -0.7,
+        "prep_ankle_rate_rad_s": 8.0,
+        "prep_posture_rate_rad_s": 4.0
+      },
+      "episode_1": {
+        "status": "FAIL_CLOSED",
+        "fault": "LANDING_FAULT:FALLBACK_FAILS_HARD_SAFETY:SUPPORT_RETENTION",
+        "warnings": [],
+        "handoff_kind": "POST_APEX_LANDING_PREP",
+        "handoff_sample": 705,
+        "handoff_state_sha256": "31ddc10f883b785e5c240ba920c4d4fcf738dac74f4ae938464b92f6823cb220",
+        "contact_realization": "candidate",
+        "contact_realization_expected_realized_solref": [
+          0.015,
+          1.0
+        ],
+        "contact_realization_verification_status": "PASS",
+        "contact_realization_final_rows": [
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          }
+        ],
+        "landing_samples": 115,
+        "fallback_count": 0,
+        "live_branch_identity_failures": 0,
+        "e10_confirmed_time_s": null,
+        "e10_window_violated_time_s": 1.6400000000000001,
+        "e10_window_violation_reason": "E10_WINDOW_HY",
+        "e8_first_contact": {
+          "position": 92,
+          "sample": 797,
+          "time_s": 1.594,
+          "legal_plantar_active": 4,
+          "prohibited_detected": 0,
+          "com_vz_m_s": -1.8470732152461553
+        },
+        "e9_bilateral_established": {
+          "position": 92,
+          "sample": 797,
+          "time_s": 1.594,
+          "left_fz_n": 294.73051174078756,
+          "right_fz_n": 294.730511740815
+        },
+        "d_est": {
+          "value_s": 0.0,
+          "limit_s": 0.05,
+          "satisfied": true,
+          "semantics": "t_bilateral_established - t_first_contact <= D_EST_S (latency bound, not a sustain dwell)",
+          "exact_nanoseconds": true,
+          "diagnostic_intervals": 0
+        },
+        "e10": {
+          "reached": false,
+          "reason": "NO_SUSTAINED_BILATERAL_LOADED_PREDICATE_WITH_ABS_COM_VZ_BELOW_TAIL",
+          "d_bl_s": 0.05
+        },
+        "e10_point_values": {
+          "time_s": null,
+          "com_vx_m_s": null,
+          "com_vz_m_s": null,
+          "hy_kg_m2_s": null,
+          "root_pitch_rad": null,
+          "trunk_pitch_rad": null,
+          "root_pitch_rate_rad_s": null,
+          "trunk_pitch_rate_rad_s": null
+        },
+        "e10_point_gates": null,
+        "window_values": {},
+        "window_gates": null,
+        "post_contact_window_extrema": {
+          "scope_native_samples": [
+            797,
+            819
+          ],
+          "max_abs_com_vx_m_s": 0.135657665205615,
+          "max_abs_hy_kg_m2_s": 4.908213460500637,
+          "max_abs_root_pitch_rad": 0.17626217190302693,
+          "max_abs_trunk_pitch_rad": 0.010319562875006266,
+          "max_abs_root_pitch_rate_rad_s": 2.8472978964894846,
+          "max_abs_trunk_pitch_rate_rad_s": 0.564314402105577,
+          "max_penetration_m": 0.007003643278430005,
+          "peak_total_floor_fz_bw": 2.635269885368027,
+          "note": "diagnostic post-first-contact extrema over the executed trace; the frozen first-contact-to-E10 window is this scope exactly when E10 is never confirmed"
+        },
+        "hard_gate_values": {
+          "max_penetration_m": 0.007003643278430005,
+          "peak_total_floor_fz_bw": 2.635269885368027,
+          "chatter_transitions": 0,
+          "material_reflight_intervals": [],
+          "min_rom_margin_rad": 0.4428945323128326,
+          "max_abs_moment_ratio": 0.8999937270392911,
+          "max_abs_power_ratio": 1.0,
+          "prohibited_detected_samples": 0,
+          "prohibited_active_samples": 0
+        },
+        "hard_gate_gates": {
+          "no_prohibited_or_fall_contact": true,
+          "max_penetration_within_limit": true,
+          "peak_total_floor_fz_within_limit": true,
+          "chatter_within_limit": true,
+          "no_material_reflight": true,
+          "strict_structural_rom": true,
+          "hard_actuation_authority": true
+        }
+      },
+      "episode_2": {
+        "status": "FAIL_CLOSED",
+        "fault": "LANDING_FAULT:FALLBACK_FAILS_HARD_SAFETY:SUPPORT_RETENTION",
+        "warnings": [],
+        "handoff_kind": "POST_APEX_LANDING_PREP",
+        "handoff_sample": 705,
+        "handoff_state_sha256": "31ddc10f883b785e5c240ba920c4d4fcf738dac74f4ae938464b92f6823cb220",
+        "contact_realization": "candidate",
+        "contact_realization_expected_realized_solref": [
+          0.015,
+          1.0
+        ],
+        "contact_realization_verification_status": "PASS",
+        "contact_realization_final_rows": [
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          }
+        ],
+        "landing_samples": 115,
+        "fallback_count": 0,
+        "live_branch_identity_failures": 0,
+        "e10_confirmed_time_s": null,
+        "e10_window_violated_time_s": 1.6400000000000001,
+        "e10_window_violation_reason": "E10_WINDOW_HY",
+        "e8_first_contact": {
+          "position": 92,
+          "sample": 797,
+          "time_s": 1.594,
+          "legal_plantar_active": 4,
+          "prohibited_detected": 0,
+          "com_vz_m_s": -1.8470732152461553
+        },
+        "e9_bilateral_established": {
+          "position": 92,
+          "sample": 797,
+          "time_s": 1.594,
+          "left_fz_n": 294.73051174078756,
+          "right_fz_n": 294.730511740815
+        },
+        "d_est": {
+          "value_s": 0.0,
+          "limit_s": 0.05,
+          "satisfied": true,
+          "semantics": "t_bilateral_established - t_first_contact <= D_EST_S (latency bound, not a sustain dwell)",
+          "exact_nanoseconds": true,
+          "diagnostic_intervals": 0
+        },
+        "e10": {
+          "reached": false,
+          "reason": "NO_SUSTAINED_BILATERAL_LOADED_PREDICATE_WITH_ABS_COM_VZ_BELOW_TAIL",
+          "d_bl_s": 0.05
+        },
+        "e10_point_values": {
+          "time_s": null,
+          "com_vx_m_s": null,
+          "com_vz_m_s": null,
+          "hy_kg_m2_s": null,
+          "root_pitch_rad": null,
+          "trunk_pitch_rad": null,
+          "root_pitch_rate_rad_s": null,
+          "trunk_pitch_rate_rad_s": null
+        },
+        "e10_point_gates": null,
+        "window_values": {},
+        "window_gates": null,
+        "post_contact_window_extrema": {
+          "scope_native_samples": [
+            797,
+            819
+          ],
+          "max_abs_com_vx_m_s": 0.135657665205615,
+          "max_abs_hy_kg_m2_s": 4.908213460500637,
+          "max_abs_root_pitch_rad": 0.17626217190302693,
+          "max_abs_trunk_pitch_rad": 0.010319562875006266,
+          "max_abs_root_pitch_rate_rad_s": 2.8472978964894846,
+          "max_abs_trunk_pitch_rate_rad_s": 0.564314402105577,
+          "max_penetration_m": 0.007003643278430005,
+          "peak_total_floor_fz_bw": 2.635269885368027,
+          "note": "diagnostic post-first-contact extrema over the executed trace; the frozen first-contact-to-E10 window is this scope exactly when E10 is never confirmed"
+        },
+        "hard_gate_values": {
+          "max_penetration_m": 0.007003643278430005,
+          "peak_total_floor_fz_bw": 2.635269885368027,
+          "chatter_transitions": 0,
+          "material_reflight_intervals": [],
+          "min_rom_margin_rad": 0.4428945323128326,
+          "max_abs_moment_ratio": 0.8999937270392911,
+          "max_abs_power_ratio": 1.0,
+          "prohibited_detected_samples": 0,
+          "prohibited_active_samples": 0
+        },
+        "hard_gate_gates": {
+          "no_prohibited_or_fall_contact": true,
+          "max_penetration_within_limit": true,
+          "peak_total_floor_fz_within_limit": true,
+          "chatter_within_limit": true,
+          "no_material_reflight": true,
+          "strict_structural_rom": true,
+          "hard_actuation_authority": true
+        }
+      },
+      "deterministic_reproduction": {
+        "episode_1_telemetry_sha256": "2397f9c381e3a9388879206193600045cfeb6c6781c3ca27c050751fcca03a8e",
+        "episode_2_telemetry_sha256": "2397f9c381e3a9388879206193600045cfeb6c6781c3ca27c050751fcca03a8e",
+        "bit_identical": true
+      },
+      "e10_pass": false
+    },
+    "forward_reach_sensitivity": {
+      "preparation_config": {
+        "prep_position_gain_scale": 1.0,
+        "prep_flexion_target_rad": 0.4,
+        "prep_knee_offset_rad": -0.6,
+        "prep_ankle_offset_rad": -0.7,
+        "prep_ankle_rate_rad_s": 8.0,
+        "prep_posture_rate_rad_s": 4.0
+      },
+      "episode_1": {
+        "status": "FAIL_CLOSED",
+        "fault": "LANDING_FAULT:FALLBACK_FAILS_HARD_SAFETY:MAX_PENETRATION",
+        "warnings": [],
+        "handoff_kind": "POST_APEX_LANDING_PREP",
+        "handoff_sample": 705,
+        "handoff_state_sha256": "31ddc10f883b785e5c240ba920c4d4fcf738dac74f4ae938464b92f6823cb220",
+        "contact_realization": "candidate",
+        "contact_realization_expected_realized_solref": [
+          0.015,
+          1.0
+        ],
+        "contact_realization_verification_status": "PASS",
+        "contact_realization_final_rows": [
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          }
+        ],
+        "landing_samples": 85,
+        "fallback_count": 0,
+        "live_branch_identity_failures": 0,
+        "e10_confirmed_time_s": null,
+        "e10_window_violated_time_s": 1.562,
+        "e10_window_violation_reason": "E10_WINDOW_HY",
+        "e8_first_contact": {
+          "position": 72,
+          "sample": 777,
+          "time_s": 1.554,
+          "legal_plantar_active": 4,
+          "prohibited_detected": 0,
+          "com_vz_m_s": -1.4548876464589233
+        },
+        "e9_bilateral_established": {
+          "position": 72,
+          "sample": 777,
+          "time_s": 1.554,
+          "left_fz_n": 293.41705094791973,
+          "right_fz_n": 293.4170509480709
+        },
+        "d_est": {
+          "value_s": 0.0,
+          "limit_s": 0.05,
+          "satisfied": true,
+          "semantics": "t_bilateral_established - t_first_contact <= D_EST_S (latency bound, not a sustain dwell)",
+          "exact_nanoseconds": true,
+          "diagnostic_intervals": 0
+        },
+        "e10": {
+          "reached": false,
+          "reason": "NO_SUSTAINED_BILATERAL_LOADED_PREDICATE_WITH_ABS_COM_VZ_BELOW_TAIL",
+          "d_bl_s": 0.05
+        },
+        "e10_point_values": {
+          "time_s": null,
+          "com_vx_m_s": null,
+          "com_vz_m_s": null,
+          "hy_kg_m2_s": null,
+          "root_pitch_rad": null,
+          "trunk_pitch_rad": null,
+          "root_pitch_rate_rad_s": null,
+          "trunk_pitch_rate_rad_s": null
+        },
+        "e10_point_gates": null,
+        "window_values": {},
+        "window_gates": null,
+        "post_contact_window_extrema": {
+          "scope_native_samples": [
+            777,
+            789
+          ],
+          "max_abs_com_vx_m_s": 0.09372915141476566,
+          "max_abs_hy_kg_m2_s": 9.986662459919845,
+          "max_abs_root_pitch_rad": 0.16959065818188124,
+          "max_abs_trunk_pitch_rad": 0.03884447724080392,
+          "max_abs_root_pitch_rate_rad_s": 1.711342158740595,
+          "max_abs_trunk_pitch_rate_rad_s": 0.8427074421427507,
+          "max_penetration_m": 0.00697131160054628,
+          "peak_total_floor_fz_bw": 1.5736504860319036,
+          "note": "diagnostic post-first-contact extrema over the executed trace; the frozen first-contact-to-E10 window is this scope exactly when E10 is never confirmed"
+        },
+        "hard_gate_values": {
+          "max_penetration_m": 0.00697131160054628,
+          "peak_total_floor_fz_bw": 1.5736504860319036,
+          "chatter_transitions": 0,
+          "material_reflight_intervals": [],
+          "min_rom_margin_rad": 0.40488701853749715,
+          "max_abs_moment_ratio": 0.665784217331031,
+          "max_abs_power_ratio": 0.5132833425861966,
+          "prohibited_detected_samples": 0,
+          "prohibited_active_samples": 0
+        },
+        "hard_gate_gates": {
+          "no_prohibited_or_fall_contact": true,
+          "max_penetration_within_limit": true,
+          "peak_total_floor_fz_within_limit": true,
+          "chatter_within_limit": true,
+          "no_material_reflight": true,
+          "strict_structural_rom": true,
+          "hard_actuation_authority": true
+        }
+      },
+      "episode_2": {
+        "status": "FAIL_CLOSED",
+        "fault": "LANDING_FAULT:FALLBACK_FAILS_HARD_SAFETY:MAX_PENETRATION",
+        "warnings": [],
+        "handoff_kind": "POST_APEX_LANDING_PREP",
+        "handoff_sample": 705,
+        "handoff_state_sha256": "31ddc10f883b785e5c240ba920c4d4fcf738dac74f4ae938464b92f6823cb220",
+        "contact_realization": "candidate",
+        "contact_realization_expected_realized_solref": [
+          0.015,
+          1.0
+        ],
+        "contact_realization_verification_status": "PASS",
+        "contact_realization_final_rows": [
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "left_toe_support",
+            "side": "left",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          },
+          {
+            "geom": "right_toe_support",
+            "side": "right",
+            "region": "toe",
+            "dim": 4,
+            "solref": [
+              0.015,
+              1.0
+            ],
+            "solimp": [
+              0.9,
+              0.95,
+              0.001,
+              0.5,
+              2.0
+            ],
+            "friction": [
+              0.9,
+              0.9,
+              1e-05,
+              1e-05,
+              1e-05
+            ],
+            "includemargin_m": 0.0
+          }
+        ],
+        "landing_samples": 85,
+        "fallback_count": 0,
+        "live_branch_identity_failures": 0,
+        "e10_confirmed_time_s": null,
+        "e10_window_violated_time_s": 1.562,
+        "e10_window_violation_reason": "E10_WINDOW_HY",
+        "e8_first_contact": {
+          "position": 72,
+          "sample": 777,
+          "time_s": 1.554,
+          "legal_plantar_active": 4,
+          "prohibited_detected": 0,
+          "com_vz_m_s": -1.4548876464589233
+        },
+        "e9_bilateral_established": {
+          "position": 72,
+          "sample": 777,
+          "time_s": 1.554,
+          "left_fz_n": 293.41705094791973,
+          "right_fz_n": 293.4170509480709
+        },
+        "d_est": {
+          "value_s": 0.0,
+          "limit_s": 0.05,
+          "satisfied": true,
+          "semantics": "t_bilateral_established - t_first_contact <= D_EST_S (latency bound, not a sustain dwell)",
+          "exact_nanoseconds": true,
+          "diagnostic_intervals": 0
+        },
+        "e10": {
+          "reached": false,
+          "reason": "NO_SUSTAINED_BILATERAL_LOADED_PREDICATE_WITH_ABS_COM_VZ_BELOW_TAIL",
+          "d_bl_s": 0.05
+        },
+        "e10_point_values": {
+          "time_s": null,
+          "com_vx_m_s": null,
+          "com_vz_m_s": null,
+          "hy_kg_m2_s": null,
+          "root_pitch_rad": null,
+          "trunk_pitch_rad": null,
+          "root_pitch_rate_rad_s": null,
+          "trunk_pitch_rate_rad_s": null
+        },
+        "e10_point_gates": null,
+        "window_values": {},
+        "window_gates": null,
+        "post_contact_window_extrema": {
+          "scope_native_samples": [
+            777,
+            789
+          ],
+          "max_abs_com_vx_m_s": 0.09372915141476566,
+          "max_abs_hy_kg_m2_s": 9.986662459919845,
+          "max_abs_root_pitch_rad": 0.16959065818188124,
+          "max_abs_trunk_pitch_rad": 0.03884447724080392,
+          "max_abs_root_pitch_rate_rad_s": 1.711342158740595,
+          "max_abs_trunk_pitch_rate_rad_s": 0.8427074421427507,
+          "max_penetration_m": 0.00697131160054628,
+          "peak_total_floor_fz_bw": 1.5736504860319036,
+          "note": "diagnostic post-first-contact extrema over the executed trace; the frozen first-contact-to-E10 window is this scope exactly when E10 is never confirmed"
+        },
+        "hard_gate_values": {
+          "max_penetration_m": 0.00697131160054628,
+          "peak_total_floor_fz_bw": 1.5736504860319036,
+          "chatter_transitions": 0,
+          "material_reflight_intervals": [],
+          "min_rom_margin_rad": 0.40488701853749715,
+          "max_abs_moment_ratio": 0.665784217331031,
+          "max_abs_power_ratio": 0.5132833425861966,
+          "prohibited_detected_samples": 0,
+          "prohibited_active_samples": 0
+        },
+        "hard_gate_gates": {
+          "no_prohibited_or_fall_contact": true,
+          "max_penetration_within_limit": true,
+          "peak_total_floor_fz_within_limit": true,
+          "chatter_within_limit": true,
+          "no_material_reflight": true,
+          "strict_structural_rom": true,
+          "hard_actuation_authority": true
+        }
+      },
+      "deterministic_reproduction": {
+        "episode_1_telemetry_sha256": "774c410a2497ae29a445c0e0ab01ea87a878142e8aad65c144d0f6bbf5c5cdeb",
+        "episode_2_telemetry_sha256": "774c410a2497ae29a445c0e0ab01ea87a878142e8aad65c144d0f6bbf5c5cdeb",
+        "bit_identical": true
+      },
+      "e10_pass": false
+    }
+  },
+  "e10_point_limits": {
+    "com_vx": 0.3,
+    "hy": 5.0,
+    "root_pitch": 0.35,
+    "trunk_pitch": 0.45,
+    "root_pitch_rate": 3.0,
+    "trunk_pitch_rate": 3.0
+  },
+  "e10_window_limits": {
+    "com_vx": 0.4,
+    "hy": 5.0,
+    "root_pitch": 0.45,
+    "trunk_pitch": 0.55,
+    "root_pitch_rate": 5.0,
+    "trunk_pitch_rate": 5.0
+  },
+  "horizon_s": 2.05,
+  "e10_pass": false,
+  "wall_s": 61.41315317153931
+}

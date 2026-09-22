@@ -1,0 +1,158 @@
+{
+  "authority_id": "LCMJ_RES86_E10_CLOSURE_EVIDENCE_JOURNAL_V1",
+  "mission": "RES86_CONTACT_REALIZATION_QUALIFICATION_AND_E10_CLOSURE_001",
+  "linear_issue": "RES-86",
+  "contact_realization": "candidate (realized plantar solref (0.015, 1.0))",
+  "rollout_budget": {
+    "max_new_canonical_rollouts": 20,
+    "canonical_runtime_landing_episodes_used": 8,
+    "development_cached_handoff_evaluations": 83,
+    "note": "canonical = full run_landing_episode executions (sealed launch + post-apex preparation + landing); development evaluations reuse one cached sealed post-apex handoff and are not canonical rollouts"
+  },
+  "preparation_search": {
+    "instrument": "declared post-apex preparation parameter sweep (development)",
+    "best_effort_touchdown": {
+      "config": {
+        "prep_position_gain_scale": 1.0,
+        "prep_flexion_target_rad": 0.4,
+        "prep_knee_offset_rad": 0.0,
+        "prep_ankle_offset_rad": -0.7,
+        "prep_ankle_rate_rad_s": 8.0,
+        "prep_posture_rate_rad_s": 4.0
+      },
+      "first_contact_native_sample": 797,
+      "first_contact_time_s": 1.594,
+      "first_contact_com_vz_m_s": -1.8470732152461553,
+      "contact_x_minus_com_x_m": -0.15491803154425549,
+      "ankle_rad": -0.0196,
+      "root_pitch_rad": -0.1763
+    },
+    "forward_reach_sensitivity": {
+      "config": {
+        "prep_position_gain_scale": 1.0,
+        "prep_flexion_target_rad": 0.4,
+        "prep_knee_offset_rad": -0.6,
+        "prep_ankle_offset_rad": -0.7,
+        "prep_ankle_rate_rad_s": 8.0,
+        "prep_posture_rate_rad_s": 4.0
+      },
+      "first_contact_native_sample": 777,
+      "first_contact_time_s": 1.554,
+      "first_contact_com_vz_m_s": -1.4548876464589233,
+      "contact_x_minus_com_x_m": -0.04945919463995003,
+      "ankle_rad": 0.0528,
+      "root_pitch_rad": -0.1696
+    },
+    "sealed_res85_reference": {
+      "first_contact_native_sample": 791,
+      "first_contact_time_s": 1.582,
+      "first_contact_com_vz_m_s": -1.7294385957361254,
+      "contact_x_minus_com_x_m": -0.007,
+      "ankle_rad": 0.3293,
+      "root_pitch_rad": -0.0806
+    }
+  },
+  "oracle_e10_aware_searches": [
+    {
+      "oracle_result_file": "ORACLE_E10_SEARCH_SHAPE_A_400.json",
+      "oracle_result_sha256": "c24531264e3a4f6017e231d8b63a0636e2a99b11c0215ad342c9511c8a4f7006",
+      "solver": "deterministic_bounded_powell_structured_law_v1",
+      "evaluations": 400,
+      "branch_pre_touchdown_sha256": "2c719e7920b0782af408a07954388f3af42f85ee5a83d06cdf30c4feb4e30952",
+      "branch_e8_sha256": "c9bc1c3cde15a83769596f349aae68a965a30a56363bd71fdd076b9cda286152",
+      "e10_reached": false,
+      "e10_sustain_max_run_s": 0.04799999999999982,
+      "e10_loaded_max_run_s": 0.17999999999999994,
+      "e10_sustain_progress": 0.9599999999999964,
+      "e10_tail_min_abs_vz_m_s": 0.008590183087407582,
+      "window_max_abs_hy_kg_m2_s": 18.935896488994846,
+      "window_max_abs_com_vx_m_s": 1.6913145828599794,
+      "window_max_abs_root_pitch_rad": 0.2683150947157728,
+      "window_max_abs_root_pitch_rate_rad_s": 10.604344489167953,
+      "max_penetration_m": 0.04367600247065294,
+      "peak_total_fz_bw": 4.293766080534296,
+      "min_left_legal_fz_n": 0.0,
+      "min_right_legal_fz_n": 0.0,
+      "terminal_com_vz_m_s": -0.12277837154291547,
+      "hard_gate_failures": [
+        "E10_NOT_REACHED",
+        "MAX_PENETRATION",
+        "STRUCTURAL_ROM"
+      ],
+      "branch": "pre-touchdown preparation shape A (gain 1.0, flexion 0.4, knee 0.0, ankle -0.7, rates 8/4)",
+      "mode_gate": true
+    },
+    {
+      "oracle_result_file": "ORACLE_E10_SEARCH_SHAPE_A_1200.json",
+      "oracle_result_sha256": "27c02960c1a87229655e3a7049edefbb276408e16cb31eea50bec5b61175f1ec",
+      "solver": "deterministic_bounded_powell_structured_law_v1",
+      "evaluations": 1200,
+      "branch_pre_touchdown_sha256": "9df0f0a1fc9f5f88b08757f2f1f8d4f361b0d8487555a77c5af527bd73a18e18",
+      "branch_e8_sha256": "4e112884ad998dc13f88bb3c983a4e190811a98293bbe3b33ca847e1e5ef7600",
+      "e10_reached": false,
+      "e10_sustain_max_run_s": 0.04800000000000004,
+      "e10_loaded_max_run_s": 0.3979999999999999,
+      "e10_sustain_progress": 0.9600000000000009,
+      "e10_tail_min_abs_vz_m_s": 4.144083015275579e-05,
+      "window_max_abs_hy_kg_m2_s": 20.27017921276365,
+      "window_max_abs_com_vx_m_s": 1.2113570617934486,
+      "window_max_abs_root_pitch_rad": 0.5873906836394446,
+      "window_max_abs_root_pitch_rate_rad_s": 8.255345110913236,
+      "max_penetration_m": 0.009385235528919608,
+      "peak_total_fz_bw": 2.479876325941005,
+      "min_left_legal_fz_n": 267.0389271980008,
+      "min_right_legal_fz_n": 267.03892719802514,
+      "terminal_com_vz_m_s": 0.0035052734825014487,
+      "hard_gate_failures": [
+        "E10_NOT_REACHED",
+        "STRUCTURAL_ROM"
+      ],
+      "branch": "pre-touchdown preparation shape A",
+      "mode_gate": true
+    },
+    {
+      "oracle_result_file": "ORACLE_E10_SEARCH_SHAPE_A_HYFEEDBACK_1500.json",
+      "oracle_result_sha256": "190f0065764de73a76202f5b79a1ddd8b93ac760aaf2f3af806c9ee3c86a23a9",
+      "solver": "deterministic_bounded_powell_structured_law_v1",
+      "evaluations": 1500,
+      "branch_pre_touchdown_sha256": "9df0f0a1fc9f5f88b08757f2f1f8d4f361b0d8487555a77c5af527bd73a18e18",
+      "branch_e8_sha256": "4e112884ad998dc13f88bb3c983a4e190811a98293bbe3b33ca847e1e5ef7600",
+      "e10_reached": false,
+      "e10_sustain_max_run_s": 0.04800000000000004,
+      "e10_loaded_max_run_s": 0.1260000000000001,
+      "e10_sustain_progress": 0.9600000000000009,
+      "e10_tail_min_abs_vz_m_s": 0.0014591165385636898,
+      "window_max_abs_hy_kg_m2_s": 19.521018993942036,
+      "window_max_abs_com_vx_m_s": 0.9205401063687157,
+      "window_max_abs_root_pitch_rad": 0.6029633530168028,
+      "window_max_abs_root_pitch_rate_rad_s": 7.675488421330158,
+      "max_penetration_m": 0.0232882164427827,
+      "peak_total_fz_bw": 5.181809683145518,
+      "min_left_legal_fz_n": 0.0,
+      "min_right_legal_fz_n": 0.0,
+      "terminal_com_vz_m_s": -0.4214277332463074,
+      "hard_gate_failures": [
+        "E10_NOT_REACHED",
+        "MAX_PENETRATION",
+        "STRUCTURAL_ROM"
+      ],
+      "branch": "pre-touchdown preparation shape A",
+      "mode_gate": false,
+      "note": "extended structured witness with declared Hy CoP/ankle feedback"
+    }
+  ],
+  "canonical_qualification": {
+    "file": "E10_CLOSURE_QUALIFICATION.json",
+    "sha256": "3a6f4158a78d853f8885b7cf3cb93b7a666428cd8cfbafc67ecc3992e2d74447"
+  },
+  "controlling_blocker": {
+    "primary": "E10_WINDOW_HY",
+    "statement": "The frozen first-contact-to-E10 envelope |Hy| <= 5 kg m^2/s is the first-binding gate of the production E10 window.  The incoming Hy at physical first contact is 2.947 (fixed by the sealed RES-85 flight handoff; free-flight centroidal angular momentum is conserved), so the whole impact may add at most ~2 units of angular impulse about the SYSTEM_COM.  The vertical arrest requires ~150-175 N*s of vertical impulse within the frozen 10 mm penetration envelope, and every admissible touchdown places the support polygon behind the COM, so the resulting vertical-force lever plus the angled toe-contact horizontal impulse inject more than the available Hy budget.  Within the same support polygon the friction force is one-directional (a rearward force would move the CoP forward of the support), so the controller cannot cancel the injected angular impulse without unloading the feet, which the frozen support-retention gate rejects.",
+    "bounded_evidence": [
+      "sealed branch: every contact-maintaining constant action over a declared knee/hip/ankle grid gives 5-sample peak |Hy| >= 6.18",
+      "best-effort canonical touchdown: live |Hy| reaches 4.908 at native sample 819 (within 2% of the envelope) and leaves the envelope at the next sample while no support-retaining validated action exists",
+      "E10-aware bounded optimization on three branches (preparation shapes A and B): reaches a 24/25-interval sustained bilateral loaded predicate (0.048 s of the 0.050 s D_BL) and a vertical arrest (terminal |vz| 3.5e-4, penetration 9.39 mm, both feet loaded) but only with window max |Hy| 18.9-20.3 vs the 5.0 envelope"
+    ],
+    "never_promoted": "a bounded search is not a global infeasibility proof; this is a bounded qualification failure with the first-binding envelope and its causal mechanism identified, not a proof that no solution exists"
+  }
+}
